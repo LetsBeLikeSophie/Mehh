@@ -14,6 +14,11 @@ class PlaceNamer {
   Map<String, dynamic>? _memory;
   final _inflight = <String, Future<String?>>{};
 
+  Future<void> clearCache() async {
+    _memory = {};
+    await _cache.delete();
+  }
+
   /// 약 100m 단위로 묶어서 캐시한다.
   static String keyOf(double lat, double lng) =>
       '${lat.toStringAsFixed(3)},${lng.toStringAsFixed(3)}';

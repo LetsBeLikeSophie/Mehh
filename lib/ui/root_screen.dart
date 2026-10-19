@@ -57,16 +57,16 @@ class _RootScreenState extends ConsumerState<RootScreen> {
   }
 }
 
-class _BottomTabs extends StatelessWidget {
+class _BottomTabs extends ConsumerWidget {
   const _BottomTabs({required this.index, required this.onTap});
 
   final int index;
   final ValueChanged<int> onTap;
 
   @override
-  Widget build(BuildContext context) {
-    // 보류함 개수는 3단계에서
-    const labels = ['묶음', '보류함'];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final held = ref.watch(heldProvider).length;
+    final labels = ['묶음', held > 0 ? '보류함 $held' : '보류함'];
     return Container(
       decoration: const BoxDecoration(
         border: Border(top: BorderSide(color: MehhColors.border)),

@@ -67,19 +67,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   color: MehhColors.surface,
                   borderRadius: BorderRadius.circular(MehhRadius.card),
                 ),
-                child: const Row(
+                child: const Column(
                   children: [
-                    Icon(Icons.lock_outline, size: 20, color: MehhColors.text),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        '사진은 폰 밖으로 나가지 않아요.',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
+                    _Promise(Icons.lock_outline, '사진과 기록은 폰 밖으로 나가지 않아요.'),
+                    SizedBox(height: 12),
+                    _Promise(Icons.tune, '고를수록 취향을 배워요. 처음엔 추천이 틀릴 수 있어요.'),
+                    SizedBox(height: 12),
+                    _Promise(Icons.undo, '정리한 사진은 30일 안에 되살릴 수 있어요.'),
                   ],
                 ),
               ),
@@ -101,6 +95,34 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _Promise extends StatelessWidget {
+  const _Promise(this.icon, this.text);
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 20, color: MehhColors.text),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              height: 1.45,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

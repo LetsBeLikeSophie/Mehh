@@ -26,7 +26,7 @@ void main() {
         group([DateTime(2026, 9, 5)], kind: DayGroupKind.screenshots),
         now: now,
       ),
-      '9월 · 캡처 모음',
+      '캡처',
     );
   });
 

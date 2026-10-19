@@ -1,7 +1,11 @@
 ﻿import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:share_plus/share_plus.dart';
 
+import '../logic/image_analysis.dart';
+import '../models/features.dart';
 import '../models/photo_meta.dart';
 import 'json_cache.dart';
 
@@ -26,6 +30,9 @@ class PhotoLibrary {
       PhotoManager.requestPermissionExtend(requestOption: _permissionOption);
 
   Future<void> openSettings() => PhotoManager.openSetting();
+
+  /// 위치 캐시 지우기
+  Future<void> clearCache() => _locationCache.delete();
 
   /// 일부만 허용한 상태에서 사진 선택 화면을 다시 띄운다.
   Future<void> presentLimited() =>
@@ -64,6 +71,7 @@ class PhotoLibrary {
             lat: lat,
             lng: lng,
             isScreenshot: _isScreenshot(e),
+            modifiedAt: e.modifiedDateSecond ?? 0,
           ),
         );
       }
@@ -109,6 +117,81 @@ class PhotoLibrary {
     }
     await _locationCache.write(cached);
     return found;
+  }
+
+  /// 썸네일(128px)로 분석한다. 썸네일은 여러 장씩 받아 백그라운드에서 계산.
+  /// [onBatch]로 조금씩 결과를 넘긴다.
+  Future<void> analyze(
+    List<PhotoMeta> metas, {
+    required Future<void> Function(List<PhotoFeatures>) onBatch,
+    bool Function()? cancelled,
+  }) async {
+    const batch = 24;
+    for (var i = 0; i < metas.length; i += batch) {
+      if (cancelled?.call() ?? false) return;
+      final part = metas.skip(i).take(batch).toList();
+      final inputs = <AnalysisInput>[];
+      await Future.wait(
+        part.map((m) async {
+          try {
+            final bytes = await entities[m.id]?.thumbnailDataWithSize(
+              const ThumbnailSize.square(128),
+              quality: 90,
+            );
+            if (bytes != null) {
+              inputs.add(AnalysisInput(m.id, m.modifiedAt, bytes));
+            }
+          } catch (_) {}
+        }),
+      );
+      final result = await compute(analyzeBatch, inputs);
+      await onBatch(result);
+    }
+  }
+
+  /// 파일 크기 (바이트). 실패하면 0.
+  Future<Map<String, int>> fileSizes(Iterable<String> ids) async {
+    final out = <String, int>{};
+    await Future.wait(
+      ids.map((id) async {
+        try {
+          out[id] = await entities[id]?.fileSize ?? 0;
+        } catch (_) {
+          out[id] = 0;
+        }
+      }),
+    );
+    return out;
+  }
+
+  /// 사용자가 고른 사진을 공유시트로 다른 앱에 보낸다 (사용자가 직접 누를 때만).
+  /// 반환: 공유를 마쳤으면 true, 닫았으면 false
+  Future<bool> share(List<String> ids) async {
+    final files = <XFile>[];
+    for (final id in ids) {
+      final f = await entities[id]?.file;
+      if (f != null) files.add(XFile(f.path));
+    }
+    if (files.isEmpty) return false;
+    final r = await SharePlus.instance.share(ShareParams(files: files));
+    return r.status != ShareResultStatus.dismissed;
+  }
+
+  /// 시스템 휴지통으로 보낸다. 여러 장을 한 번의 확인 창으로.
+  /// 반환: 실제로 옮겨진 사진 id (사용자가 취소하면 빈 목록)
+  Future<List<String>> trash(List<String> ids) async {
+    final list = [for (final id in ids) ?entities[id]];
+    if (list.isEmpty) return [];
+    if (Platform.isAndroid) {
+      // 안드로이드 11+ 휴지통 요청. 10 이하는 휴지통이 없어 바로 삭제 요청.
+      try {
+        return await PhotoManager.editor.android.moveToTrash(list);
+      } catch (_) {
+        return PhotoManager.editor.deleteWithIds(ids);
+      }
+    }
+    // iOS는 삭제하면 "최근 삭제된 항목"으로 간다.
+    return PhotoManager.editor.deleteWithIds(ids);
   }
 
   static bool _valid(double? lat, double? lng) =>

@@ -5,6 +5,7 @@ import '../models/day_group.dart';
 import '../models/photo_meta.dart';
 
 /// 사진을 그날의 묶음으로 나눈다. 결과는 최신 묶음이 먼저.
+/// 캡처는 전부 "캡처" 하나로, 사진이 너무 적은 날은 "한 장 사진" 하나로 모은다.
 List<DayGroup> groupPhotos(
   Iterable<PhotoMeta> photos, {
   GroupingConfig config = const GroupingConfig(),
@@ -13,7 +14,7 @@ List<DayGroup> groupPhotos(
     ..sort((a, b) => a.takenAt.compareTo(b.takenAt));
 
   final groups = <DayGroup>[];
-  final shotsByMonth = <String, List<PhotoMeta>>{};
+  final shots = <PhotoMeta>[];
   var current = <PhotoMeta>[];
 
   void close() {
@@ -24,9 +25,7 @@ List<DayGroup> groupPhotos(
 
   for (final p in sorted) {
     if (p.isScreenshot) {
-      final key =
-          '${p.takenAt.year}-${p.takenAt.month.toString().padLeft(2, '0')}';
-      shotsByMonth.putIfAbsent(key, () => []).add(p);
+      shots.add(p);
       continue;
     }
     if (current.isNotEmpty && _startsNewGroup(current.last, p, config)) {
@@ -36,17 +35,22 @@ List<DayGroup> groupPhotos(
   }
   close();
 
-  for (final entry in shotsByMonth.entries) {
+  final singles = [
+    for (final g in groups)
+      if (g.count < config.minDayPhotos) ...g.photos,
+  ];
+  groups.removeWhere((g) => g.count < config.minDayPhotos);
+  groups.sort((a, b) => b.end.compareTo(a.end));
+  if (singles.isNotEmpty) {
     groups.add(
-      DayGroup(
-        id: 'shots-${entry.key}',
-        kind: DayGroupKind.screenshots,
-        photos: entry.value,
-      ),
+      DayGroup(id: 'singles', kind: DayGroupKind.singles, photos: singles),
     );
   }
-
-  groups.sort((a, b) => b.end.compareTo(a.end));
+  if (shots.isNotEmpty) {
+    groups.add(
+      DayGroup(id: 'shots', kind: DayGroupKind.screenshots, photos: shots),
+    );
+  }
   return groups;
 }
 

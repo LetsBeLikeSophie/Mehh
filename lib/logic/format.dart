@@ -17,12 +17,8 @@ String formatTime(DateTime d) {
 /// "10월 3일 · 롯데월드", "10월 3일", "9월 · 캡처 모음"
 String groupTitle(DayGroup g, {String? place, DateTime? now}) {
   final n = now ?? DateTime.now();
-  if (g.kind == DayGroupKind.screenshots) {
-    final m = g.start.year == n.year
-        ? '${g.start.month}월'
-        : '${g.start.year}년 ${g.start.month}월';
-    return '$m · 캡처 모음';
-  }
+  if (g.kind == DayGroupKind.screenshots) return '캡처';
+  if (g.kind == DayGroupKind.singles) return '한 장 사진';
   final date = formatDate(g.start, now: n);
   return place == null || place.isEmpty ? date : '$date · $place';
 }
@@ -30,7 +26,7 @@ String groupTitle(DayGroup g, {String? place, DateTime? now}) {
 /// "오후 1:12 – 8:40", 날짜를 넘기면 "10월 3일 – 10월 4일"
 String groupTimeRange(DayGroup g, {DateTime? now}) {
   final s = g.start, e = g.end;
-  if (g.kind == DayGroupKind.screenshots ||
+  if (g.kind != DayGroupKind.day ||
       s.year != e.year ||
       s.month != e.month ||
       s.day != e.day) {

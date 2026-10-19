@@ -8,7 +8,11 @@ class PhotoMeta {
     this.lat,
     this.lng,
     this.isScreenshot = false,
+    this.modifiedAt = 0,
   });
+
+  /// 사진 수정 시각 (초). 분석 캐시 무효화용.
+  final int modifiedAt;
 
   final String id;
   final DateTime takenAt;
@@ -28,5 +32,8 @@ class PhotoMeta {
     lat: lat,
     lng: lng,
     isScreenshot: isScreenshot,
+    modifiedAt: modifiedAt,
   );
+
+  double get aspect => height == 0 ? 0 : width / height;
 }

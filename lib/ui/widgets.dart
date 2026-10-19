@@ -65,6 +65,73 @@ class MehhLogo extends StatelessWidget {
   }
 }
 
+/// 검정 작은 배지 ("베스트", "남김")
+class MehhBadge extends StatelessWidget {
+  const MehhBadge(this.text, {super.key, this.inverted = false});
+
+  final String text;
+  final bool inverted;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+      decoration: BoxDecoration(
+        color: inverted ? MehhColors.white : MehhColors.black,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w500,
+          color: inverted ? MehhColors.text : MehhColors.white,
+        ),
+      ),
+    );
+  }
+}
+
+/// 정리 표시 (검정 동그라미 X)
+class XMark extends StatelessWidget {
+  const XMark({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 16,
+      height: 16,
+      decoration: const BoxDecoration(
+        color: MehhColors.black,
+        shape: BoxShape.circle,
+      ),
+      child: const Icon(Icons.close, size: 10, color: MehhColors.white),
+    );
+  }
+}
+
+/// 2.3GB, 840MB
+String formatBytes(int bytes) {
+  const gb = 1024 * 1024 * 1024, mb = 1024 * 1024;
+  if (bytes >= gb) return '${(bytes / gb).toStringAsFixed(1)}GB';
+  if (bytes >= mb) return '${(bytes / mb).round()}MB';
+  return '${(bytes / 1024).ceil()}KB';
+}
+
+/// 한 줄 알림 (화면 아래)
+void showNote(BuildContext context, String text) {
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      SnackBar(
+        content: Text(text),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: MehhColors.black,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+}
+
 String formatCount(int n) {
   final s = n.toString();
   final buf = StringBuffer();

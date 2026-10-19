@@ -1,15 +1,20 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../logic/format.dart';
 import '../models/day_group.dart';
+import '../models/decision.dart';
 import '../providers.dart';
 import '../theme.dart';
+import 'duplicates_screen.dart';
 import 'group_screen.dart';
+import 'screenshots_screen.dart';
+import 'swipe_screen.dart';
+import 'settings_screen.dart';
 import 'widgets.dart';
 
-/// 홈: 그날의 묶음 목록 (최신순).
+/// 홈: 중복 카드 + 그날의 묶음 목록 (최신순).
 class HomeTab extends ConsumerWidget {
   const HomeTab({super.key});
 
@@ -28,19 +33,46 @@ class HomeTab extends ConsumerWidget {
         ),
         data: (state) {
           if (state.groups.isEmpty) return const _Message('정리할 사진이 없어요');
+          final decisions = ref.watch(decisionsProvider).value ?? const {};
+          final days = [
+            for (final g in state.groups)
+              if (g.kind == DayGroupKind.day) g,
+          ];
+          final others = [
+            for (final g in state.groups)
+              if (g.kind != DayGroupKind.day) g,
+          ];
+          final left = days.where((g) => !groupDone(g, decisions)).length;
           return CustomScrollView(
             slivers: [
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                 sliver: SliverList.list(
                   children: [
-                    const Align(
-                      alignment: Alignment.centerLeft,
-                      child: MehhLogo(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const MehhLogo(),
+                        IconButton(
+                          tooltip: '설정',
+                          onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const SettingsScreen(),
+                            ),
+                          ),
+                          icon: const Icon(
+                            Icons.settings_outlined,
+                            size: 22,
+                            color: MehhColors.icon,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      '정리할 날\n${formatCount(state.dayGroupCount)}개 남았어요',
+                      left == 0
+                          ? '오늘은\n정리할 날이 없어요'
+                          : '정리할 날\n${formatCount(left)}개 남았어요',
                       style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w700,
@@ -49,13 +81,7 @@ class HomeTab extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    Text(
-                      _subtitle(state),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: MehhColors.textMuted,
-                      ),
-                    ),
+                    const _Subtitle(),
                     if (limited) ...[
                       const SizedBox(height: 20),
                       _LimitedBanner(
@@ -65,41 +91,121 @@ class HomeTab extends ConsumerWidget {
                         },
                       ),
                     ],
+                    const _DuplicateCard(),
                     const SizedBox(height: 24),
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 6),
-                      child: Text(
-                        '그날의 묶음',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: MehhColors.textMuted,
-                        ),
-                      ),
-                    ),
+                    if (days.isNotEmpty) const _SectionLabel('그날의 묶음'),
                   ],
                 ),
               ),
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 sliver: SliverList.builder(
-                  itemCount: state.groups.length,
-                  itemBuilder: (_, i) => _GroupTile(group: state.groups[i]),
+                  itemCount: days.length,
+                  itemBuilder: (_, i) => _GroupTile(group: days[i]),
                 ),
               ),
+              if (others.isNotEmpty)
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
+                  sliver: SliverList.list(
+                    children: [
+                      const _SectionLabel('따로 보기'),
+                      for (final g in others) _GroupTile(group: g),
+                    ],
+                  ),
+                ),
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
             ],
           );
         },
       ),
     );
   }
+}
 
-  String _subtitle(LibraryState s) {
-    final total = s.groups.fold<int>(0, (n, g) => n + g.count);
-    final base = '사진 ${formatCount(total)}장';
-    final loc = s.locating;
-    if (loc == null || loc.$1 >= loc.$2) return base;
-    return '$base · 장소 확인 중 ${loc.$1 * 100 ~/ loc.$2}%';
+/// "이번 달 2.3GB 비웠어요" · 분석/위치 진행 상황
+class _Subtitle extends ConsumerWidget {
+  const _Subtitle();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final freed = ref.watch(freedThisMonthProvider).value ?? 0;
+    final analysis = ref.watch(analysisProvider);
+    final loc = ref.watch(libraryProvider.select((s) => s.value?.locating));
+
+    final parts = <String>[
+      if (freed > 0) '이번 달 ${formatBytes(freed)} 비웠어요',
+      if (freed == 0) '사진 ${formatCount(analysis.total)}장',
+      if (!analysis.done && analysis.total > 0)
+        '사진 살펴보는 중 ${analysis.analyzed * 100 ~/ analysis.total}%'
+      else if (loc != null && loc.$1 < loc.$2)
+        '장소 확인 중 ${loc.$1 * 100 ~/ loc.$2}%',
+    ];
+    return Text(
+      parts.join(' · '),
+      style: const TextStyle(fontSize: 14, color: MehhColors.textMuted),
+    );
+  }
+}
+
+/// 검정 포인트 카드: "중복 N장 찾았어요 · 무료"
+class _DuplicateCard extends ConsumerWidget {
+  const _DuplicateCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sets = ref.watch(duplicatesProvider).value;
+    final n = sets?.fold<int>(0, (n, s) => n + s.remove.length) ?? 0;
+    if (n == 0) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 24),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
+        decoration: BoxDecoration(
+          color: MehhColors.black,
+          borderRadius: BorderRadius.circular(MehhRadius.card),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '똑같은 사진 · 무료',
+                    style: TextStyle(fontSize: 12, color: Color(0xFFB4B4B0)),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '중복 ${formatCount(n)}장 찾았어요',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: MehhColors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: MehhColors.white,
+                foregroundColor: MehhColors.black,
+                minimumSize: const Size(44, 44),
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+              ),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const DuplicatesScreen()),
+              ),
+              child: const Text(
+                '하나만 남기기',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -116,11 +222,34 @@ class _GroupTile extends ConsumerWidget {
               .value
         : null;
     final entity = ref.read(photoLibraryProvider).entities[group.cover.id];
+    final decisions = ref.watch(decisionsProvider).value ?? const {};
+    final done = groupDone(group, decisions);
+    final plan = ref.watch(groupPlanProvider(group));
+
+    final meta = StringBuffer('${formatCount(group.count)}장');
+    if (group.kind == DayGroupKind.screenshots) {
+      meta.write(' · 다른 앱으로 보내고 정리');
+    } else if (group.kind == DayGroupKind.singles && !done) {
+      final left = group.photos
+          .where((p) => stateOf(decisions, p.id) == DecisionState.undecided)
+          .length;
+      meta.write(' · 하나씩 보기 ${formatCount(left)}장 남음');
+    } else if (done) {
+      meta.write(' · 정리 끝');
+    } else if (plan.analyzed < group.count) {
+      meta.write(' · 살펴보는 중');
+    } else if (plan.trash.isNotEmpty) {
+      meta.write(' · 정리 추천 ${formatCount(plan.trash.length)}장');
+    }
 
     return InkWell(
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (_) => GroupScreen(group: group, place: place),
+          builder: (_) => switch (group.kind) {
+            DayGroupKind.day => GroupScreen(group: group, place: place),
+            DayGroupKind.singles => SwipeScreen(group: group),
+            DayGroupKind.screenshots => ScreenshotsScreen(group: group),
+          },
         ),
       ),
       child: Container(
@@ -128,40 +257,43 @@ class _GroupTile extends ConsumerWidget {
         decoration: const BoxDecoration(
           border: Border(bottom: BorderSide(color: MehhColors.tile)),
         ),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 48,
-              height: 48,
-              child: PhotoThumb(entity: entity, radius: 8, size: 144),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    groupTitle(group, place: place),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${formatCount(group.count)}장',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: MehhColors.textMuted,
-                    ),
-                  ),
-                ],
+        child: Opacity(
+          opacity: done ? 0.5 : 1,
+          child: Row(
+            children: [
+              SizedBox(
+                width: 48,
+                height: 48,
+                child: PhotoThumb(entity: entity, radius: 8, size: 144),
               ),
-            ),
-            const Icon(Icons.chevron_right, size: 18, color: MehhColors.icon),
-          ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      groupTitle(group, place: place),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      meta.toString(),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: MehhColors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, size: 18, color: MehhColors.icon),
+            ],
+          ),
         ),
       ),
     );
@@ -229,6 +361,27 @@ class _Message extends StatelessWidget {
             OutlinedButton(onPressed: a.$2, child: Text(a.$1)),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: MehhColors.textMuted,
+        ),
       ),
     );
   }

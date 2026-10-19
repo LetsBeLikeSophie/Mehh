@@ -24,6 +24,11 @@ class JsonCache {
     }
   }
 
+  Future<void> delete() async {
+    final f = await _file();
+    if (await f.exists()) await f.delete();
+  }
+
   Future<void> write(Map<String, dynamic> data) async {
     final f = await _file();
     final tmp = File('${f.path}.tmp');
