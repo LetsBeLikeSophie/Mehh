@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>보류함</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#37352F;text-decoration:none}a:hover{color:#000}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #FFFFFF; font-family: 'IBM Plex Sans KR', sans-serif; color: #37352F; display: flex; flex-direction: column">
+  <div style="flex: 1; overflow: hidden; padding: 52px 20px 0; display: flex; flex-direction: column; gap: 22px">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <div style="font-size: 28px; font-weight: 700; letter-spacing: -0.5px">보류함</div>
+      <div style="font-size: 14px; color: #787774; line-height: 1.5">30일 동안 한 번도 안 열어본 사진은 정리할지 물어볼게요.</div>
+    </div>
+    <div style="background: #F7F7F5; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start">
+        <div style="font-size: 16px; font-weight: 600; line-height: 1.4">8장, 30일 동안<br>한 번도 안 보셨어요</div>
+        <div style="font-size: 11px; font-weight: 600; color: #FFFFFF; background: #111111; border-radius: 999px; padding: 3px 9px">결정할 때</div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px">
+        <sc-for list="{{due}}" as="d" hint-placeholder-count="4">
+          <div aria-hidden="true" style="aspect-ratio: 1; border-radius: 6px; background: #E9E9E7"></div>
+        </sc-for>
+      </div>
+      <div style="display: flex; gap: 8px">
+        <button style="flex: 1; height: 44px; border-radius: 8px; border: 1px solid #E9E9E7; background: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 500; color: #37352F">계속 둘래요</button>
+        <button style="flex: 1; height: 44px; border-radius: 8px; border: 0; background: #111111; font-family: inherit; font-size: 14px; font-weight: 500; color: #FFFFFF">이제 정리</button>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; justify-content: space-between; font-size: 12px; color: #787774">
+        <div style="font-weight: 500">보류 중 15장</div>
+        <div>가장 빠른 결정 D-6</div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px">
+        <sc-for list="{{held}}" as="h" hint-placeholder-count="8">
+          <div style="position: relative; aspect-ratio: 1; border-radius: 6px; background: #F1F1EF">
+            <div style="position: absolute; right: 4px; bottom: 4px; font-size: 10px; font-weight: 500; color: #37352F; background: #FFFFFF; border-radius: 4px; padding: 0 4px">{{h.d}}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  <nav style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid #E9E9E7; padding: 4px 20px 28px">
+    <a href="Main.dc.html" style="height: 48px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #787774">묶음</a>
+    <a href="Hold.dc.html" style="height: 48px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: #111111"><span style="border-bottom: 2px solid #111111; padding-bottom: 4px">보류함 23</span></a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const due = [0, 1, 2, 3].map((i) => ({ i }));
+    const held = ['D-6', 'D-9', 'D-12', 'D-15', 'D-18', 'D-21', 'D-24', 'D-28'].map((d) => ({ d }));
+    return { due, held };
+  }
+}
+</script>
+</body>
+</html>
