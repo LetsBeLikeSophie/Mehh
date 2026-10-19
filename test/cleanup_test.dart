@@ -206,6 +206,32 @@ void main() {
       expect(sharp.hammingTo(recompressed), lessThanOrEqualTo(2));
     });
 
+    test('글자 화면은 글자 점수가 높고, 사진 같은 화면은 낮다', () {
+      // 흰 바탕에 검은 짧은 막대 줄 (글자 줄처럼)
+      final text = img.Image(width: 128, height: 128);
+      img.fill(text, color: img.ColorRgb8(255, 255, 255));
+      for (var y = 8; y < 120; y += 10) {
+        for (var x = 6; x < 120; x += 7) {
+          img.fillRect(
+            text,
+            x1: x,
+            y1: y,
+            x2: x + 3,
+            y2: y + 4,
+            color: img.ColorRgb8(20, 20, 20),
+          );
+        }
+      }
+      expect(analyzeImage('t', jpg(text))!.textScore, greaterThan(0.2));
+
+      // 부드러운 그라데이션 사진
+      final photo = img.Image(width: 128, height: 128);
+      for (final p in photo) {
+        p.setRgb(p.x * 2, 80 + p.y, 120);
+      }
+      expect(analyzeImage('p', jpg(photo))!.textScore, lessThan(0.2));
+    });
+
     test('까만 사진은 밝기가 낮다', () {
       final black = img.Image(width: 64, height: 64);
       expect(analyzeImage('k', jpg(black))!.brightness, lessThan(5));

@@ -47,6 +47,21 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
     });
   }
 
+  /// 사진 크게 보기 (좌우로 넘기기, 정리 표시 함께 바꾸기)
+  void _openPager(int index) {
+    GroupPlan plan() => ref.read(groupPlanProvider(g));
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PhotoPager(
+          ids: [for (final p in g.photos) p.id],
+          initial: index,
+          isMarked: (id) => _toTrash(plan()).contains(id),
+          onToggle: (id) => _toggle(id, plan()),
+        ),
+      ),
+    );
+  }
+
   /// 나머지 사진은 남기기로 기록해서 이 날은 정리 끝
   Future<void> _keepRest(Set<String> except) async {
     final decisions = ref.read(decisionsProvider).value ?? const {};
@@ -146,7 +161,7 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
                                 children: [
                                   const Expanded(
                                     child: Text(
-                                      '눌러서 살릴 사진만 고르세요',
+                                      'X를 눌러 살릴 사진을 고르세요',
                                       style: TextStyle(
                                         fontSize: 13,
                                         color: MehhColors.textMuted,
@@ -188,8 +203,7 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
                         final out = toTrash.contains(p.id);
                         final state = stateOf(decisions, p.id);
                         return GestureDetector(
-                          onTap: () => _toggle(p.id, plan),
-                          onLongPress: () => openPhoto(context, p.id),
+                          onTap: () => _openPager(i),
                           child: Semantics(
                             button: true,
                             label: out ? '정리할 사진' : '남길 사진',
@@ -200,12 +214,14 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
                                   opacity: out ? 0.45 : 1,
                                   child: PhotoThumb(entity: entities[p.id]),
                                 ),
-                                if (out)
-                                  const Positioned(
-                                    right: 4,
-                                    top: 4,
-                                    child: XMark(),
+                                Positioned(
+                                  right: 0,
+                                  top: 0,
+                                  child: _XButton(
+                                    on: out,
+                                    onTap: () => _toggle(p.id, plan),
                                   ),
+                                ),
                                 if (plan.best.contains(p.id))
                                   const Positioned(
                                     left: 4,
@@ -359,6 +375,47 @@ class _Summary extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// 사진 모서리 X: 켜지면 정리, 꺼지면 남김. 누르기 쉽게 영역은 크게.
+class _XButton extends StatelessWidget {
+  const _XButton({required this.on, required this.onTap});
+
+  final bool on;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: on ? '정리 취소' : '정리하기',
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: SizedBox(
+          width: 36,
+          height: 36,
+          child: Align(
+            alignment: Alignment.topRight,
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: on
+                  ? const XMark()
+                  : Container(
+                      width: 16,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: MehhColors.white.withValues(alpha: 0.8),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: MehhColors.icon),
+                      ),
+                    ),
+            ),
+          ),
+        ),
       ),
     );
   }

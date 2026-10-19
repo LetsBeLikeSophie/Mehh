@@ -10,7 +10,11 @@ class CleanupConfig {
     this.pocketBrightness = 40,
     this.pocketContrast = 12,
     this.holdDays = 30,
+    this.textScreenshot = 0.2,
   });
+
+  /// 글자 점수가 이 이상이면 "글자 있는 캡처"
+  final double textScreenshot;
 
   /// dHash 해밍 거리가 이 이하이고 가로세로 비율이 같으면 중복.
   final int duplicateMaxHamming;

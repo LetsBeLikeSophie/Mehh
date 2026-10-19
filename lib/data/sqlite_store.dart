@@ -5,22 +5,22 @@ import '../models/features.dart';
 import 'store.dart';
 
 /// 분석 방식이 바뀌면 올린다. 다른 버전의 분석 결과는 다시 계산한다.
-const featuresVersion = 2;
+const featuresVersion = 3;
 
 const _featuresTable = '''
   CREATE TABLE features (
     id TEXT PRIMARY KEY, hi INTEGER, lo INTEGER,
-    sharp REAL, bright REAL, contrast REAL, mod INTEGER, v INTEGER)''';
+    sharp REAL, bright REAL, contrast REAL, text REAL, mod INTEGER, v INTEGER)''';
 
 class SqliteStore implements Store {
   Database? _db;
 
   Future<Database> get _database async => _db ??= await openDatabase(
     'mehh.db',
-    version: 2,
+    version: 3,
     onUpgrade: (db, from, _) async {
       // 분석 결과는 캐시라서 버리고 다시 계산한다
-      if (from < 2) {
+      if (from < 3) {
         await db.execute('DROP TABLE IF EXISTS features');
         await db.execute(_featuresTable);
       }
@@ -57,6 +57,7 @@ class SqliteStore implements Store {
           sharpness: (r['sharp'] as num).toDouble(),
           brightness: (r['bright'] as num).toDouble(),
           contrast: (r['contrast'] as num?)?.toDouble() ?? 50,
+          textScore: (r['text'] as num?)?.toDouble() ?? 0,
           modifiedAt: r['mod'] as int,
         ),
     };
@@ -73,6 +74,7 @@ class SqliteStore implements Store {
         'sharp': f.sharpness,
         'bright': f.brightness,
         'contrast': f.contrast,
+        'text': f.textScore,
         'mod': f.modifiedAt,
         'v': featuresVersion,
       }, conflictAlgorithm: ConflictAlgorithm.replace);

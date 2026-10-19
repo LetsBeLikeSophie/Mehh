@@ -233,7 +233,7 @@ class _GroupTile extends ConsumerWidget {
       final left = group.photos
           .where((p) => stateOf(decisions, p.id) == DecisionState.undecided)
           .length;
-      meta.write(' · 하나씩 보기 ${formatCount(left)}장 남음');
+      meta.write(' 중 ${formatCount(left)}장 남음');
     } else if (done) {
       meta.write(' · 정리 끝');
     } else if (plan.analyzed < group.count) {

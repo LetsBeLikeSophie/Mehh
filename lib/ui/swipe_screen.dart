@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../logic/recommend.dart';
@@ -10,8 +11,9 @@ import '../theme.dart';
 import 'photo_viewer.dart';
 import 'widgets.dart';
 
-/// 하나씩 넘기기 (SPEC 5-3): 위로 = 보류, 아래로 = 킵, 좌우 = 이전/다음.
-/// [정리]로 고른 사진은 화면을 나갈 때 한 번의 확인으로 휴지통에 보낸다.
+/// 하나씩 넘기기 (SPEC 5-3). 버튼 없이 밀어서 결정한다.
+/// 위 = 보류, 아래 = 킵, 왼쪽 = 정리, 오른쪽 = 이전 사진.
+/// 정리로 고른 사진은 화면을 나갈 때 한 번의 확인으로 휴지통에 보낸다.
 class SwipeScreen extends ConsumerStatefulWidget {
   const SwipeScreen({super.key, required this.group});
 
@@ -35,8 +37,13 @@ enum _Motion { next, prev, keep, hold, trash }
 class _SwipeScreenState extends ConsumerState<SwipeScreen> {
   late final List<List<PhotoMeta>> _bursts;
   int _b = 0, _i = 0;
+
+  /// 끌고 있는 거리. 처음 움직인 방향(가로/세로) 한 축으로만 움직인다.
   Offset _drag = Offset.zero;
+  Offset _raw = Offset.zero;
+  Axis? _axis;
   bool _dragging = false;
+
   _Motion _motion = _Motion.next;
   final _undo = <_Undo>[];
 
@@ -54,7 +61,7 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
             for (final p in widget.group.photos.reversed) [p],
           ]
         : ref.read(groupPlanProvider(widget.group)).bursts;
-    // 아직 결정 안 한 사진이 있는 첫 연속 컷부터
+    // 아직 결정 안 한 사진부터
     final decisions = ref.read(decisionsProvider).value ?? const {};
     for (var b = 0; b < _bursts.length; b++) {
       final i = _bursts[b].indexWhere(
@@ -71,6 +78,8 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
   PhotoMeta get _current => _bursts[_b][_i];
 
   bool get _isLast => _b == _bursts.length - 1 && _i == _bursts[_b].length - 1;
+
+  Iterable<PhotoMeta> get _all => _bursts.expand((b) => b);
 
   void _move(int step, {_Motion? motion}) {
     var b = _b, i = _i + step;
@@ -90,15 +99,22 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
     });
   }
 
+  void _jump(int i) {
+    if (i == _i) return;
+    setState(() {
+      _motion = i > _i ? _Motion.next : _Motion.prev;
+      _i = i;
+    });
+  }
+
   Future<void> _decide(DecisionState s) async {
     final id = _current.id;
     final before = await ref.read(decisionsProvider.notifier).set([id], s);
     _pending.remove(id);
     _undo.add(_Undo(before, null, _b, _i));
     if (!mounted) return;
-    final motion = s == DecisionState.hold ? _Motion.hold : _Motion.keep;
     if (_isLast) return _leave();
-    _move(1, motion: motion);
+    _move(1, motion: s == DecisionState.hold ? _Motion.hold : _Motion.keep);
   }
 
   void _markTrash() {
@@ -106,6 +122,7 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
     _pending.add(id);
     _undo.add(_Undo(const {}, id, _b, _i));
     if (_isLast) {
+      setState(() {});
       _leave();
       return;
     }
@@ -128,45 +145,90 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
     });
   }
 
-  /// 고른 사진을 한 번에 휴지통으로 보내고 나간다
+  /// 저장 상태를 알려주고, 고른 사진은 한 번에 휴지통으로 보낸 뒤 나간다
   Future<void> _leave() async {
     if (_leaving) return;
     _leaving = true;
+    final decisions = ref.read(decisionsProvider).value ?? const {};
+    final c = _counts(decisions);
+    var note = '킵 ${c.keep} · 보류 ${c.hold} 저장했어요';
     if (_pending.isNotEmpty) {
       final n = await ref.read(cleanerProvider).trash(_pending);
-      if (mounted) {
-        showNote(
-          context,
-          n > 0 ? '${formatCount(n)}장을 휴지통으로 보냈어요' : '정리를 취소했어요',
-        );
-      }
-    } else if (_isLast && mounted) {
-      showNote(context, '다 봤어요');
+      note = n > 0 ? '$note · ${formatCount(n)}장 휴지통으로' : '$note · 정리는 취소했어요';
     }
-    if (mounted) Navigator.of(context).pop();
+    if (!mounted) return;
+    showNote(context, note);
+    Navigator.of(context).pop();
+  }
+
+  ({int keep, int hold, int trash, int left}) _counts(
+    Map<String, Decision> decisions,
+  ) {
+    var keep = 0, hold = 0, left = 0;
+    for (final p in _all) {
+      if (_pending.contains(p.id)) continue;
+      switch (stateOf(decisions, p.id)) {
+        case DecisionState.keep:
+          keep++;
+        case DecisionState.hold:
+          hold++;
+        case DecisionState.undecided:
+          left++;
+        case DecisionState.trashed:
+          break;
+      }
+    }
+    return (keep: keep, hold: hold, trash: _pending.length, left: left);
+  }
+
+  void _onPanUpdate(DragUpdateDetails d) {
+    _raw += d.delta;
+    _axis ??= _raw.distance < 12
+        ? null
+        : (_raw.dx.abs() > _raw.dy.abs() ? Axis.horizontal : Axis.vertical);
+    setState(() {
+      _drag = switch (_axis) {
+        Axis.horizontal => Offset(_raw.dx, 0),
+        Axis.vertical => Offset(0, _raw.dy),
+        null => Offset.zero,
+      };
+    });
   }
 
   void _onPanEnd(DragEndDetails _) {
     final d = _drag;
-    final vertical = d.dy.abs() > d.dx.abs();
-    if (vertical && d.dy.abs() > 90) {
-      _decide(d.dy < 0 ? DecisionState.hold : DecisionState.keep);
-    } else if (!vertical && d.dx.abs() > 70) {
-      _move(d.dx < 0 ? 1 : -1);
-    }
     setState(() {
       _drag = Offset.zero;
+      _raw = Offset.zero;
+      _axis = null;
       _dragging = false;
     });
+    if (d.dy < -90) {
+      _decide(DecisionState.hold);
+    } else if (d.dy > 90) {
+      _decide(DecisionState.keep);
+    } else if (d.dx < -80) {
+      _markTrash();
+    } else if (d.dx > 80) {
+      _move(-1);
+    }
+  }
+
+  String? get _dragLabel {
+    if (_drag.dy < -40) return '보류';
+    if (_drag.dy > 40) return '킵';
+    if (_drag.dx < -40) return '정리';
+    if (_drag.dx > 40) return '이전 사진';
+    return null;
   }
 
   /// 들어오는 사진의 시작 위치, 나가는 사진의 끝 위치
   (Offset, Offset) get _slide => switch (_motion) {
     _Motion.next => (const Offset(1, 0), const Offset(-1, 0)),
     _Motion.prev => (const Offset(-1, 0), const Offset(1, 0)),
-    _Motion.keep => (const Offset(0.4, 0), const Offset(0, 1.1)),
-    _Motion.hold => (const Offset(0.4, 0), const Offset(0, -1.1)),
-    _Motion.trash => (const Offset(0.4, 0), const Offset(0, 0.25)),
+    _Motion.keep => (const Offset(0, -0.15), const Offset(0, 1.1)),
+    _Motion.hold => (const Offset(0, 0.15), const Offset(0, -1.1)),
+    _Motion.trash => (const Offset(1, 0), const Offset(-1.1, 0)),
   };
 
   @override
@@ -181,12 +243,8 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
     final state = stateOf(decisions, p.id);
     final isBest = !_perPhoto && plan.best.contains(p.id);
     final (inFrom, outTo) = _slide;
-
-    String? dragLabel;
-    if (_drag.dy.abs() > _drag.dx.abs()) {
-      if (_drag.dy < -40) dragLabel = '보류';
-      if (_drag.dy > 40) dragLabel = '킵';
-    }
+    final c = _counts(decisions);
+    final label = _dragLabel;
 
     final card = KeyedSubtree(
       key: ValueKey(p.id),
@@ -221,8 +279,8 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
                 ],
               ),
             ),
-            if (dragLabel != null)
-              Center(child: _Chip(dragLabel, dark: true, big: true)),
+            if (label != null)
+              Center(child: _Chip(label, dark: true, big: true)),
           ],
         ),
       ),
@@ -236,7 +294,7 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
       child: Scaffold(
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
             child: Column(
               children: [
                 Row(
@@ -251,15 +309,25 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
                       ),
                     ),
                     Expanded(
-                      child: Text(
-                        _perPhoto
-                            ? '사진 ${_b + 1} / ${_bursts.length}'
-                            : '연속 컷 ${_b + 1} / ${_bursts.length}',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: MehhColors.textMuted,
-                        ),
+                      child: Column(
+                        children: [
+                          Text(
+                            c.left == 0
+                                ? '다 봤어요'
+                                : '남은 ${formatCount(c.left)}장',
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            '킵 ${c.keep} · 보류 ${c.hold} · 정리 ${c.trash}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: MehhColors.textMuted,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     IconButton(
@@ -271,48 +339,58 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
                     ),
                   ],
                 ),
-                const Text(
-                  '위로 올리면 보류',
-                  style: TextStyle(fontSize: 12, color: MehhColors.textMuted),
-                ),
+                const SizedBox(height: 6),
+                const _Hint('↑ 올리면 보류'),
                 const SizedBox(height: 10),
                 Expanded(
-                  child: GestureDetector(
-                    onPanStart: (_) => setState(() => _dragging = true),
-                    onPanUpdate: (d) => setState(() => _drag += d.delta),
-                    onPanEnd: _onPanEnd,
-                    onTap: () => openPhoto(context, p.id),
-                    child: ClipRect(
-                      child: AnimatedSwitcher(
-                        duration: Duration(milliseconds: _dragging ? 0 : 240),
-                        switchInCurve: Curves.easeOutCubic,
-                        switchOutCurve: Curves.easeInCubic,
-                        layoutBuilder: (current, previous) => Stack(
-                          fit: StackFit.expand,
-                          children: [...previous, ?current],
+                  child: Semantics(
+                    label: '사진. 위로 밀면 보류, 아래로 밀면 킵, 왼쪽으로 밀면 정리',
+                    customSemanticsActions: {
+                      const CustomSemanticsAction(label: '보류'): () =>
+                          _decide(DecisionState.hold),
+                      const CustomSemanticsAction(label: '킵'): () =>
+                          _decide(DecisionState.keep),
+                      const CustomSemanticsAction(label: '정리'): _markTrash,
+                      const CustomSemanticsAction(label: '이전 사진'): () =>
+                          _move(-1),
+                    },
+                    child: GestureDetector(
+                      onPanStart: (_) => setState(() => _dragging = true),
+                      onPanUpdate: _onPanUpdate,
+                      onPanEnd: _onPanEnd,
+                      onTap: () => openPhoto(context, p.id),
+                      child: ClipRect(
+                        child: AnimatedSwitcher(
+                          duration: Duration(milliseconds: _dragging ? 0 : 240),
+                          switchInCurve: Curves.easeOutCubic,
+                          switchOutCurve: Curves.easeInCubic,
+                          layoutBuilder: (current, previous) => Stack(
+                            fit: StackFit.expand,
+                            children: [...previous, ?current],
+                          ),
+                          transitionBuilder: (child, anim) {
+                            final incoming = child.key == ValueKey(p.id);
+                            return SlideTransition(
+                              position: Tween(
+                                begin: incoming ? inFrom : outTo,
+                                end: Offset.zero,
+                              ).animate(anim),
+                              child: FadeTransition(
+                                opacity: anim,
+                                child: child,
+                              ),
+                            );
+                          },
+                          child: card,
                         ),
-                        transitionBuilder: (child, anim) {
-                          final incoming = child.key == ValueKey(p.id);
-                          return SlideTransition(
-                            position: Tween(
-                              begin: incoming ? inFrom : outTo,
-                              end: Offset.zero,
-                            ).animate(anim),
-                            child: FadeTransition(opacity: anim, child: child),
-                          );
-                        },
-                        child: card,
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 10),
-                const Text(
-                  '아래로 내리면 킵 · 좌우로 넘기기',
-                  style: TextStyle(fontSize: 12, color: MehhColors.textMuted),
-                ),
-                const SizedBox(height: 12),
+                const _Hint('↓ 내리면 킵 · ← 밀면 정리 · → 이전 사진'),
                 if (!_perPhoto) ...[
+                  const SizedBox(height: 12),
                   SizedBox(
                     height: 40,
                     child: ListView.separated(
@@ -325,7 +403,7 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
                             _pending.contains(q.id) ||
                             stateOf(decisions, q.id) != DecisionState.undecided;
                         return GestureDetector(
-                          onTap: () => _move(i - _i),
+                          onTap: () => _jump(i),
                           child: Container(
                             width: 40,
                             decoration: BoxDecoration(
@@ -350,32 +428,7 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
                       },
                     ),
                   ),
-                  const SizedBox(height: 14),
                 ],
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => _decide(DecisionState.hold),
-                        child: const Text('보류', style: _buttonText),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: _markTrash,
-                        child: const Text('정리', style: _buttonText),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: () => _decide(DecisionState.keep),
-                        child: const Text('킵', style: _buttonText),
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
@@ -385,7 +438,19 @@ class _SwipeScreenState extends ConsumerState<SwipeScreen> {
   }
 }
 
-const _buttonText = TextStyle(fontSize: 15, fontWeight: FontWeight.w500);
+class _Hint extends StatelessWidget {
+  const _Hint(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: const TextStyle(fontSize: 12, color: MehhColors.textMuted),
+    );
+  }
+}
 
 class _Chip extends StatelessWidget {
   const _Chip(this.text, {this.dark = false, this.big = false});

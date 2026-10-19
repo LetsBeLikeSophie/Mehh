@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../config/cleanup_config.dart';
 import '../models/day_group.dart';
+import '../models/features.dart';
 import '../providers.dart';
 import '../theme.dart';
 import 'photo_viewer.dart';
@@ -18,15 +20,22 @@ class ScreenshotsScreen extends ConsumerStatefulWidget {
   ConsumerState<ScreenshotsScreen> createState() => _ScreenshotsScreenState();
 }
 
+/// 캡처 나눠 보기: 전체 / 글자 있는 캡처 / 그 외 (폰 안 픽셀 계산이라 완벽하진 않다)
+enum _Filter { all, text, other }
+
 class _ScreenshotsScreenState extends ConsumerState<ScreenshotsScreen> {
   final _selected = <String>{};
   final _gone = <String>{};
   bool _busy = false;
+  _Filter _filter = _Filter.all;
 
-  List<String> get _ids => [
+  List<String> get _allIds => [
     for (final p in widget.group.photos.reversed)
       if (!_gone.contains(p.id)) p.id,
   ];
+
+  bool _isText(String id, Map<String, PhotoFeatures> features) =>
+      (features[id]?.textScore ?? 0) >= const CleanupConfig().textScreenshot;
 
   Future<void> _trash(Set<String> ids) async {
     final n = await ref.read(cleanerProvider).trash(ids);
@@ -83,8 +92,21 @@ class _ScreenshotsScreenState extends ConsumerState<ScreenshotsScreen> {
   @override
   Widget build(BuildContext context) {
     final entities = ref.read(photoLibraryProvider).entities;
-    final ids = _ids;
-    final allSelected = ids.isNotEmpty && _selected.length == ids.length;
+    final features = ref.watch(analysisProvider.select((s) => s.features));
+    final all = _allIds;
+    final textCount = all.where((id) => _isText(id, features)).length;
+    final ids = switch (_filter) {
+      _Filter.all => all,
+      _Filter.text => [
+        for (final id in all)
+          if (_isText(id, features)) id,
+      ],
+      _Filter.other => [
+        for (final id in all)
+          if (!_isText(id, features)) id,
+      ],
+    };
+    final allSelected = ids.isNotEmpty && ids.every(_selected.contains);
     final n = _selected.length;
 
     return Scaffold(
@@ -115,7 +137,7 @@ class _ScreenshotsScreenState extends ConsumerState<ScreenshotsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '캡처 ${formatCount(ids.length)}장',
+                                '캡처 ${formatCount(all.length)}장',
                                 style: const TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.w700,
@@ -131,6 +153,30 @@ class _ScreenshotsScreenState extends ConsumerState<ScreenshotsScreen> {
                                   color: MehhColors.textMuted,
                                   height: 1.5,
                                 ),
+                              ),
+                              const SizedBox(height: 12),
+                              Wrap(
+                                spacing: 6,
+                                children: [
+                                  _FilterChip(
+                                    '전체 ${formatCount(all.length)}',
+                                    on: _filter == _Filter.all,
+                                    onTap: () =>
+                                        setState(() => _filter = _Filter.all),
+                                  ),
+                                  _FilterChip(
+                                    '글자 있음 ${formatCount(textCount)}',
+                                    on: _filter == _Filter.text,
+                                    onTap: () =>
+                                        setState(() => _filter = _Filter.text),
+                                  ),
+                                  _FilterChip(
+                                    '그 외 ${formatCount(all.length - textCount)}',
+                                    on: _filter == _Filter.other,
+                                    onTap: () =>
+                                        setState(() => _filter = _Filter.other),
+                                  ),
+                                ],
                               ),
                               Row(
                                 children: [
@@ -148,7 +194,7 @@ class _ScreenshotsScreenState extends ConsumerState<ScreenshotsScreen> {
                                   TextButton(
                                     onPressed: () => setState(() {
                                       allSelected
-                                          ? _selected.clear()
+                                          ? _selected.removeAll(ids)
                                           : _selected.addAll(ids);
                                     }),
                                     style: TextButton.styleFrom(
@@ -271,6 +317,42 @@ class _ScreenshotsScreenState extends ConsumerState<ScreenshotsScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  const _FilterChip(this.text, {required this.on, required this.onTap});
+
+  final String text;
+  final bool on;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: on,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: 32,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: on ? MehhColors.black : MehhColors.surface,
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: on ? FontWeight.w600 : FontWeight.w400,
+              color: on ? MehhColors.white : MehhColors.text,
+            ),
+          ),
         ),
       ),
     );

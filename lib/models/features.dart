@@ -7,6 +7,7 @@ class PhotoFeatures {
     required this.sharpness,
     required this.brightness,
     this.contrast = 50,
+    this.textScore = 0,
     this.modifiedAt = 0,
   });
 
@@ -24,6 +25,9 @@ class PhotoFeatures {
 
   /// 밝기 표준편차. 낮으면 화면이 거의 한 가지 색 (주머니·렌즈 가림).
   final double contrast;
+
+  /// 글자 많은 화면일수록 1에 가깝다 (캡처를 글자/화면으로 나눌 때).
+  final double textScore;
 
   /// 분석 당시 사진 수정 시각 (초). 바뀌면 다시 분석한다.
   final int modifiedAt;

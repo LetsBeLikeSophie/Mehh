@@ -32,6 +32,7 @@ PhotoFeatures? analyzeImage(String id, Uint8List bytes, {int modifiedAt = 0}) {
     sharpness: laplacianVariance(gray),
     brightness: meanBrightness(gray),
     contrast: brightnessStdDev(gray),
+    textScore: textScore(gray),
     modifiedAt: modifiedAt,
   );
 }
@@ -137,4 +138,34 @@ double brightnessStdDev(Gray g) {
     sq += (p - mean) * (p - mean);
   }
   return math.sqrt(sq / g.pixels.length);
+}
+
+/// 글자 화면 점수 (0~1). 배경색이 넓게 깔려 있고(배경 비율),
+/// 가로줄마다 짧고 강한 경계가 촘촘하면(글자 줄) 높다. 사진·게임 화면은 낮다.
+double textScore(Gray g) {
+  if (g.pixels.isEmpty || g.width < 8) return 0;
+  final hist = List<int>.filled(256, 0);
+  for (final p in g.pixels) {
+    hist[p]++;
+  }
+  var mode = 0;
+  for (var v = 1; v < 256; v++) {
+    if (hist[v] > hist[mode]) mode = v;
+  }
+  var bg = 0;
+  for (var v = math.max(0, mode - 12); v <= math.min(255, mode + 12); v++) {
+    bg += hist[v];
+  }
+  final bgRatio = bg / g.pixels.length;
+  if (bgRatio < 0.4) return 0;
+
+  var textRows = 0;
+  for (var y = 0; y < g.height; y++) {
+    var edges = 0;
+    for (var x = 0; x < g.width - 1; x++) {
+      if ((g.at(x + 1, y) - g.at(x, y)).abs() > 35) edges++;
+    }
+    if (edges >= 6) textRows++;
+  }
+  return (textRows / g.height).clamp(0, 1).toDouble();
 }

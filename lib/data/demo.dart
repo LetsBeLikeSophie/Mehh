@@ -215,6 +215,7 @@ _Demo _build() {
           hashLo: rand32(),
           sharpness: 2000,
           brightness: 200,
+          textScore: r.nextDouble() < 0.65 ? 0.3 + r.nextDouble() * 0.6 : 0,
         ),
         300000 + r.nextInt(500000),
       );

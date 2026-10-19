@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 /// 디자인 토큰 (docs/SPEC.md 5장). 흰색·회색·검정만 쓴다.
@@ -33,6 +34,13 @@ ThemeData buildMehhTheme() {
       outline: MehhColors.border,
     ),
     splashFactory: NoSplash.splashFactory,
+    // 안드로이드에서도 왼쪽 가장자리를 오른쪽으로 밀면 이전 화면으로
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+      },
+    ),
   );
   return base.copyWith(
     textTheme: base.textTheme.apply(
