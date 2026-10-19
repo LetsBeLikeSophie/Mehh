@@ -10,6 +10,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_riverpod: ^3.4.3
+  geocoding: ^5.0.0
+  path_provider: ^2.1.6
+  photo_manager: ^3.12.0
+  photo_manager_image_provider: ^2.2.0
 
 dev_dependencies:
   flutter_test:
@@ -22,14 +27,14 @@ flutter:
   assets:
     - assets/mehh-goat.png
 
-  # IBM Plex Sans KR (OFL) — 폰트 파일을 fonts/ 에 넣은 뒤 주석 해제
-  # fonts:
-  #   - family: IBM Plex Sans KR
-  #     fonts:
-  #       - asset: fonts/IBMPlexSansKR-Regular.ttf
-  #       - asset: fonts/IBMPlexSansKR-Medium.ttf
-  #         weight: 500
-  #       - asset: fonts/IBMPlexSansKR-SemiBold.ttf
-  #         weight: 600
-  #       - asset: fonts/IBMPlexSansKR-Bold.ttf
-  #         weight: 700
+  # IBM Plex Sans KR (OFL, fonts/OFL.txt)
+  fonts:
+    - family: IBM Plex Sans KR
+      fonts:
+        - asset: fonts/IBMPlexSansKR-Regular.ttf
+        - asset: fonts/IBMPlexSansKR-Medium.ttf
+          weight: 500
+        - asset: fonts/IBMPlexSansKR-SemiBold.ttf
+          weight: 600
+        - asset: fonts/IBMPlexSansKR-Bold.ttf
+          weight: 700

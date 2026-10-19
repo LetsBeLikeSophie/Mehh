@@ -6,6 +6,10 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>사진을 날짜별로 묶고 중복을 찾기 위해 필요해요. 사진은 폰 밖으로 나가지 않아요.</string>
+	<key>PHPhotoLibraryPreventAutomaticLimitedAccessAlert</key>
+	<true/>
 	<key>CFBundleDisplayName</key>
 	<string>Mehh</string>
 	<key>CFBundleExecutable</key>
