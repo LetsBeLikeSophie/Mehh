@@ -26,6 +26,7 @@ flutter:
 
   assets:
     - assets/mehh-goat.png
+    - assets/mehh-goat-mehh.png
 
   # IBM Plex Sans KR (OFL, fonts/OFL.txt)
   fonts:

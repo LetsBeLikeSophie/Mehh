@@ -50,26 +50,17 @@ class PhotoThumb extends StatelessWidget {
   }
 }
 
-/// 염소 + Mehh 로고
+/// 홈 헤더 로고: 염소만. 손글씨 mehh...는 크게 보이는 온보딩에서만 쓴다.
 class MehhLogo extends StatelessWidget {
   const MehhLogo({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Image.asset('assets/mehh-goat.png', width: 30, height: 34),
-        const SizedBox(width: 6),
-        const Text(
-          'Mehh',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.3,
-          ),
-        ),
-      ],
+    return Image.asset(
+      'assets/mehh-goat.png',
+      width: 34,
+      height: 38,
+      semanticLabel: 'Mehh',
     );
   }
 }

@@ -34,7 +34,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Spacer(),
-              Image.asset('assets/mehh-goat.png', width: 88, height: 100),
+              // 받은 그림 그대로 (docs/mehh-logo-source.png)
+              Image.asset(
+                'assets/mehh-goat-mehh.png',
+                width: 150,
+                semanticLabel: 'Mehh',
+              ),
               const SizedBox(height: 28),
               const Text(
                 '사진 정리,\n제가 먼저 해둘게요',
