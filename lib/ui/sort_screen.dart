@@ -85,6 +85,9 @@ class _SortScreenState extends ConsumerState<SortScreen> {
 
   _Motion _motion = _Motion.next;
   final _undo = <_Undo>[];
+
+  /// 이번에 들어와서 고른 결정 (나갈 때 안내용)
+  final _session = <String, DecisionState>{};
   bool _busy = false;
 
   // ───────────────────────── 보여줄 사진
@@ -178,6 +181,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
   ) async {
     final before = await ref.read(decisionsProvider.notifier).set([id], s);
     _undo.add(_Undo(before, id));
+    _session[id] = s;
     if (!mounted) return;
     // 다음 남은 사진으로 (현재 위치 뒤에서 먼저 찾고, 없으면 처음부터)
     final i = order.indexWhere((p) => p.id == id);
@@ -210,6 +214,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
   Future<void> _undoLast() async {
     if (_undo.isEmpty) return;
     final u = _undo.removeLast();
+    _session.remove(u.id);
     await ref.read(decisionsProvider.notifier).restore(u.before);
     if (!mounted) return;
     _goTo(u.id, motion: _Motion.prev);
@@ -264,21 +269,24 @@ class _SortScreenState extends ConsumerState<SortScreen> {
       if (ok != true || !mounted) return;
     }
     setState(() => _busy = true);
-    await sendToTrash(context, ref, ids);
+    final n = await sendToTrash(context, ref, ids);
     if (!mounted) return;
-    setState(() => _busy = false);
+    setState(() {
+      _busy = false;
+      // 휴지통으로 간 사진은 앱에서 되돌릴 수 없다 (갤러리 휴지통에서 되살린다)
+      if (n > 0) _undo.removeWhere((u) => sending.contains(u.id));
+    });
   }
 
-  void _leave(int keep, int hold, int pile) {
-    if (_undo.isNotEmpty) {
-      showNote(
-        context,
-        pile > 0
-            ? '킵 $keep · 보류 $hold 저장했어요 · 정리 줄 $pile장은 그대로 있어요'
-            : '킵 $keep · 보류 $hold 저장했어요',
-      );
-    }
-    Navigator.of(context).pop();
+  /// 나갈 때 이번에 고른 것만 알려 준다. 결정은 고를 때마다 이미 저장돼 있다.
+  void _noteOnLeave(int pile) {
+    final keep = _session.values.where((s) => s == DecisionState.keep).length;
+    final hold = _session.values.where((s) => s == DecisionState.hold).length;
+    if (keep + hold == 0 && pile == 0) return;
+    final parts = [if (keep > 0) '킵 $keep', if (hold > 0) '보류 $hold'];
+    final saved = parts.isEmpty ? '' : '${parts.join(' · ')} 저장했어요';
+    final rest = pile > 0 ? '정리 줄 $pile장은 그대로 있어요' : '';
+    showNote(context, [saved, rest].where((t) => t.isNotEmpty).join(' · '));
   }
 
   // ───────────────────────── 밀기·확대
@@ -429,7 +437,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
               pile: pile.length,
               busy: _busy,
               onSend: () => _sendTrash(pile, src),
-              onLeave: () => _leave(keeps.length, holds.length, pile.length),
+              onLeave: () => Navigator.of(context).maybePop(),
             ),
           )
         : KeyedSubtree(
@@ -469,10 +477,10 @@ class _SortScreenState extends ConsumerState<SortScreen> {
             ),
           );
 
+    // 뒤로 가기(버튼·제스처·왼쪽 가장자리 밀기)를 막지 않고, 나갈 때 안내만 한다
     return PopScope(
-      canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) _leave(keeps.length, holds.length, pile.length);
+        if (didPop) _noteOnLeave(pile.length);
       },
       child: Scaffold(
         body: SafeArea(
@@ -485,8 +493,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                   children: [
                     IconButton(
                       tooltip: '돌아가기',
-                      onPressed: () =>
-                          _leave(keeps.length, holds.length, pile.length),
+                      onPressed: () => Navigator.of(context).maybePop(),
                       icon: const Icon(
                         Icons.chevron_left,
                         color: MehhColors.text,
