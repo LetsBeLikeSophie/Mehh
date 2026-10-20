@@ -152,7 +152,8 @@ class _DuplicateCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sets = ref.watch(duplicatesProvider).value;
-    final n = sets?.fold<int>(0, (n, s) => n + s.remove.length) ?? 0;
+    final decisions = ref.watch(decisionsProvider).value ?? const {};
+    final n = duplicatesLeft(sets, decisions);
     if (n == 0) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(top: 24),

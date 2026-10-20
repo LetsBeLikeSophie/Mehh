@@ -935,7 +935,3 @@ Route<void> sortRoute(SortKind kind, {DayGroup? group, String? place}) =>
     MaterialPageRoute(
       builder: (_) => SortScreen(kind: kind, group: group, place: place),
     );
-
-/// 똑같은 사진 묶음 수 (홈 카드용)
-int duplicateCount(List<DuplicateSet>? sets) =>
-    sets?.fold<int>(0, (n, s) => n + s.remove.length) ?? 0;

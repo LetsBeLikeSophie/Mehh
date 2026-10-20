@@ -173,13 +173,19 @@ class AnalysisNotifier extends Notifier<AnalysisState> {
     }
     Future.microtask(() => _start(photos, run));
     final present = {for (final p in photos) p.id};
+    final cache = _cache;
+    // 사진이 빠지기만 한 경우(휴지통으로 보냄)는 이미 다 분석돼 있어서 바로 끝난 상태로 둔다.
+    // 그래야 중복·추천이 "살펴보는 중"으로 깜빡이지 않는다.
+    final allCached =
+        cache != null &&
+        photos.every((p) => cache[p.id]?.modifiedAt == p.modifiedAt);
     return AnalysisState(
       features: {
-        for (final e in (_cache ?? const <String, PhotoFeatures>{}).entries)
+        for (final e in (cache ?? const <String, PhotoFeatures>{}).entries)
           if (present.contains(e.key)) e.key: e.value,
       },
       total: photos.length,
-      done: false,
+      done: allCached,
     );
   }
 
@@ -382,6 +388,15 @@ Set<String> _needSize((List<PhotoMeta>, Map<String, PhotoFeatures>) a) =>
 List<DuplicateSet> _findDups(
   (List<PhotoMeta>, Map<String, PhotoFeatures>, Map<String, int>) a,
 ) => findDuplicates(a.$1, a.$2, sizes: a.$3);
+
+/// 아직 고르지 않은 똑같은 사진 수 (홈 카드). 킵·보류·휴지통으로 간 것은 빠진다.
+int duplicatesLeft(List<DuplicateSet>? sets, Map<String, Decision> decisions) =>
+    sets == null
+    ? 0
+    : sets.expand((s) => s.remove).where((p) {
+        final st = stateOf(decisions, p.id);
+        return st == DecisionState.undecided || st == DecisionState.toTrash;
+      }).length;
 
 /// 묶음 하나의 추천 정리
 final groupPlanProvider = Provider.autoDispose.family<GroupPlan, DayGroup>((
