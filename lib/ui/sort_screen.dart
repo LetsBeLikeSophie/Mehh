@@ -39,6 +39,24 @@ class _SortScreenState extends ConsumerState<SortScreen> {
       .read(decisionsProvider.notifier)
       .set([id], marked ? DecisionState.keep : DecisionState.toTrash);
 
+  /// [처음대로]: 이 화면에서 정한 정리·킵·보류를 지우고 앱 추천 상태로 되돌린다.
+  /// 이미 휴지통으로 보낸 사진은 앱에서 되돌릴 수 없어서 그대로 둔다.
+  Future<void> _reset(List<String> changed) async {
+    final ok = await _ask(
+      title: '처음 추천대로 되돌릴까요?',
+      body:
+          '여기서 정한 ${Terms.pile}·${Terms.keep}·${Terms.hold} '
+          '${formatCount(changed.length)}장을 앱이 처음 고른 상태로 되돌려요. '
+          '휴지통으로 보낸 사진은 그대로예요.',
+      no: '취소',
+      yes: '되돌리기',
+    );
+    if (ok != true) return;
+    await ref.read(decisionsProvider.notifier).restore({
+      for (final id in changed) id: null,
+    });
+  }
+
   void _open(String id) => Navigator.of(context).push(
     MaterialPageRoute(
       builder: (_) => FocusScreen(
@@ -153,6 +171,11 @@ class _SortScreenState extends ConsumerState<SortScreen> {
               !marked.contains(p.id),
         )
         .length;
+    // 사용자가 직접 정한 사진 (휴지통으로 간 것은 되돌릴 수 없어서 빼고)
+    final changed = [
+      for (final p in order)
+        if (stateOf(decisions, p.id) != DecisionState.undecided) p.id,
+    ];
     final g = widget.group;
 
     return Scaffold(
@@ -166,16 +189,27 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                     padding: const EdgeInsets.fromLTRB(8, 4, 20, 12),
                     sliver: SliverList.list(
                       children: [
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: IconButton(
-                            tooltip: '돌아가기',
-                            onPressed: () => Navigator.of(context).maybePop(),
-                            icon: const Icon(
-                              Icons.chevron_left,
-                              color: MehhColors.text,
+                        Row(
+                          children: [
+                            IconButton(
+                              tooltip: '돌아가기',
+                              onPressed: () => Navigator.of(context).maybePop(),
+                              icon: const Icon(
+                                Icons.chevron_left,
+                                color: MehhColors.text,
+                              ),
                             ),
-                          ),
+                            const Spacer(),
+                            if (changed.isNotEmpty)
+                              TextButton(
+                                onPressed: () => _reset(changed),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: MehhColors.text,
+                                  minimumSize: const Size(44, 44),
+                                ),
+                                child: const Text('처음대로'),
+                              ),
+                          ],
                         ),
                         Padding(
                           padding: const EdgeInsets.only(left: 12),

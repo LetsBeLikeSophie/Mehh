@@ -260,6 +260,16 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                   ),
                 ],
               ),
+              const SizedBox(height: 4),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: _TrashBar(
+                  // 위로 끌수록 채워진다 (90px에서 꽉 참)
+                  fill: (-_drag.dy / 90).clamp(0.0, 1.0),
+                  marked: marked,
+                  onTap: () => _decide(ids, DecisionState.toTrash),
+                ),
+              ),
               const SizedBox(height: 8),
               Expanded(
                 child: Padding(
@@ -515,6 +525,55 @@ class _Chip extends StatelessWidget {
           fontSize: big ? 18 : 12,
           fontWeight: dark ? FontWeight.w500 : FontWeight.w400,
           color: dark ? MehhColors.white : MehhColors.text,
+        ),
+      ),
+    );
+  }
+}
+
+/// 맨 위 쓰레기통 줄: 사진을 위로 끌면 점점 검게 채워진다. 눌러도 정리.
+class _TrashBar extends StatelessWidget {
+  const _TrashBar({
+    required this.fill,
+    required this.marked,
+    required this.onTap,
+  });
+
+  final double fill;
+  final bool marked;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = Color.lerp(MehhColors.surface, MehhColors.black, fill)!;
+    final fg = Color.lerp(MehhColors.text, MehhColors.white, fill)!;
+    return Semantics(
+      button: true,
+      label: '${Terms.pile}. 사진을 위로 올려도 돼요',
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 80),
+          height: 48,
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(MehhRadius.card),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.delete_outline, size: 22, color: fg),
+              const SizedBox(width: 6),
+              Text(
+                marked ? '${Terms.pile}할 사진' : Terms.pile,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: fg,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

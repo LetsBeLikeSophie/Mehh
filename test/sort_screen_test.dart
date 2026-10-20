@@ -118,4 +118,32 @@ void main() {
     await tester.pumpAndSettle();
     await flush(tester);
   });
+
+  testWidgets('크게 보기: 맨 위 쓰레기통 줄을 눌러도 정리된다', (tester) async {
+    await pump(tester, SortScreen(kind: SortKind.singles, group: group));
+    await tester.tap(find.byType(PhotoThumb).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.delete_outline));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('돌아가기'));
+    await tester.pumpAndSettle();
+    expect(find.text('1장 휴지통으로'), findsOneWidget);
+    await flush(tester);
+  });
+
+  testWidgets('그리드: [처음대로]를 누르면 직접 정한 것을 지우고 추천 상태로 돌아간다', (tester) async {
+    await pump(tester, SortScreen(kind: SortKind.singles, group: group));
+    expect(find.text('처음대로'), findsNothing);
+    await tester.tap(find.byType(XToggle).first);
+    await tester.pumpAndSettle();
+    expect(find.text('1장 휴지통으로'), findsOneWidget);
+
+    await tester.tap(find.text('처음대로'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('되돌리기'));
+    await tester.pumpAndSettle();
+    expect(find.text('1장 휴지통으로'), findsNothing);
+    expect(find.text('처음대로'), findsNothing);
+    await flush(tester);
+  });
 }
