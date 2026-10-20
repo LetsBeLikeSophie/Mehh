@@ -62,7 +62,7 @@ class HoldTab extends ConsumerWidget {
             final n = await trash([id]);
             if (n > 0 && context.mounted) Navigator.of(context).pop();
           },
-          child: const Text('정리'),
+          child: const Text('휴지통으로'),
         ),
       ],
     );
@@ -98,7 +98,7 @@ class HoldTab extends ConsumerWidget {
                     padding: EdgeInsets.only(top: 24),
                     child: Center(
                       child: Text(
-                        '보류한 사진이 없어요.\n하나씩 보기에서 위로 올리면 여기로 와요.',
+                        '보류한 사진이 없어요.\n정리 화면에서 사진을 위로 올리면 여기로 와요.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 14,
@@ -111,6 +111,7 @@ class HoldTab extends ConsumerWidget {
                 if (due.isNotEmpty) ...[
                   _DueCard(
                     due: due,
+                    onOpen: open,
                     onKeep: () => keep(due.map((h) => h.photo.id)),
                     onTrash: () async {
                       await trash(due.map((h) => h.photo.id));
@@ -179,17 +180,21 @@ class HoldTab extends ConsumerWidget {
   }
 }
 
-/// "8장, 30일 동안 한 번도 안 보셨어요" + [계속 둘래요] / [이제 정리]
+/// "8장, 30일 동안 한 번도 안 보셨어요" + [계속 둘래요] / [N장 휴지통으로]
 class _DueCard extends ConsumerWidget {
   const _DueCard({
     required this.due,
     required this.onKeep,
     required this.onTrash,
+    required this.onOpen,
   });
 
   final List<HeldPhoto> due;
   final VoidCallback onKeep;
   final VoidCallback onTrash;
+
+  /// 카드 안 사진을 눌러 크게 보기 (한 장씩 남기기·휴지통으로)
+  final void Function(String id) onOpen;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -241,8 +246,35 @@ class _DueCard extends ConsumerWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             children: [
-              for (final h in due.take(8))
-                PhotoThumb(entity: entities[h.photo.id]),
+              for (final (i, h) in due.take(8).indexed)
+                GestureDetector(
+                  onTap: () => onOpen(h.photo.id),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      PhotoThumb(entity: entities[h.photo.id]),
+                      // 8장보다 많으면 마지막 칸에 나머지 수를 보여 준다
+                      if (i == 7 && due.length > 8)
+                        Container(
+                          decoration: BoxDecoration(
+                            color: MehhColors.black.withValues(alpha: 0.55),
+                            borderRadius: BorderRadius.circular(
+                              MehhRadius.thumb,
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '+${formatCount(due.length - 7)}',
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: MehhColors.white,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 14),
@@ -265,7 +297,7 @@ class _DueCard extends ConsumerWidget {
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(44, 44),
                   ),
-                  child: const Text('이제 정리'),
+                  child: Text('${formatCount(due.length)}장 휴지통으로'),
                 ),
               ),
             ],
