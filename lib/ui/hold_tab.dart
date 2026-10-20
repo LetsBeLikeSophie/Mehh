@@ -8,6 +8,7 @@ import '../providers.dart';
 import '../theme.dart';
 import 'photo_viewer.dart';
 import 'trash_flow.dart';
+import 'strings.dart';
 import 'widgets.dart';
 
 class HeldPhoto {
@@ -55,14 +56,14 @@ class HoldTab extends ConsumerWidget {
             await keep([id]);
             if (context.mounted) Navigator.of(context).pop();
           },
-          child: const Text('남기기'),
+          child: const Text(Terms.keep),
         ),
         FilledButton(
           onPressed: () async {
             final n = await trash([id]);
             if (n > 0 && context.mounted) Navigator.of(context).pop();
           },
-          child: const Text('휴지통으로'),
+          child: const Text(Terms.toTrash),
         ),
       ],
     );
@@ -180,7 +181,7 @@ class HoldTab extends ConsumerWidget {
   }
 }
 
-/// "8장, 30일 동안 한 번도 안 보셨어요" + [계속 둘래요] / [N장 휴지통으로]
+/// "8장, 30일 동안 한 번도 안 보셨어요" + [N장 킵] / [N장 휴지통으로]
 class _DueCard extends ConsumerWidget {
   const _DueCard({
     required this.due,
@@ -193,7 +194,7 @@ class _DueCard extends ConsumerWidget {
   final VoidCallback onKeep;
   final VoidCallback onTrash;
 
-  /// 카드 안 사진을 눌러 크게 보기 (한 장씩 남기기·휴지통으로)
+  /// 카드 안 사진을 눌러 크게 보기 (한 장씩 킵·휴지통으로)
   final void Function(String id) onOpen;
 
   @override
@@ -287,7 +288,7 @@ class _DueCard extends ConsumerWidget {
                     backgroundColor: MehhColors.white,
                     minimumSize: const Size(44, 44),
                   ),
-                  child: const Text('계속 둘래요'),
+                  child: Text('${formatCount(due.length)}장 ${Terms.keep}'),
                 ),
               ),
               const SizedBox(width: 8),
@@ -297,7 +298,7 @@ class _DueCard extends ConsumerWidget {
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(44, 44),
                   ),
-                  child: Text('${formatCount(due.length)}장 휴지통으로'),
+                  child: Text('${formatCount(due.length)}장 ${Terms.toTrash}'),
                 ),
               ),
             ],

@@ -13,6 +13,7 @@ import '../providers.dart';
 import '../theme.dart';
 import 'photo_viewer.dart';
 import 'trash_flow.dart';
+import 'strings.dart';
 import 'widgets.dart';
 
 /// 정리 화면에 들어가는 것: 그날의 묶음, 한 장 사진, 캡처, 똑같은 사진
@@ -259,7 +260,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
               onPressed: () => Navigator.of(c).pop(true),
               style: TextButton.styleFrom(foregroundColor: MehhColors.black),
               child: const Text(
-                '휴지통으로',
+                Terms.toTrash,
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
             ),
@@ -283,7 +284,10 @@ class _SortScreenState extends ConsumerState<SortScreen> {
     final keep = _session.values.where((s) => s == DecisionState.keep).length;
     final hold = _session.values.where((s) => s == DecisionState.hold).length;
     if (keep + hold == 0 && pile == 0) return;
-    final parts = [if (keep > 0) '킵 $keep', if (hold > 0) '보류 $hold'];
+    final parts = [
+      if (keep > 0) '${Terms.keep} $keep',
+      if (hold > 0) '${Terms.hold} $hold',
+    ];
     final saved = parts.isEmpty ? '' : '${parts.join(' · ')} 저장했어요';
     final rest = pile > 0 ? '정리 줄 $pile장은 그대로 있어요' : '';
     showNote(context, [saved, rest].where((t) => t.isNotEmpty).join(' · '));
@@ -341,9 +345,9 @@ class _SortScreenState extends ConsumerState<SortScreen> {
   }
 
   String? get _dragLabel {
-    if (_drag.dy < -40) return '보류';
-    if (_drag.dy > 40) return '킵';
-    if (_drag.dx < -40) return '정리';
+    if (_drag.dy < -40) return Terms.hold;
+    if (_drag.dy > 40) return Terms.keep;
+    if (_drag.dx < -40) return Terms.pile;
     if (_drag.dx > 40) return '이전 사진';
     return null;
   }
@@ -460,11 +464,11 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                         runSpacing: 6,
                         children: [
                           if (inPile(current))
-                            const _Chip('정리 줄', dark: true)
+                            const _Chip(Terms.pileRow, dark: true)
                           else if (stateNow == DecisionState.keep)
-                            const _Chip('킵', dark: true)
+                            const _Chip(Terms.keep, dark: true)
                           else if (stateNow == DecisionState.hold)
-                            const _Chip('보류', dark: true),
+                            const _Chip(Terms.hold, dark: true),
                           if (src.notes[current] case final n?) _Chip(n),
                         ],
                       ),
@@ -556,7 +560,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                   ),
                 const SizedBox(height: 4),
                 _Strip(
-                  label: '남은',
+                  label: Terms.left,
                   ids: left,
                   current: current,
                   empty: '다 골랐어요',
@@ -565,7 +569,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                 ),
                 const SizedBox(height: 6),
                 _Strip(
-                  label: '보류',
+                  label: Terms.hold,
                   ids: holds,
                   current: current,
                   empty: '↑ 위로 올리면 여기로',
@@ -577,11 +581,11 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                   child: Semantics(
                     label: '사진. 위로 밀면 보류, 아래로 밀면 킵, 왼쪽으로 밀면 정리',
                     customSemanticsActions: {
-                      const CustomSemanticsAction(label: '보류'): () =>
+                      const CustomSemanticsAction(label: Terms.hold): () =>
                           act('hold'),
-                      const CustomSemanticsAction(label: '킵'): () =>
+                      const CustomSemanticsAction(label: Terms.keep): () =>
                           act('keep'),
-                      const CustomSemanticsAction(label: '정리'): () =>
+                      const CustomSemanticsAction(label: Terms.pile): () =>
                           act('trash'),
                       const CustomSemanticsAction(label: '이전 사진'): () =>
                           act('prev'),
@@ -629,7 +633,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                 ),
                 const SizedBox(height: 8),
                 _Strip(
-                  label: '킵',
+                  label: Terms.keep,
                   ids: keeps,
                   current: current,
                   empty: '↓ 아래로 내리면 여기로',
@@ -638,7 +642,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                 ),
                 const SizedBox(height: 6),
                 _Strip(
-                  label: '정리',
+                  label: Terms.pile,
                   ids: pile,
                   current: current,
                   empty: '← 왼쪽으로 밀면 여기로',
@@ -654,7 +658,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                           ),
                           child: const Text(
-                            '휴지통으로',
+                            Terms.toTrash,
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,

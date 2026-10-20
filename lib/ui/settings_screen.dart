@@ -22,7 +22,7 @@ class SettingsScreen extends ConsumerWidget {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
         ),
         content: const Text(
-          '사진 분석 결과, 남기기·보류 기록, 배운 취향, 비운 용량 기록을 지워요.\n'
+          '사진 분석 결과, 킵·보류·정리 줄 기록, 배운 취향, 비운 용량 기록을 지워요.\n'
           '사진은 지워지지 않아요.',
           style: TextStyle(fontSize: 14, height: 1.5),
         ),
