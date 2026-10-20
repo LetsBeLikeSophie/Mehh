@@ -111,4 +111,17 @@ void main() {
     expect(find.byType(AlertDialog), findsNothing);
     await flush(tester);
   });
+
+  testWidgets('정리 줄을 보내면 나머지를 한 번에 킵할지 묻고, 킵하면 다 고른 상태가 된다', (tester) async {
+    await pump(tester);
+    await tester.drag(card(), const Offset(-200, 0)); // 한 장을 정리 줄로
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('휴지통으로'));
+    await tester.pumpAndSettle();
+    expect(find.text('나머지 3장은 킵할까요?'), findsOneWidget);
+    await tester.tap(find.text('3장 킵'));
+    await tester.pumpAndSettle();
+    expect(find.text('다 골랐어요'), findsWidgets);
+    await flush(tester);
+  });
 }

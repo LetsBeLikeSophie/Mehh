@@ -277,6 +277,61 @@ class _SortScreenState extends ConsumerState<SortScreen> {
       // 휴지통으로 간 사진은 앱에서 되돌릴 수 없다 (갤러리 휴지통에서 되살린다)
       if (n > 0) _undo.removeWhere((u) => sending.contains(u.id));
     });
+    if (n > 0) await _offerKeepRest(src);
+  }
+
+  /// 정리 줄을 보낸 뒤 아직 고르지 않은 사진이 남아 있으면, 한 번에 킵할지 묻는다.
+  /// "앱이 먼저 다 해놓고 사용자는 확인만": 추천을 보냈으면 나머지는 남기는 것으로 끝낸다.
+  Future<void> _offerKeepRest(_Source src) async {
+    final decisions = ref.read(decisionsProvider).value ?? const {};
+    final rest = [
+      for (final p in src.photos)
+        if (stateOf(decisions, p.id) == DecisionState.undecided) p.id,
+    ];
+    if (rest.isEmpty || !mounted) return;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        backgroundColor: MehhColors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(MehhRadius.card),
+        ),
+        title: Text(
+          '나머지 ${formatCount(rest.length)}장은 ${Terms.keep}할까요?',
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+        ),
+        content: Text(
+          widget.kind == SortKind.day
+              ? '${Terms.keep}하면 이 날은 정리 끝이에요.'
+              : '${Terms.keep}하면 여기 정리가 끝나요.',
+          style: const TextStyle(fontSize: 14, height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(c).pop(false),
+            style: TextButton.styleFrom(foregroundColor: MehhColors.textMuted),
+            child: const Text('더 볼게요'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(c).pop(true),
+            style: TextButton.styleFrom(foregroundColor: MehhColors.black),
+            child: Text(
+              '${formatCount(rest.length)}장 ${Terms.keep}',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    await ref.read(decisionsProvider.notifier).set(rest, DecisionState.keep);
+    if (!mounted) return;
+    setState(() {
+      for (final id in rest) {
+        _session[id] = DecisionState.keep;
+      }
+      _currentId = null;
+    });
   }
 
   /// 나갈 때 이번에 고른 것만 알려 준다. 결정은 고를 때마다 이미 저장돼 있다.
