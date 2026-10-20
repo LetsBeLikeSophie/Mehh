@@ -78,6 +78,27 @@ void main() {
       expect(findDuplicates(photos, f), isEmpty);
     });
 
+    test('글자 많은 사진(예: 택시 내역)은 파일 크기까지 같아야 중복', () {
+      final photos = [
+        meta('r1', t0, w: 1080, h: 2340),
+        meta('r2', t0.add(const Duration(days: 3)), w: 1080, h: 2340),
+      ];
+      PhotoFeatures receipt(String id) => PhotoFeatures(
+        id: id,
+        hashHi: 7,
+        hashLo: 9,
+        sharpness: 900,
+        brightness: 230,
+        textScore: 0.6,
+      );
+      final f = {'r1': receipt('r1'), 'r2': receipt('r2')};
+      expect(findDuplicates(photos, f, sizes: {'r1': 100, 'r2': 120}), isEmpty);
+      expect(
+        findDuplicates(photos, f, sizes: {'r1': 100, 'r2': 100}),
+        hasLength(1),
+      );
+    });
+
     test('해밍 거리 3 이상이거나 비율이 다르면 중복 아님', () {
       final photos = [
         meta('a', t0),

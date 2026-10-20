@@ -17,7 +17,7 @@ Set<String> idsNeedingSize(
 }) {
   final out = <String>{};
   _forEachCandidatePair(photos, features, config, (a, b) {
-    if (_sameShotRisk(a, b, config)) {
+    if (_sameShotRisk(a, b, features, config)) {
       out
         ..add(a.id)
         ..add(b.id);
@@ -43,7 +43,7 @@ List<DuplicateSet> findDuplicates(
 
   final byId = {for (final p in photos) p.id: p};
   _forEachCandidatePair(photos, features, config, (a, b) {
-    if (_sameShotRisk(a, b, config)) {
+    if (_sameShotRisk(a, b, features, config)) {
       final sa = sizes[a.id], sb = sizes[b.id];
       if (sa == null || sb == null || sa == 0 || sa != sb) return;
     }
@@ -72,10 +72,18 @@ List<DuplicateSet> findDuplicates(
 
 /// 해시만으로는 못 믿는 쌍:
 /// 같은 크기로 짧은 시간 안에 찍힌 사진(연속 촬영),
-/// 스크린샷(같은 앱 화면은 글자만 달라도 해시가 거의 같다)
-bool _sameShotRisk(PhotoMeta a, PhotoMeta b, CleanupConfig c) =>
+/// 스크린샷·글자 많은 사진(같은 앱 화면은 글자만 달라도 해시가 거의 같다.
+/// 예: 택시 이용 내역 여러 장)
+bool _sameShotRisk(
+  PhotoMeta a,
+  PhotoMeta b,
+  Map<String, PhotoFeatures> features,
+  CleanupConfig c,
+) =>
     a.isScreenshot ||
     b.isScreenshot ||
+    (features[a.id]?.textScore ?? 0) >= c.textScreenshot ||
+    (features[b.id]?.textScore ?? 0) >= c.textScreenshot ||
     (a.width == b.width &&
         a.height == b.height &&
         a.takenAt.difference(b.takenAt).abs() <= c.sameShotWindow);

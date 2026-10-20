@@ -394,4 +394,9 @@ final groupPlanProvider = Provider.autoDispose.family<GroupPlan, DayGroup>((
 
 /// 묶음의 모든 사진을 결정했으면 정리 끝
 bool groupDone(DayGroup g, Map<String, Decision> decisions) =>
-    g.photos.every((p) => stateOf(decisions, p.id) != DecisionState.undecided);
+    g.photos.every((p) {
+      final s = stateOf(decisions, p.id);
+      return s == DecisionState.keep ||
+          s == DecisionState.hold ||
+          s == DecisionState.trashed;
+    });

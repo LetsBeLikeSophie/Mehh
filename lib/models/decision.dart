@@ -1,5 +1,6 @@
 /// 사용자 결정 (SPEC 6-5).
-enum DecisionState { undecided, keep, hold, trashed }
+/// [toTrash]: 정리 줄에 넣어 둔 사진 (휴지통으로 보내기 전, 언제든 되돌릴 수 있다)
+enum DecisionState { undecided, keep, hold, toTrash, trashed }
 
 class Decision {
   const Decision({

@@ -7,11 +7,8 @@ import '../models/day_group.dart';
 import '../models/decision.dart';
 import '../providers.dart';
 import '../theme.dart';
-import 'duplicates_screen.dart';
-import 'group_screen.dart';
-import 'screenshots_screen.dart';
-import 'swipe_screen.dart';
 import 'settings_screen.dart';
+import 'sort_screen.dart';
 import 'widgets.dart';
 
 /// 홈: 중복 카드 + 그날의 묶음 목록 (최신순).
@@ -194,11 +191,10 @@ class _DuplicateCard extends ConsumerWidget {
                 minimumSize: const Size(44, 44),
                 padding: const EdgeInsets.symmetric(horizontal: 14),
               ),
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const DuplicatesScreen()),
-              ),
+              onPressed: () =>
+                  Navigator.of(context).push(sortRoute(SortKind.duplicates)),
               child: const Text(
-                '하나만 남기기',
+                '살펴보기',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
             ),
@@ -244,12 +240,14 @@ class _GroupTile extends ConsumerWidget {
 
     return InkWell(
       onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => switch (group.kind) {
-            DayGroupKind.day => GroupScreen(group: group, place: place),
-            DayGroupKind.singles => SwipeScreen(group: group),
-            DayGroupKind.screenshots => ScreenshotsScreen(group: group),
+        sortRoute(
+          switch (group.kind) {
+            DayGroupKind.day => SortKind.day,
+            DayGroupKind.singles => SortKind.singles,
+            DayGroupKind.screenshots => SortKind.screenshots,
           },
+          group: group,
+          place: place,
         ),
       ),
       child: Container(
