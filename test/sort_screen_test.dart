@@ -51,6 +51,10 @@ void main() {
 
   Finder card() => find.byType(AnimatedSwitcher);
 
+  // 지금 크게 보고 있는 사진 (한 장 사진은 최신이 앞: p3, p2, p1, p0)
+  Finder showing(String id) =>
+      find.descendant(of: card(), matching: find.byKey(ValueKey(id)));
+
   testWidgets('그리드: X를 켜면 휴지통 버튼, 보내면 그 사진만 빠진다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     expect(find.text('정리할 사진이 없어요'), findsWidgets);
@@ -87,15 +91,15 @@ void main() {
       tester,
       FocusScreen(kind: SortKind.singles, group: group, initialId: 'p3'),
     );
-    expect(find.text('1 / 4'), findsOneWidget); // 한 장 사진은 최신이 앞
+    expect(showing('p3'), findsOneWidget);
     for (var i = 0; i < 4; i++) {
       await tester.drag(card(), const Offset(-200, 0)); // 다음
       await tester.pumpAndSettle();
     }
-    expect(find.text('1 / 4'), findsOneWidget);
+    expect(showing('p3'), findsOneWidget);
     await tester.drag(card(), const Offset(200, 0)); // 이전 = 마지막으로
     await tester.pumpAndSettle();
-    expect(find.text('4 / 4'), findsOneWidget);
+    expect(showing('p0'), findsOneWidget);
     await flush(tester);
   });
 
@@ -157,7 +161,7 @@ void main() {
     );
     await tester.drag(card(), const Offset(-200, 0)); // 다음 (상태 안 바뀜)
     await tester.pumpAndSettle();
-    expect(find.text('2 / 4'), findsOneWidget);
+    expect(showing('p2'), findsOneWidget);
     expect(find.textContaining('✓'), findsNothing);
 
     await tester.drag(card(), const Offset(0, 200)); // 킵 → 다음 사진으로
@@ -167,7 +171,7 @@ void main() {
     expect(find.text('✓ 킵'), findsOneWidget);
     await tester.drag(card(), const Offset(0, 200)); // 한 번 더 아래 = 킵 취소
     await tester.pumpAndSettle();
-    expect(find.text('2 / 4'), findsOneWidget); // 취소는 그 자리에
+    expect(showing('p2'), findsOneWidget); // 취소는 그 자리에
     expect(find.text('✓ 킵'), findsNothing);
     await flush(tester);
   });

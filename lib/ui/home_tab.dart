@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
@@ -11,12 +12,91 @@ import 'settings_screen.dart';
 import 'sort_screen.dart';
 import 'widgets.dart';
 
-/// 홈: 중복 카드 + 그날의 묶음 목록 (최신순).
-class HomeTab extends ConsumerWidget {
+/// 홈: 중복 카드 + 그날의 묶음 목록 (최신순, 연도별 구분선).
+/// 연도가 2개 이상이면 오른쪽 연도 레일로 앨범처럼 연도 사이를 오간다.
+class HomeTab extends ConsumerStatefulWidget {
   const HomeTab({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeTab> createState() => _HomeTabState();
+}
+
+/// 목록 한 줄: 연도 구분선 또는 묶음
+sealed class _Entry {}
+
+class _YearEntry extends _Entry {
+  _YearEntry(this.year);
+  final int year;
+}
+
+class _GroupEntry extends _Entry {
+  _GroupEntry(this.group);
+  final DayGroup group;
+}
+
+const _yearExtent = 48.0;
+const _tileExtent = 69.0;
+const _railWidth = 32.0;
+
+class _HomeTabState extends ConsumerState<HomeTab> {
+  final _scroll = ScrollController();
+  final _daysKey = GlobalKey();
+  List<_Entry> _entries = const [];
+  List<double> _offsets = const []; // 각 줄의 시작 위치 (목록 안에서)
+  int? _currentYear;
+
+  @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(_updateYear);
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  /// 묶음 목록이 스크롤 안에서 시작하는 위치
+  double? get _daysStart {
+    final ro = _daysKey.currentContext?.findRenderObject();
+    return ro is RenderSliver ? ro.constraints.precedingScrollExtent : null;
+  }
+
+  int _indexAt(double y) {
+    var lo = 0, hi = _offsets.length - 1;
+    while (lo < hi) {
+      final mid = (lo + hi + 1) >> 1;
+      if (_offsets[mid] <= y) {
+        lo = mid;
+      } else {
+        hi = mid - 1;
+      }
+    }
+    return lo;
+  }
+
+  void _updateYear() {
+    final start = _daysStart;
+    if (start == null || _entries.isEmpty) return;
+    final year = switch (_entries[_indexAt(_scroll.offset - start + 1)]) {
+      _YearEntry(:final year) => year,
+      _GroupEntry(:final group) => group.start.year,
+    };
+    if (year != _currentYear) setState(() => _currentYear = year);
+  }
+
+  void _jumpToYear(int year) {
+    final start = _daysStart;
+    final i = _entries.indexWhere((e) => e is _YearEntry && e.year == year);
+    if (start == null || i < 0) return;
+    _scroll.jumpTo(
+      (start + _offsets[i]).clamp(0.0, _scroll.position.maxScrollExtent),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final library = ref.watch(libraryProvider);
     final limited = ref.watch(permissionProvider) == PermissionState.limited;
 
@@ -44,10 +124,37 @@ class HomeTab extends ConsumerWidget {
                     ref.watch(groupStatusProvider(g)) == GroupStatus.needsWork,
               )
               .length;
-          return CustomScrollView(
+
+          // 연도 구분선을 끼운 목록과 각 줄의 위치
+          final entries = <_Entry>[];
+          int? lastYear;
+          for (final g in days) {
+            final y = g.start.year;
+            if (y != lastYear) entries.add(_YearEntry(y));
+            lastYear = y;
+            entries.add(_GroupEntry(g));
+          }
+          final offsets = <double>[];
+          var acc = 0.0;
+          for (final e in entries) {
+            offsets.add(acc);
+            acc += e is _YearEntry ? _yearExtent : _tileExtent;
+          }
+          _entries = entries;
+          _offsets = offsets;
+          final years = [
+            for (final e in entries)
+              if (e is _YearEntry) e.year,
+          ];
+          final rail = years.length > 1;
+          final right = rail ? 12.0 + _railWidth : 20.0;
+          final bottom = MediaQuery.paddingOf(context).bottom + 48;
+
+          final list = CustomScrollView(
+            controller: _scroll,
             slivers: [
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                padding: EdgeInsets.fromLTRB(20, 16, right, 0),
                 sliver: SliverList.list(
                   children: [
                     Row(
@@ -93,32 +200,128 @@ class HomeTab extends ConsumerWidget {
                       ),
                     ],
                     const _DuplicateCard(),
-                    const SizedBox(height: 24),
-                    if (days.isNotEmpty) const _SectionLabel('그날의 묶음'),
+                    if (others.isNotEmpty) ...[
+                      const SizedBox(height: 24),
+                      const _SectionLabel('따로 보기'),
+                      for (final g in others)
+                        SizedBox(
+                          height: _tileExtent,
+                          child: _GroupTile(group: g),
+                        ),
+                    ],
+                    const SizedBox(height: 8),
                   ],
                 ),
               ),
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                sliver: SliverList.builder(
-                  itemCount: days.length,
-                  itemBuilder: (_, i) => _GroupTile(group: days[i]),
+                padding: EdgeInsets.fromLTRB(20, 0, right, bottom),
+                sliver: SliverVariedExtentList.builder(
+                  key: _daysKey,
+                  itemCount: entries.length,
+                  itemExtentBuilder: (i, _) =>
+                      entries[i] is _YearEntry ? _yearExtent : _tileExtent,
+                  itemBuilder: (_, i) => switch (entries[i]) {
+                    _YearEntry(:final year) => _YearDivider(year),
+                    _GroupEntry(:final group) => _GroupTile(group: group),
+                  },
                 ),
               ),
-              if (others.isNotEmpty)
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
-                  sliver: SliverList.list(
-                    children: [
-                      const _SectionLabel('따로 보기'),
-                      for (final g in others) _GroupTile(group: g),
-                    ],
-                  ),
+            ],
+          );
+          if (!rail) return list;
+          return Stack(
+            children: [
+              list,
+              Positioned(
+                right: 4,
+                top: 140,
+                bottom: bottom,
+                width: _railWidth,
+                child: _YearRail(
+                  years: years,
+                  current: _currentYear ?? years.first,
+                  onYear: _jumpToYear,
                 ),
-              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              ),
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+/// 연도 구분선: "2025 ────"
+class _YearDivider extends StatelessWidget {
+  const _YearDivider(this.year);
+
+  final int year;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 18, bottom: 8),
+      child: Row(
+        children: [
+          Text(
+            '$year',
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: MehhColors.text,
+            ),
+          ),
+          const SizedBox(width: 10),
+          const Expanded(child: Divider()),
+        ],
+      ),
+    );
+  }
+}
+
+/// 오른쪽 연도 레일: 누르거나 위아래로 끌면 그 연도로 이동 (앨범 빠른 스크롤처럼)
+class _YearRail extends StatelessWidget {
+  const _YearRail({
+    required this.years,
+    required this.current,
+    required this.onYear,
+  });
+
+  final List<int> years;
+  final int current;
+  final void Function(int year) onYear;
+
+  void _pick(double dy, double height) {
+    final i = (dy / height * years.length).floor().clamp(0, years.length - 1);
+    onYear(years[i]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, box) => GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (d) => _pick(d.localPosition.dy, box.maxHeight),
+        onVerticalDragUpdate: (d) => _pick(d.localPosition.dy, box.maxHeight),
+        child: Semantics(
+          label: '연도 이동',
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              for (final y in years)
+                Text(
+                  "'${y % 100}",
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: y == current
+                        ? FontWeight.w700
+                        : FontWeight.w400,
+                    color: y == current ? MehhColors.black : MehhColors.icon,
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

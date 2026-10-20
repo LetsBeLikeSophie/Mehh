@@ -339,7 +339,7 @@ class _Summary extends StatelessWidget {
       detail = '';
     } else if (marked == 0) {
       title = const Text('정리할 사진을 못 찾았어요');
-      detail = 'X를 눌러 직접 고르거나, 사진을 눌러 크게 보세요.';
+      detail = '';
     } else {
       title = Text.rich(
         TextSpan(
@@ -366,7 +366,7 @@ class _Summary extends StatelessWidget {
           ],
         ),
       );
-      detail = [?reason, 'X를 눌러 바꾸고, 사진을 누르면 크게 봐요.'].join('\n');
+      detail = reason ?? '';
     }
     return Container(
       width: double.infinity,

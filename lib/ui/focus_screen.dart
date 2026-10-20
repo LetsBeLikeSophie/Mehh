@@ -256,16 +256,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                       color: MehhColors.text,
                     ),
                   ),
-                  Expanded(
-                    child: Text(
-                      '${index + 1} / ${ids.length}',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: MehhColors.textMuted,
-                      ),
-                    ),
-                  ),
+                  // 위치는 아래 사진 줄이 보여 주므로 "3 / 214" 숫자는 두지 않는다
+                  const Spacer(),
                   if (widget.kind == SortKind.screenshots &&
                       (ref.watch(cortexInstalledProvider).value ?? false))
                     TextButton.icon(
@@ -273,8 +265,18 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                         final ok = await ref
                             .read(handoffProvider)
                             .sendToCortex(current);
-                        if (!ok && context.mounted) {
+                        if (!context.mounted) return;
+                        if (!ok) {
                           showNote(context, 'Cortex로 보내지 못했어요');
+                          return;
+                        }
+                        // 보낸 캡처는 정리(X)에 넣는다. 지우는 건 [휴지통으로]를 눌러야 하고,
+                        // 잘못 넣었으면 되돌리기나 X로 바로 뺄 수 있다.
+                        if (!marked) {
+                          await _decide(ids, DecisionState.toTrash);
+                        }
+                        if (context.mounted) {
+                          showNote(context, 'Cortex로 보냈어요 · 정리에 넣어 뒀어요');
                         }
                       },
                       style: TextButton.styleFrom(
@@ -381,7 +383,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
   }
 }
 
-/// 아래 한 줄 사진 줄. 끝에서 계속 밀면 처음으로 이어진다 (무한 반복).
+/// 아래 한 줄 사진 줄. 화면보다 많으면 끝에서 처음으로 이어지며 돈다 (무한 반복),
+/// 다 들어가면 실제 장수만 보여 준다.
 /// 지금 사진은 테두리, 정리할 사진은 흐리게 + X, 킵은 체크, 정하지 않은 사진은 표시 없음.
 class _LoopStrip extends StatefulWidget {
   const _LoopStrip({
@@ -457,6 +460,18 @@ class _LoopStripState extends State<_LoopStrip> {
       child: LayoutBuilder(
         builder: (context, box) {
           _width = box.maxWidth;
+          // 화면에 다 들어가면 실제 장수만 보여 준다 (반복해서 채우지 않음)
+          if (_n * _extent <= box.maxWidth) {
+            return Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final id in widget.ids)
+                    SizedBox(width: _extent, child: _tile(id)),
+                ],
+              ),
+            );
+          }
           _scroll ??= ScrollController(
             initialScrollOffset: _offsetFor(
               (_laps ~/ 2) * _n + widget.ids.indexOf(widget.current),
@@ -467,46 +482,46 @@ class _LoopStripState extends State<_LoopStrip> {
             scrollDirection: Axis.horizontal,
             itemExtent: _extent,
             itemCount: _n * _laps,
-            itemBuilder: (_, i) {
-              final id = widget.ids[i % _n];
-              final s = widget.stateOf(id);
-              final out = s == DecisionState.toTrash;
-              final selected = id == widget.current;
-              return Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: GestureDetector(
-                  onTap: () => widget.onTap(id),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: selected ? MehhColors.black : Colors.transparent,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(MehhRadius.thumb),
-                    ),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Opacity(
-                          opacity: out ? 0.35 : 1,
-                          child: PhotoThumb(
-                            entity: widget.entities[id],
-                            radius: 4,
-                            size: 150,
-                          ),
-                        ),
-                        if (out)
-                          const Positioned(right: 2, top: 2, child: XMark()),
-                        if (s == DecisionState.keep)
-                          const Positioned(right: 2, top: 2, child: _Check()),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
+            itemBuilder: (_, i) => _tile(widget.ids[i % _n]),
           );
         },
+      ),
+    );
+  }
+
+  Widget _tile(String id) {
+    final s = widget.stateOf(id);
+    final out = s == DecisionState.toTrash;
+    final selected = id == widget.current;
+    return Padding(
+      padding: const EdgeInsets.only(right: 4),
+      child: GestureDetector(
+        onTap: () => widget.onTap(id),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: selected ? MehhColors.black : Colors.transparent,
+              width: 2,
+            ),
+            borderRadius: BorderRadius.circular(MehhRadius.thumb),
+          ),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Opacity(
+                opacity: out ? 0.35 : 1,
+                child: PhotoThumb(
+                  entity: widget.entities[id],
+                  radius: 4,
+                  size: 150,
+                ),
+              ),
+              if (out) const Positioned(right: 2, top: 2, child: XMark()),
+              if (s == DecisionState.keep)
+                const Positioned(right: 2, top: 2, child: _Check()),
+            ],
+          ),
+        ),
       ),
     );
   }
