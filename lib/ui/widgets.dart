@@ -110,6 +110,47 @@ class XMark extends StatelessWidget {
   }
 }
 
+/// 사진 모서리 X 버튼: 켜지면 정리, 꺼지면 킵. 누르기 쉽게 영역은 크게.
+class XToggle extends StatelessWidget {
+  const XToggle({super.key, required this.on, required this.onTap});
+
+  final bool on;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: on ? '정리 취소' : '정리하기',
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: SizedBox(
+          width: 36,
+          height: 36,
+          child: Align(
+            alignment: Alignment.topRight,
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: on
+                  ? const XMark()
+                  : Container(
+                      width: 16,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: MehhColors.white.withValues(alpha: 0.8),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: MehhColors.icon),
+                      ),
+                    ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// 2.3GB, 840MB
 String formatBytes(int bytes) {
   const gb = 1024 * 1024 * 1024, mb = 1024 * 1024;
