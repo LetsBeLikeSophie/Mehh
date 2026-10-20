@@ -12,6 +12,7 @@ import '../models/photo_meta.dart';
 import '../providers.dart';
 import '../theme.dart';
 import 'photo_viewer.dart';
+import 'trash_flow.dart';
 import 'widgets.dart';
 
 /// 정리 화면에 들어가는 것: 그날의 묶음, 한 장 사진, 캡처, 똑같은 사진
@@ -194,10 +195,9 @@ class _SortScreenState extends ConsumerState<SortScreen> {
 
   Future<void> _sendTrash(List<String> ids) async {
     setState(() => _busy = true);
-    final n = await ref.read(cleanerProvider).trash(ids);
+    await sendToTrash(context, ref, ids);
     if (!mounted) return;
     setState(() => _busy = false);
-    if (n > 0) showNote(context, '${formatCount(n)}장을 휴지통으로 보냈어요');
   }
 
   void _leave(int keep, int hold, int pile) {

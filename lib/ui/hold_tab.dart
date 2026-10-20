@@ -7,6 +7,7 @@ import '../models/photo_meta.dart';
 import '../providers.dart';
 import '../theme.dart';
 import 'photo_viewer.dart';
+import 'trash_flow.dart';
 import 'widgets.dart';
 
 class HeldPhoto {
@@ -43,8 +44,7 @@ class HoldTab extends ConsumerWidget {
 
     Future<void> keep(Iterable<String> ids) =>
         ref.read(decisionsProvider.notifier).set(ids, DecisionState.keep);
-    Future<int> trash(Iterable<String> ids) =>
-        ref.read(cleanerProvider).trash(ids);
+    Future<int> trash(Iterable<String> ids) => sendToTrash(context, ref, ids);
 
     void open(String id) => openPhoto(
       context,
@@ -113,10 +113,7 @@ class HoldTab extends ConsumerWidget {
                     due: due,
                     onKeep: () => keep(due.map((h) => h.photo.id)),
                     onTrash: () async {
-                      final n = await trash(due.map((h) => h.photo.id));
-                      if (n > 0 && context.mounted) {
-                        showNote(context, '${formatCount(n)}장을 휴지통으로 보냈어요');
-                      }
+                      await trash(due.map((h) => h.photo.id));
                     },
                   ),
                   const SizedBox(height: 22),

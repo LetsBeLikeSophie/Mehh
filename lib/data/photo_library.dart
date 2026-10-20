@@ -1,5 +1,6 @@
 ﻿import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:share_plus/share_plus.dart';
@@ -177,18 +178,33 @@ class PhotoLibrary {
     return r.status != ShareResultStatus.dismissed;
   }
 
-  /// 시스템 휴지통으로 보낸다. 여러 장을 한 번의 확인 창으로.
-  /// 반환: 실제로 옮겨진 사진 id (사용자가 취소하면 빈 목록)
-  Future<List<String>> trash(List<String> ids) async {
+  int? _sdk;
+
+  Future<int> _androidSdk() async =>
+      _sdk ??= (await DeviceInfoPlugin().androidInfo).version.sdkInt;
+
+  /// 휴대폰 휴지통이 있는지. 안드로이드는 11(API 30)부터, iOS는 "최근 삭제된 항목".
+  Future<bool> hasTrash() async {
+    if (Platform.isIOS) return true;
+    return Platform.isAndroid && await _androidSdk() >= 30;
+  }
+
+  /// 휴대폰 휴지통으로 보낸다. 여러 장을 한 번의 확인 창으로.
+  /// 휴지통이 없는 폰(안드로이드 10 이하)은 [permanentOk]일 때만 바로 지운다.
+  /// 휴지통으로 보내다 실패하면 영구 삭제로 넘어가지 않고 예외를 그대로 던진다.
+  /// 반환: 실제로 옮긴(지운) 사진 id (사용자가 취소하면 빈 목록)
+  Future<List<String>> trash(
+    List<String> ids, {
+    bool permanentOk = false,
+  }) async {
     final list = [for (final id in ids) ?entities[id]];
     if (list.isEmpty) return [];
     if (Platform.isAndroid) {
-      // 안드로이드 11+ 휴지통 요청. 10 이하는 휴지통이 없어 바로 삭제 요청.
-      try {
-        return await PhotoManager.editor.android.moveToTrash(list);
-      } catch (_) {
-        return PhotoManager.editor.deleteWithIds(ids);
+      if (await _androidSdk() >= 30) {
+        return PhotoManager.editor.android.moveToTrash(list);
       }
+      if (!permanentOk) throw const TrashUnavailable();
+      return PhotoManager.editor.deleteWithIds(ids);
     }
     // iOS는 삭제하면 "최근 삭제된 항목"으로 간다.
     return PhotoManager.editor.deleteWithIds(ids);
@@ -206,4 +222,9 @@ class PhotoLibrary {
     final title = (e.title ?? '').toLowerCase();
     return path.contains('screenshot') || title.startsWith('screenshot');
   }
+}
+
+/// 휴지통이 없는 폰에서 영구 삭제 확인 없이 지우려고 할 때
+class TrashUnavailable implements Exception {
+  const TrashUnavailable();
 }
