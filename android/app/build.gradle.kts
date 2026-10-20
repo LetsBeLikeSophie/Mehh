@@ -19,7 +19,8 @@ android {
         applicationId = "com.letsbelikesophie.mehh"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // 안드로이드 11(API 30)부터: 휴대폰 휴지통이 있어야 "바로 지우지 않는다"를 지킬 수 있다
+        minSdk = 30
         targetSdk = flutter.targetSdkVersion
         // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION
         // is added automatically by Flutter. (https://developer.android.com/studio/build/configure-apk-splits#configure-APK-versions)

@@ -273,13 +273,7 @@ class DemoPhotoLibrary extends PhotoLibrary {
   };
 
   @override
-  Future<bool> hasTrash() async => true;
-
-  @override
-  Future<List<String>> trash(
-    List<String> ids, {
-    bool permanentOk = false,
-  }) async => ids;
+  Future<List<String>> trash(List<String> ids) async => ids;
 
   /// 웹 미리보기에는 실제 파일이 없어 보낸 것으로 친다
   @override
