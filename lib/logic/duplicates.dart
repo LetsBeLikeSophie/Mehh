@@ -112,3 +112,12 @@ void _forEachCandidatePair(
     }
   }
 }
+
+/// 중복 묶음에서 남길 사진: 정리 줄·휴지통에 가지 않은 사진 중 가장 앞(가장 큰) 것.
+/// 사용자가 원본을 정리하면 다음 사진이 남길 사진이 된다. 전부 갔으면 null.
+String? keeperOf(DuplicateSet s, bool Function(String id) gone) {
+  for (final p in [s.keep, ...s.remove]) {
+    if (!gone(p.id)) return p.id;
+  }
+  return null;
+}

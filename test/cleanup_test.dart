@@ -135,6 +135,34 @@ void main() {
       expect(trashSummary(plan), '더 선명한 컷이 있는 흔들린 사진 1장, 비슷한 연속 컷 1장');
     });
 
+    test('베스트를 정리 줄에 넣으면 남은 사진 중 베스트를 다시 골라 하나는 남긴다', () {
+      final photos = [
+        meta('a', t0),
+        meta('b', t0.add(const Duration(seconds: 10))),
+        meta('c', t0.add(const Duration(seconds: 20))),
+      ];
+      final f = {
+        'a': feat('a', sharp: 300),
+        'b': feat('b', sharp: 900),
+        'c': feat('c', sharp: 500),
+      };
+      final plan = planGroup(photos, f, {
+        'b': Decision(photoId: 'b', state: DecisionState.toTrash, at: t0),
+      });
+      expect(plan.best, {'c'}); // b 다음으로 선명한 c
+      expect(plan.trash.keys, ['a']);
+    });
+
+    test('중복 원본을 정리하면 다음 사진이 남길 사진이 된다', () {
+      final s = DuplicateSet(meta('orig', t0), [
+        meta('copy1', t0.add(const Duration(days: 1))),
+        meta('copy2', t0.add(const Duration(days: 2))),
+      ]);
+      expect(keeperOf(s, (_) => false), 'orig');
+      expect(keeperOf(s, (id) => id == 'orig'), 'copy1');
+      expect(keeperOf(s, (_) => true), isNull);
+    });
+
     test('킵·보류한 사진은 추천에서 빠진다', () {
       final photos = [
         meta('a', t0),

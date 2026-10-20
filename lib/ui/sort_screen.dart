@@ -45,7 +45,11 @@ class _Source {
     this.notes = const {},
     this.summary,
     this.analyzing = false,
+    this.units = const [],
   });
+
+  /// 연속 컷·중복 묶음 (2장 이상). 정리 줄을 보낼 때 하나도 안 남는 묶음이 있으면 묻는다.
+  final List<List<String>> units;
 
   /// 보여줄 순서
   final List<PhotoMeta> photos;
@@ -92,18 +96,32 @@ class _SortScreenState extends ConsumerState<SortScreen> {
       case SortKind.duplicates:
         final sets = ref.watch(duplicatesProvider).value;
         if (sets == null) return const _Source(photos: [], analyzing: true);
+        final decisions = ref.watch(decisionsProvider).value ?? const {};
+        bool gone(String id) {
+          final s = stateOf(decisions, id);
+          return s == DecisionState.toTrash || s == DecisionState.trashed;
+        }
+
+        // 묶음마다 하나는 남긴다: 원본을 정리하면 다음 사진이 남길 사진이 된다
+        final keepers = {for (final s in sets) ?keeperOf(s, gone)};
         return _Source(
           photos: [
             for (final s in sets) ...[s.keep, ...s.remove],
           ],
-          suggested: {for (final s in sets) ...s.remove.map((p) => p.id)},
+          suggested: {
+            for (final s in sets)
+              for (final p in [s.keep, ...s.remove])
+                if (!keepers.contains(p.id)) p.id,
+          },
           notes: {
-            for (final s in sets) ...{
-              s.keep.id: '가장 큰 사진',
-              for (final p in s.remove) p.id: '똑같은 사진',
-            },
+            for (final s in sets)
+              for (final p in [s.keep, ...s.remove])
+                p.id: keepers.contains(p.id) ? '남길 사진' : '똑같은 사진',
           },
           summary: '똑같은 사진은 정리 줄에 넣어 뒀어요',
+          units: [
+            for (final s in sets) [s.keep.id, ...s.remove.map((p) => p.id)],
+          ],
         );
       case SortKind.screenshots:
         return _Source(photos: g!.photos.reversed.toList());
@@ -137,6 +155,10 @@ class _SortScreenState extends ConsumerState<SortScreen> {
           notes: notes,
           summary: summary.isEmpty ? null : '정리 줄에 미리 넣어 뒀어요 · $summary',
           analyzing: plan.analyzed < g.count,
+          units: [
+            for (final b in plan.bursts)
+              if (b.length > 1) [for (final p in b) p.id],
+          ],
         );
     }
   }
@@ -193,7 +215,54 @@ class _SortScreenState extends ConsumerState<SortScreen> {
     _goTo(u.id, motion: _Motion.prev);
   }
 
-  Future<void> _sendTrash(List<String> ids) async {
+  Future<void> _sendTrash(List<String> ids, _Source src) async {
+    // 연속 컷·중복 묶음이 통째로 사라지면 한 번 묻는다
+    final decisions = ref.read(decisionsProvider).value ?? const {};
+    final sending = ids.toSet();
+    final emptied = src.units.where(
+      (u) => u.every(
+        (id) =>
+            sending.contains(id) ||
+            stateOf(decisions, id) == DecisionState.trashed,
+      ),
+    );
+    if (emptied.isNotEmpty) {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (c) => AlertDialog(
+          backgroundColor: MehhColors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(MehhRadius.card),
+          ),
+          title: Text(
+            '${formatCount(emptied.length)}개 장면은 사진이 하나도 안 남아요',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          ),
+          content: const Text(
+            '비슷한 사진을 전부 정리 줄에 넣었어요. 그래도 휴지통으로 보낼까요?',
+            style: TextStyle(fontSize: 14, height: 1.5),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(c).pop(false),
+              style: TextButton.styleFrom(
+                foregroundColor: MehhColors.textMuted,
+              ),
+              child: const Text('다시 볼게요'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(c).pop(true),
+              style: TextButton.styleFrom(foregroundColor: MehhColors.black),
+              child: const Text(
+                '휴지통으로',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
+      );
+      if (ok != true || !mounted) return;
+    }
     setState(() => _busy = true);
     await sendToTrash(context, ref, ids);
     if (!mounted) return;
@@ -359,7 +428,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
               empty: order.isEmpty && !src.analyzing,
               pile: pile.length,
               busy: _busy,
-              onSend: () => _sendTrash(pile),
+              onSend: () => _sendTrash(pile, src),
               onLeave: () => _leave(keeps.length, holds.length, pile.length),
             ),
           )
@@ -571,7 +640,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                   trailing: pile.isEmpty
                       ? null
                       : TextButton(
-                          onPressed: _busy ? null : () => _sendTrash(pile),
+                          onPressed: _busy ? null : () => _sendTrash(pile, src),
                           style: TextButton.styleFrom(
                             foregroundColor: MehhColors.black,
                             minimumSize: const Size(44, 44),

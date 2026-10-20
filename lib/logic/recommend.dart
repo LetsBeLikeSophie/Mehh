@@ -36,6 +36,9 @@ class GroupPlan {
 
 /// SPEC 6-3, 6-4 (3단계 임시 기준: dHash + 선명도·밝기, ML 없음).
 /// [photos]는 시간순. keep/hold로 결정한 사진은 추천에서 빠진다.
+///
+/// 연속 컷마다 정리 줄(toTrash)·휴지통(trashed)에 가지 않은 사진이 최소 1장 남는다:
+/// 사용자가 베스트를 정리하면 남은 사진 중에서 베스트를 다시 고른다.
 GroupPlan planGroup(
   List<PhotoMeta> photos,
   Map<String, PhotoFeatures> features,
@@ -50,10 +53,16 @@ GroupPlan planGroup(
       (decisions[p.id]?.state ?? DecisionState.undecided) ==
       DecisionState.undecided;
 
+  bool gone(PhotoMeta p) {
+    final s = decisions[p.id]?.state;
+    return s == DecisionState.toTrash || s == DecisionState.trashed;
+  }
+
   for (final b in bursts) {
     String? bestId;
-    if (b.length > 1) {
-      bestId = b
+    final alive = b.where((p) => !gone(p)).toList();
+    if (b.length > 1 && alive.isNotEmpty) {
+      bestId = alive
           .reduce(
             (x, y) => score(features[x.id]) >= score(features[y.id]) ? x : y,
           )
