@@ -51,18 +51,17 @@ void main() {
 
   Finder card() => find.byType(AnimatedSwitcher);
 
-  testWidgets('그리드: X를 켜면 휴지통 버튼, 보내면 나머지를 한 번에 킵할지 묻는다', (tester) async {
+  testWidgets('그리드: X를 켜면 휴지통 버튼, 보내면 그 사진만 빠진다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
+    expect(find.text('정리할 사진이 없어요'), findsWidgets);
     await tester.tap(find.byType(XToggle).first);
     await tester.pumpAndSettle();
     expect(find.text('1장 휴지통으로'), findsOneWidget);
 
     await tester.tap(find.text('1장 휴지통으로'));
     await tester.pumpAndSettle();
-    expect(find.text('나머지 3장은 킵할까요?'), findsOneWidget);
-    await tester.tap(find.text('3장 킵'));
-    await tester.pumpAndSettle();
-    expect(find.text('다 골랐어요'), findsOneWidget);
+    expect(find.text('3장'), findsOneWidget); // 남은 사진 수
+    expect(find.text('정리할 사진이 없어요'), findsWidgets);
     await flush(tester);
   });
 
@@ -131,43 +130,45 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('그리드: [추천]을 누르면 직접 정한 것을 지우고 추천 상태로 돌아간다', (tester) async {
+  testWidgets('그리드: [되돌리기]는 처음 상태로, [전체 선택]은 모두 X·다시 누르면 해제', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
+    await tester.tap(find.text('전체 선택'));
+    await tester.pumpAndSettle();
+    expect(find.text('4장 휴지통으로'), findsOneWidget);
+    await tester.tap(find.text('선택 해제'));
+    await tester.pumpAndSettle();
+    expect(find.text('정리할 사진이 없어요'), findsWidgets);
+
     await tester.tap(find.byType(XToggle).first);
     await tester.pumpAndSettle();
-    expect(find.text('1장 휴지통으로'), findsOneWidget);
-
-    await tester.tap(find.text('추천'));
+    await tester.tap(find.widgetWithText(TextButton, '되돌리기'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('되돌리기'));
+    expect(find.text('처음 상태로 되돌릴까요?'), findsOneWidget);
+    await tester.tap(find.widgetWithText(TextButton, '되돌리기').last);
     await tester.pumpAndSettle();
     expect(find.text('1장 휴지통으로'), findsNothing);
     await flush(tester);
   });
 
-  testWidgets('그리드: [전체 정리]로 시작하면 모두 X, 하나만 끄면 3장', (tester) async {
-    await pump(tester, SortScreen(kind: SortKind.singles, group: group));
-    await tester.tap(find.text('전체 정리'));
-    await tester.pumpAndSettle();
-    expect(find.text('4장 휴지통으로'), findsOneWidget);
-    await tester.tap(find.byType(XToggle).first);
-    await tester.pumpAndSettle();
-    expect(find.text('3장 휴지통으로'), findsOneWidget);
-    await flush(tester);
-  });
-
-  testWidgets('크게 보기: 정하지 않고 옆으로 넘기면 보류가 된다', (tester) async {
+  testWidgets('크게 보기: 좌우는 이동만, 같은 방향으로 한 번 더 밀면 취소', (tester) async {
     await pump(
       tester,
       FocusScreen(kind: SortKind.singles, group: group, initialId: 'p3'),
     );
-    await tester.drag(card(), const Offset(-200, 0)); // 다음으로 = 보류
+    await tester.drag(card(), const Offset(-200, 0)); // 다음 (상태 안 바뀜)
     await tester.pumpAndSettle();
     expect(find.text('2 / 4'), findsOneWidget);
-    await tester.drag(card(), const Offset(200, 0)); // 이전으로 (보류 안 됨)
+    expect(find.textContaining('✓'), findsNothing);
+
+    await tester.drag(card(), const Offset(0, 200)); // 킵 → 다음 사진으로
     await tester.pumpAndSettle();
-    expect(find.text('1 / 4'), findsOneWidget);
-    expect(find.text('보류'), findsOneWidget); // 넘긴 사진에 보류 표시
+    await tester.drag(card(), const Offset(200, 0)); // 이전 = 킵한 사진
+    await tester.pumpAndSettle();
+    expect(find.text('✓ 킵'), findsOneWidget);
+    await tester.drag(card(), const Offset(0, 200)); // 한 번 더 아래 = 킵 취소
+    await tester.pumpAndSettle();
+    expect(find.text('2 / 4'), findsOneWidget); // 취소는 그 자리에
+    expect(find.text('✓ 킵'), findsNothing);
     await flush(tester);
   });
 }

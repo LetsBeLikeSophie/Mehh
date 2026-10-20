@@ -4,9 +4,6 @@ abstract final class Terms {
   /// 남기기로 결정 (이후 추천에서 빠짐)
   static const keep = '킵';
 
-  /// 30일 유예
-  static const hold = '보류';
-
   /// 지울 후보에 넣기 (아직 안 지움)
   static const pile = '정리';
   static const pileRow = '정리 줄';

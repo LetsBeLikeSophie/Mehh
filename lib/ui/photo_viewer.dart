@@ -6,7 +6,7 @@ import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 import '../providers.dart';
 import '../theme.dart';
 
-/// 사진 크게 보기. 열어본 기록을 남긴다 (보류함 유예기간용).
+/// 사진 크게 보기. 열어본 기록을 남긴다 (취향 학습용).
 void openPhoto(BuildContext context, String id, {List<Widget>? actions}) {
   Navigator.of(context).push(
     MaterialPageRoute(

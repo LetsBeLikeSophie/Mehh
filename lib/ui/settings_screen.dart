@@ -22,7 +22,7 @@ class SettingsScreen extends ConsumerWidget {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
         ),
         content: const Text(
-          '사진 분석 결과, 킵·보류·정리 줄 기록, 배운 취향, 비운 용량 기록을 지워요.\n'
+          '사진 분석 결과, 킵·정리 기록, 배운 취향, 비운 용량 기록을 지워요.\n'
           '사진은 지워지지 않아요.',
           style: TextStyle(fontSize: 14, height: 1.5),
         ),
@@ -80,7 +80,7 @@ class SettingsScreen extends ConsumerWidget {
                   const _Section(
                     title: '사진과 기록은 이 폰에만 있어요',
                     lines: [
-                      '사진 분석, 정리·보류 기록, 배운 취향은 이 폰 안에만 저장돼요. '
+                      '사진 분석, 정리·킵 기록, 배운 취향은 이 폰 안에만 저장돼요. '
                           '서버로 보내지 않고, 클라우드 백업에도 넣지 않아요.',
                       '장소 이름을 찾을 때는 사진의 위치 좌표만 휴대폰의 위치 서비스로 보내요.',
                       '정리한 사진은 휴대폰 휴지통으로 가서 30일 안에 갤러리 앱에서 되살릴 수 있어요.',

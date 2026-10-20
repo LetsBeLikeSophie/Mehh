@@ -9,7 +9,6 @@ class CleanupConfig {
     this.darkBrightness = 12,
     this.pocketBrightness = 40,
     this.pocketContrast = 12,
-    this.holdDays = 30,
     this.textScreenshot = 0.2,
   });
 
@@ -37,7 +36,4 @@ class CleanupConfig {
   /// (대비 < pocketContrast) 흐린 사진.
   final double pocketBrightness;
   final double pocketContrast;
-
-  /// 보류 유예기간
-  final int holdDays;
 }

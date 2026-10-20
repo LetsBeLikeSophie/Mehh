@@ -30,7 +30,6 @@ class HomeTab extends ConsumerWidget {
         ),
         data: (state) {
           if (state.groups.isEmpty) return const _Message('정리할 사진이 없어요');
-          final decisions = ref.watch(decisionsProvider).value ?? const {};
           final days = [
             for (final g in state.groups)
               if (g.kind == DayGroupKind.day) g,
@@ -39,7 +38,12 @@ class HomeTab extends ConsumerWidget {
             for (final g in state.groups)
               if (g.kind != DayGroupKind.day) g,
           ];
-          final left = days.where((g) => !groupDone(g, decisions)).length;
+          final left = days
+              .where(
+                (g) =>
+                    ref.watch(groupStatusProvider(g)) == GroupStatus.needsWork,
+              )
+              .length;
           return CustomScrollView(
             slivers: [
               SliverPadding(
@@ -220,23 +224,27 @@ class _GroupTile extends ConsumerWidget {
         : null;
     final entity = ref.read(photoLibraryProvider).entities[group.cover.id];
     final decisions = ref.watch(decisionsProvider).value ?? const {};
-    final done = groupDone(group, decisions);
+    final status = ref.watch(groupStatusProvider(group));
+    final done = status == GroupStatus.done;
     final plan = ref.watch(groupPlanProvider(group));
+    final pile =
+        plan.trash.length +
+        group.photos
+            .where((p) => stateOf(decisions, p.id) == DecisionState.toTrash)
+            .length;
 
     final meta = StringBuffer('${formatCount(group.count)}장');
-    if (group.kind == DayGroupKind.screenshots) {
-      meta.write(' · 다른 앱으로 보내고 정리');
-    } else if (group.kind == DayGroupKind.singles && !done) {
-      final left = group.photos
-          .where((p) => stateOf(decisions, p.id) == DecisionState.undecided)
-          .length;
-      meta.write(' 중 ${formatCount(left)}장 남음');
-    } else if (done) {
-      meta.write(' · 다 봤어요');
-    } else if (plan.analyzed < group.count) {
-      meta.write(' · 살펴보는 중');
-    } else if (plan.trash.isNotEmpty) {
-      meta.write(' · 정리 추천 ${formatCount(plan.trash.length)}장');
+    switch (status) {
+      case GroupStatus.needsWork:
+        meta.write(' · 정리 추천 ${formatCount(pile)}장');
+      case GroupStatus.analyzing:
+        meta.write(' · 살펴보는 중');
+      case GroupStatus.done:
+        meta.write(' · 다 봤어요');
+      case GroupStatus.nothing:
+        if (group.kind == DayGroupKind.screenshots) {
+          meta.write(' · 지울 캡처를 골라 보세요');
+        }
     }
 
     return InkWell(

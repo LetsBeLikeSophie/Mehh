@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:mehh/logic/duplicates.dart';
-import 'package:mehh/logic/hold.dart';
 import 'package:mehh/logic/image_analysis.dart';
 import 'package:mehh/logic/recommend.dart';
 import 'package:mehh/models/decision.dart';
@@ -163,7 +162,7 @@ void main() {
       expect(keeperOf(s, (_) => true), isNull);
     });
 
-    test('킵·보류한 사진은 추천에서 빠진다', () {
+    test('킵한 사진은 추천에서 빠진다', () {
       final photos = [
         meta('a', t0),
         meta('b', t0.add(const Duration(seconds: 10))),
@@ -209,23 +208,6 @@ void main() {
       );
       expect(planGroup([meta('n', t0)], {'n': night}, {}).trash, isEmpty);
     });
-  });
-
-  test('보류 유예기간: 열어보면 다시 30일', () {
-    final d = Decision(
-      photoId: 'a',
-      state: DecisionState.hold,
-      at: t0,
-      holdAt: t0,
-    );
-    final due = holdDueAt(d, null);
-    expect(holdDaysLeft(due, t0.add(const Duration(days: 24))), 6);
-    expect(holdDaysLeft(due, t0.add(const Duration(days: 30))), 0);
-    final viewed = holdDueAt(
-      d,
-      ViewRecord(count: 1, lastAt: t0.add(const Duration(days: 10))),
-    );
-    expect(holdDaysLeft(viewed, t0.add(const Duration(days: 30))), 10);
   });
 
   group('이미지 분석', () {

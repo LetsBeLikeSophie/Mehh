@@ -272,13 +272,7 @@ class DecisionsNotifier extends AsyncNotifier<Map<String, Decision>> {
     final cur = state.value ?? {};
     final before = {for (final id in ids) id: cur[id]};
     final list = [
-      for (final id in ids)
-        Decision(
-          photoId: id,
-          state: s,
-          at: now,
-          holdAt: s == DecisionState.hold ? now : null,
-        ),
+      for (final id in ids) Decision(photoId: id, state: s, at: now),
     ];
     await ref.read(storeProvider).saveDecisions(list);
     state = AsyncData({...cur, for (final d in list) d.photoId: d});
@@ -306,8 +300,11 @@ final decisionsProvider =
       DecisionsNotifier.new,
     );
 
-DecisionState stateOf(Map<String, Decision> decisions, String id) =>
-    decisions[id]?.state ?? DecisionState.undecided;
+/// 사진의 결정 상태. 예전에 저장된 보류는 표시 없음(undecided)으로 본다.
+DecisionState stateOf(Map<String, Decision> decisions, String id) {
+  final s = decisions[id]?.state;
+  return s == null || s == DecisionState.hold ? DecisionState.undecided : s;
+}
 
 // ───────────────────────── 열람 기록, 비운 용량
 
@@ -397,7 +394,7 @@ List<DuplicateSet> _findDups(
   (List<PhotoMeta>, Map<String, PhotoFeatures>, Map<String, int>) a,
 ) => findDuplicates(a.$1, a.$2, sizes: a.$3);
 
-/// 아직 고르지 않은 똑같은 사진 수 (홈 카드). 킵·보류·휴지통으로 간 것은 빠진다.
+/// 아직 고르지 않은 똑같은 사진 수 (홈 카드). 킵·휴지통으로 간 것은 빠진다.
 int duplicatesLeft(List<DuplicateSet>? sets, Map<String, Decision> decisions) =>
     sets == null
     ? 0
@@ -416,11 +413,36 @@ final groupPlanProvider = Provider.autoDispose.family<GroupPlan, DayGroup>((
   return planGroup(g.photos, features, decisions);
 });
 
-/// 묶음의 모든 사진을 결정했으면 "다 봤어요" (정리할 묶음 수에서 빠짐)
-bool groupDone(DayGroup g, Map<String, Decision> decisions) =>
-    g.photos.every((p) {
-      final s = stateOf(decisions, p.id);
-      return s == DecisionState.keep ||
-          s == DecisionState.hold ||
-          s == DecisionState.trashed;
-    });
+/// 묶음 상태 (홈 목록·"정리할 묶음 N개")
+enum GroupStatus {
+  /// 아직 사진을 살펴보는 중
+  analyzing,
+
+  /// 정리할 사진이 있다 (앱 추천이 남았거나, 사용자가 X를 쳐 두고 아직 안 보냄)
+  needsWork,
+
+  /// 추천을 다 처리했다 (휴지통으로 보냈거나 X를 꺼서 남김)
+  done,
+
+  /// 앱이 찾은 게 없고 손댄 것도 없다
+  nothing,
+}
+
+/// "다 봤어요" 기준 (2026-10-21): 모든 사진을 정할 필요 없이, 추천을 다 처리하면 끝.
+/// 표시 없는 사진은 앱이 다시 추천하지 않으니 그대로 둔다.
+final groupStatusProvider = Provider.autoDispose.family<GroupStatus, DayGroup>((
+  ref,
+  g,
+) {
+  final plan = ref.watch(groupPlanProvider(g));
+  final decisions = ref.watch(decisionsProvider).value ?? const {};
+  final pile = g.photos.any(
+    (p) => stateOf(decisions, p.id) == DecisionState.toTrash,
+  );
+  if (plan.trash.isNotEmpty || pile) return GroupStatus.needsWork;
+  if (plan.analyzed < g.count) return GroupStatus.analyzing;
+  final touched = g.photos.any(
+    (p) => stateOf(decisions, p.id) != DecisionState.undecided,
+  );
+  return touched ? GroupStatus.done : GroupStatus.nothing;
+});
