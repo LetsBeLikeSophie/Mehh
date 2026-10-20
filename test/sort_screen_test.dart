@@ -131,19 +131,43 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('그리드: [처음대로]를 누르면 직접 정한 것을 지우고 추천 상태로 돌아간다', (tester) async {
+  testWidgets('그리드: [추천]을 누르면 직접 정한 것을 지우고 추천 상태로 돌아간다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
-    expect(find.text('처음대로'), findsNothing);
     await tester.tap(find.byType(XToggle).first);
     await tester.pumpAndSettle();
     expect(find.text('1장 휴지통으로'), findsOneWidget);
 
-    await tester.tap(find.text('처음대로'));
+    await tester.tap(find.text('추천'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('되돌리기'));
     await tester.pumpAndSettle();
     expect(find.text('1장 휴지통으로'), findsNothing);
-    expect(find.text('처음대로'), findsNothing);
+    await flush(tester);
+  });
+
+  testWidgets('그리드: [전체 정리]로 시작하면 모두 X, 하나만 끄면 3장', (tester) async {
+    await pump(tester, SortScreen(kind: SortKind.singles, group: group));
+    await tester.tap(find.text('전체 정리'));
+    await tester.pumpAndSettle();
+    expect(find.text('4장 휴지통으로'), findsOneWidget);
+    await tester.tap(find.byType(XToggle).first);
+    await tester.pumpAndSettle();
+    expect(find.text('3장 휴지통으로'), findsOneWidget);
+    await flush(tester);
+  });
+
+  testWidgets('크게 보기: 정하지 않고 옆으로 넘기면 보류가 된다', (tester) async {
+    await pump(
+      tester,
+      FocusScreen(kind: SortKind.singles, group: group, initialId: 'p3'),
+    );
+    await tester.drag(card(), const Offset(-200, 0)); // 다음으로 = 보류
+    await tester.pumpAndSettle();
+    expect(find.text('2 / 4'), findsOneWidget);
+    await tester.drag(card(), const Offset(200, 0)); // 이전으로 (보류 안 됨)
+    await tester.pumpAndSettle();
+    expect(find.text('1 / 4'), findsOneWidget);
+    expect(find.text('보류'), findsOneWidget); // 넘긴 사진에 보류 표시
     await flush(tester);
   });
 }

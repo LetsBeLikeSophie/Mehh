@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import 'data/demo.dart';
+import 'data/handoff.dart';
 import 'data/photo_library.dart';
 import 'data/place_namer.dart';
 import 'data/sqlite_store.dart';
@@ -26,6 +27,13 @@ final placeNamerProvider = Provider<PlaceNamer>(
   (ref) => isDemo
       ? DemoPlaceNamer()
       : PlaceNamer(locale: PlatformDispatcher.instance.locale),
+);
+
+final handoffProvider = Provider((ref) => Handoff());
+
+/// Cortex가 설치돼 있으면 캡처를 Cortex로 보낼 수 있다
+final cortexInstalledProvider = FutureProvider<bool>(
+  (ref) => ref.read(handoffProvider).cortexInstalled(),
 );
 
 final storeProvider = Provider<Store>(
@@ -408,7 +416,7 @@ final groupPlanProvider = Provider.autoDispose.family<GroupPlan, DayGroup>((
   return planGroup(g.photos, features, decisions);
 });
 
-/// 묶음의 모든 사진을 결정했으면 정리 끝
+/// 묶음의 모든 사진을 결정했으면 "다 봤어요" (정리할 묶음 수에서 빠짐)
 bool groupDone(DayGroup g, Map<String, Decision> decisions) =>
     g.photos.every((p) {
       final s = stateOf(decisions, p.id);

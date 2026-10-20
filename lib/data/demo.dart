@@ -275,10 +275,6 @@ class DemoPhotoLibrary extends PhotoLibrary {
   @override
   Future<List<String>> trash(List<String> ids) async => ids;
 
-  /// 웹 미리보기에는 실제 파일이 없어 보낸 것으로 친다
-  @override
-  Future<bool> share(List<String> ids) async => ids.isNotEmpty;
-
   @override
   Future<void> clearCache() async {}
 }

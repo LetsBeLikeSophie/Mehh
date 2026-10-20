@@ -68,8 +68,8 @@ class HomeTab extends ConsumerWidget {
                     const SizedBox(height: 24),
                     Text(
                       left == 0
-                          ? '오늘은\n정리할 날이 없어요'
-                          : '정리할 날\n${formatCount(left)}개 남았어요',
+                          ? '지금은\n정리할 묶음이 없어요'
+                          : '정리할 묶음\n${formatCount(left)}개 남았어요',
                       style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w700,
@@ -232,7 +232,7 @@ class _GroupTile extends ConsumerWidget {
           .length;
       meta.write(' 중 ${formatCount(left)}장 남음');
     } else if (done) {
-      meta.write(' · 정리 끝');
+      meta.write(' · 다 봤어요');
     } else if (plan.analyzed < group.count) {
       meta.write(' · 살펴보는 중');
     } else if (plan.trash.isNotEmpty) {

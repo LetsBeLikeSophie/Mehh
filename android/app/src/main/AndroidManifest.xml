@@ -47,6 +47,8 @@
 
          In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
     <queries>
+        <!-- 캡처를 Cortex로 보내기: 설치돼 있는지 확인 (lib/data/handoff.dart) -->
+        <package android:name="com.anonymous.cortex" />
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>

@@ -13,8 +13,8 @@ import 'strings.dart';
 import 'widgets.dart';
 
 /// 크게 보기: 위로 밀면 정리, 아래로 밀면 킵, 좌우는 이전·다음 (끝에서 처음으로 이어짐).
+/// 정하지 않고 옆으로 넘긴 사진은 자동으로 보류 (애매하면 그냥 넘기면 된다. 30일 뒤 다시 물어봄).
 /// 아래 한 줄 사진 줄이 지금 위치와 각 사진의 상태(정리 = 흐리게 + X, 킵 = 체크)를 보여 준다.
-/// 보류는 위쪽 아이콘으로.
 class FocusScreen extends ConsumerStatefulWidget {
   const FocusScreen({
     super.key,
@@ -72,6 +72,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     if (!mounted) return;
     _go(ids, 1, switch (s) {
       DecisionState.keep => _Motion.down,
+      DecisionState.hold => _Motion.next,
       _ => _Motion.up,
     });
   }
@@ -118,7 +119,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     });
   }
 
-  void _onScaleEnd(List<String> ids) {
+  /// [autoHold]: 지금 사진을 아직 정하지 않았으면 다음으로 넘길 때 보류로
+  void _onScaleEnd(List<String> ids, bool autoHold) {
     final d = _drag;
     final wasZoom = _zooming;
     setState(() {
@@ -135,7 +137,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     } else if (d.dy > 90) {
       _decide(ids, DecisionState.keep);
     } else if (d.dx < -70) {
-      _go(ids, 1, _Motion.next);
+      autoHold ? _decide(ids, DecisionState.hold) : _go(ids, 1, _Motion.next);
     } else if (d.dx > 70) {
       _go(ids, -1, _Motion.prev);
     }
@@ -237,20 +239,24 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                       ),
                     ),
                   ),
-                  if (widget.kind == SortKind.screenshots)
-                    IconButton(
-                      tooltip: '다른 앱으로 보내기',
-                      onPressed: () =>
-                          ref.read(photoLibraryProvider).share([current]),
-                      icon: const Icon(Icons.ios_share, size: 20),
-                      color: MehhColors.text,
+                  if (widget.kind == SortKind.screenshots &&
+                      (ref.watch(cortexInstalledProvider).value ?? false))
+                    TextButton.icon(
+                      onPressed: () async {
+                        final ok = await ref
+                            .read(handoffProvider)
+                            .sendToCortex(current);
+                        if (!ok && context.mounted) {
+                          showNote(context, 'Cortex로 보내지 못했어요');
+                        }
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: MehhColors.text,
+                        minimumSize: const Size(44, 44),
+                      ),
+                      icon: const Icon(Icons.north_east, size: 16),
+                      label: const Text('Cortex로 보내기'),
                     ),
-                  IconButton(
-                    tooltip: Terms.hold,
-                    onPressed: () => _decide(ids, DecisionState.hold),
-                    icon: const Icon(Icons.schedule, size: 22),
-                    color: MehhColors.text,
-                  ),
                   IconButton(
                     tooltip: '되돌리기',
                     onPressed: _undo.isEmpty ? null : _undoLast,
@@ -289,7 +295,10 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                     child: GestureDetector(
                       onScaleStart: _onScaleStart,
                       onScaleUpdate: _onScaleUpdate,
-                      onScaleEnd: (_) => _onScaleEnd(ids),
+                      onScaleEnd: (_) => _onScaleEnd(
+                        ids,
+                        state == DecisionState.undecided && !marked,
+                      ),
                       onTap: () => openPhoto(context, current),
                       child: ClipRect(
                         child: AnimatedSwitcher(

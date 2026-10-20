@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../logic/image_analysis.dart';
 import '../models/features.dart';
@@ -162,19 +161,6 @@ class PhotoLibrary {
       }),
     );
     return out;
-  }
-
-  /// 사용자가 고른 사진을 공유시트로 다른 앱에 보낸다 (사용자가 직접 누를 때만).
-  /// 반환: 공유를 마쳤으면 true, 닫았으면 false
-  Future<bool> share(List<String> ids) async {
-    final files = <XFile>[];
-    for (final id in ids) {
-      final f = await entities[id]?.file;
-      if (f != null) files.add(XFile(f.path));
-    }
-    if (files.isEmpty) return false;
-    final r = await SharePlus.instance.share(ShareParams(files: files));
-    return r.status != ShareResultStatus.dismissed;
   }
 
   /// 휴대폰 휴지통으로 보낸다. 여러 장을 한 번의 확인 창으로.

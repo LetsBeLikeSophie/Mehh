@@ -1,0 +1,39 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+
+/// 캡처를 받아 정리해 주는 Sophie의 다른 앱. 스토어 출시 때 실제 패키지 이름으로 바꾼다.
+const cortexPackage = 'com.anonymous.cortex';
+
+/// Mehh → 다른 앱으로 사진 넘기기 (사용자가 버튼을 누를 때만).
+/// 일반 공유시트는 쓰지 않는다: 캡처는 Cortex로만 보낸다.
+class Handoff {
+  static const _channel = MethodChannel('mehh/handoff');
+
+  /// Cortex가 이 폰에 설치돼 있을 때만 버튼을 보여 준다.
+  /// (설치 안 된 경우 스토어로 안내하는 건 나라별 출시 확인 후 5단계에서)
+  Future<bool> cortexInstalled() async {
+    if (kIsWeb || !Platform.isAndroid) return false;
+    try {
+      return await _channel.invokeMethod<bool>('isInstalled', {
+            'package': cortexPackage,
+          }) ??
+          false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> sendToCortex(String photoId) async {
+    try {
+      return await _channel.invokeMethod<bool>('sendImage', {
+            'package': cortexPackage,
+            'id': photoId,
+          }) ??
+          false;
+    } catch (_) {
+      return false;
+    }
+  }
+}

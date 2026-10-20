@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../logic/format.dart';
 import '../models/day_group.dart';
 import '../models/decision.dart';
+import '../models/photo_meta.dart';
 import '../providers.dart';
 import '../theme.dart';
 import 'focus_screen.dart';
@@ -39,7 +40,27 @@ class _SortScreenState extends ConsumerState<SortScreen> {
       .read(decisionsProvider.notifier)
       .set([id], marked ? DecisionState.keep : DecisionState.toTrash);
 
-  /// [처음대로]: 이 화면에서 정한 정리·킵·보류를 지우고 앱 추천 상태로 되돌린다.
+  /// [전체 정리] / [전체 킵]: 모두 그 상태로 시작해서 예외만 X로 바꾼다
+  Future<void> _setAll(Iterable<String> ids, DecisionState s) =>
+      ref.read(decisionsProvider.notifier).set(ids.toList(), s);
+
+  _StartMode? _modeOf(
+    List<PhotoMeta> order,
+    Map<String, Decision> decisions,
+    List<String> changed,
+  ) {
+    if (changed.isEmpty) return _StartMode.recommend;
+    final states = {for (final p in order) stateOf(decisions, p.id)};
+    if (states.length == 1 && states.first == DecisionState.toTrash) {
+      return _StartMode.allPile;
+    }
+    if (states.length == 1 && states.first == DecisionState.keep) {
+      return _StartMode.allKeep;
+    }
+    return null;
+  }
+
+  /// [추천]: 이 화면에서 정한 정리·킵·보류를 지우고 앱 추천 상태로 되돌린다.
   /// 이미 휴지통으로 보낸 사진은 앱에서 되돌릴 수 없어서 그대로 둔다.
   Future<void> _reset(List<String> changed) async {
     final ok = await _ask(
@@ -110,7 +131,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
     final ok = await _ask(
       title: '나머지 ${formatCount(rest.length)}장은 ${Terms.keep}할까요?',
       body: widget.kind == SortKind.day
-          ? '${Terms.keep}하면 이 날은 정리 끝이에요.'
+          ? '${Terms.keep}하면 이 묶음은 다 본 걸로 할게요.'
           : '${Terms.keep}하면 여기 정리가 끝나요.',
       no: '더 볼게요',
       yes: '${formatCount(rest.length)}장 ${Terms.keep}',
@@ -199,16 +220,6 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                                 color: MehhColors.text,
                               ),
                             ),
-                            const Spacer(),
-                            if (changed.isNotEmpty)
-                              TextButton(
-                                onPressed: () => _reset(changed),
-                                style: TextButton.styleFrom(
-                                  foregroundColor: MehhColors.text,
-                                  minimumSize: const Size(44, 44),
-                                ),
-                                child: const Text('처음대로'),
-                              ),
                           ],
                         ),
                         Padding(
@@ -234,7 +245,22 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                                   color: MehhColors.textMuted,
                                 ),
                               ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 14),
+                              _StartChips(
+                                mode: _modeOf(order, decisions, changed),
+                                onRecommend: changed.isEmpty
+                                    ? null
+                                    : () => _reset(changed),
+                                onAllPile: () => _setAll(
+                                  order.map((p) => p.id),
+                                  DecisionState.toTrash,
+                                ),
+                                onAllKeep: () => _setAll(
+                                  order.map((p) => p.id),
+                                  DecisionState.keep,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
                               _Summary(
                                 analyzing: src.analyzing,
                                 marked: marked.length,
@@ -343,6 +369,62 @@ class _SortScreenState extends ConsumerState<SortScreen> {
       ),
     );
   }
+}
+
+enum _StartMode { recommend, allPile, allKeep }
+
+/// 시작 상태 칩: [추천] [전체 정리] [전체 킵]. 지금 상태와 같은 칩이 검게 보인다.
+class _StartChips extends StatelessWidget {
+  const _StartChips({
+    required this.mode,
+    required this.onRecommend,
+    required this.onAllPile,
+    required this.onAllKeep,
+  });
+
+  final _StartMode? mode;
+
+  /// 이미 추천 상태면 null
+  final VoidCallback? onRecommend;
+  final VoidCallback onAllPile;
+  final VoidCallback onAllKeep;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 6,
+      children: [
+        _chip('추천', mode == _StartMode.recommend, onRecommend),
+        _chip('전체 ${Terms.pile}', mode == _StartMode.allPile, onAllPile),
+        _chip('전체 ${Terms.keep}', mode == _StartMode.allKeep, onAllKeep),
+      ],
+    );
+  }
+
+  Widget _chip(String text, bool on, VoidCallback? onTap) => Semantics(
+    button: true,
+    selected: on,
+    child: GestureDetector(
+      onTap: on ? null : onTap,
+      child: Container(
+        height: 32,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: on ? MehhColors.black : MehhColors.surface,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: on ? FontWeight.w600 : FontWeight.w400,
+            color: on ? MehhColors.white : MehhColors.text,
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 /// 회색 요약 박스: "[138장] 정리할게요" + 이유 한 줄
