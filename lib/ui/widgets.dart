@@ -2,6 +2,7 @@
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
+import '../l10n/l10n.dart';
 import '../theme.dart';
 
 /// 사진 썸네일. 로딩 중에는 회색 칸.
@@ -121,7 +122,7 @@ class XToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: on ? '정리 취소' : '정리하기',
+      label: on ? context.l.pileCancel : context.l.markForRemoval,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,

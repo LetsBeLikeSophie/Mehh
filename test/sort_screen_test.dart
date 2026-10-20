@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mehh/data/demo.dart';
 import 'package:mehh/data/photo_library.dart';
 import 'package:mehh/data/store.dart';
+import 'package:mehh/l10n/l10n.dart';
 import 'package:mehh/models/day_group.dart';
 import 'package:mehh/models/photo_meta.dart';
 import 'package:mehh/providers.dart';
@@ -39,7 +40,12 @@ void main() {
           ),
           storeProvider.overrideWithValue(MemoryStore()),
         ],
-        child: MaterialApp(home: home),
+        child: MaterialApp(
+          locale: const Locale('ko'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
+          home: home,
+        ),
       ),
     );
     await tester.pumpAndSettle();

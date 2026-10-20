@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../l10n/l10n.dart';
 import '../providers.dart';
 import '../theme.dart';
 import 'widgets.dart';
@@ -17,26 +18,25 @@ class SettingsScreen extends ConsumerWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(MehhRadius.card),
         ),
-        title: const Text(
-          '모든 기록을 지울까요?',
+        title: Text(
+          context.l.clearTitle,
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
         ),
-        content: const Text(
-          '사진 분석 결과, 킵·정리 기록, 배운 취향, 비운 용량 기록을 지워요.\n'
-          '사진은 지워지지 않아요.',
+        content: Text(
+          context.l.clearBody,
           style: TextStyle(fontSize: 14, height: 1.5),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(c).pop(false),
             style: TextButton.styleFrom(foregroundColor: MehhColors.textMuted),
-            child: const Text('취소'),
+            child: Text(context.l.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(c).pop(true),
             style: TextButton.styleFrom(foregroundColor: MehhColors.black),
-            child: const Text(
-              '지우기',
+            child: Text(
+              context.l.clearConfirm,
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
           ),
@@ -45,7 +45,7 @@ class SettingsScreen extends ConsumerWidget {
     );
     if (ok != true) return;
     await clearAllRecords(ref);
-    if (context.mounted) showNote(context, '기록을 모두 지웠어요');
+    if (context.mounted) showNote(context, context.l.cleared);
   }
 
   @override
@@ -58,7 +58,7 @@ class SettingsScreen extends ConsumerWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: IconButton(
-                tooltip: '홈으로',
+                tooltip: context.l.home,
                 onPressed: () => Navigator.of(context).pop(),
                 icon: const Icon(Icons.chevron_left, color: MehhColors.text),
               ),
@@ -68,8 +68,8 @@ class SettingsScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '설정',
+                  Text(
+                    context.l.settings,
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
@@ -77,13 +77,12 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const _Section(
-                    title: '사진과 기록은 이 폰에만 있어요',
+                  _Section(
+                    title: context.l.privacyTitle,
                     lines: [
-                      '사진 분석, 정리·킵 기록, 배운 취향은 이 폰 안에만 저장돼요. '
-                          '서버로 보내지 않고, 클라우드 백업에도 넣지 않아요.',
-                      '장소 이름을 찾을 때는 사진의 위치 좌표만 휴대폰의 위치 서비스로 보내요.',
-                      '정리한 사진은 휴대폰 휴지통으로 가서 30일 안에 갤러리 앱에서 되살릴 수 있어요.',
+                      context.l.privacyLocal,
+                      context.l.privacyGeocode,
+                      context.l.privacyTrash,
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -91,7 +90,7 @@ class SettingsScreen extends ConsumerWidget {
                     width: double.infinity,
                     child: OutlinedButton(
                       onPressed: () => _confirmClear(context, ref),
-                      child: const Text('모든 기록 지우기'),
+                      child: Text(context.l.clearAll),
                     ),
                   ),
                   const SizedBox(height: 24),

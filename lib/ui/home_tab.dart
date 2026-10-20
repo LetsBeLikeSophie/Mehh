@@ -3,6 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../l10n/l10n.dart';
 import '../logic/format.dart';
 import '../models/day_group.dart';
 import '../models/decision.dart';
@@ -97,19 +98,20 @@ class _HomeTabState extends ConsumerState<HomeTab> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l;
     final library = ref.watch(libraryProvider);
     final limited = ref.watch(permissionProvider) == PermissionState.limited;
 
     return SafeArea(
       bottom: false,
       child: library.when(
-        loading: () => const _Message('사진을 묶는 중이에요'),
+        loading: () => _Message(l.loadingGroups),
         error: (e, _) => _Message(
-          '사진을 불러오지 못했어요',
-          action: ('다시 시도', () => ref.read(libraryProvider.notifier).reload()),
+          l.loadFailed,
+          action: (l.retry, () => ref.read(libraryProvider.notifier).reload()),
         ),
         data: (state) {
-          if (state.groups.isEmpty) return const _Message('정리할 사진이 없어요');
+          if (state.groups.isEmpty) return _Message(l.noPhotos);
           final days = [
             for (final g in state.groups)
               if (g.kind == DayGroupKind.day) g,
@@ -162,7 +164,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                       children: [
                         const MehhLogo(),
                         IconButton(
-                          tooltip: '설정',
+                          tooltip: l.settings,
                           onPressed: () => Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (_) => const SettingsScreen(),
@@ -178,9 +180,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      left == 0
-                          ? '지금은\n정리할 묶음이 없어요'
-                          : '정리할 묶음\n${formatCount(left)}개 남았어요',
+                      left == 0 ? l.noGroupsLeft : l.groupsLeft(left),
                       style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w700,
@@ -202,7 +202,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                     const _DuplicateCard(),
                     if (others.isNotEmpty) ...[
                       const SizedBox(height: 24),
-                      const _SectionLabel('따로 보기'),
+                      _SectionLabel(l.sectionOthers),
                       for (final g in others)
                         SizedBox(
                           height: _tileExtent,
@@ -304,7 +304,7 @@ class _YearRail extends StatelessWidget {
         onTapDown: (d) => _pick(d.localPosition.dy, box.maxHeight),
         onVerticalDragUpdate: (d) => _pick(d.localPosition.dy, box.maxHeight),
         child: Semantics(
-          label: '연도 이동',
+          label: context.l.jumpToYear,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -337,13 +337,14 @@ class _Subtitle extends ConsumerWidget {
     final analysis = ref.watch(analysisProvider);
     final loc = ref.watch(libraryProvider.select((s) => s.value?.locating));
 
+    final l = context.l;
     final parts = <String>[
-      if (freed > 0) '이번 달 ${formatBytes(freed)} 비웠어요',
-      if (freed == 0) '사진 ${formatCount(analysis.total)}장',
+      if (freed > 0) l.freedThisMonth(formatBytes(freed)),
+      if (freed == 0) l.photoTotal(analysis.total),
       if (!analysis.done && analysis.total > 0)
-        '사진 살펴보는 중 ${analysis.analyzed * 100 ~/ analysis.total}%'
+        l.analyzingPercent(analysis.analyzed * 100 ~/ analysis.total)
       else if (loc != null && loc.$1 < loc.$2)
-        '장소 확인 중 ${loc.$1 * 100 ~/ loc.$2}%',
+        l.locatingPercent(loc.$1 * 100 ~/ loc.$2),
     ];
     return Text(
       parts.join(' · '),
@@ -376,13 +377,13 @@ class _DuplicateCard extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '똑같은 사진 · 무료',
+                  Text(
+                    context.l.duplicatesFree,
                     style: TextStyle(fontSize: 12, color: Color(0xFFB4B4B0)),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '중복 ${formatCount(n)}장 찾았어요',
+                    context.l.duplicatesFound(n),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -401,8 +402,8 @@ class _DuplicateCard extends ConsumerWidget {
               ),
               onPressed: () =>
                   Navigator.of(context).push(sortRoute(SortKind.duplicates)),
-              child: const Text(
-                '살펴보기',
+              child: Text(
+                context.l.review,
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
             ),
@@ -436,17 +437,18 @@ class _GroupTile extends ConsumerWidget {
             .where((p) => stateOf(decisions, p.id) == DecisionState.toTrash)
             .length;
 
-    final meta = StringBuffer('${formatCount(group.count)}장');
+    final l = context.l;
+    final meta = StringBuffer(l.photos(group.count));
     switch (status) {
       case GroupStatus.needsWork:
-        meta.write(' · 정리 추천 ${formatCount(pile)}장');
+        meta.write(' · ${l.suggestedCount(pile)}');
       case GroupStatus.analyzing:
-        meta.write(' · 살펴보는 중');
+        meta.write(' · ${l.analyzingShort}');
       case GroupStatus.done:
-        meta.write(' · 다 봤어요');
+        meta.write(' · ${l.allSeen}');
       case GroupStatus.nothing:
         if (group.kind == DayGroupKind.screenshots) {
-          meta.write(' · 지울 캡처를 골라 보세요');
+          meta.write(' · ${l.pickScreenshots}');
         }
     }
 
@@ -482,7 +484,7 @@ class _GroupTile extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      groupTitle(group, place: place),
+                      groupTitle(group, l, place: place),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -525,9 +527,9 @@ class _LimitedBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Expanded(
+          Expanded(
             child: Text(
-              '일부 사진만 허용했어요.\n전체를 허용하면 더 많이 찾을 수 있어요.',
+              context.l.limitedAccess,
               style: TextStyle(
                 fontSize: 13,
                 color: MehhColors.text,
@@ -541,7 +543,7 @@ class _LimitedBanner extends StatelessWidget {
               foregroundColor: MehhColors.text,
               minimumSize: const Size(44, 44),
             ),
-            child: const Text('사진 고르기'),
+            child: Text(context.l.choosePhotos),
           ),
         ],
       ),

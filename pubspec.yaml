@@ -10,9 +10,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   flutter_riverpod: ^3.4.3
   geocoding: ^5.0.0
   image: ^4.12.0
+  intl: ^0.20.3
   path_provider: ^2.1.6
   photo_manager: ^3.12.0
   photo_manager_image_provider: ^2.2.0
@@ -25,6 +28,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  # 다국어: lib/l10n/app_ko.arb·app_en.arb → L10n (l10n.yaml)
+  generate: true
 
   assets:
     - assets/mehh-goat.png

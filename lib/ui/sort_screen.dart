@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../l10n/l10n.dart';
 import '../logic/format.dart';
 import '../models/day_group.dart';
 import '../models/decision.dart';
@@ -8,7 +9,6 @@ import '../providers.dart';
 import '../theme.dart';
 import 'focus_screen.dart';
 import 'sort_source.dart';
-import 'strings.dart';
 import 'trash_flow.dart';
 import 'widgets.dart';
 
@@ -46,7 +46,8 @@ class _SortScreenState extends ConsumerState<SortScreen> {
 
   /// [되돌리기]: 여기서 정한 것을 지우고 앱이 처음 고른 상태로
   Future<void> _reset(List<String> changed) async {
-    final ok = await _ask(title: '처음 상태로 되돌릴까요?', no: '취소', yes: '되돌리기');
+    final l = context.l;
+    final ok = await _ask(title: l.resetTitle, no: l.cancel, yes: l.reset);
     if (ok != true) return;
     await ref.read(decisionsProvider.notifier).restore({
       for (final id in changed) id: null,
@@ -83,11 +84,12 @@ class _SortScreenState extends ConsumerState<SortScreen> {
       ),
     );
     if (emptied.isEmpty) return true;
+    final l = context.l;
     final ok = await _ask(
-      title: '${formatCount(emptied.length)}개 장면은 사진이 하나도 안 남아요',
-      body: '비슷한 사진에 전부 X를 쳤어요. 그래도 ${Terms.toTrash} 보낼까요?',
-      no: '다시 볼게요',
-      yes: Terms.toTrash,
+      title: l.sceneLossTitle(emptied.length),
+      body: l.sceneLossBody,
+      no: l.lookAgain,
+      yes: l.toTrash,
     );
     return ok == true;
   }
@@ -128,6 +130,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l;
     final src = watchSortSource(ref, widget.kind, widget.group);
     final decisions = ref.watch(decisionsProvider).value ?? const {};
     final entities = ref.read(photoLibraryProvider).entities;
@@ -161,7 +164,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                         Row(
                           children: [
                             IconButton(
-                              tooltip: '돌아가기',
+                              tooltip: l.back,
                               onPressed: () => Navigator.of(context).maybePop(),
                               icon: const Icon(
                                 Icons.chevron_left,
@@ -178,7 +181,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                                 disabledForegroundColor: MehhColors.icon,
                                 minimumSize: const Size(44, 44),
                               ),
-                              child: const Text('되돌리기'),
+                              child: Text(l.reset),
                             ),
                           ],
                         ),
@@ -188,7 +191,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                sortTitle(widget.kind, g, widget.place),
+                                sortTitle(widget.kind, g, widget.place, l),
                                 style: const TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.w700,
@@ -198,8 +201,11 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                               const SizedBox(height: 2),
                               Text(
                                 widget.kind == SortKind.day && g != null
-                                    ? '${formatCount(order.length)}장 · ${groupTimeRange(g)}'
-                                    : '${formatCount(order.length)}장',
+                                    ? l.countAndRange(
+                                        l.photos(order.length),
+                                        groupTimeRange(g, l),
+                                      )
+                                    : l.photos(order.length),
                                 style: const TextStyle(
                                   fontSize: 14,
                                   color: MehhColors.textMuted,
@@ -209,7 +215,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                               _Summary(
                                 analyzing: src.analyzing,
                                 marked: marked.length,
-                                reason: src.summary,
+                                reason: summaryText(widget.kind, src, l),
                                 empty: order.isEmpty,
                               ),
                               Align(
@@ -227,7 +233,9 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                                     foregroundColor: MehhColors.text,
                                     minimumSize: const Size(44, 44),
                                   ),
-                                  child: Text(allSelected ? '선택 해제' : '전체 선택'),
+                                  child: Text(
+                                    allSelected ? l.deselectAll : l.selectAll,
+                                  ),
                                 ),
                               ),
                             ],
@@ -254,7 +262,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                           onTap: () => _open(id),
                           child: Semantics(
                             button: true,
-                            label: out ? '정리할 사진' : '사진',
+                            label: out ? l.markedPhoto : l.photo,
                             child: Stack(
                               fit: StackFit.expand,
                               children: [
@@ -274,7 +282,10 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                                   Positioned(
                                     left: 4,
                                     bottom: 4,
-                                    child: MehhBadge(tag, inverted: out),
+                                    child: MehhBadge(
+                                      tagText(tag, l),
+                                      inverted: out,
+                                    ),
                                   ),
                               ],
                             ),
@@ -295,9 +306,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                       ? null
                       : () => _send(marked, src),
                   child: Text(
-                    marked.isEmpty
-                        ? '정리할 사진이 없어요'
-                        : '${formatCount(marked.length)}장 ${Terms.toTrash}',
+                    marked.isEmpty ? l.noPhotos : l.trashCount(marked.length),
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
@@ -329,16 +338,17 @@ class _Summary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l;
     final Widget title;
     final String detail;
     if (analyzing) {
-      title = const Text('사진을 살펴보는 중이에요');
-      detail = '추천이 조금씩 채워져요.';
+      title = Text(l.analyzingTitle);
+      detail = l.analyzingDetail;
     } else if (empty) {
-      title = const Text('정리할 사진이 없어요');
+      title = Text(l.noPhotos);
       detail = '';
     } else if (marked == 0) {
-      title = const Text('정리할 사진을 못 찾았어요');
+      title = Text(l.noneFound);
       detail = '';
     } else {
       title = Text.rich(
@@ -353,7 +363,7 @@ class _Summary extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  '${formatCount(marked)}장',
+                  l.photos(marked),
                   style: const TextStyle(
                     color: MehhColors.white,
                     fontSize: 15,
@@ -362,7 +372,7 @@ class _Summary extends StatelessWidget {
                 ),
               ),
             ),
-            const TextSpan(text: ' 정리할게요'),
+            TextSpan(text: l.willRemoveSuffix),
           ],
         ),
       );

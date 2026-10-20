@@ -140,26 +140,16 @@ double score(PhotoFeatures? f) {
   return sharp - 2 * exposure;
 }
 
-/// 베스트 추천 이유 한 줄 ("초점 선명 · 밝기 적당")
-String bestReason(PhotoFeatures? f, List<PhotoFeatures?> others) {
-  if (f == null) return '';
-  final parts = <String>[];
+/// 베스트로 고른 이유 (화면 문구는 UI에서 언어별로)
+enum BestReason { sharp, exposure }
+
+List<BestReason> bestReasons(PhotoFeatures? f, List<PhotoFeatures?> others) {
+  if (f == null) return const [];
   final sharper = others.whereType<PhotoFeatures>().every(
     (o) => o.id == f.id || f.sharpness >= o.sharpness,
   );
-  if (sharper) parts.add('초점 선명');
-  if (f.brightness >= 50 && f.brightness <= 215) parts.add('밝기 적당');
-  return parts.join(' · ');
-}
-
-/// "흔들린 사진 21장, 비슷한 연속 컷 117장"
-String trashSummary(GroupPlan plan) {
-  final parts = <String>[];
-  final blurry = plan.count(TrashReason.blurry);
-  final junk = plan.count(TrashReason.junk);
-  final burst = plan.count(TrashReason.burst);
-  if (junk > 0) parts.add('실수로 찍힌 사진 $junk장');
-  if (blurry > 0) parts.add('더 선명한 컷이 있는 흔들린 사진 $blurry장');
-  if (burst > 0) parts.add('비슷한 연속 컷 $burst장');
-  return parts.join(', ');
+  return [
+    if (sharper) BestReason.sharp,
+    if (f.brightness >= 50 && f.brightness <= 215) BestReason.exposure,
+  ];
 }

@@ -131,7 +131,8 @@ void main() {
       expect(plan.bursts.map((b) => b.length), [3, 1]);
       expect(plan.best, {'b'});
       expect(plan.trash, {'a': TrashReason.burst, 'c': TrashReason.blurry});
-      expect(trashSummary(plan), '더 선명한 컷이 있는 흔들린 사진 1장, 비슷한 연속 컷 1장');
+      expect(plan.count(TrashReason.blurry), 1);
+      expect(plan.count(TrashReason.burst), 1);
     });
 
     test('베스트를 정리 줄에 넣으면 남은 사진 중 베스트를 다시 골라 하나는 남긴다', () {

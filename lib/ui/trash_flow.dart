@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../l10n/l10n.dart';
 import '../providers.dart';
 import 'widgets.dart';
 
@@ -19,15 +20,12 @@ Future<int> sendToTrash(
     n = await ref.read(cleanerProvider).trash(list);
   } catch (_) {
     if (context.mounted) {
-      showNote(context, '휴지통으로 보내지 못했어요. 사진은 그대로예요.');
+      showNote(context, context.l.trashFailed);
     }
     return 0;
   }
   if (n > 0 && context.mounted) {
-    showNote(
-      context,
-      '${formatCount(n)}장을 휴지통으로 보냈어요 · 갤러리 휴지통에서 30일 동안 되살릴 수 있어요',
-    );
+    showNote(context, context.l.trashed(n));
   }
   return n;
 }

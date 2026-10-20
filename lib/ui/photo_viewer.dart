@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
+import '../l10n/l10n.dart';
 import '../providers.dart';
 import '../theme.dart';
 
@@ -44,7 +45,7 @@ class _PhotoViewerState extends ConsumerState<PhotoViewer> {
             Align(
               alignment: Alignment.centerLeft,
               child: IconButton(
-                tooltip: '닫기',
+                tooltip: context.l.close,
                 onPressed: () => Navigator.of(context).pop(),
                 icon: const Icon(Icons.close, color: MehhColors.text),
               ),

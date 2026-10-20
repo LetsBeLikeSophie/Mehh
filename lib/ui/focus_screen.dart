@@ -3,13 +3,13 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../l10n/l10n.dart';
 import '../models/day_group.dart';
 import '../models/decision.dart';
 import '../providers.dart';
 import '../theme.dart';
 import 'photo_viewer.dart';
 import 'sort_source.dart';
-import 'strings.dart';
 import 'widgets.dart';
 
 /// 크게 보기: 위로 밀면 정리, 아래로 밀면 킵. 이미 그 상태면 같은 방향으로 한 번 더 = 취소.
@@ -170,9 +170,9 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     }
   }
 
-  String? _dragLabel({required bool marked, required bool kept}) {
-    if (_drag.dy < -40) return marked ? '${Terms.pile} 취소' : Terms.pile;
-    if (_drag.dy > 40) return kept ? '${Terms.keep} 취소' : Terms.keep;
+  String? _dragLabel(L10n l, {required bool marked, required bool kept}) {
+    if (_drag.dy < -40) return marked ? l.pileCancel : l.pile;
+    if (_drag.dy > 40) return kept ? l.keepCancel : l.keep;
     return null;
   }
 
@@ -185,6 +185,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l;
     final src = watchSortSource(ref, widget.kind, widget.group);
     final decisions = ref.watch(decisionsProvider).value ?? const {};
     final entities = ref.read(photoLibraryProvider).entities;
@@ -200,7 +201,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     final (inFrom, outTo) = _slide;
     final kept = state == DecisionState.keep;
     final suggested = src.suggested.contains(current);
-    final label = _dragLabel(marked: marked, kept: kept);
+    final label = _dragLabel(l, marked: marked, kept: kept);
 
     final card = KeyedSubtree(
       key: ValueKey(current),
@@ -225,10 +226,13 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                   runSpacing: 6,
                   children: [
                     if (marked)
-                      const _Chip('✕ ${Terms.pile}', dark: true)
+                      _Chip('✕ ${l.pile}', dark: true)
                     else if (kept)
-                      const _Chip('✓ ${Terms.keep}', dark: true),
-                    if (src.notes[current] case final n?) _Chip(n),
+                      _Chip('✓ ${l.keep}', dark: true),
+                    if (src.tags[current] case final t?)
+                      _Chip(
+                        noteText(t, src.bestReasons[current] ?? const [], l),
+                      ),
                   ],
                 ),
               ),
@@ -249,7 +253,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
               Row(
                 children: [
                   IconButton(
-                    tooltip: '돌아가기',
+                    tooltip: l.back,
                     onPressed: () => Navigator.of(context).maybePop(),
                     icon: const Icon(
                       Icons.chevron_left,
@@ -267,7 +271,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                             .sendToCortex(current);
                         if (!context.mounted) return;
                         if (!ok) {
-                          showNote(context, 'Cortex로 보내지 못했어요');
+                          showNote(context, l.cortexFailed);
                           return;
                         }
                         // 보낸 캡처는 정리(X)에 넣는다. 지우는 건 [휴지통으로]를 눌러야 하고,
@@ -276,7 +280,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                           await _decide(ids, DecisionState.toTrash);
                         }
                         if (context.mounted) {
-                          showNote(context, 'Cortex로 보냈어요 · 정리에 넣어 뒀어요');
+                          showNote(context, l.cortexSent);
                         }
                       },
                       style: TextButton.styleFrom(
@@ -284,10 +288,10 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                         minimumSize: const Size(44, 44),
                       ),
                       icon: const Icon(Icons.north_east, size: 16),
-                      label: const Text('Cortex로 보내기'),
+                      label: Text(l.sendToCortex),
                     ),
                   IconButton(
-                    tooltip: '되돌리기',
+                    tooltip: l.undo,
                     onPressed: _undo.isEmpty ? null : _undoLast,
                     icon: const Icon(Icons.undo, size: 20),
                     color: MehhColors.text,
@@ -310,15 +314,15 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Semantics(
-                    label: '사진. 위로 밀면 정리, 아래로 밀면 킵',
+                    label: l.photoSemantics,
                     customSemanticsActions: {
-                      const CustomSemanticsAction(label: Terms.pile): () =>
+                      CustomSemanticsAction(label: l.pile): () =>
                           _up(ids, marked: marked, suggested: suggested),
-                      const CustomSemanticsAction(label: Terms.keep): () =>
+                      CustomSemanticsAction(label: l.keep): () =>
                           _down(ids, kept: kept),
-                      const CustomSemanticsAction(label: '다음 사진'): () =>
+                      CustomSemanticsAction(label: l.nextPhoto): () =>
                           _go(ids, 1, _Motion.next),
-                      const CustomSemanticsAction(label: '이전 사진'): () =>
+                      CustomSemanticsAction(label: l.prevPhoto): () =>
                           _go(ids, -1, _Motion.prev),
                     },
                     child: GestureDetector(
@@ -592,7 +596,7 @@ class _TrashBar extends StatelessWidget {
     final fg = Color.lerp(MehhColors.text, MehhColors.white, fill)!;
     return Semantics(
       button: true,
-      label: '${Terms.pile}. 사진을 위로 올려도 돼요',
+      label: context.l.trashBarSemantics,
       child: GestureDetector(
         onTap: onTap,
         child: AnimatedContainer(
@@ -608,7 +612,7 @@ class _TrashBar extends StatelessWidget {
               Icon(Icons.delete_outline, size: 22, color: fg),
               const SizedBox(width: 6),
               Text(
-                marked ? '${Terms.pile} 취소' : Terms.pile,
+                marked ? context.l.pileCancel : context.l.pile,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,

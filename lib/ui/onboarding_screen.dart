@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../l10n/l10n.dart';
 import '../providers.dart';
 import '../theme.dart';
 
@@ -41,8 +42,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 semanticLabel: 'Mehh',
               ),
               const SizedBox(height: 28),
-              const Text(
-                '사진 정리,\n제가 먼저 해둘게요',
+              Text(
+                context.l.onboardingTitle,
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w700,
@@ -51,9 +52,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                '찍은 날짜와 장소로 사진을 묶고, 똑같은 사진을 찾으려면 '
-                '사진 전체에 접근해야 해요.',
+              Text(
+                context.l.onboardingBody,
                 style: TextStyle(
                   fontSize: 15,
                   color: MehhColors.textMuted,
@@ -67,13 +67,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   color: MehhColors.surface,
                   borderRadius: BorderRadius.circular(MehhRadius.card),
                 ),
-                child: const Column(
+                child: Column(
                   children: [
-                    _Promise(Icons.lock_outline, '사진과 기록은 폰 밖으로 나가지 않아요.'),
-                    SizedBox(height: 12),
-                    _Promise(Icons.tune, '고를수록 취향을 배워요. 처음엔 추천이 틀릴 수 있어요.'),
-                    SizedBox(height: 12),
-                    _Promise(Icons.undo, '정리한 사진은 30일 안에 되살릴 수 있어요.'),
+                    _Promise(Icons.lock_outline, context.l.promiseLocal),
+                    const SizedBox(height: 12),
+                    _Promise(Icons.tune, context.l.promiseLearn),
+                    const SizedBox(height: 12),
+                    _Promise(Icons.undo, context.l.promiseRestore),
                   ],
                 ),
               ),
@@ -83,7 +83,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 child: FilledButton(
                   onPressed: _onPressed,
                   child: Text(
-                    _denied ? '설정에서 허용하기' : '사진 접근 허용',
+                    _denied ? context.l.allowInSettings : context.l.allowAccess,
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
