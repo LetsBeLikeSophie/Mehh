@@ -673,71 +673,11 @@ abstract class L10n {
   /// **'정리 추천 {count}장을 골라 뒀어요'**
   String unlockTitle(int count);
 
-  /// No description provided for @unlockButton.
-  ///
-  /// In ko, this message translates to:
-  /// **'크레딧 1개로 보기'**
-  String get unlockButton;
-
   /// No description provided for @unlockHint.
   ///
   /// In ko, this message translates to:
   /// **'직접 X를 눌러 고르는 건 무료예요'**
   String get unlockHint;
-
-  /// No description provided for @creditsLeft.
-  ///
-  /// In ko, this message translates to:
-  /// **'남은 크레딧 {count}개'**
-  String creditsLeft(int count);
-
-  /// No description provided for @creditsBuy.
-  ///
-  /// In ko, this message translates to:
-  /// **'크레딧 충전'**
-  String get creditsBuy;
-
-  /// No description provided for @creditsChip.
-  ///
-  /// In ko, this message translates to:
-  /// **'크레딧 {count}'**
-  String creditsChip(int count);
-
-  /// No description provided for @creditsTitle.
-  ///
-  /// In ko, this message translates to:
-  /// **'크레딧'**
-  String get creditsTitle;
-
-  /// No description provided for @creditsBody.
-  ///
-  /// In ko, this message translates to:
-  /// **'묶음 하나의 정리 추천을 보는 데 크레딧 1개가 들어요. 한 번 연 묶음은 계속 볼 수 있어요.'**
-  String get creditsBody;
-
-  /// No description provided for @creditsFree.
-  ///
-  /// In ko, this message translates to:
-  /// **'똑같은 사진·한 장 사진·캡처 정리와 직접 고르기는 무료예요.'**
-  String get creditsFree;
-
-  /// No description provided for @creditsNotes.
-  ///
-  /// In ko, this message translates to:
-  /// **'회원 가입 없이 이 폰에만 저장돼요. 기간 제한은 없고, 앱을 지우면 남은 크레딧도 사라져요.'**
-  String get creditsNotes;
-
-  /// No description provided for @packCredits.
-  ///
-  /// In ko, this message translates to:
-  /// **'크레딧 {count}개'**
-  String packCredits(int count);
-
-  /// No description provided for @creditsAdded.
-  ///
-  /// In ko, this message translates to:
-  /// **'크레딧 {count}개를 받았어요'**
-  String creditsAdded(int count);
 
   /// No description provided for @billingPending.
   ///
@@ -762,6 +702,120 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'미리보기라 실제로 결제되지 않아요'**
   String get billingDemo;
+
+  /// No description provided for @unlockFree.
+  ///
+  /// In ko, this message translates to:
+  /// **'무료로 보기 · 이번 달 {count}개 남음'**
+  String unlockFree(int count);
+
+  /// No description provided for @unlockPro.
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro로 모든 묶음 보기'**
+  String get unlockPro;
+
+  /// No description provided for @proChip.
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro'**
+  String get proChip;
+
+  /// No description provided for @freeChip.
+  ///
+  /// In ko, this message translates to:
+  /// **'무료 {count}개'**
+  String freeChip(int count);
+
+  /// No description provided for @proTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'Mehh Pro'**
+  String get proTitle;
+
+  /// No description provided for @proBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'모든 묶음의 정리 추천을 바로 봐요.'**
+  String get proBody;
+
+  /// No description provided for @proFree.
+  ///
+  /// In ko, this message translates to:
+  /// **'무료로는 매달 묶음 {limit}개까지 추천을 볼 수 있어요. 이번 달 {count}개 남았어요.'**
+  String proFree(int limit, int count);
+
+  /// No description provided for @proActive.
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro를 쓰고 있어요. 모든 묶음의 추천이 열려 있어요.'**
+  String get proActive;
+
+  /// No description provided for @planLifetime.
+  ///
+  /// In ko, this message translates to:
+  /// **'평생 이용권'**
+  String get planLifetime;
+
+  /// No description provided for @planLifetimeNote.
+  ///
+  /// In ko, this message translates to:
+  /// **'한 번 사면 계속 써요'**
+  String get planLifetimeNote;
+
+  /// No description provided for @planYearly.
+  ///
+  /// In ko, this message translates to:
+  /// **'1년 이용권'**
+  String get planYearly;
+
+  /// No description provided for @planYearlyNote.
+  ///
+  /// In ko, this message translates to:
+  /// **'매년 자동 갱신 · 언제든 해지'**
+  String get planYearlyNote;
+
+  /// No description provided for @planBest.
+  ///
+  /// In ko, this message translates to:
+  /// **'추천'**
+  String get planBest;
+
+  /// No description provided for @proNotes.
+  ///
+  /// In ko, this message translates to:
+  /// **'회원 가입 없이 스토어 계정으로 사요. 폰을 바꾸거나 앱을 다시 깔아도 [구매 복원]으로 다시 쓸 수 있어요. 1년 이용권은 해지하지 않으면 매년 자동으로 결제되고, 스토어의 구독 메뉴에서 언제든 해지할 수 있어요.'**
+  String get proNotes;
+
+  /// No description provided for @restorePurchases.
+  ///
+  /// In ko, this message translates to:
+  /// **'구매 복원'**
+  String get restorePurchases;
+
+  /// No description provided for @restored.
+  ///
+  /// In ko, this message translates to:
+  /// **'구매를 복원했어요'**
+  String get restored;
+
+  /// No description provided for @nothingToRestore.
+  ///
+  /// In ko, this message translates to:
+  /// **'복원할 구매가 없어요'**
+  String get nothingToRestore;
+
+  /// No description provided for @proThanks.
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro가 열렸어요'**
+  String get proThanks;
+
+  /// No description provided for @proNudge.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}장 정리했어요. 남은 묶음도 추천대로 바로 정리해 볼까요?'**
+  String proNudge(int count);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

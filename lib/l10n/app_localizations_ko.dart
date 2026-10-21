@@ -366,63 +366,7 @@ class L10nKo extends L10n {
   }
 
   @override
-  String get unlockButton => '크레딧 1개로 보기';
-
-  @override
   String get unlockHint => '직접 X를 눌러 고르는 건 무료예요';
-
-  @override
-  String creditsLeft(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    return '남은 크레딧 $countString개';
-  }
-
-  @override
-  String get creditsBuy => '크레딧 충전';
-
-  @override
-  String creditsChip(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    return '크레딧 $countString';
-  }
-
-  @override
-  String get creditsTitle => '크레딧';
-
-  @override
-  String get creditsBody =>
-      '묶음 하나의 정리 추천을 보는 데 크레딧 1개가 들어요. 한 번 연 묶음은 계속 볼 수 있어요.';
-
-  @override
-  String get creditsFree => '똑같은 사진·한 장 사진·캡처 정리와 직접 고르기는 무료예요.';
-
-  @override
-  String get creditsNotes =>
-      '회원 가입 없이 이 폰에만 저장돼요. 기간 제한은 없고, 앱을 지우면 남은 크레딧도 사라져요.';
-
-  @override
-  String packCredits(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    return '크레딧 $countString개';
-  }
-
-  @override
-  String creditsAdded(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    return '크레딧 $countString개를 받았어요';
-  }
 
   @override
   String get billingPending => '결제를 확인하는 중이에요';
@@ -435,4 +379,86 @@ class L10nKo extends L10n {
 
   @override
   String get billingDemo => '미리보기라 실제로 결제되지 않아요';
+
+  @override
+  String unlockFree(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '무료로 보기 · 이번 달 $countString개 남음';
+  }
+
+  @override
+  String get unlockPro => 'Pro로 모든 묶음 보기';
+
+  @override
+  String get proChip => 'Pro';
+
+  @override
+  String freeChip(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '무료 $countString개';
+  }
+
+  @override
+  String get proTitle => 'Mehh Pro';
+
+  @override
+  String get proBody => '모든 묶음의 정리 추천을 바로 봐요.';
+
+  @override
+  String proFree(int limit, int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '무료로는 매달 묶음 $limit개까지 추천을 볼 수 있어요. 이번 달 $countString개 남았어요.';
+  }
+
+  @override
+  String get proActive => 'Pro를 쓰고 있어요. 모든 묶음의 추천이 열려 있어요.';
+
+  @override
+  String get planLifetime => '평생 이용권';
+
+  @override
+  String get planLifetimeNote => '한 번 사면 계속 써요';
+
+  @override
+  String get planYearly => '1년 이용권';
+
+  @override
+  String get planYearlyNote => '매년 자동 갱신 · 언제든 해지';
+
+  @override
+  String get planBest => '추천';
+
+  @override
+  String get proNotes =>
+      '회원 가입 없이 스토어 계정으로 사요. 폰을 바꾸거나 앱을 다시 깔아도 [구매 복원]으로 다시 쓸 수 있어요. 1년 이용권은 해지하지 않으면 매년 자동으로 결제되고, 스토어의 구독 메뉴에서 언제든 해지할 수 있어요.';
+
+  @override
+  String get restorePurchases => '구매 복원';
+
+  @override
+  String get restored => '구매를 복원했어요';
+
+  @override
+  String get nothingToRestore => '복원할 구매가 없어요';
+
+  @override
+  String get proThanks => 'Pro가 열렸어요';
+
+  @override
+  String proNudge(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString장 정리했어요. 남은 묶음도 추천대로 바로 정리해 볼까요?';
+  }
 }

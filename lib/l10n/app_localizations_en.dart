@@ -436,82 +436,7 @@ class L10nEn extends L10n {
   }
 
   @override
-  String get unlockButton => 'See picks · 1 credit';
-
-  @override
   String get unlockHint => 'Marking photos yourself is free';
-
-  @override
-  String creditsLeft(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$countString credits left',
-      one: '1 credit left',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get creditsBuy => 'Get credits';
-
-  @override
-  String creditsChip(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$countString credits',
-      one: '1 credit',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get creditsTitle => 'Credits';
-
-  @override
-  String get creditsBody =>
-      'Seeing the picks for one set uses 1 credit. Once opened, a set stays open.';
-
-  @override
-  String get creditsFree =>
-      'Duplicates, single shots, screenshots and marking photos yourself are free.';
-
-  @override
-  String get creditsNotes =>
-      'No sign-up — credits are stored only on this phone. They never expire, but they\'re lost if you delete the app.';
-
-  @override
-  String packCredits(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    return '$countString credits';
-  }
-
-  @override
-  String creditsAdded(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Added $countString credits',
-      one: 'Added 1 credit',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get billingPending => 'Confirming your purchase…';
@@ -524,4 +449,98 @@ class L10nEn extends L10n {
 
   @override
   String get billingDemo => 'Preview only — no real payment';
+
+  @override
+  String unlockFree(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'See picks free · $countString left this month',
+      one: 'See picks free · 1 left this month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get unlockPro => 'See every set with Pro';
+
+  @override
+  String get proChip => 'Pro';
+
+  @override
+  String freeChip(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString free';
+  }
+
+  @override
+  String get proTitle => 'Mehh Pro';
+
+  @override
+  String get proBody => 'See the picks for every set, right away.';
+
+  @override
+  String proFree(int limit, int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Free: picks for $limit sets each month. $countString left this month.';
+  }
+
+  @override
+  String get proActive => 'You have Pro. Every set\'s picks are open.';
+
+  @override
+  String get planLifetime => 'Lifetime';
+
+  @override
+  String get planLifetimeNote => 'Pay once, keep it';
+
+  @override
+  String get planYearly => '1 year';
+
+  @override
+  String get planYearlyNote => 'Renews yearly · cancel anytime';
+
+  @override
+  String get planBest => 'Best value';
+
+  @override
+  String get proNotes =>
+      'No sign-up — you buy with your store account. On a new phone or after reinstalling, tap Restore purchases. The 1-year plan renews automatically each year until you cancel it in your store\'s subscriptions.';
+
+  @override
+  String get restorePurchases => 'Restore purchases';
+
+  @override
+  String get restored => 'Purchases restored';
+
+  @override
+  String get nothingToRestore => 'No purchases to restore';
+
+  @override
+  String get proThanks => 'Pro is unlocked';
+
+  @override
+  String proNudge(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Cleaned up $countString photos.',
+      one: 'Cleaned up 1 photo.',
+    );
+    return '$_temp0 Want picks for every other set too?';
+  }
 }

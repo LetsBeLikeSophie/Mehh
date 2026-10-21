@@ -7,23 +7,33 @@ import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:pointycastle/export.dart';
 import 'package:pointycastle/asn1.dart';
 
-/// 크레딧 묶음 상품 (스토어 소모성 상품, SPEC 9장)
-class Pack {
-  const Pack({required this.id, required this.credits, required this.price});
+/// Mehh Pro 상품 (SPEC 9장). Play Console·App Store Connect에 같은 ID로 만든다.
+enum Plan {
+  /// 평생 이용권 (한 번 사는 상품)
+  lifetime('mehh_pro_lifetime'),
 
-  final String id;
-  final int credits;
+  /// 1년 이용권 (자동 갱신 구독)
+  yearly('mehh_pro_yearly');
 
-  /// 스토어가 알려주는 그 나라 가격 ("₩1,900", "$1.49")
-  final String price;
+  const Plan(this.productId);
+  final String productId;
+
+  static Plan? of(String productId) {
+    for (final p in values) {
+      if (p.productId == productId) return p;
+    }
+    return null;
+  }
 }
 
-/// 상품 ID → 크레딧 수. Play Console·App Store Connect에 같은 ID로 만든다.
-const packCredits = {
-  'mehh_credits_10': 10,
-  'mehh_credits_30': 30,
-  'mehh_credits_100': 100,
-};
+class Offer {
+  const Offer({required this.plan, required this.price});
+
+  final Plan plan;
+
+  /// 스토어가 알려주는 그 나라 가격 ("₩12,900", "$9.99")
+  final String price;
+}
 
 /// Play Console > 수익 창출 설정 > 라이선스의 Base64 공개키.
 /// 비어 있으면 Play 결제는 모두 거절한다 (가짜 결제 도구 방지, SPEC 9장).
@@ -31,15 +41,18 @@ const playPublicKey = '';
 
 enum BillingStatus { pending, canceled, failed, unavailable }
 
-/// 결제가 끝나면 크레딧을 더하는 쪽. 저장이 끝나야 스토어에 "전달 완료"를 알린다.
-typedef OnPurchased = Future<void> Function(String purchaseId, int credits);
+/// 산 것(또는 복원된 것)을 받는 쪽. 저장이 끝나야 스토어에 "전달 완료"를 알린다.
+typedef OnOwned = Future<void> Function(Plan plan);
 
 abstract class Billing {
   /// 결제 대기·취소·실패 (화면에 한 줄 안내)
   Stream<BillingStatus> get status;
-  Future<List<Pack>> packs();
-  Future<void> buy(Pack p);
-  void listen(OnPurchased onPurchased);
+  Future<List<Offer>> offers();
+  Future<void> buy(Offer o);
+  void listen(OnOwned onOwned);
+
+  /// 스토어에 지금 가진 것을 묻는다. 연결할 수 없으면 null.
+  Future<Set<Plan>?> restore();
   void dispose();
 }
 
@@ -47,14 +60,15 @@ abstract class Billing {
 class StoreBilling implements Billing {
   final _iap = InAppPurchase.instance;
   final _status = StreamController<BillingStatus>.broadcast();
-  final _details = <String, ProductDetails>{};
+  final _details = <Plan, ProductDetails>{};
   StreamSubscription<List<PurchaseDetails>>? _sub;
+  Set<Plan>? _restoring;
 
   @override
   Stream<BillingStatus> get status => _status.stream;
 
   @override
-  void listen(OnPurchased onPurchased) {
+  void listen(OnOwned onOwned) {
     _sub ??= _iap.purchaseStream.listen((list) async {
       for (final p in list) {
         switch (p.status) {
@@ -66,12 +80,10 @@ class StoreBilling implements Billing {
             _status.add(BillingStatus.failed);
           case PurchaseStatus.purchased:
           case PurchaseStatus.restored:
-            final credits = packCredits[p.productID];
-            if (credits != null && _verified(p)) {
-              await onPurchased(
-                p.purchaseID ?? p.transactionDate ?? '',
-                credits,
-              );
+            final plan = Plan.of(p.productID);
+            if (plan != null && _verified(p)) {
+              _restoring?.add(plan);
+              await onOwned(plan);
             } else {
               _status.add(BillingStatus.failed);
             }
@@ -82,27 +94,47 @@ class StoreBilling implements Billing {
   }
 
   @override
-  Future<List<Pack>> packs() async {
+  Future<List<Offer>> offers() async {
     if (!await _iap.isAvailable()) return const [];
-    final res = await _iap.queryProductDetails(packCredits.keys.toSet());
+    final res = await _iap.queryProductDetails({
+      for (final p in Plan.values) p.productId,
+    });
     for (final d in res.productDetails) {
-      _details[d.id] = d;
+      if (Plan.of(d.id) case final plan?) _details[plan] = d;
     }
     return [
-      for (final id in packCredits.keys)
-        if (_details[id] case final d?)
-          Pack(id: id, credits: packCredits[id]!, price: d.price),
+      for (final plan in Plan.values)
+        if (_details[plan] case final d?) Offer(plan: plan, price: d.price),
     ];
   }
 
   @override
-  Future<void> buy(Pack p) async {
-    final d = _details[p.id];
+  Future<void> buy(Offer o) async {
+    final d = _details[o.plan];
     if (d == null) {
       _status.add(BillingStatus.unavailable);
       return;
     }
-    await _iap.buyConsumable(purchaseParam: PurchaseParam(productDetails: d));
+    // 평생권·구독 모두 "다시 쓰는" 상품이라 buyNonConsumable
+    await _iap.buyNonConsumable(
+      purchaseParam: PurchaseParam(productDetails: d),
+    );
+  }
+
+  @override
+  Future<Set<Plan>?> restore() async {
+    if (!await _iap.isAvailable()) return null;
+    final seen = _restoring = <Plan>{};
+    try {
+      await _iap.restorePurchases();
+      // 복원 결과는 purchaseStream으로 따로 온다
+      await Future<void>.delayed(const Duration(seconds: 4));
+      return seen;
+    } catch (_) {
+      return null;
+    } finally {
+      _restoring = null;
+    }
   }
 
   @override
@@ -143,39 +175,39 @@ bool verifyPlaySignature(String publicKey, String data, String signature) {
   }
 }
 
-/// 웹 미리보기: 결제 흉내만 낸다 (돈이 나가지 않는다)
+/// 웹 미리보기·테스트: 결제 흉내만 낸다 (돈이 나가지 않는다)
 class DemoBilling implements Billing {
   DemoBilling({required this.korean});
 
   final bool korean;
   final _status = StreamController<BillingStatus>.broadcast();
-  OnPurchased? _onPurchased;
-  var _n = 0;
+  final owned = <Plan>{};
+  OnOwned? _onOwned;
 
-  static const _krw = {10: '₩1,900', 30: '₩4,400', 100: '₩9,900'};
-  static const _usd = {10: r'$1.49', 30: r'$2.99', 100: r'$6.99'};
+  static const _krw = {Plan.lifetime: '₩12,900', Plan.yearly: '₩7,900'};
+  static const _usd = {Plan.lifetime: r'$9.99', Plan.yearly: r'$5.99'};
 
   @override
   Stream<BillingStatus> get status => _status.stream;
 
   @override
-  void listen(OnPurchased onPurchased) => _onPurchased = onPurchased;
+  void listen(OnOwned onOwned) => _onOwned = onOwned;
 
   @override
-  Future<List<Pack>> packs() async => [
-    for (final e in packCredits.entries)
-      Pack(
-        id: e.key,
-        credits: e.value,
-        price: (korean ? _krw : _usd)[e.value]!,
-      ),
+  Future<List<Offer>> offers() async => [
+    for (final p in Plan.values)
+      Offer(plan: p, price: (korean ? _krw : _usd)[p]!),
   ];
 
   @override
-  Future<void> buy(Pack p) async {
-    await Future<void>.delayed(const Duration(milliseconds: 400));
-    await _onPurchased?.call('demo-${_n++}', p.credits);
+  Future<void> buy(Offer o) async {
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    owned.add(o.plan);
+    await _onOwned?.call(o.plan);
   }
+
+  @override
+  Future<Set<Plan>?> restore() async => {...owned};
 
   @override
   void dispose() => _status.close();

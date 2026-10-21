@@ -235,51 +235,63 @@
       }
     }
   },
-  "unlockButton": "크레딧 1개로 보기",
   "unlockHint": "직접 X를 눌러 고르는 건 무료예요",
-  "creditsLeft": "남은 크레딧 {count}개",
-  "@creditsLeft": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "format": "decimalPattern"
-      }
-    }
-  },
-  "creditsBuy": "크레딧 충전",
-  "creditsChip": "크레딧 {count}",
-  "@creditsChip": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "format": "decimalPattern"
-      }
-    }
-  },
-  "creditsTitle": "크레딧",
-  "creditsBody": "묶음 하나의 정리 추천을 보는 데 크레딧 1개가 들어요. 한 번 연 묶음은 계속 볼 수 있어요.",
-  "creditsFree": "똑같은 사진·한 장 사진·캡처 정리와 직접 고르기는 무료예요.",
-  "creditsNotes": "회원 가입 없이 이 폰에만 저장돼요. 기간 제한은 없고, 앱을 지우면 남은 크레딧도 사라져요.",
-  "packCredits": "크레딧 {count}개",
-  "@packCredits": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "format": "decimalPattern"
-      }
-    }
-  },
-  "creditsAdded": "크레딧 {count}개를 받았어요",
-  "@creditsAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "format": "decimalPattern"
-      }
-    }
-  },
   "billingPending": "결제를 확인하는 중이에요",
   "billingFailed": "결제를 마치지 못했어요",
   "billingUnavailable": "지금은 스토어에 연결할 수 없어요",
-  "billingDemo": "미리보기라 실제로 결제되지 않아요"
+  "billingDemo": "미리보기라 실제로 결제되지 않아요",
+  "unlockFree": "무료로 보기 · 이번 달 {count}개 남음",
+  "@unlockFree": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "unlockPro": "Pro로 모든 묶음 보기",
+  "proChip": "Pro",
+  "freeChip": "무료 {count}개",
+  "@freeChip": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "proTitle": "Mehh Pro",
+  "proBody": "모든 묶음의 정리 추천을 바로 봐요.",
+  "proFree": "무료로는 매달 묶음 {limit}개까지 추천을 볼 수 있어요. 이번 달 {count}개 남았어요.",
+  "@proFree": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "proActive": "Pro를 쓰고 있어요. 모든 묶음의 추천이 열려 있어요.",
+  "planLifetime": "평생 이용권",
+  "planLifetimeNote": "한 번 사면 계속 써요",
+  "planYearly": "1년 이용권",
+  "planYearlyNote": "매년 자동 갱신 · 언제든 해지",
+  "planBest": "추천",
+  "proNotes": "회원 가입 없이 스토어 계정으로 사요. 폰을 바꾸거나 앱을 다시 깔아도 [구매 복원]으로 다시 쓸 수 있어요. 1년 이용권은 해지하지 않으면 매년 자동으로 결제되고, 스토어의 구독 메뉴에서 언제든 해지할 수 있어요.",
+  "restorePurchases": "구매 복원",
+  "restored": "구매를 복원했어요",
+  "nothingToRestore": "복원할 구매가 없어요",
+  "proThanks": "Pro가 열렸어요",
+  "proNudge": "{count}장 정리했어요. 남은 묶음도 추천대로 바로 정리해 볼까요?",
+  "@proNudge": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  }
 }

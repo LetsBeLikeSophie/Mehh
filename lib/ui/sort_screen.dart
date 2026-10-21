@@ -7,7 +7,7 @@ import '../models/day_group.dart';
 import '../models/decision.dart';
 import '../providers.dart';
 import '../theme.dart';
-import 'credits_sheet.dart';
+import 'pro_sheet.dart';
 import 'focus_screen.dart';
 import 'sort_source.dart';
 import 'trash_flow.dart';
@@ -55,10 +55,10 @@ class _SortScreenState extends ConsumerState<SortScreen> {
     });
   }
 
-  /// 크레딧 1개로 이 묶음의 추천을 연다. 모자라면 충전 시트.
+  /// 이번 달 무료 묶음으로 추천을 연다. 다 썼으면 Pro 안내.
   Future<void> _unlock(String groupId) async {
-    final ok = await ref.read(creditsProvider.notifier).unlock(groupId);
-    if (!ok && mounted) await showCreditsSheet(context);
+    final ok = await ref.read(proProvider.notifier).unlock(groupId);
+    if (!ok && mounted) await showProSheet(context);
   }
 
   void _open(String id) => Navigator.of(context).push(
@@ -75,8 +75,16 @@ class _SortScreenState extends ConsumerState<SortScreen> {
   Future<void> _send(List<String> ids, SortSource src) async {
     if (!await _confirmSceneLoss(ids, src) || !mounted) return;
     setState(() => _busy = true);
-    await sendToTrash(context, ref, ids);
+    final n = await sendToTrash(context, ref, ids);
     if (mounted) setState(() => _busy = false);
+    // 정리를 끝낸 순간에 Pro 안내 (Pro가 아니면 하루 한 번까지)
+    if (n > 0 &&
+        widget.kind == SortKind.day &&
+        mounted &&
+        await ref.read(proProvider.notifier).takeNudge() &&
+        mounted) {
+      await showProSheet(context, lead: context.l.proNudge(n));
+    }
   }
 
   /// 연속 컷·중복 묶음이 통째로 사라지면 한 번 묻는다 (묶음마다 최소 1장)
@@ -463,7 +471,7 @@ class _Summary extends StatelessWidget {
   }
 }
 
-/// 크레딧으로 열기 전의 요약: 추천 장수와 이유만 보여 주고 [크레딧 1개로 보기]
+/// 추천을 열기 전의 요약: 추천 장수와 이유만 보여 주고 [무료로 보기] 또는 [Pro로 모든 묶음 보기]
 class _Unlock extends ConsumerWidget {
   const _Unlock({
     required this.count,
@@ -478,7 +486,7 @@ class _Unlock extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l;
-    final balance = ref.watch(creditsProvider).value?.balance ?? 0;
+    final free = ref.watch(proProvider).value?.freeLeft(DateTime.now()) ?? 0;
     const muted = TextStyle(
       fontSize: MehhText.caption,
       color: MehhColors.textMuted,
@@ -519,11 +527,11 @@ class _Unlock extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(MehhRadius.button),
                 ),
               ),
-              child: Text(balance > 0 ? l.unlockButton : l.creditsBuy),
+              child: Text(free > 0 ? l.unlockFree(free) : l.unlockPro),
             ),
           ),
           const SizedBox(height: 8),
-          Text('${l.creditsLeft(balance)} · ${l.unlockHint}', style: muted),
+          Text(l.unlockHint, style: muted),
         ],
       ),
     );

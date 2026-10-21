@@ -9,7 +9,7 @@ import '../models/day_group.dart';
 import '../models/decision.dart';
 import '../providers.dart';
 import '../theme.dart';
-import 'credits_sheet.dart';
+import 'pro_sheet.dart';
 import 'settings_screen.dart';
 import 'sort_screen.dart';
 import 'widgets.dart';
@@ -167,7 +167,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const CreditsChip(),
+                            const ProChip(),
                             IconButton(
                               tooltip: l.settings,
                               onPressed: () => Navigator.of(context).push(

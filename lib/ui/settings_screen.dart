@@ -98,7 +98,7 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 24),
                   const Text(
-                    'Mehh 1.3.0',
+                    'Mehh 1.4.0',
                     style: TextStyle(
                       fontSize: MehhText.label,
                       color: MehhColors.textMuted,

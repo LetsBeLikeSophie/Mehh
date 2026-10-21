@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import 'data/billing.dart';
-import 'data/credits.dart';
 import 'data/demo.dart';
 import 'data/handoff.dart';
 import 'data/photo_library.dart';
+import 'data/pro.dart';
 import 'data/place_namer.dart';
 import 'data/sqlite_store.dart';
 import 'data/store.dart';
@@ -42,12 +42,11 @@ final storeProvider = Provider<Store>(
   (ref) => isDemo ? MemoryStore() : SqliteStore(),
 );
 
-// ───────────────────────── 크레딧 (SPEC 9장)
+// ───────────────────────── Mehh Pro (SPEC 9장)
 
-final creditVaultProvider = Provider<CreditVault>(
-  (ref) => isDemo || !storeBillingSupported
-      ? MemoryCreditVault()
-      : SecureCreditVault(),
+final proVaultProvider = Provider<ProVault>(
+  (ref) =>
+      isDemo || !storeBillingSupported ? MemoryProVault() : SecureProVault(),
 );
 
 final billingProvider = Provider<Billing>((ref) {
@@ -60,59 +59,85 @@ final billingProvider = Provider<Billing>((ref) {
   return b;
 });
 
-class CreditsNotifier extends AsyncNotifier<Credits> {
-  CreditVault get _vault => ref.read(creditVaultProvider);
+class ProNotifier extends AsyncNotifier<ProState> {
+  ProVault get _vault => ref.read(proVaultProvider);
+  Billing get _billing => ref.read(billingProvider);
 
   @override
-  Future<Credits> build() async {
-    var c = await _vault.load();
-    if (!c.welcomeGiven) {
-      c = c.copyWith(balance: c.balance + welcomeCredits, welcomeGiven: true);
-      await _vault.save(c);
-    }
-    ref.read(billingProvider).listen(_purchased);
-    return c;
+  Future<ProState> build() async {
+    final s = await _vault.load();
+    _billing.listen(_owned);
+    // 1년 이용권이 끝났는지, 다른 폰에서 산 게 있는지 조용히 확인
+    Future.microtask(() => restore(quiet: true));
+    return s;
   }
 
-  Future<void> _purchased(String purchaseId, int credits) async {
-    final c = await future;
-    if (c.purchases.contains(purchaseId)) return;
+  Future<void> _owned(Plan plan) async {
+    final s = await future;
     await _save(
-      c.copyWith(
-        balance: c.balance + credits,
-        purchases: {...c.purchases, purchaseId},
-      ),
+      plan == Plan.lifetime
+          ? s.copyWith(lifetime: true)
+          : s.copyWith(yearly: true),
     );
   }
 
-  /// 크레딧 1개로 묶음 추천을 연다. 이미 열렸으면 그대로, 모자라면 false.
-  Future<bool> unlock(String groupId) async {
-    final c = await future;
-    if (c.unlocked.contains(groupId)) return true;
-    if (c.balance < unlockCost) return false;
+  /// 스토어에서 가진 것을 다시 받는다. 반환: 복원된 게 있으면 true, 연결 실패면 null.
+  /// 평생권은 한 번 받으면 지우지 않는다 (스토어가 잠깐 빈 답을 줘도 사용자가 잃지 않게).
+  Future<bool?> restore({bool quiet = false}) async {
+    final owned = await _billing.restore();
+    if (owned == null) return null;
+    final s = await future;
+    final next = s.copyWith(
+      lifetime: s.lifetime || owned.contains(Plan.lifetime),
+      yearly: owned.contains(Plan.yearly),
+    );
+    if (next.lifetime != s.lifetime || next.yearly != s.yearly) {
+      await _save(next);
+    }
+    return owned.isNotEmpty;
+  }
+
+  /// 묶음 추천을 연다. Pro면 그대로, 아니면 이번 달 무료 묶음을 하나 쓴다.
+  /// 무료가 다 떨어졌으면 false.
+  Future<bool> unlock(String groupId, {DateTime? now}) async {
+    final s = await future;
+    if (s.isOpen(groupId)) return true;
+    final at = now ?? DateTime.now();
+    if (s.freeLeft(at) == 0) return false;
+    final month = monthKey(at);
     await _save(
-      c.copyWith(
-        balance: c.balance - unlockCost,
-        unlocked: {...c.unlocked, groupId},
+      s.copyWith(
+        unlocked: {...s.unlocked, groupId},
+        freeMonth: month,
+        freeUsed: (s.freeMonth == month ? s.freeUsed : 0) + 1,
       ),
     );
     return true;
   }
 
-  Future<void> _save(Credits c) async {
-    await _vault.save(c);
-    state = AsyncData(c);
+  /// 정리를 끝낸 뒤 Pro 안내를 띄울까 (Pro가 아니고 오늘 아직 안 띄웠으면). 띄우면 기록.
+  Future<bool> takeNudge({DateTime? now}) async {
+    final s = await future;
+    final at = now ?? DateTime.now();
+    final day = '${monthKey(at)}-${at.day.toString().padLeft(2, '0')}';
+    if (s.pro || s.lastNudge == day) return false;
+    await _save(s.copyWith(lastNudge: day));
+    return true;
+  }
+
+  Future<void> _save(ProState s) async {
+    await _vault.save(s);
+    state = AsyncData(s);
   }
 }
 
-final creditsProvider = AsyncNotifierProvider<CreditsNotifier, Credits>(
-  CreditsNotifier.new,
+final proProvider = AsyncNotifierProvider<ProNotifier, ProState>(
+  ProNotifier.new,
 );
 
 /// 이 묶음의 앱 추천이 열려 있는가 (불러오는 중엔 닫힌 것으로)
 final unlockedProvider = Provider.family<bool, String>(
-  (ref, groupId) =>
-      ref.watch(creditsProvider).value?.unlocked.contains(groupId) ?? false,
+  (ref, groupId) => ref.watch(proProvider).value?.isOpen(groupId) ?? false,
 );
 
 // ───────────────────────── 권한

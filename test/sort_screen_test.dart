@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mehh/data/billing.dart';
-import 'package:mehh/data/credits.dart';
+import 'package:mehh/data/pro.dart';
 import 'package:mehh/data/demo.dart';
 import 'package:mehh/data/photo_library.dart';
 import 'package:mehh/data/store.dart';
@@ -47,7 +47,7 @@ void main() {
             DemoPhotoLibrary() as PhotoLibrary,
           ),
           storeProvider.overrideWithValue(MemoryStore()),
-          creditVaultProvider.overrideWithValue(MemoryCreditVault()),
+          proVaultProvider.overrideWithValue(MemoryProVault()),
           billingProvider.overrideWithValue(DemoBilling(korean: true)),
           ...extra,
         ],
@@ -227,7 +227,7 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('그날의 묶음: 추천은 크레딧 1개로 연다, 한 번 연 묶음은 계속 열림', (tester) async {
+  testWidgets('그날의 묶음: 추천은 이번 달 무료 묶음으로 열고, 연 묶음은 계속 열림', (tester) async {
     final day = DayGroup(id: 'day-p0', kind: DayGroupKind.day, photos: photos);
     final plan = GroupPlan(
       bursts: [
@@ -244,45 +244,62 @@ void main() {
     );
     expect(find.text('정리 추천 2장을 골라 뒀어요'), findsOneWidget);
     expect(find.text('2장 휴지통으로'), findsNothing); // 열기 전엔 X 없음
-    expect(find.textContaining('남은 크레딧 5개'), findsOneWidget);
 
-    await tester.tap(find.text('크레딧 1개로 보기'));
+    await tester.tap(find.text('무료로 보기 · 이번 달 3개 남음'));
     await tester.pumpAndSettle();
     expect(find.text('2장 휴지통으로'), findsOneWidget);
     final container = ProviderScope.containerOf(
       tester.element(find.byType(SortScreen)),
     );
-    expect(container.read(creditsProvider).value!.balance, 4);
-    expect(
-      await container.read(creditsProvider.notifier).unlock(day.id),
-      isTrue,
-    );
-    expect(container.read(creditsProvider).value!.balance, 4);
+    final now = DateTime.now();
+    expect(container.read(proProvider).value!.freeLeft(now), 2);
+    expect(await container.read(proProvider.notifier).unlock(day.id), isTrue);
+    expect(container.read(proProvider).value!.freeLeft(now), 2);
     await flush(tester);
   });
 
-  test('크레딧: 처음 5개, 모자라면 못 열고, 사면 늘어난다', () async {
-    final vault = MemoryCreditVault();
+  test('무료 묶음은 매달 3개, 다음 달에 다시 채워지고, Pro면 모두 열림', () async {
+    final vault = MemoryProVault();
     final billing = DemoBilling(korean: true);
     final c = ProviderContainer(
       overrides: [
-        creditVaultProvider.overrideWithValue(vault),
+        proVaultProvider.overrideWithValue(vault),
         billingProvider.overrideWithValue(billing),
       ],
     );
     addTearDown(c.dispose);
-    expect((await c.read(creditsProvider.future)).balance, welcomeCredits);
-    for (var i = 0; i < 5; i++) {
-      expect(await c.read(creditsProvider.notifier).unlock('g$i'), isTrue);
+    final pro = c.read(proProvider.notifier);
+    final oct = DateTime(2026, 10, 21);
+    await c.read(proProvider.future);
+    for (var i = 0; i < freeGroupsPerMonth; i++) {
+      expect(await pro.unlock('g$i', now: oct), isTrue);
     }
-    expect(await c.read(creditsProvider.notifier).unlock('g9'), isFalse);
-    expect(await c.read(creditsProvider.notifier).unlock('g0'), isTrue);
+    expect(await pro.unlock('g9', now: oct), isFalse);
+    expect(await pro.unlock('g0', now: oct), isTrue); // 이미 연 묶음
+    expect(await pro.unlock('g9', now: DateTime(2026, 11, 1)), isTrue);
 
-    final pack = (await billing.packs()).first;
-    expect(pack.price, '₩1,900');
-    await billing.buy(pack);
-    expect(c.read(creditsProvider).value!.balance, 10);
-    expect(vault.value.balance, 10);
-    expect(vault.value.welcomeGiven, isTrue);
+    final offers = await billing.offers();
+    expect(offers.first.plan, Plan.lifetime);
+    expect(offers.first.price, '₩12,900');
+    await billing.buy(offers.first);
+    expect(c.read(proProvider).value!.pro, isTrue);
+    expect(await pro.unlock('anything', now: oct), isTrue);
+    expect(await pro.takeNudge(), isFalse); // Pro면 안내 안 띄움
+    expect(vault.value.lifetime, isTrue);
+  });
+
+  test('구매 복원: 1년 이용권이 끝나면 꺼지고, 평생권은 남는다', () async {
+    final vault = MemoryProVault(const ProState(lifetime: true, yearly: true));
+    final c = ProviderContainer(
+      overrides: [
+        proVaultProvider.overrideWithValue(vault),
+        billingProvider.overrideWithValue(DemoBilling(korean: true)),
+      ],
+    );
+    addTearDown(c.dispose);
+    await c.read(proProvider.future);
+    expect(await c.read(proProvider.notifier).restore(), isFalse);
+    expect(vault.value.yearly, isFalse);
+    expect(vault.value.lifetime, isTrue);
   });
 }
