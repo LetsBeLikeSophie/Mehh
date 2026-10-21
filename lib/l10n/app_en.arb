@@ -1,14 +1,11 @@
 {
   "@@locale": "en",
-
   "appTitle": "Mehh",
-
   "keep": "Keep",
   "pile": "Remove",
   "toTrash": "Move to trash",
   "pileCancel": "Undo remove",
   "keepCancel": "Undo keep",
-
   "back": "Back",
   "close": "Close",
   "home": "Home",
@@ -17,7 +14,6 @@
   "undo": "Undo",
   "reset": "Reset",
   "retry": "Try again",
-
   "loadingGroups": "Grouping your photos…",
   "loadFailed": "Couldn't load your photos",
   "noPhotos": "No photos to clean up",
@@ -29,7 +25,7 @@
   "photoTotal": "{count, plural, =1{1 photo} other{{count} photos}}",
   "analyzingPercent": "Analyzing photos {percent}%",
   "locatingPercent": "Finding places {percent}%",
-  "duplicatesFree": "Exact duplicates · Free",
+  "duplicatesFree": "Free cleanup",
   "duplicatesFound": "{count, plural, =1{Found 1 duplicate} other{Found {count} duplicates}}",
   "review": "Review",
   "photos": "{count, plural, =1{1 photo} other{{count} photos}}",
@@ -39,30 +35,26 @@
   "pickScreenshots": "Pick screenshots to remove",
   "limitedAccess": "You've allowed only some photos.\nAllow all to find more.",
   "choosePhotos": "Choose photos",
-
   "screenshots": "Screenshots",
   "singles": "Single shots",
   "duplicatesTitle": "Exact duplicates",
-
   "reasonSharp": "Sharp focus",
   "reasonExposure": "Good exposure",
   "summaryJunk": "{count, plural, =1{1 accidental shot} other{{count} accidental shots}}",
   "summaryBlurry": "{count, plural, =1{1 blurry shot with a sharper one} other{{count} blurry shots with sharper ones}}",
   "summaryBurst": "{count, plural, =1{1 similar shot} other{{count} similar shots}}",
-  "summaryDuplicates": "Marked the duplicates, keeping one of each",
-
+  "summaryDuplicates": "Marked the duplicates, keeping one in each set",
   "tagBest": "Best",
   "tagBurst": "Similar",
   "tagBlurry": "Blurry",
   "tagJunk": "Accidental",
-  "tagOriginal": "Original",
+  "tagOriginal": "Keeping",
   "tagDuplicate": "Duplicate",
   "noteBestWith": "Best · {reason}",
   "noteBurst": "Similar to nearby shots",
   "noteBlurry": "A sharper shot exists",
   "noteJunk": "Looks accidental",
   "noteKeeper": "Keeping this one",
-
   "sendToCortex": "Send to Cortex",
   "cortexSent": "Sent to Cortex · marked for removal",
   "cortexFailed": "Couldn't send to Cortex",
@@ -71,7 +63,6 @@
   "prevPhoto": "Previous photo",
   "trashBarSemantics": "Remove. You can also swipe the photo up",
   "markForRemoval": "Mark for removal",
-
   "resetTitle": "Reset to the original picks?",
   "sceneLossTitle": "{count, plural, =1{1 moment will have no photos left} other{{count} moments will have no photos left}}",
   "sceneLossBody": "You marked every similar photo. Move them to trash anyway?",
@@ -86,25 +77,22 @@
   "noneFound": "Nothing to clean up here",
   "willRemoveSuffix": " to remove",
   "countAndRange": "{count} · {range}",
-
   "trashFailed": "Couldn't move to trash. Your photos are unchanged.",
   "trashed": "{count, plural, =1{Moved 1 photo to trash · restore it from your gallery's trash within 30 days} other{Moved {count} photos to trash · restore them from your gallery's trash within 30 days}}",
-
   "clearTitle": "Clear all records?",
-  "clearBody": "This clears photo analysis, keep and remove records, learned preferences, and space-freed history.\nYour photos aren't deleted.",
+  "clearBody": "This clears photo analysis, keep/remove records, and space-freed history.\nYour photos aren't deleted.",
   "clearConfirm": "Clear",
   "cleared": "All records cleared",
   "privacyTitle": "Your photos and records stay on this phone",
-  "privacyLocal": "Photo analysis, keep and remove records, and learned preferences are stored only on this phone. Nothing is sent to a server or included in cloud backups.",
+  "privacyLocal": "Photo analysis and keep/remove records are stored only on this phone. Nothing is sent to a server or included in cloud backups.",
   "privacyGeocode": "To show place names, only a photo's location coordinates are sent to your phone's location service.",
-  "privacyTrash": "Removed photos go to your phone's trash, where you can restore them from your gallery app within 30 days.",
+  "privacyTrash": "Photos moved to trash can be restored from your gallery's trash for 30 days.",
   "clearAll": "Clear all records",
-
   "onboardingTitle": "Photo cleanup,\nI'll do the first pass",
   "onboardingBody": "To group photos by date and place and find duplicates, Mehh needs access to all your photos.",
   "promiseLocal": "Your photos and records never leave your phone.",
-  "promiseLearn": "It learns your taste as you go. Early suggestions may be off.",
-  "promiseRestore": "Removed photos can be restored within 30 days.",
+  "promiseLearn": "Suggestions are just the app's first pass. Change them anytime.",
+  "promiseRestore": "Photos moved to trash can be restored from your gallery's trash for 30 days.",
   "allowAccess": "Allow photo access",
   "allowInSettings": "Allow in Settings"
 }

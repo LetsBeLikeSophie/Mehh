@@ -250,13 +250,13 @@ abstract class L10n {
   /// No description provided for @duplicatesFree.
   ///
   /// In ko, this message translates to:
-  /// **'똑같은 사진 · 무료'**
+  /// **'무료로 정리'**
   String get duplicatesFree;
 
   /// No description provided for @duplicatesFound.
   ///
   /// In ko, this message translates to:
-  /// **'중복 {count}장 찾았어요'**
+  /// **'똑같은 사진 {count}장 찾았어요'**
   String duplicatesFound(int count);
 
   /// No description provided for @review.
@@ -358,7 +358,7 @@ abstract class L10n {
   /// No description provided for @summaryDuplicates.
   ///
   /// In ko, this message translates to:
-  /// **'줄마다 하나만 남기고 똑같은 사진에 X를 쳐 뒀어요'**
+  /// **'묶음마다 하나만 남기고 똑같은 사진에 X를 쳐 뒀어요'**
   String get summaryDuplicates;
 
   /// No description provided for @tagBest.
@@ -388,7 +388,7 @@ abstract class L10n {
   /// No description provided for @tagOriginal.
   ///
   /// In ko, this message translates to:
-  /// **'원본'**
+  /// **'남길 사진'**
   String get tagOriginal;
 
   /// No description provided for @tagDuplicate.
@@ -580,7 +580,7 @@ abstract class L10n {
   /// No description provided for @clearBody.
   ///
   /// In ko, this message translates to:
-  /// **'사진 분석 결과, 킵·정리 기록, 배운 취향, 비운 용량 기록을 지워요.\n사진은 지워지지 않아요.'**
+  /// **'사진 분석 결과, 킵·정리 기록, 비운 용량 기록을 지워요.\n사진은 지워지지 않아요.'**
   String get clearBody;
 
   /// No description provided for @clearConfirm.
@@ -604,7 +604,7 @@ abstract class L10n {
   /// No description provided for @privacyLocal.
   ///
   /// In ko, this message translates to:
-  /// **'사진 분석, 정리·킵 기록, 배운 취향은 이 폰 안에만 저장돼요. 서버로 보내지 않고, 클라우드 백업에도 넣지 않아요.'**
+  /// **'사진 분석과 정리·킵 기록은 이 폰 안에만 저장돼요. 서버로 보내지 않고, 클라우드 백업에도 넣지 않아요.'**
   String get privacyLocal;
 
   /// No description provided for @privacyGeocode.
@@ -616,7 +616,7 @@ abstract class L10n {
   /// No description provided for @privacyTrash.
   ///
   /// In ko, this message translates to:
-  /// **'정리한 사진은 휴대폰 휴지통으로 가서 30일 안에 갤러리 앱에서 되살릴 수 있어요.'**
+  /// **'휴지통으로 보낸 사진은 30일 동안 갤러리 휴지통에서 되살릴 수 있어요.'**
   String get privacyTrash;
 
   /// No description provided for @clearAll.
@@ -646,13 +646,13 @@ abstract class L10n {
   /// No description provided for @promiseLearn.
   ///
   /// In ko, this message translates to:
-  /// **'고를수록 취향을 배워요. 처음엔 추천이 틀릴 수 있어요.'**
+  /// **'추천은 앱이 먼저 골라 둔 것일 뿐이에요. 언제든 바꿀 수 있어요.'**
   String get promiseLearn;
 
   /// No description provided for @promiseRestore.
   ///
   /// In ko, this message translates to:
-  /// **'정리한 사진은 30일 안에 되살릴 수 있어요.'**
+  /// **'휴지통으로 보낸 사진은 30일 동안 갤러리 휴지통에서 되살릴 수 있어요.'**
   String get promiseRestore;
 
   /// No description provided for @allowAccess.

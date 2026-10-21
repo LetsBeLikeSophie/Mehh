@@ -103,7 +103,7 @@ class L10nKo extends L10n {
   }
 
   @override
-  String get duplicatesFree => '똑같은 사진 · 무료';
+  String get duplicatesFree => '무료로 정리';
 
   @override
   String duplicatesFound(int count) {
@@ -111,7 +111,7 @@ class L10nKo extends L10n {
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return '중복 $countString장 찾았어요';
+    return '똑같은 사진 $countString장 찾았어요';
   }
 
   @override
@@ -181,7 +181,7 @@ class L10nKo extends L10n {
   }
 
   @override
-  String get summaryDuplicates => '줄마다 하나만 남기고 똑같은 사진에 X를 쳐 뒀어요';
+  String get summaryDuplicates => '묶음마다 하나만 남기고 똑같은 사진에 X를 쳐 뒀어요';
 
   @override
   String get tagBest => '베스트';
@@ -196,7 +196,7 @@ class L10nKo extends L10n {
   String get tagJunk => '실수';
 
   @override
-  String get tagOriginal => '원본';
+  String get tagOriginal => '남길 사진';
 
   @override
   String get tagDuplicate => '똑같은 사진';
@@ -310,8 +310,7 @@ class L10nKo extends L10n {
   String get clearTitle => '모든 기록을 지울까요?';
 
   @override
-  String get clearBody =>
-      '사진 분석 결과, 킵·정리 기록, 배운 취향, 비운 용량 기록을 지워요.\n사진은 지워지지 않아요.';
+  String get clearBody => '사진 분석 결과, 킵·정리 기록, 비운 용량 기록을 지워요.\n사진은 지워지지 않아요.';
 
   @override
   String get clearConfirm => '지우기';
@@ -324,13 +323,13 @@ class L10nKo extends L10n {
 
   @override
   String get privacyLocal =>
-      '사진 분석, 정리·킵 기록, 배운 취향은 이 폰 안에만 저장돼요. 서버로 보내지 않고, 클라우드 백업에도 넣지 않아요.';
+      '사진 분석과 정리·킵 기록은 이 폰 안에만 저장돼요. 서버로 보내지 않고, 클라우드 백업에도 넣지 않아요.';
 
   @override
   String get privacyGeocode => '장소 이름을 찾을 때는 사진의 위치 좌표만 휴대폰의 위치 서비스로 보내요.';
 
   @override
-  String get privacyTrash => '정리한 사진은 휴대폰 휴지통으로 가서 30일 안에 갤러리 앱에서 되살릴 수 있어요.';
+  String get privacyTrash => '휴지통으로 보낸 사진은 30일 동안 갤러리 휴지통에서 되살릴 수 있어요.';
 
   @override
   String get clearAll => '모든 기록 지우기';
@@ -346,10 +345,10 @@ class L10nKo extends L10n {
   String get promiseLocal => '사진과 기록은 폰 밖으로 나가지 않아요.';
 
   @override
-  String get promiseLearn => '고를수록 취향을 배워요. 처음엔 추천이 틀릴 수 있어요.';
+  String get promiseLearn => '추천은 앱이 먼저 골라 둔 것일 뿐이에요. 언제든 바꿀 수 있어요.';
 
   @override
-  String get promiseRestore => '정리한 사진은 30일 안에 되살릴 수 있어요.';
+  String get promiseRestore => '휴지통으로 보낸 사진은 30일 동안 갤러리 휴지통에서 되살릴 수 있어요.';
 
   @override
   String get allowAccess => '사진 접근 허용';

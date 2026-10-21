@@ -115,7 +115,7 @@ class L10nEn extends L10n {
   }
 
   @override
-  String get duplicatesFree => 'Exact duplicates · Free';
+  String get duplicatesFree => 'Free cleanup';
 
   @override
   String duplicatesFound(int count) {
@@ -224,7 +224,8 @@ class L10nEn extends L10n {
   }
 
   @override
-  String get summaryDuplicates => 'Marked the duplicates, keeping one of each';
+  String get summaryDuplicates =>
+      'Marked the duplicates, keeping one in each set';
 
   @override
   String get tagBest => 'Best';
@@ -239,7 +240,7 @@ class L10nEn extends L10n {
   String get tagJunk => 'Accidental';
 
   @override
-  String get tagOriginal => 'Original';
+  String get tagOriginal => 'Keeping';
 
   @override
   String get tagDuplicate => 'Duplicate';
@@ -369,7 +370,7 @@ class L10nEn extends L10n {
 
   @override
   String get clearBody =>
-      'This clears photo analysis, keep and remove records, learned preferences, and space-freed history.\nYour photos aren\'t deleted.';
+      'This clears photo analysis, keep/remove records, and space-freed history.\nYour photos aren\'t deleted.';
 
   @override
   String get clearConfirm => 'Clear';
@@ -382,7 +383,7 @@ class L10nEn extends L10n {
 
   @override
   String get privacyLocal =>
-      'Photo analysis, keep and remove records, and learned preferences are stored only on this phone. Nothing is sent to a server or included in cloud backups.';
+      'Photo analysis and keep/remove records are stored only on this phone. Nothing is sent to a server or included in cloud backups.';
 
   @override
   String get privacyGeocode =>
@@ -390,7 +391,7 @@ class L10nEn extends L10n {
 
   @override
   String get privacyTrash =>
-      'Removed photos go to your phone\'s trash, where you can restore them from your gallery app within 30 days.';
+      'Photos moved to trash can be restored from your gallery\'s trash for 30 days.';
 
   @override
   String get clearAll => 'Clear all records';
@@ -407,10 +408,11 @@ class L10nEn extends L10n {
 
   @override
   String get promiseLearn =>
-      'It learns your taste as you go. Early suggestions may be off.';
+      'Suggestions are just the app\'s first pass. Change them anytime.';
 
   @override
-  String get promiseRestore => 'Removed photos can be restored within 30 days.';
+  String get promiseRestore =>
+      'Photos moved to trash can be restored from your gallery\'s trash for 30 days.';
 
   @override
   String get allowAccess => 'Allow photo access';
