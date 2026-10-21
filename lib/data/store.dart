@@ -1,5 +1,6 @@
 import '../models/decision.dart';
 import '../models/features.dart';
+import '../models/pick.dart';
 
 /// 기기 안에만 저장하는 데이터 (분석 결과, 결정, 열람 기록, 비운 용량).
 abstract class Store {
@@ -18,6 +19,10 @@ abstract class Store {
   Future<void> addFreedBytes(String month, int bytes);
   Future<int> freedBytes(String month);
 
+  /// 추천 정확도 기록 (설정의 숨은 화면용)
+  Future<void> addPicks(List<PickRecord> list);
+  Future<List<PickRecord>> loadPicks();
+
   /// 이 폰에 남긴 모든 기록을 지운다 (분석 결과, 결정, 열람, 비운 용량).
   Future<void> clearAll();
 }
@@ -32,6 +37,13 @@ class MemoryStore implements Store {
   final log = <Decision>[];
   final views = <String, ViewRecord>{};
   final freed = <String, int>{};
+  final picks = <PickRecord>[];
+
+  @override
+  Future<void> addPicks(List<PickRecord> list) async => picks.addAll(list);
+
+  @override
+  Future<List<PickRecord>> loadPicks() async => [...picks];
 
   @override
   Future<Map<String, PhotoFeatures>> loadFeatures() async => {...features};
@@ -78,5 +90,6 @@ class MemoryStore implements Store {
     log.clear();
     views.clear();
     freed.clear();
+    picks.clear();
   }
 }

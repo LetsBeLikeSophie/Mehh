@@ -320,5 +320,49 @@
         "type": "String"
       }
     }
-  }
+  },
+  "accTitle": "추천 정확도",
+  "accEmpty": "아직 기록이 없어요. 묶음을 정리하고 [휴지통으로]를 누르면 쌓여요.",
+  "accRate": "추천을 받아들인 비율",
+  "accSends": "{count}번 휴지통으로 보냈어요",
+  "@accSends": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accAccepted": "앱이 추천한 {total}장 중 {count}장을 보냈어요",
+  "@accAccepted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "accAdded": "앱이 놓쳐서 직접 고른 사진 {count}장",
+  "@accAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accBest": "베스트로 고른 사진을 남긴 비율",
+  "accByTag": "이유별",
+  "accTagLine": "{count}/{total}장",
+  "@accTagLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "accNote": "이 기록은 이 폰에만 있어요. 받아들인 비율이 80%를 넘으면 추천을 믿을 만해요."
 }

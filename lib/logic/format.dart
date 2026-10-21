@@ -14,6 +14,10 @@ String formatDate(DateTime d, String locale, {DateTime? now}) {
 
 String formatTime(DateTime d, String locale) => DateFormat.jm(locale).format(d);
 
+/// 0.823 → "82%" (언어별 형식)
+String formatPercent(double v, String locale) =>
+    NumberFormat.percentPattern(locale).format(v);
+
 /// "10월 3일 · 롯데월드", "10월 3일", "캡처"
 String groupTitle(DayGroup g, L10n l, {String? place, DateTime? now}) {
   if (g.kind == DayGroupKind.screenshots) return l.screenshots;

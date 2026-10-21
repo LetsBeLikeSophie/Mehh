@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../models/decision.dart';
 import '../models/features.dart';
+import '../models/pick.dart';
 import 'store.dart';
 
 /// 분석 방식이 바뀌면 올린다. 다른 버전의 분석 결과는 다시 계산한다.
@@ -12,18 +13,23 @@ const _featuresTable = '''
     id TEXT PRIMARY KEY, hi INTEGER, lo INTEGER,
     sharp REAL, bright REAL, contrast REAL, text REAL, mod INTEGER, v INTEGER)''';
 
+const _picksTable = '''
+  CREATE TABLE picks (
+    at INTEGER, kind TEXT, tag TEXT, suggested INTEGER, sent INTEGER)''';
+
 class SqliteStore implements Store {
   Database? _db;
 
   Future<Database> get _database async => _db ??= await openDatabase(
     'mehh.db',
-    version: 3,
+    version: 4,
     onUpgrade: (db, from, _) async {
       // 분석 결과는 캐시라서 버리고 다시 계산한다
       if (from < 3) {
         await db.execute('DROP TABLE IF EXISTS features');
         await db.execute(_featuresTable);
       }
+      if (from < 4) await db.execute(_picksTable);
     },
     onCreate: (db, _) async {
       await db.execute(_featuresTable);
@@ -38,6 +44,7 @@ class SqliteStore implements Store {
           id TEXT PRIMARY KEY, count INTEGER, last_at INTEGER)''');
       await db.execute('''
         CREATE TABLE freed (month TEXT PRIMARY KEY, bytes INTEGER)''');
+      await db.execute(_picksTable);
     },
   );
 
@@ -167,6 +174,33 @@ class SqliteStore implements Store {
   }
 
   @override
+  Future<void> addPicks(List<PickRecord> list) async {
+    final batch = (await _database).batch();
+    for (final p in list) {
+      batch.insert('picks', {
+        'at': p.at.millisecondsSinceEpoch,
+        'kind': p.kind,
+        'tag': p.tag,
+        'suggested': p.suggested ? 1 : 0,
+        'sent': p.sent ? 1 : 0,
+      });
+    }
+    await batch.commit(noResult: true);
+  }
+
+  @override
+  Future<List<PickRecord>> loadPicks() async => [
+    for (final r in await (await _database).query('picks'))
+      PickRecord(
+        at: DateTime.fromMillisecondsSinceEpoch(r['at'] as int),
+        kind: r['kind'] as String,
+        tag: r['tag'] as String?,
+        suggested: r['suggested'] == 1,
+        sent: r['sent'] == 1,
+      ),
+  ];
+
+  @override
   Future<void> clearAll() async {
     final db = await _database;
     await db.transaction((tx) async {
@@ -176,6 +210,7 @@ class SqliteStore implements Store {
         'decision_log',
         'views',
         'freed',
+        'picks',
       ]) {
         await tx.delete(t);
       }

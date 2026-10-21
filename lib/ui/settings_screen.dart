@@ -8,6 +8,7 @@ import '../config/app_config.dart';
 import '../l10n/l10n.dart';
 import '../providers.dart';
 import '../theme.dart';
+import 'accuracy_screen.dart';
 import 'widgets.dart';
 
 /// 설정: 개인정보 안내 + 이 폰에 남긴 기록 지우기
@@ -137,13 +138,8 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ],
                   const SizedBox(height: 24),
-                  const Text(
-                    'Mehh $appVersion',
-                    style: TextStyle(
-                      fontSize: MehhText.label,
-                      color: MehhColors.textMuted,
-                    ),
-                  ),
+                  // 버전 글자를 7번 누르면 추천 정확도 (숨은 화면, SPEC 6-8)
+                  const _VersionTap(),
                 ],
               ),
             ),
@@ -194,4 +190,35 @@ class _Section extends StatelessWidget {
       ),
     );
   }
+}
+
+class _VersionTap extends StatefulWidget {
+  const _VersionTap();
+
+  @override
+  State<_VersionTap> createState() => _VersionTapState();
+}
+
+class _VersionTapState extends State<_VersionTap> {
+  var _taps = 0;
+
+  void _tap() {
+    if (++_taps < 7) return;
+    _taps = 0;
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const AccuracyScreen()));
+  }
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    behavior: HitTestBehavior.opaque,
+    onTap: _tap,
+    child: const Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Text(
+        'Mehh $appVersion',
+        style: TextStyle(fontSize: MehhText.label, color: MehhColors.textMuted),
+      ),
+    ),
+  );
 }

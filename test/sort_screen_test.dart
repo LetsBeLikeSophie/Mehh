@@ -252,6 +252,15 @@ void main() {
       tester.element(find.byType(SortScreen)),
     );
     final now = DateTime.now();
+
+    // 추천 하나(p2)를 빼고 보내면 정확도 기록이 남는다
+    await tester.tap(find.byType(XToggle).at(2));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('1장 휴지통으로'));
+    await tester.pumpAndSettle();
+    final picks = await container.read(storeProvider).loadPicks();
+    expect(picks.where((p) => p.suggested).length, 2);
+    expect(picks.where((p) => p.suggested && p.sent).length, 1);
     expect(container.read(proProvider).value!.freeLeft(now), 2);
     expect(await container.read(proProvider.notifier).unlock(day.id), isTrue);
     expect(container.read(proProvider).value!.freeLeft(now), 2);

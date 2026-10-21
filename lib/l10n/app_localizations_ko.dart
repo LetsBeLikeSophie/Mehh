@@ -487,4 +487,42 @@ class L10nKo extends L10n {
 
   @override
   String get contactCopied => '메일 주소를 복사했어요';
+
+  @override
+  String get accTitle => '추천 정확도';
+
+  @override
+  String get accEmpty => '아직 기록이 없어요. 묶음을 정리하고 [휴지통으로]를 누르면 쌓여요.';
+
+  @override
+  String get accRate => '추천을 받아들인 비율';
+
+  @override
+  String accSends(int count) {
+    return '$count번 휴지통으로 보냈어요';
+  }
+
+  @override
+  String accAccepted(int count, int total) {
+    return '앱이 추천한 $total장 중 $count장을 보냈어요';
+  }
+
+  @override
+  String accAdded(int count) {
+    return '앱이 놓쳐서 직접 고른 사진 $count장';
+  }
+
+  @override
+  String get accBest => '베스트로 고른 사진을 남긴 비율';
+
+  @override
+  String get accByTag => '이유별';
+
+  @override
+  String accTagLine(int count, int total) {
+    return '$count/$total장';
+  }
+
+  @override
+  String get accNote => '이 기록은 이 폰에만 있어요. 받아들인 비율이 80%를 넘으면 추천을 믿을 만해요.';
 }

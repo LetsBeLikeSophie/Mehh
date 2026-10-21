@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../l10n/l10n.dart';
 import '../logic/format.dart';
+import '../logic/pick_stats.dart';
 import '../models/day_group.dart';
 import '../models/decision.dart';
 import '../providers.dart';
@@ -72,10 +73,15 @@ class _SortScreenState extends ConsumerState<SortScreen> {
     ),
   );
 
-  Future<void> _send(List<String> ids, SortSource src) async {
+  Future<void> _send(
+    List<String> ids,
+    SortSource src,
+    List<String> shown,
+  ) async {
     if (!await _confirmSceneLoss(ids, src) || !mounted) return;
     setState(() => _busy = true);
     final n = await sendToTrash(context, ref, ids);
+    if (n > 0) await _recordPicks(ids, src, shown);
     if (mounted) setState(() => _busy = false);
     // 정리를 끝낸 순간에 Pro 안내 (Pro가 아니면 하루 한 번까지)
     if (n > 0 &&
@@ -85,6 +91,27 @@ class _SortScreenState extends ConsumerState<SortScreen> {
         mounted) {
       await showProSheet(context, lead: context.l.proNudge(n));
     }
+  }
+
+  /// 추천 정확도 기록 (SPEC 6-8). 캡처·잠긴 묶음은 앱 추천이 없어 세지 않는다.
+  Future<void> _recordPicks(
+    List<String> sent,
+    SortSource src,
+    List<String> shown,
+  ) async {
+    if (widget.kind == SortKind.screenshots || src.locked > 0) return;
+    await ref
+        .read(storeProvider)
+        .addPicks(
+          pickRecords(
+            at: DateTime.now(),
+            kind: widget.kind.name,
+            shown: shown,
+            sent: sent.toSet(),
+            suggested: src.suggested,
+            tags: {for (final e in src.tags.entries) e.key: e.value.name},
+          ),
+        );
   }
 
   /// 연속 컷·중복 묶음이 통째로 사라지면 한 번 묻는다 (묶음마다 최소 1장)
@@ -347,7 +374,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                 child: FilledButton(
                   onPressed: _busy || marked.isEmpty
                       ? null
-                      : () => _send(marked, src),
+                      : () => _send(marked, src, order),
                   child: Text(
                     marked.isEmpty ? l.noPhotos : l.trashCount(marked.length),
                     style: const TextStyle(

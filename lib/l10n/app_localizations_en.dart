@@ -568,4 +568,56 @@ class L10nEn extends L10n {
 
   @override
   String get contactCopied => 'Email address copied';
+
+  @override
+  String get accTitle => 'Pick accuracy';
+
+  @override
+  String get accEmpty =>
+      'No records yet. Clean up a set and tap Move to trash.';
+
+  @override
+  String get accRate => 'Picks you accepted';
+
+  @override
+  String accSends(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Moved to trash $count times',
+      one: 'Moved to trash once',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String accAccepted(int count, int total) {
+    return 'Sent $count of $total photos the app picked';
+  }
+
+  @override
+  String accAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos you picked that the app missed',
+      one: '1 photo you picked that the app missed',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get accBest => 'Best shots you kept';
+
+  @override
+  String get accByTag => 'By reason';
+
+  @override
+  String accTagLine(int count, int total) {
+    return '$count/$total';
+  }
+
+  @override
+  String get accNote =>
+      'These records stay on this phone. Above 80% accepted, the picks are trustworthy.';
 }

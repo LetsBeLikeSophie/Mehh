@@ -846,6 +846,66 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'메일 주소를 복사했어요'**
   String get contactCopied;
+
+  /// No description provided for @accTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'추천 정확도'**
+  String get accTitle;
+
+  /// No description provided for @accEmpty.
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 기록이 없어요. 묶음을 정리하고 [휴지통으로]를 누르면 쌓여요.'**
+  String get accEmpty;
+
+  /// No description provided for @accRate.
+  ///
+  /// In ko, this message translates to:
+  /// **'추천을 받아들인 비율'**
+  String get accRate;
+
+  /// No description provided for @accSends.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}번 휴지통으로 보냈어요'**
+  String accSends(int count);
+
+  /// No description provided for @accAccepted.
+  ///
+  /// In ko, this message translates to:
+  /// **'앱이 추천한 {total}장 중 {count}장을 보냈어요'**
+  String accAccepted(int count, int total);
+
+  /// No description provided for @accAdded.
+  ///
+  /// In ko, this message translates to:
+  /// **'앱이 놓쳐서 직접 고른 사진 {count}장'**
+  String accAdded(int count);
+
+  /// No description provided for @accBest.
+  ///
+  /// In ko, this message translates to:
+  /// **'베스트로 고른 사진을 남긴 비율'**
+  String get accBest;
+
+  /// No description provided for @accByTag.
+  ///
+  /// In ko, this message translates to:
+  /// **'이유별'**
+  String get accByTag;
+
+  /// No description provided for @accTagLine.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}/{total}장'**
+  String accTagLine(int count, int total);
+
+  /// No description provided for @accNote.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 기록은 이 폰에만 있어요. 받아들인 비율이 80%를 넘으면 추천을 믿을 만해요.'**
+  String get accNote;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {
