@@ -40,12 +40,6 @@ class L10nEn extends L10n {
   String get cancel => 'Cancel';
 
   @override
-  String get undo => 'Undo';
-
-  @override
-  String get reset => 'Start over';
-
-  @override
   String get retry => 'Try again';
 
   @override
@@ -188,43 +182,6 @@ class L10nEn extends L10n {
   String get reasonExposure => 'Good exposure';
 
   @override
-  String summaryJunk(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count accidental shots',
-      one: '1 accidental shot',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String summaryBlurry(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count blurry shots with sharper ones',
-      one: '1 blurry shot with a sharper one',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String summaryBurst(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count similar shots',
-      one: '1 similar shot',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get summaryDuplicates =>
-      'Marked the duplicates, keeping one in each set';
-
-  @override
   String get tagBest => 'Best';
 
   @override
@@ -278,9 +235,6 @@ class L10nEn extends L10n {
   String get markForRemoval => 'Mark for removal';
 
   @override
-  String get resetTitle => 'Reset to the original picks?';
-
-  @override
   String sceneLossTitle(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -318,18 +272,6 @@ class L10nEn extends L10n {
 
     return 'Move $countString to trash';
   }
-
-  @override
-  String get analyzingTitle => 'Analyzing your photos';
-
-  @override
-  String get analyzingDetail => 'Suggestions will fill in as we go.';
-
-  @override
-  String get noneFound => 'Nothing to clean up here';
-
-  @override
-  String get willRemoveSuffix => ' to remove';
 
   @override
   String countAndRange(String count, String range) {
@@ -412,27 +354,6 @@ class L10nEn extends L10n {
   String get allowInSettings => 'Allow in Settings';
 
   @override
-  String get allKept => 'Keeping all of them';
-
-  @override
-  String unlockTitle(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Picked $countString photos to remove',
-      one: 'Picked 1 photo to remove',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get unlockHint => 'Marking photos yourself is free';
-
-  @override
   String get billingPending => 'Confirming your purchase…';
 
   @override
@@ -443,24 +364,6 @@ class L10nEn extends L10n {
 
   @override
   String get billingDemo => 'Preview only — no real payment';
-
-  @override
-  String unlockFree(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'See picks free · $countString left this month',
-      one: 'See picks free · 1 left this month',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get unlockPro => 'See every set with Pro';
 
   @override
   String get proChip => 'Pro';
@@ -539,15 +442,6 @@ class L10nEn extends L10n {
   }
 
   @override
-  String markedCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    return '$countString marked';
-  }
-
-  @override
   String get contact => 'Contact us';
 
   @override
@@ -616,9 +510,6 @@ class L10nEn extends L10n {
       'These records stay on this phone. Above 80% accepted, the picks are trustworthy.';
 
   @override
-  String get toCortex => 'To Cortex';
-
-  @override
   String cortexSendCount(int count) {
     final intl.NumberFormat countNumberFormat =
         intl.NumberFormat.decimalPattern(localeName);
@@ -636,12 +527,6 @@ class L10nEn extends L10n {
   @override
   String get cortexThenTrash =>
       'Sent screenshots move to trash · restore within 30 days';
-
-  @override
-  String get pickForCortex => 'Pick screenshots to send to Cortex';
-
-  @override
-  String get cortexWillSendSuffix => ' to send to Cortex';
 
   @override
   String cortexSentTrashed(int count) {
@@ -664,9 +549,29 @@ class L10nEn extends L10n {
       'Cortex can\'t take several at once yet. Please update Cortex.';
 
   @override
-  String get trashBarCortexSemantics =>
-      'Pick for Cortex. You can also swipe the photo up';
+  String showPicks(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Show picks · $countString';
+  }
 
   @override
-  String get markedCortexPhoto => 'Screenshot to send to Cortex';
+  String freeLeftNote(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count free sets left this month',
+      one: '1 free set left this month',
+      zero: 'No free sets left this month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cortexSend => 'Send to Cortex';
+
+  @override
+  String get keepBarSemantics => 'Keep. You can also swipe the photo down';
 }

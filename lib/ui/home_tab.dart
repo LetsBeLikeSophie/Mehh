@@ -6,13 +6,11 @@ import 'package:photo_manager/photo_manager.dart';
 import '../l10n/l10n.dart';
 import '../logic/format.dart';
 import '../models/day_group.dart';
-import '../models/decision.dart';
 import '../providers.dart';
 import '../theme.dart';
 import 'pro_sheet.dart';
 import 'settings_screen.dart';
 import 'sort_screen.dart';
-import 'sort_source.dart';
 import 'widgets.dart';
 
 /// 홈: 중복 카드 + 그날의 묶음 목록 (최신순, 연도별 구분선).
@@ -537,33 +535,24 @@ class _GroupTile extends ConsumerWidget {
               .value
         : null;
     final entity = ref.read(photoLibraryProvider).entities[group.cover.id];
-    final decisions = ref.watch(decisionsProvider).value ?? const {};
     final status = ref.watch(groupStatusProvider(group));
     final done = status == GroupStatus.done;
     final plan = ref.watch(groupPlanProvider(group));
-    // 앱이 추천한 것(아직 안 정한 것만)과 사용자가 직접 X한 것을 따로 센다
-    final suggested = plan.trash.keys
-        .where((id) => stateOf(decisions, id) == DecisionState.undecided)
-        .length;
-    final marked = group.photos
-        .where((p) => stateOf(decisions, p.id) == DecisionState.toTrash)
-        .length;
+    // 앱이 고른 추천 장수만 (직접 X는 세지 않는다)
+    final suggested = plan.trash.length;
 
     final l = context.l;
     final meta = StringBuffer(l.photos(group.count));
     switch (status) {
       case GroupStatus.needsWork:
         if (suggested > 0) meta.write(' · ${l.suggestedCount(suggested)}');
-        if (marked > 0) meta.write(' · ${l.markedCount(marked)}');
       case GroupStatus.analyzing:
         meta.write(' · ${l.analyzingShort}');
       case GroupStatus.done:
         meta.write(' · ${l.allSeen}');
       case GroupStatus.nothing:
         if (group.kind == DayGroupKind.screenshots) {
-          meta.write(
-            ' · ${watchCortexMode(ref, SortKind.screenshots) ? l.pickForCortex : l.pickScreenshots}',
-          );
+          meta.write(' · ${l.pickScreenshots}');
         }
     }
 

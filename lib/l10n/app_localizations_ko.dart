@@ -40,12 +40,6 @@ class L10nKo extends L10n {
   String get cancel => '취소';
 
   @override
-  String get undo => '되돌리기';
-
-  @override
-  String get reset => '처음대로';
-
-  @override
   String get retry => '다시 시도';
 
   @override
@@ -163,24 +157,6 @@ class L10nKo extends L10n {
   String get reasonExposure => '밝기 적당';
 
   @override
-  String summaryJunk(int count) {
-    return '실수로 찍힌 사진 $count장';
-  }
-
-  @override
-  String summaryBlurry(int count) {
-    return '더 선명한 컷이 있는 흔들린 사진 $count장';
-  }
-
-  @override
-  String summaryBurst(int count) {
-    return '비슷한 연속 컷 $count장';
-  }
-
-  @override
-  String get summaryDuplicates => '묶음마다 하나만 남기고 똑같은 사진에 X를 쳐 뒀어요';
-
-  @override
   String get tagBest => '베스트';
 
   @override
@@ -234,9 +210,6 @@ class L10nKo extends L10n {
   String get markForRemoval => '정리하기';
 
   @override
-  String get resetTitle => '처음 상태로 되돌릴까요?';
-
-  @override
   String sceneLossTitle(int count) {
     return '$count개 장면은 사진이 하나도 안 남아요';
   }
@@ -267,18 +240,6 @@ class L10nKo extends L10n {
 
     return '$countString장 휴지통으로';
   }
-
-  @override
-  String get analyzingTitle => '사진을 살펴보는 중이에요';
-
-  @override
-  String get analyzingDetail => '추천이 조금씩 채워져요.';
-
-  @override
-  String get noneFound => '정리할 사진을 못 찾았어요';
-
-  @override
-  String get willRemoveSuffix => ' 정리할게요';
 
   @override
   String countAndRange(String count, String range) {
@@ -349,21 +310,6 @@ class L10nKo extends L10n {
   String get allowInSettings => '설정에서 허용하기';
 
   @override
-  String get allKept => '전부 킵하기로 했어요';
-
-  @override
-  String unlockTitle(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    return '정리 추천 $countString장을 골라 뒀어요';
-  }
-
-  @override
-  String get unlockHint => '직접 X를 눌러 고르는 건 무료예요';
-
-  @override
   String get billingPending => '결제를 확인하는 중이에요';
 
   @override
@@ -374,18 +320,6 @@ class L10nKo extends L10n {
 
   @override
   String get billingDemo => '미리보기라 실제로 결제되지 않아요';
-
-  @override
-  String unlockFree(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    return '무료로 보기 · 이번 달 $countString개 남음';
-  }
-
-  @override
-  String get unlockPro => 'Pro로 모든 묶음 보기';
 
   @override
   String get proChip => 'Pro';
@@ -458,15 +392,6 @@ class L10nKo extends L10n {
   }
 
   @override
-  String markedCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    return 'X 표시 $countString장';
-  }
-
-  @override
   String get contact => '문의하기';
 
   @override
@@ -521,9 +446,6 @@ class L10nKo extends L10n {
   String get accNote => '이 기록은 이 폰에만 있어요. 받아들인 비율이 80%를 넘으면 추천을 믿을 만해요.';
 
   @override
-  String get toCortex => 'Cortex로';
-
-  @override
   String cortexSendCount(int count) {
     final intl.NumberFormat countNumberFormat =
         intl.NumberFormat.decimalPattern(localeName);
@@ -534,12 +456,6 @@ class L10nKo extends L10n {
 
   @override
   String get cortexThenTrash => '보낸 캡처는 휴지통으로 옮겨요 · 30일 안에 되살릴 수 있어요';
-
-  @override
-  String get pickForCortex => 'Cortex로 보낼 캡처를 골라 보세요';
-
-  @override
-  String get cortexWillSendSuffix => ' Cortex로 보낼게요';
 
   @override
   String cortexSentTrashed(int count) {
@@ -555,8 +471,22 @@ class L10nKo extends L10n {
       'Cortex가 아직 여러 장 받기를 못 해요. Cortex를 업데이트해 주세요.';
 
   @override
-  String get trashBarCortexSemantics => 'Cortex로 보낼 캡처로 고르기. 사진을 위로 올려도 돼요';
+  String showPicks(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '추천 보기 · $countString장';
+  }
 
   @override
-  String get markedCortexPhoto => 'Cortex로 보낼 캡처';
+  String freeLeftNote(int count) {
+    return '이번 달 무료 묶음이 $count개 남았어요';
+  }
+
+  @override
+  String get cortexSend => 'Cortex로 보내기';
+
+  @override
+  String get keepBarSemantics => '킵. 사진을 아래로 내려도 돼요';
 }

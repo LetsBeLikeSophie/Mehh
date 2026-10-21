@@ -12,8 +12,8 @@ import 'photo_viewer.dart';
 import 'sort_source.dart';
 import 'widgets.dart';
 
-/// 크게 보기: 위로 밀면 정리, 아래로 밀면 킵. 이미 그 상태면 같은 방향으로 한 번 더 = 취소.
-/// 좌우는 이전·다음 이동만 (상태는 바뀌지 않음, 끝에서 처음으로 이어짐).
+/// 크게 보기: 위로 밀면 정리, 아래로 밀면 킵 (위·아래에 같은 모양의 줄, 눌러도 된다).
+/// 잘못 정했으면 반대로 밀면 된다. 좌우는 이전·다음 이동만 (끝에서 처음으로 이어짐).
 /// 아래 한 줄 사진 줄이 지금 위치와 각 사진의 상태(정리 = 흐리게 + X, 킵 = 체크)를 보여 준다.
 class FocusScreen extends ConsumerStatefulWidget {
   const FocusScreen({
@@ -33,12 +33,6 @@ class FocusScreen extends ConsumerStatefulWidget {
   ConsumerState<FocusScreen> createState() => _FocusScreenState();
 }
 
-class _Undo {
-  const _Undo(this.before, this.id);
-  final Map<String, Decision?> before;
-  final String id;
-}
-
 /// 사진이 들어오고 나가는 방향
 enum _Motion { next, prev, up, down }
 
@@ -53,7 +47,6 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
   double _zoom = 1;
 
   _Motion _motion = _Motion.next;
-  final _undo = <_Undo>[];
 
   void _go(List<String> ids, int step, _Motion motion) {
     if (ids.isEmpty) return;
@@ -67,29 +60,16 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
 
   /// 정하고 다음 사진으로
   Future<void> _decide(List<String> ids, DecisionState s) async {
-    final id = _currentId;
-    final before = await ref.read(decisionsProvider.notifier).set([id], s);
-    _undo.add(_Undo(before, id));
+    await ref.read(decisionsProvider.notifier).set([_currentId], s);
     if (!mounted) return;
     _go(ids, 1, s == DecisionState.keep ? _Motion.down : _Motion.up);
   }
 
   /// 같은 손동작은 언제나 같은 결과 (CLAUDE.md): 위로 = 정리, 아래로 = 킵.
-  /// 잘못 했으면 반대로 밀거나 되돌리기.
+  /// 잘못 했으면 반대로 밀면 된다.
   void _up(List<String> ids) => _decide(ids, DecisionState.toTrash);
 
   void _down(List<String> ids) => _decide(ids, DecisionState.keep);
-
-  Future<void> _undoLast() async {
-    if (_undo.isEmpty) return;
-    final u = _undo.removeLast();
-    await ref.read(decisionsProvider.notifier).restore(u.before);
-    if (!mounted) return;
-    setState(() {
-      _motion = _Motion.prev;
-      _currentId = u.id;
-    });
-  }
 
   // ───────────────────────── 밀기·확대
 
@@ -145,8 +125,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     }
   }
 
-  String? _dragLabel(L10n l, {required bool cortex}) {
-    if (_drag.dy < -40) return cortex ? l.toCortex : l.pile;
+  String? _dragLabel(L10n l) {
+    if (_drag.dy < -40) return l.pile;
     if (_drag.dy > 40) return l.keep;
     return null;
   }
@@ -162,8 +142,6 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
   Widget build(BuildContext context) {
     final l = context.l;
     final src = watchSortSource(ref, widget.kind, widget.group);
-    // 캡처 + Cortex 설치: 위로 = Cortex로 보낼 캡처 (보낸 뒤 휴지통으로)
-    final cortex = watchCortexMode(ref, widget.kind);
     final decisions = ref.watch(decisionsProvider).value ?? const {};
     final entities = ref.read(photoLibraryProvider).entities;
     final ids = [
@@ -177,7 +155,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     final state = stateOf(decisions, current);
     final (inFrom, outTo) = _slide;
     final kept = state == DecisionState.keep;
-    final label = _dragLabel(l, cortex: cortex);
+    final label = _dragLabel(l);
 
     final card = KeyedSubtree(
       key: ValueKey(current),
@@ -202,10 +180,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                   runSpacing: 6,
                   children: [
                     if (marked)
-                      _Chip(
-                        cortex ? '↗ ${l.toCortex}' : '✕ ${l.pile}',
-                        dark: true,
-                      )
+                      _Chip('✕ ${l.pile}', dark: true)
                     else if (kept)
                       _Chip('✓ ${l.keep}', dark: true),
                     if (src.tags[current] case final t?)
@@ -239,25 +214,19 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                       color: MehhColors.text,
                     ),
                   ),
-                  // 위치는 아래 사진 줄이 보여 주므로 "3 / 214" 숫자는 두지 않는다
-                  const Spacer(),
-                  // Cortex로 보내기는 여러 장을 모아 그리드 아래 버튼으로 (한 장씩 보내지 않는다)
-                  IconButton(
-                    tooltip: l.undo,
-                    onPressed: _undo.isEmpty ? null : _undoLast,
-                    icon: const Icon(Icons.undo, size: 20),
-                    color: MehhColors.text,
-                    disabledColor: MehhColors.border,
-                  ),
+                  // 위치는 아래 사진 줄이 보여 주므로 "3 / 214" 숫자는 두지 않는다.
+                  // 되돌리기 버튼도 두지 않는다: 반대로 밀면 된다 (2026-10-22)
                 ],
               ),
               const SizedBox(height: 4),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: _TrashBar(
+                child: _ActionBar(
                   // 위로 끌수록 채워진다 (90px에서 꽉 참)
                   fill: (-_drag.dy / 90).clamp(0.0, 1.0),
-                  cortex: cortex,
+                  icon: Icons.delete_outline,
+                  label: l.pile,
+                  semantics: l.trashBarSemantics,
                   onTap: () => _up(ids),
                 ),
               ),
@@ -268,10 +237,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                   child: Semantics(
                     label: l.photoSemantics,
                     customSemanticsActions: {
-                      CustomSemanticsAction(
-                        label: cortex ? l.toCortex : l.pile,
-                      ): () =>
-                          _up(ids),
+                      CustomSemanticsAction(label: l.pile): () => _up(ids),
                       CustomSemanticsAction(label: l.keep): () => _down(ids),
                       CustomSemanticsAction(label: l.nextPhoto): () =>
                           _go(ids, 1, _Motion.next),
@@ -310,6 +276,18 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                       ),
                     ),
                   ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: _ActionBar(
+                  // 아래로 끌수록 채워진다 (위쪽 정리 줄과 같은 모양)
+                  fill: (_drag.dy / 90).clamp(0.0, 1.0),
+                  icon: Icons.check,
+                  label: l.keep,
+                  semantics: l.keepBarSemantics,
+                  onTap: () => _down(ids),
                 ),
               ),
               const SizedBox(height: 12),
@@ -526,18 +504,20 @@ class _Chip extends StatelessWidget {
   }
 }
 
-/// 맨 위 쓰레기통 줄: 사진을 위로 끌면 점점 검게 채워진다. 눌러도 정리.
-class _TrashBar extends StatelessWidget {
-  const _TrashBar({
+/// 위 정리 줄·아래 킵 줄: 사진을 그쪽으로 끌면 점점 검게 채워진다. 눌러도 된다.
+class _ActionBar extends StatelessWidget {
+  const _ActionBar({
     required this.fill,
+    required this.icon,
+    required this.label,
+    required this.semantics,
     required this.onTap,
-    this.cortex = false,
   });
 
   final double fill;
-
-  /// 캡처를 Cortex로 보내는 모드: "정리" 대신 "Cortex로"
-  final bool cortex;
+  final IconData icon;
+  final String label;
+  final String semantics;
   final VoidCallback onTap;
 
   @override
@@ -546,14 +526,12 @@ class _TrashBar extends StatelessWidget {
     final fg = Color.lerp(MehhColors.text, MehhColors.white, fill)!;
     return Semantics(
       button: true,
-      label: cortex
-          ? context.l.trashBarCortexSemantics
-          : context.l.trashBarSemantics,
+      label: semantics,
       child: GestureDetector(
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 80),
-          height: 48,
+          height: 44,
           decoration: BoxDecoration(
             color: bg,
             borderRadius: BorderRadius.circular(MehhRadius.card),
@@ -561,14 +539,10 @@ class _TrashBar extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                cortex ? Icons.north_east : Icons.delete_outline,
-                size: 22,
-                color: fg,
-              ),
+              Icon(icon, size: 20, color: fg),
               const SizedBox(width: 6),
               Text(
-                cortex ? context.l.toCortex : context.l.pile,
+                label,
                 style: TextStyle(
                   fontSize: MehhText.bodySmall,
                   fontWeight: FontWeight.w600,

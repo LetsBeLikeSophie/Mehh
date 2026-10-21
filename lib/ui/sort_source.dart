@@ -90,33 +90,9 @@ String noteText(PhotoTag t, List<BestReason> reasons, L10n l) => switch (t) {
   PhotoTag.duplicate => l.tagDuplicate,
 };
 
-/// 요약 박스 이유 한 줄 ("흔들린 사진 21장, 비슷한 연속 컷 117장")
-String? summaryText(SortKind kind, SortSource src, L10n l) {
-  if (kind == SortKind.duplicates) return l.summaryDuplicates;
-  final plan = src.plan;
-  if (plan == null) return null;
-  final junk = plan.count(TrashReason.junk);
-  final blurry = plan.count(TrashReason.blurry);
-  final burst = plan.count(TrashReason.burst);
-  final parts = [
-    if (junk > 0) l.summaryJunk(junk),
-    if (blurry > 0) l.summaryBlurry(blurry),
-    if (burst > 0) l.summaryBurst(burst),
-  ];
-  return parts.isEmpty ? null : parts.join(', ');
-}
-
-/// 정리할 사진(X)인가: 직접 정리로 정했거나, 아직 안 정했는데 앱이 추천한 것
-bool isMarked(String id, Map<String, Decision> decisions, SortSource src) {
-  final s = stateOf(decisions, id);
-  return s == DecisionState.toTrash ||
-      (s == DecisionState.undecided && src.suggested.contains(id));
-}
-
-/// 캡처 + Cortex 설치: "정리" 대신 "Cortex로 보내기"를 고른다 (보낸 뒤 휴지통으로, SPEC 5-3)
-bool watchCortexMode(WidgetRef ref, SortKind kind) =>
-    kind == SortKind.screenshots &&
-    (ref.watch(cortexInstalledProvider).value ?? false);
+/// 정리할 사진(X)인가. 앱 추천은 [추천 보기]를 눌러야 X로 들어간다 (2026-10-22).
+bool isMarked(String id, Map<String, Decision> decisions, SortSource src) =>
+    stateOf(decisions, id) == DecisionState.toTrash;
 
 SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
   final features = ref.watch(analysisProvider.select((s) => s.features));

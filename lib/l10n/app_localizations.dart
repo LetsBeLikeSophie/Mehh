@@ -157,18 +157,6 @@ abstract class L10n {
   /// **'취소'**
   String get cancel;
 
-  /// No description provided for @undo.
-  ///
-  /// In ko, this message translates to:
-  /// **'되돌리기'**
-  String get undo;
-
-  /// No description provided for @reset.
-  ///
-  /// In ko, this message translates to:
-  /// **'처음대로'**
-  String get reset;
-
   /// No description provided for @retry.
   ///
   /// In ko, this message translates to:
@@ -331,30 +319,6 @@ abstract class L10n {
   /// **'밝기 적당'**
   String get reasonExposure;
 
-  /// No description provided for @summaryJunk.
-  ///
-  /// In ko, this message translates to:
-  /// **'실수로 찍힌 사진 {count}장'**
-  String summaryJunk(int count);
-
-  /// No description provided for @summaryBlurry.
-  ///
-  /// In ko, this message translates to:
-  /// **'더 선명한 컷이 있는 흔들린 사진 {count}장'**
-  String summaryBlurry(int count);
-
-  /// No description provided for @summaryBurst.
-  ///
-  /// In ko, this message translates to:
-  /// **'비슷한 연속 컷 {count}장'**
-  String summaryBurst(int count);
-
-  /// No description provided for @summaryDuplicates.
-  ///
-  /// In ko, this message translates to:
-  /// **'묶음마다 하나만 남기고 똑같은 사진에 X를 쳐 뒀어요'**
-  String get summaryDuplicates;
-
   /// No description provided for @tagBest.
   ///
   /// In ko, this message translates to:
@@ -457,12 +421,6 @@ abstract class L10n {
   /// **'정리하기'**
   String get markForRemoval;
 
-  /// No description provided for @resetTitle.
-  ///
-  /// In ko, this message translates to:
-  /// **'처음 상태로 되돌릴까요?'**
-  String get resetTitle;
-
   /// No description provided for @sceneLossTitle.
   ///
   /// In ko, this message translates to:
@@ -510,30 +468,6 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'{count}장 휴지통으로'**
   String trashCount(int count);
-
-  /// No description provided for @analyzingTitle.
-  ///
-  /// In ko, this message translates to:
-  /// **'사진을 살펴보는 중이에요'**
-  String get analyzingTitle;
-
-  /// No description provided for @analyzingDetail.
-  ///
-  /// In ko, this message translates to:
-  /// **'추천이 조금씩 채워져요.'**
-  String get analyzingDetail;
-
-  /// No description provided for @noneFound.
-  ///
-  /// In ko, this message translates to:
-  /// **'정리할 사진을 못 찾았어요'**
-  String get noneFound;
-
-  /// No description provided for @willRemoveSuffix.
-  ///
-  /// In ko, this message translates to:
-  /// **' 정리할게요'**
-  String get willRemoveSuffix;
 
   /// No description provided for @countAndRange.
   ///
@@ -649,24 +583,6 @@ abstract class L10n {
   /// **'설정에서 허용하기'**
   String get allowInSettings;
 
-  /// No description provided for @allKept.
-  ///
-  /// In ko, this message translates to:
-  /// **'전부 킵하기로 했어요'**
-  String get allKept;
-
-  /// No description provided for @unlockTitle.
-  ///
-  /// In ko, this message translates to:
-  /// **'정리 추천 {count}장을 골라 뒀어요'**
-  String unlockTitle(int count);
-
-  /// No description provided for @unlockHint.
-  ///
-  /// In ko, this message translates to:
-  /// **'직접 X를 눌러 고르는 건 무료예요'**
-  String get unlockHint;
-
   /// No description provided for @billingPending.
   ///
   /// In ko, this message translates to:
@@ -690,18 +606,6 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'미리보기라 실제로 결제되지 않아요'**
   String get billingDemo;
-
-  /// No description provided for @unlockFree.
-  ///
-  /// In ko, this message translates to:
-  /// **'무료로 보기 · 이번 달 {count}개 남음'**
-  String unlockFree(int count);
-
-  /// No description provided for @unlockPro.
-  ///
-  /// In ko, this message translates to:
-  /// **'Pro로 모든 묶음 보기'**
-  String get unlockPro;
 
   /// No description provided for @proChip.
   ///
@@ -805,12 +709,6 @@ abstract class L10n {
   /// **'{count}장 정리했어요. 남은 묶음도 추천대로 바로 정리해 볼까요?'**
   String proNudge(int count);
 
-  /// No description provided for @markedCount.
-  ///
-  /// In ko, this message translates to:
-  /// **'X 표시 {count}장'**
-  String markedCount(int count);
-
   /// No description provided for @contact.
   ///
   /// In ko, this message translates to:
@@ -895,12 +793,6 @@ abstract class L10n {
   /// **'이 기록은 이 폰에만 있어요. 받아들인 비율이 80%를 넘으면 추천을 믿을 만해요.'**
   String get accNote;
 
-  /// No description provided for @toCortex.
-  ///
-  /// In ko, this message translates to:
-  /// **'Cortex로'**
-  String get toCortex;
-
   /// No description provided for @cortexSendCount.
   ///
   /// In ko, this message translates to:
@@ -912,18 +804,6 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'보낸 캡처는 휴지통으로 옮겨요 · 30일 안에 되살릴 수 있어요'**
   String get cortexThenTrash;
-
-  /// No description provided for @pickForCortex.
-  ///
-  /// In ko, this message translates to:
-  /// **'Cortex로 보낼 캡처를 골라 보세요'**
-  String get pickForCortex;
-
-  /// No description provided for @cortexWillSendSuffix.
-  ///
-  /// In ko, this message translates to:
-  /// **' Cortex로 보낼게요'**
-  String get cortexWillSendSuffix;
 
   /// No description provided for @cortexSentTrashed.
   ///
@@ -937,17 +817,29 @@ abstract class L10n {
   /// **'Cortex가 아직 여러 장 받기를 못 해요. Cortex를 업데이트해 주세요.'**
   String get cortexMultiUnsupported;
 
-  /// No description provided for @trashBarCortexSemantics.
+  /// No description provided for @showPicks.
   ///
   /// In ko, this message translates to:
-  /// **'Cortex로 보낼 캡처로 고르기. 사진을 위로 올려도 돼요'**
-  String get trashBarCortexSemantics;
+  /// **'추천 보기 · {count}장'**
+  String showPicks(int count);
 
-  /// No description provided for @markedCortexPhoto.
+  /// No description provided for @freeLeftNote.
   ///
   /// In ko, this message translates to:
-  /// **'Cortex로 보낼 캡처'**
-  String get markedCortexPhoto;
+  /// **'이번 달 무료 묶음이 {count}개 남았어요'**
+  String freeLeftNote(int count);
+
+  /// No description provided for @cortexSend.
+  ///
+  /// In ko, this message translates to:
+  /// **'Cortex로 보내기'**
+  String get cortexSend;
+
+  /// No description provided for @keepBarSemantics.
+  ///
+  /// In ko, this message translates to:
+  /// **'킵. 사진을 아래로 내려도 돼요'**
+  String get keepBarSemantics;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

@@ -19,8 +19,6 @@
   "home": "홈으로",
   "settings": "설정",
   "cancel": "취소",
-  "undo": "되돌리기",
-  "reset": "처음대로",
   "retry": "다시 시도",
   "loadingGroups": "사진을 묶는 중이에요",
   "loadFailed": "사진을 불러오지 못했어요",
@@ -109,31 +107,6 @@
   "duplicatesTitle": "똑같은 사진",
   "reasonSharp": "초점 선명",
   "reasonExposure": "밝기 적당",
-  "summaryJunk": "실수로 찍힌 사진 {count}장",
-  "@summaryJunk": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "summaryBlurry": "더 선명한 컷이 있는 흔들린 사진 {count}장",
-  "@summaryBlurry": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "summaryBurst": "비슷한 연속 컷 {count}장",
-  "@summaryBurst": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "summaryDuplicates": "묶음마다 하나만 남기고 똑같은 사진에 X를 쳐 뒀어요",
   "tagBest": "베스트",
   "tagBurst": "비슷한 컷",
   "tagBlurry": "흔들림",
@@ -158,7 +131,6 @@
   "prevPhoto": "이전 사진",
   "trashBarSemantics": "정리. 사진을 위로 올려도 돼요",
   "markForRemoval": "정리하기",
-  "resetTitle": "처음 상태로 되돌릴까요?",
   "sceneLossTitle": "{count}개 장면은 사진이 하나도 안 남아요",
   "@sceneLossTitle": {
     "placeholders": {
@@ -182,10 +154,6 @@
       }
     }
   },
-  "analyzingTitle": "사진을 살펴보는 중이에요",
-  "analyzingDetail": "추천이 조금씩 채워져요.",
-  "noneFound": "정리할 사진을 못 찾았어요",
-  "willRemoveSuffix": " 정리할게요",
   "countAndRange": "{count} · {range}",
   "@countAndRange": {
     "placeholders": {
@@ -223,31 +191,10 @@
   "promiseRestore": "휴지통으로 보낸 사진은 30일 동안 갤러리 휴지통에서 되살릴 수 있어요.",
   "allowAccess": "사진 접근 허용",
   "allowInSettings": "설정에서 허용하기",
-  "allKept": "전부 킵하기로 했어요",
-  "unlockTitle": "정리 추천 {count}장을 골라 뒀어요",
-  "@unlockTitle": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "format": "decimalPattern"
-      }
-    }
-  },
-  "unlockHint": "직접 X를 눌러 고르는 건 무료예요",
   "billingPending": "결제를 확인하는 중이에요",
   "billingFailed": "결제를 마치지 못했어요",
   "billingUnavailable": "지금은 스토어에 연결할 수 없어요",
   "billingDemo": "미리보기라 실제로 결제되지 않아요",
-  "unlockFree": "무료로 보기 · 이번 달 {count}개 남음",
-  "@unlockFree": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "format": "decimalPattern"
-      }
-    }
-  },
-  "unlockPro": "Pro로 모든 묶음 보기",
   "proChip": "Pro",
   "freeChip": "무료 {count}개",
   "@freeChip": {
@@ -285,15 +232,6 @@
   "proThanks": "Pro가 열렸어요",
   "proNudge": "{count}장 정리했어요. 남은 묶음도 추천대로 바로 정리해 볼까요?",
   "@proNudge": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "format": "decimalPattern"
-      }
-    }
-  },
-  "markedCount": "X 표시 {count}장",
-  "@markedCount": {
     "placeholders": {
       "count": {
         "type": "int",
@@ -363,7 +301,6 @@
     }
   },
   "accNote": "이 기록은 이 폰에만 있어요. 받아들인 비율이 80%를 넘으면 추천을 믿을 만해요.",
-  "toCortex": "Cortex로",
   "cortexSendCount": "{count}장 Cortex로 보내기",
   "@cortexSendCount": {
     "placeholders": {
@@ -374,8 +311,6 @@
     }
   },
   "cortexThenTrash": "보낸 캡처는 휴지통으로 옮겨요 · 30일 안에 되살릴 수 있어요",
-  "pickForCortex": "Cortex로 보낼 캡처를 골라 보세요",
-  "cortexWillSendSuffix": " Cortex로 보낼게요",
   "cortexSentTrashed": "{count}장을 Cortex로 보내고 휴지통으로 옮겼어요 · 30일 안에 되살릴 수 있어요",
   "@cortexSentTrashed": {
     "placeholders": {
@@ -386,6 +321,23 @@
     }
   },
   "cortexMultiUnsupported": "Cortex가 아직 여러 장 받기를 못 해요. Cortex를 업데이트해 주세요.",
-  "trashBarCortexSemantics": "Cortex로 보낼 캡처로 고르기. 사진을 위로 올려도 돼요",
-  "markedCortexPhoto": "Cortex로 보낼 캡처"
+  "showPicks": "추천 보기 · {count}장",
+  "@showPicks": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "freeLeftNote": "이번 달 무료 묶음이 {count}개 남았어요",
+  "@freeLeftNote": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cortexSend": "Cortex로 보내기",
+  "keepBarSemantics": "킵. 사진을 아래로 내려도 돼요"
 }

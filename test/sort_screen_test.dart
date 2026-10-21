@@ -82,7 +82,7 @@ void main() {
 
     await tester.tap(find.text('1장 휴지통으로'));
     await tester.pumpAndSettle();
-    expect(find.text('3장'), findsOneWidget); // 남은 사진 수
+    expect(find.textContaining('3장'), findsOneWidget); // 남은 사진 수
     expect(find.text('정리할 사진이 없어요'), findsWidgets);
     await flush(tester);
   });
@@ -140,6 +140,20 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('크게 보기: 아래 킵 줄을 눌러도 킵, 되돌리기 버튼은 없다', (tester) async {
+    await pump(
+      tester,
+      FocusScreen(kind: SortKind.singles, group: group, initialId: 'p3'),
+    );
+    expect(find.byIcon(Icons.undo), findsNothing);
+    await tester.tap(find.text('킵'));
+    await tester.pumpAndSettle();
+    await tester.drag(card(), const Offset(200, 0)); // 이전 = 방금 킵한 사진
+    await tester.pumpAndSettle();
+    expect(find.text('✓ 킵'), findsOneWidget);
+    await flush(tester);
+  });
+
   testWidgets('크게 보기: 맨 위 쓰레기통 줄을 눌러도 정리된다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     await tester.tap(find.byType(PhotoThumb).first);
@@ -152,7 +166,7 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('그리드: [처음대로]는 처음 상태로, [전체 선택]은 모두 X·다시 누르면 해제', (tester) async {
+  testWidgets('그리드: [전체 선택]은 모두 X, 다시 누르면 해제 ([처음대로]는 없다)', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     await tester.tap(find.text('전체 선택'));
     await tester.pumpAndSettle();
@@ -161,14 +175,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('정리할 사진이 없어요'), findsWidgets);
 
-    await tester.tap(find.byType(XToggle).first);
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(TextButton, '처음대로'));
-    await tester.pumpAndSettle();
-    expect(find.text('처음 상태로 되돌릴까요?'), findsOneWidget);
-    await tester.tap(find.widgetWithText(TextButton, '처음대로').last);
-    await tester.pumpAndSettle();
-    expect(find.text('1장 휴지통으로'), findsNothing);
+    expect(find.text('처음대로'), findsNothing);
     await flush(tester);
   });
 
@@ -202,16 +209,15 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('캡처: 요약은 "골라 보세요", X를 껐다 켜면 "전부 킵", 홈 상태는 X가 있을 때만 할 일', (
-    tester,
-  ) async {
+  testWidgets('캡처: [추천 보기]는 없고, 홈 상태는 X가 있을 때만 할 일', (tester) async {
     final shots = DayGroup(
       id: 'shots',
       kind: DayGroupKind.screenshots,
       photos: photos,
     );
     await pump(tester, SortScreen(kind: SortKind.screenshots, group: shots));
-    expect(find.text('지울 캡처를 골라 보세요'), findsOneWidget);
+    expect(find.textContaining('추천 보기'), findsNothing);
+    expect(find.text('Cortex로 보내기'), findsNothing); // Cortex가 없으면 버튼도 없다
 
     final container = ProviderScope.containerOf(
       tester.element(find.byType(SortScreen)),
@@ -223,12 +229,13 @@ void main() {
     expect(container.read(groupStatusProvider(shots)), GroupStatus.needsWork);
     await tester.tap(find.byType(XToggle).first); // X 끄기 = 킵
     await tester.pumpAndSettle();
-    expect(find.text('전부 킵하기로 했어요'), findsOneWidget);
     expect(container.read(groupStatusProvider(shots)), GroupStatus.done);
     await flush(tester);
   });
 
-  testWidgets('그날의 묶음: 추천은 이번 달 무료 묶음으로 열고, 연 묶음은 계속 열림', (tester) async {
+  testWidgets('그날의 묶음: [추천 보기]를 눌러야 X, 이번 달 무료 묶음으로 열고 연 묶음은 계속 열림', (
+    tester,
+  ) async {
     final day = DayGroup(id: 'day-p0', kind: DayGroupKind.day, photos: photos);
     final plan = GroupPlan(
       bursts: [
@@ -243,12 +250,12 @@ void main() {
       SortScreen(kind: SortKind.day, group: day),
       extra: [groupPlanProvider.overrideWith((ref, g) => plan)],
     );
-    expect(find.text('정리 추천 2장을 골라 뒀어요'), findsOneWidget);
-    expect(find.text('2장 휴지통으로'), findsNothing); // 열기 전엔 X 없음
+    expect(find.text('2장 휴지통으로'), findsNothing); // 누르기 전엔 X 없음
 
-    await tester.tap(find.text('무료로 보기 · 이번 달 3개 남음'));
+    await tester.tap(find.text('추천 보기 · 2장'));
     await tester.pumpAndSettle();
     expect(find.text('2장 휴지통으로'), findsOneWidget);
+    expect(find.text('이번 달 무료 묶음이 2개 남았어요'), findsOneWidget);
     final container = ProviderScope.containerOf(
       tester.element(find.byType(SortScreen)),
     );
@@ -256,6 +263,7 @@ void main() {
 
     // 추천 하나(p2)를 빼고 보내면 정확도 기록이 남는다
     await tester.tap(find.byType(XToggle).at(2));
+    await tester.pump(const Duration(seconds: 5)); // 무료 묶음 안내가 사라지게
     await tester.pumpAndSettle();
     await tester.tap(find.text('1장 휴지통으로'));
     await tester.pumpAndSettle();
@@ -313,7 +321,9 @@ void main() {
     expect(vault.value.lifetime, isTrue);
   });
 
-  testWidgets('캡처 + Cortex: 여러 장 골라 한 번에 보내고, 돌아오면 휴지통으로', (tester) async {
+  testWidgets('캡처 + Cortex: 위쪽 [Cortex로 보내기]로 여러 장 한 번에, 돌아오면 휴지통으로', (
+    tester,
+  ) async {
     final shots = DayGroup(
       id: 'shots',
       kind: DayGroupKind.screenshots,
@@ -328,21 +338,22 @@ void main() {
         handoffProvider.overrideWithValue(handoff),
       ],
     );
-    expect(find.text('Cortex로 보낼 캡처를 골라 보세요'), findsOneWidget);
+    expect(find.text('Cortex로 보내기'), findsOneWidget); // 고르기 전엔 흐리게
     await tester.tap(find.byType(XToggle).at(0));
     await tester.tap(find.byType(XToggle).at(1));
     await tester.pumpAndSettle();
     expect(find.text('보낸 캡처는 휴지통으로 옮겨요 · 30일 안에 되살릴 수 있어요'), findsOneWidget);
 
+    expect(find.text('2장 휴지통으로'), findsOneWidget); // 그냥 지울 수도 있다
     await tester.tap(find.text('2장 Cortex로 보내기'));
     await tester.pumpAndSettle();
     expect(handoff.sent.length, 2);
-    expect(find.text('4장'), findsOneWidget); // 아직 휴지통으로 안 감
+    expect(find.textContaining('4장'), findsOneWidget); // 아직 휴지통으로 안 감
 
     // Cortex에서 돌아오면 휴지통으로
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pumpAndSettle();
-    expect(find.text('2장'), findsOneWidget);
+    expect(find.text('2장'), findsOneWidget); // 남은 캡처 수
     expect(find.textContaining('Cortex로 보내고 휴지통으로'), findsOneWidget);
     await flush(tester);
   });
