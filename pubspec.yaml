@@ -2,7 +2,7 @@ name: mehh
 description: "Mehh: 사진 정리, 중복 사진 삭제"
 publish_to: 'none'
 
-version: 1.5.0+17
+version: 1.5.1+18
 
 environment:
   sdk: ^3.13.1
