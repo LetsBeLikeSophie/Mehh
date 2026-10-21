@@ -25,9 +25,6 @@ class L10nEn extends L10n {
   String get pileCancel => 'Undo remove';
 
   @override
-  String get keepCancel => 'Undo keep';
-
-  @override
   String get back => 'Back';
 
   @override
@@ -46,7 +43,7 @@ class L10nEn extends L10n {
   String get undo => 'Undo';
 
   @override
-  String get reset => 'Reset';
+  String get reset => 'Start over';
 
   @override
   String get retry => 'Try again';

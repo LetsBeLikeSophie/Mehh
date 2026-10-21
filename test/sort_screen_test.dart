@@ -140,7 +140,7 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('그리드: [되돌리기]는 처음 상태로, [전체 선택]은 모두 X·다시 누르면 해제', (tester) async {
+  testWidgets('그리드: [처음대로]는 처음 상태로, [전체 선택]은 모두 X·다시 누르면 해제', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     await tester.tap(find.text('전체 선택'));
     await tester.pumpAndSettle();
@@ -151,16 +151,16 @@ void main() {
 
     await tester.tap(find.byType(XToggle).first);
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(TextButton, '되돌리기'));
+    await tester.tap(find.widgetWithText(TextButton, '처음대로'));
     await tester.pumpAndSettle();
     expect(find.text('처음 상태로 되돌릴까요?'), findsOneWidget);
-    await tester.tap(find.widgetWithText(TextButton, '되돌리기').last);
+    await tester.tap(find.widgetWithText(TextButton, '처음대로').last);
     await tester.pumpAndSettle();
     expect(find.text('1장 휴지통으로'), findsNothing);
     await flush(tester);
   });
 
-  testWidgets('크게 보기: 좌우는 이동만, 같은 방향으로 한 번 더 밀면 취소', (tester) async {
+  testWidgets('크게 보기: 좌우는 이동만, 위는 언제나 정리·아래는 언제나 킵', (tester) async {
     await pump(
       tester,
       FocusScreen(kind: SortKind.singles, group: group, initialId: 'p3'),
@@ -175,10 +175,18 @@ void main() {
     await tester.drag(card(), const Offset(200, 0)); // 이전 = 킵한 사진
     await tester.pumpAndSettle();
     expect(find.text('✓ 킵'), findsOneWidget);
-    await tester.drag(card(), const Offset(0, 200)); // 한 번 더 아래 = 킵 취소
+    await tester.drag(card(), const Offset(0, 200)); // 한 번 더 아래도 킵 → 다음
     await tester.pumpAndSettle();
-    expect(showing('p2'), findsOneWidget); // 취소는 그 자리에
-    expect(find.text('✓ 킵'), findsNothing);
+    expect(showing('p1'), findsOneWidget);
+    await tester.drag(card(), const Offset(200, 0));
+    await tester.pumpAndSettle();
+    expect(find.text('✓ 킵'), findsOneWidget);
+    await tester.drag(card(), const Offset(0, -200)); // 위 = 정리 → 다음
+    await tester.pumpAndSettle();
+    await tester.drag(card(), const Offset(200, 0));
+    await tester.pumpAndSettle();
+    expect(showing('p2'), findsOneWidget);
+    expect(find.text('✕ 정리'), findsOneWidget);
     await flush(tester);
   });
 

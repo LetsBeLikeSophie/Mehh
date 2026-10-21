@@ -25,9 +25,6 @@ class L10nKo extends L10n {
   String get pileCancel => '정리 취소';
 
   @override
-  String get keepCancel => '킵 취소';
-
-  @override
   String get back => '돌아가기';
 
   @override
@@ -46,7 +43,7 @@ class L10nKo extends L10n {
   String get undo => '되돌리기';
 
   @override
-  String get reset => '되돌리기';
+  String get reset => '처음대로';
 
   @override
   String get retry => '다시 시도';

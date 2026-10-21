@@ -65,40 +65,20 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     });
   }
 
-  /// 정하고 다음 사진으로. [advance]가 false면(취소할 때) 그 자리에 머문다.
-  Future<void> _decide(
-    List<String> ids,
-    DecisionState s, {
-    bool advance = true,
-  }) async {
+  /// 정하고 다음 사진으로
+  Future<void> _decide(List<String> ids, DecisionState s) async {
     final id = _currentId;
     final before = await ref.read(decisionsProvider.notifier).set([id], s);
     _undo.add(_Undo(before, id));
     if (!mounted) return;
-    if (!advance) {
-      setState(() {});
-      return;
-    }
     _go(ids, 1, s == DecisionState.keep ? _Motion.down : _Motion.up);
   }
 
-  /// 위로: 정리. 이미 정리면 취소 (추천 사진이면 킵, 아니면 표시 없음)
-  void _up(List<String> ids, {required bool marked, required bool suggested}) {
-    if (!marked) {
-      _decide(ids, DecisionState.toTrash);
-    } else {
-      _decide(
-        ids,
-        suggested ? DecisionState.keep : DecisionState.undecided,
-        advance: false,
-      );
-    }
-  }
+  /// 같은 손동작은 언제나 같은 결과 (CLAUDE.md): 위로 = 정리, 아래로 = 킵.
+  /// 잘못 했으면 반대로 밀거나 되돌리기.
+  void _up(List<String> ids) => _decide(ids, DecisionState.toTrash);
 
-  /// 아래로: 킵. 이미 킵이면 취소 (표시 없음, 추천 사진이면 다시 X)
-  void _down(List<String> ids, {required bool kept}) => kept
-      ? _decide(ids, DecisionState.undecided, advance: false)
-      : _decide(ids, DecisionState.keep);
+  void _down(List<String> ids) => _decide(ids, DecisionState.keep);
 
   Future<void> _undoLast() async {
     if (_undo.isEmpty) return;
@@ -142,12 +122,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     });
   }
 
-  void _onScaleEnd(
-    List<String> ids, {
-    required bool marked,
-    required bool kept,
-    required bool suggested,
-  }) {
+  void _onScaleEnd(List<String> ids) {
     final d = _drag;
     final wasZoom = _zooming;
     setState(() {
@@ -160,9 +135,9 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     });
     if (wasZoom) return;
     if (d.dy < -90) {
-      _up(ids, marked: marked, suggested: suggested);
+      _up(ids);
     } else if (d.dy > 90) {
-      _down(ids, kept: kept);
+      _down(ids);
     } else if (d.dx < -70) {
       _go(ids, 1, _Motion.next);
     } else if (d.dx > 70) {
@@ -170,9 +145,9 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     }
   }
 
-  String? _dragLabel(L10n l, {required bool marked, required bool kept}) {
-    if (_drag.dy < -40) return marked ? l.pileCancel : l.pile;
-    if (_drag.dy > 40) return kept ? l.keepCancel : l.keep;
+  String? _dragLabel(L10n l) {
+    if (_drag.dy < -40) return l.pile;
+    if (_drag.dy > 40) return l.keep;
     return null;
   }
 
@@ -200,8 +175,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     final state = stateOf(decisions, current);
     final (inFrom, outTo) = _slide;
     final kept = state == DecisionState.keep;
-    final suggested = src.suggested.contains(current);
-    final label = _dragLabel(l, marked: marked, kept: kept);
+    final label = _dragLabel(l);
 
     final card = KeyedSubtree(
       key: ValueKey(current),
@@ -305,8 +279,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                 child: _TrashBar(
                   // 위로 끌수록 채워진다 (90px에서 꽉 참)
                   fill: (-_drag.dy / 90).clamp(0.0, 1.0),
-                  marked: marked,
-                  onTap: () => _up(ids, marked: marked, suggested: suggested),
+                  onTap: () => _up(ids),
                 ),
               ),
               const SizedBox(height: 8),
@@ -317,9 +290,9 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                     label: l.photoSemantics,
                     customSemanticsActions: {
                       CustomSemanticsAction(label: l.pile): () =>
-                          _up(ids, marked: marked, suggested: suggested),
+                          _up(ids),
                       CustomSemanticsAction(label: l.keep): () =>
-                          _down(ids, kept: kept),
+                          _down(ids),
                       CustomSemanticsAction(label: l.nextPhoto): () =>
                           _go(ids, 1, _Motion.next),
                       CustomSemanticsAction(label: l.prevPhoto): () =>
@@ -328,12 +301,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                     child: GestureDetector(
                       onScaleStart: _onScaleStart,
                       onScaleUpdate: _onScaleUpdate,
-                      onScaleEnd: (_) => _onScaleEnd(
-                        ids,
-                        marked: marked,
-                        kept: kept,
-                        suggested: suggested,
-                      ),
+                      onScaleEnd: (_) => _onScaleEnd(ids),
                       onTap: () => openPhoto(context, current),
                       child: ClipRect(
                         child: AnimatedSwitcher(
@@ -580,14 +548,9 @@ class _Chip extends StatelessWidget {
 
 /// 맨 위 쓰레기통 줄: 사진을 위로 끌면 점점 검게 채워진다. 눌러도 정리.
 class _TrashBar extends StatelessWidget {
-  const _TrashBar({
-    required this.fill,
-    required this.marked,
-    required this.onTap,
-  });
+  const _TrashBar({required this.fill, required this.onTap});
 
   final double fill;
-  final bool marked;
   final VoidCallback onTap;
 
   @override
@@ -612,7 +575,7 @@ class _TrashBar extends StatelessWidget {
               Icon(Icons.delete_outline, size: 22, color: fg),
               const SizedBox(width: 6),
               Text(
-                marked ? context.l.pileCancel : context.l.pile,
+                context.l.pile,
                 style: TextStyle(
                   fontSize: MehhText.bodySmall,
                   fontWeight: FontWeight.w600,

@@ -127,12 +127,6 @@ abstract class L10n {
   /// **'정리 취소'**
   String get pileCancel;
 
-  /// No description provided for @keepCancel.
-  ///
-  /// In ko, this message translates to:
-  /// **'킵 취소'**
-  String get keepCancel;
-
   /// No description provided for @back.
   ///
   /// In ko, this message translates to:
@@ -172,7 +166,7 @@ abstract class L10n {
   /// No description provided for @reset.
   ///
   /// In ko, this message translates to:
-  /// **'되돌리기'**
+  /// **'처음대로'**
   String get reset;
 
   /// No description provided for @retry.
