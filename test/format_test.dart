@@ -40,6 +40,10 @@ void main() {
       'Jan 2, 2025',
     );
     final shots = group([DateTime(2026, 9, 5)], kind: DayGroupKind.screenshots);
+    expect(
+      groupTitle(group([DateTime(2025, 1, 2)]), ko, now: now, withYear: false),
+      '1월 2일',
+    ); // 홈 목록: 연도 구분선이 있어서 연도를 뺀다
     expect(groupTitle(shots, ko, now: now), '캡처');
     expect(groupTitle(shots, en, now: now), 'Screenshots');
   });

@@ -543,7 +543,7 @@ class _GroupTile extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      groupTitle(group, l, place: place),
+                      groupTitle(group, l, place: place, withYear: false),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
