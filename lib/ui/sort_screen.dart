@@ -108,11 +108,17 @@ class _SortScreenState extends ConsumerState<SortScreen> {
       ),
       title: Text(
         title,
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+        style: const TextStyle(
+          fontSize: MehhText.heading,
+          fontWeight: FontWeight.w700,
+        ),
       ),
       content: body == null
           ? null
-          : Text(body, style: const TextStyle(fontSize: 14, height: 1.5)),
+          : Text(
+              body,
+              style: const TextStyle(fontSize: MehhText.bodySmall, height: 1.5),
+            ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(c).pop(false),
@@ -235,7 +241,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                               Text(
                                 sortTitle(widget.kind, g, widget.place, l),
                                 style: const TextStyle(
-                                  fontSize: 22,
+                                  fontSize: MehhText.title,
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: -0.4,
                                 ),
@@ -249,7 +255,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                                       )
                                     : l.photos(order.length),
                                 style: const TextStyle(
-                                  fontSize: 14,
+                                  fontSize: MehhText.bodySmall,
                                   color: MehhColors.textMuted,
                                 ),
                               ),
@@ -323,7 +329,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                   child: Text(
                     marked.isEmpty ? l.noPhotos : l.trashCount(marked.length),
                     style: const TextStyle(
-                      fontSize: 15,
+                      fontSize: MehhText.body,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -390,13 +396,13 @@ class _Summary extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 6),
                 decoration: BoxDecoration(
                   color: MehhColors.black,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(MehhRadius.badge),
                 ),
                 child: Text(
                   l.photos(marked),
                   style: const TextStyle(
                     color: MehhColors.white,
-                    fontSize: 15,
+                    fontSize: MehhText.body,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -420,7 +426,7 @@ class _Summary extends StatelessWidget {
         children: [
           DefaultTextStyle.merge(
             style: const TextStyle(
-              fontSize: 15,
+              fontSize: MehhText.body,
               fontWeight: FontWeight.w600,
               color: MehhColors.text,
             ),
@@ -431,7 +437,7 @@ class _Summary extends StatelessWidget {
             Text(
               detail,
               style: const TextStyle(
-                fontSize: 13,
+                fontSize: MehhText.caption,
                 color: MehhColors.textMuted,
                 height: 1.5,
               ),

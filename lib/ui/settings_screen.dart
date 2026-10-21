@@ -20,11 +20,14 @@ class SettingsScreen extends ConsumerWidget {
         ),
         title: Text(
           context.l.clearTitle,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          style: TextStyle(
+            fontSize: MehhText.heading,
+            fontWeight: FontWeight.w700,
+          ),
         ),
         content: Text(
           context.l.clearBody,
-          style: TextStyle(fontSize: 14, height: 1.5),
+          style: TextStyle(fontSize: MehhText.bodySmall, height: 1.5),
         ),
         actions: [
           TextButton(
@@ -71,7 +74,7 @@ class SettingsScreen extends ConsumerWidget {
                   Text(
                     context.l.settings,
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: MehhText.title,
                       fontWeight: FontWeight.w700,
                       letterSpacing: -0.4,
                     ),
@@ -96,7 +99,10 @@ class SettingsScreen extends ConsumerWidget {
                   const SizedBox(height: 24),
                   const Text(
                     'Mehh 1.2.0',
-                    style: TextStyle(fontSize: 12, color: MehhColors.textMuted),
+                    style: TextStyle(
+                      fontSize: MehhText.label,
+                      color: MehhColors.textMuted,
+                    ),
                   ),
                 ],
               ),
@@ -128,14 +134,17 @@ class _Section extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              fontSize: MehhText.body,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           for (final l in lines) ...[
             const SizedBox(height: 8),
             Text(
               l,
               style: const TextStyle(
-                fontSize: 13,
+                fontSize: MehhText.caption,
                 color: MehhColors.textMuted,
                 height: 1.55,
               ),

@@ -79,12 +79,12 @@ class MehhBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
       decoration: BoxDecoration(
         color: inverted ? MehhColors.white : MehhColors.black,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(MehhRadius.badge),
       ),
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 10,
+          fontSize: MehhText.micro,
           fontWeight: FontWeight.w500,
           color: inverted ? MehhColors.text : MehhColors.white,
         ),

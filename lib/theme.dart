@@ -10,6 +10,9 @@ abstract final class MehhColors {
   static const tile = Color(0xFFF1F1EF);
   static const border = Color(0xFFE9E9E7);
   static const icon = Color(0xFFACABA9);
+
+  /// 검정 카드 위 보조 글자
+  static const onBlackMuted = Color(0xFFB4B4B0);
   static const white = Color(0xFFFFFFFF);
 }
 
@@ -17,6 +20,48 @@ abstract final class MehhRadius {
   static const card = 12.0;
   static const button = 8.0;
   static const thumb = 6.0;
+
+  /// 작은 배지 ("베스트", 장수 칩)
+  static const badge = 4.0;
+
+  /// 사진 위 표시 칩
+  static const chip = 6.0;
+
+  /// 크게 보는 사진
+  static const photo = 16.0;
+}
+
+/// 글자 크기 (SPEC 5장). 화면에 숫자를 직접 쓰지 않는다 (test/style_guard_test.dart).
+abstract final class MehhText {
+  /// 홈·온보딩 큰 제목
+  static const display = 28.0;
+
+  /// 화면 제목
+  static const title = 22.0;
+
+  /// 대화상자 제목, 끌 때 뜨는 큰 칩
+  static const heading = 18.0;
+
+  /// 카드 제목
+  static const lead = 16.0;
+
+  /// 본문, 버튼
+  static const body = 15.0;
+
+  /// 보조 본문
+  static const bodySmall = 14.0;
+
+  /// 목록 부제, 설명
+  static const caption = 13.0;
+
+  /// 섹션 이름, 작은 칩
+  static const label = 12.0;
+
+  /// 연도 레일 같은 아주 작은 글자
+  static const tiny = 11.0;
+
+  /// 사진 위 배지
+  static const micro = 10.0;
 }
 
 const mehhFontFamily = 'IBM Plex Sans KR';

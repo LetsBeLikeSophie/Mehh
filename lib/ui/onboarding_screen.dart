@@ -45,7 +45,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               Text(
                 context.l.onboardingTitle,
                 style: TextStyle(
-                  fontSize: 28,
+                  fontSize: MehhText.display,
                   fontWeight: FontWeight.w700,
                   height: 1.3,
                   letterSpacing: -0.5,
@@ -55,7 +55,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               Text(
                 context.l.onboardingBody,
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: MehhText.body,
                   color: MehhColors.textMuted,
                   height: 1.5,
                 ),
@@ -85,7 +85,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   child: Text(
                     _denied ? context.l.allowInSettings : context.l.allowAccess,
                     style: const TextStyle(
-                      fontSize: 15,
+                      fontSize: MehhText.body,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -116,7 +116,7 @@ class _Promise extends StatelessWidget {
           child: Text(
             text,
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: MehhText.bodySmall,
               fontWeight: FontWeight.w500,
               height: 1.45,
             ),

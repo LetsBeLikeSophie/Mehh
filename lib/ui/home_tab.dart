@@ -182,7 +182,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                     Text(
                       left == 0 ? l.noGroupsLeft : l.groupsLeft(left),
                       style: const TextStyle(
-                        fontSize: 28,
+                        fontSize: MehhText.display,
                         fontWeight: FontWeight.w700,
                         height: 1.3,
                         letterSpacing: -0.5,
@@ -266,7 +266,7 @@ class _YearDivider extends StatelessWidget {
           Text(
             '$year',
             style: const TextStyle(
-              fontSize: 13,
+              fontSize: MehhText.caption,
               fontWeight: FontWeight.w700,
               color: MehhColors.text,
             ),
@@ -312,7 +312,7 @@ class _YearRail extends StatelessWidget {
                 Text(
                   "'${y % 100}",
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: MehhText.tiny,
                     fontWeight: y == current
                         ? FontWeight.w700
                         : FontWeight.w400,
@@ -348,7 +348,10 @@ class _Subtitle extends ConsumerWidget {
     ];
     return Text(
       parts.join(' · '),
-      style: const TextStyle(fontSize: 14, color: MehhColors.textMuted),
+      style: const TextStyle(
+        fontSize: MehhText.bodySmall,
+        color: MehhColors.textMuted,
+      ),
     );
   }
 }
@@ -379,13 +382,16 @@ class _DuplicateCard extends ConsumerWidget {
                 children: [
                   Text(
                     context.l.duplicatesFree,
-                    style: TextStyle(fontSize: 12, color: Color(0xFFB4B4B0)),
+                    style: TextStyle(
+                      fontSize: MehhText.label,
+                      color: MehhColors.onBlackMuted,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     context.l.duplicatesFound(n),
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: MehhText.lead,
                       fontWeight: FontWeight.w600,
                       color: MehhColors.white,
                     ),
@@ -404,7 +410,10 @@ class _DuplicateCard extends ConsumerWidget {
                   Navigator.of(context).push(sortRoute(SortKind.duplicates)),
               child: Text(
                 context.l.review,
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: MehhText.bodySmall,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
@@ -488,7 +497,7 @@ class _GroupTile extends ConsumerWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: 15,
+                        fontSize: MehhText.body,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -496,7 +505,7 @@ class _GroupTile extends ConsumerWidget {
                     Text(
                       meta.toString(),
                       style: const TextStyle(
-                        fontSize: 13,
+                        fontSize: MehhText.caption,
                         color: MehhColors.textMuted,
                       ),
                     ),
@@ -531,7 +540,7 @@ class _LimitedBanner extends StatelessWidget {
             child: Text(
               context.l.limitedAccess,
               style: TextStyle(
-                fontSize: 13,
+                fontSize: MehhText.caption,
                 color: MehhColors.text,
                 height: 1.5,
               ),
@@ -566,7 +575,10 @@ class _Message extends StatelessWidget {
         children: [
           Text(
             text,
-            style: const TextStyle(fontSize: 15, color: MehhColors.textMuted),
+            style: const TextStyle(
+              fontSize: MehhText.body,
+              color: MehhColors.textMuted,
+            ),
           ),
           if (a != null) ...[
             const SizedBox(height: 12),
@@ -590,7 +602,7 @@ class _SectionLabel extends StatelessWidget {
       child: Text(
         text,
         style: const TextStyle(
-          fontSize: 12,
+          fontSize: MehhText.label,
           fontWeight: FontWeight.w500,
           color: MehhColors.textMuted,
         ),

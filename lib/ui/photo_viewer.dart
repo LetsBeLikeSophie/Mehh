@@ -87,7 +87,7 @@ class LargePhoto extends StatelessWidget {
   Widget build(BuildContext context) {
     final e = entity;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(MehhRadius.photo),
       child: ColoredBox(
         color: MehhColors.tile,
         child: e == null
@@ -146,7 +146,7 @@ class _ZoomablePhotoState extends State<ZoomablePhoto> {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(MehhRadius.photo),
       child: InteractiveViewer(
         transformationController: _controller,
         minScale: 1,

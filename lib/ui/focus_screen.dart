@@ -564,12 +564,12 @@ class _Chip extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: dark ? MehhColors.black : MehhColors.white,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(MehhRadius.chip),
       ),
       child: Text(
         text,
         style: TextStyle(
-          fontSize: big ? 18 : 12,
+          fontSize: big ? MehhText.heading : MehhText.label,
           fontWeight: dark ? FontWeight.w500 : FontWeight.w400,
           color: dark ? MehhColors.white : MehhColors.text,
         ),
@@ -614,7 +614,7 @@ class _TrashBar extends StatelessWidget {
               Text(
                 marked ? context.l.pileCancel : context.l.pile,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: MehhText.bodySmall,
                   fontWeight: FontWeight.w600,
                   color: fg,
                 ),
