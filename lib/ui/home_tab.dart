@@ -88,15 +88,6 @@ class _HomeTabState extends ConsumerState<HomeTab> {
     if (year != _currentYear) setState(() => _currentYear = year);
   }
 
-  void _jumpToYear(int year) {
-    final start = _daysStart;
-    final i = _entries.indexWhere((e) => e is _YearEntry && e.year == year);
-    if (start == null || i < 0) return;
-    _scroll.jumpTo(
-      (start + _offsets[i]).clamp(0.0, _scroll.position.maxScrollExtent),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l = context.l;
@@ -250,10 +241,31 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                 top: 140,
                 bottom: bottom,
                 width: _railWidth,
-                child: _YearRail(
-                  years: years,
-                  current: _currentYear ?? years.first,
-                  onYear: _jumpToYear,
+                // 스크롤바처럼: 레일 위치 = 목록 전체에서의 위치
+                child: ListenableBuilder(
+                  listenable: _scroll,
+                  builder: (context, _) {
+                    final start = _daysStart;
+                    final max = _scroll.hasClients
+                        ? _scroll.position.maxScrollExtent
+                        : 0.0;
+                    if (start == null || max <= 0) {
+                      return const SizedBox.shrink();
+                    }
+                    return _YearRail(
+                      marks: [
+                        for (final (i, e) in entries.indexed)
+                          if (e is _YearEntry)
+                            (
+                              e.year,
+                              ((start + offsets[i]) / max).clamp(0.0, 1.0),
+                            ),
+                      ],
+                      thumb: (_scroll.offset / max).clamp(0.0, 1.0),
+                      current: _currentYear ?? years.first,
+                      onSeek: (f) => _scroll.jumpTo(f * max),
+                    );
+                  },
                 ),
               ),
             ],
@@ -292,67 +304,108 @@ class _YearDivider extends StatelessWidget {
   }
 }
 
-/// 오른쪽 연도 레일: 누르거나 위아래로 끌면 그 연도로 이동 (앨범 빠른 스크롤처럼)
+/// 오른쪽 연도 레일 (앨범 빠른 스크롤처럼). 레일을 누르거나 위아래로 끌면
+/// 그 위치로 목록이 따라 움직이고, 검은 손잡이가 지금 위치와 연도를 보여 준다.
+/// 연도 글자는 목록에서 그 연도가 시작하는 위치에 놓인다.
 class _YearRail extends StatelessWidget {
   const _YearRail({
-    required this.years,
+    required this.marks,
+    required this.thumb,
     required this.current,
-    required this.onYear,
+    required this.onSeek,
   });
 
-  final List<int> years;
-  final int current;
-  final void Function(int year) onYear;
+  /// (연도, 레일 위 위치 0~1)
+  final List<(int, double)> marks;
 
-  void _pick(double dy, double height) {
-    final i = (dy / height * years.length).floor().clamp(0, years.length - 1);
-    onYear(years[i]);
-  }
+  /// 지금 스크롤 위치 (0~1)
+  final double thumb;
+  final int current;
+  final void Function(double fraction) onSeek;
+
+  static const _thumbHeight = 22.0;
+  static const _labelHeight = 16.0;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-      builder: (context, box) => GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTapDown: (d) => _pick(d.localPosition.dy, box.maxHeight),
-        onVerticalDragUpdate: (d) => _pick(d.localPosition.dy, box.maxHeight),
-        child: Semantics(
-          label: context.l.jumpToYear,
-          // 세로 점선 길 위에 연도가 놓여, 목록과 따로 움직이는 손잡이처럼 보이게
-          child: CustomPaint(
-            painter: const _DottedTrack(),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                for (final y in years)
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 5,
-                      vertical: 3,
+      builder: (context, box) {
+        final h = box.maxHeight;
+        void seek(double dy) => onSeek((dy / h).clamp(0.0, 1.0));
+        final thumbTop = thumb * (h - _thumbHeight);
+        // 글자끼리, 또는 손잡이와 겹치면 그 연도 글자는 숨긴다
+        final labels = <(int, double)>[];
+        for (final (year, f) in marks) {
+          final top = f * (h - _labelHeight);
+          if (labels.isNotEmpty && top - labels.last.$2 < _labelHeight + 2) {
+            continue;
+          }
+          if ((top - thumbTop).abs() < _thumbHeight) continue;
+          labels.add((year, top));
+        }
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapDown: (d) => seek(d.localPosition.dy),
+          onVerticalDragStart: (d) => seek(d.localPosition.dy),
+          onVerticalDragUpdate: (d) => seek(d.localPosition.dy),
+          child: Semantics(
+            label: context.l.jumpToYear,
+            child: CustomPaint(
+              painter: const _DottedTrack(),
+              child: Stack(
+                children: [
+                  for (final (year, top) in labels)
+                    Positioned(
+                      top: top,
+                      left: 0,
+                      right: 0,
+                      height: _labelHeight,
+                      child: Center(
+                        child: Container(
+                          color: MehhColors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 2),
+                          child: Text(
+                            "'${year % 100}",
+                            style: const TextStyle(
+                              fontSize: MehhText.tiny,
+                              fontWeight: FontWeight.w500,
+                              color: MehhColors.textMuted,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                    decoration: BoxDecoration(
-                      color: y == current ? MehhColors.black : MehhColors.white,
-                      borderRadius: BorderRadius.circular(MehhRadius.chip),
-                    ),
-                    child: Text(
-                      "'${y % 100}",
-                      style: TextStyle(
-                        fontSize: MehhText.tiny,
-                        fontWeight: y == current
-                            ? FontWeight.w700
-                            : FontWeight.w500,
-                        color: y == current
-                            ? MehhColors.white
-                            : MehhColors.textMuted,
+                  Positioned(
+                    top: thumbTop,
+                    left: 0,
+                    right: 0,
+                    height: _thumbHeight,
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                        height: _thumbHeight,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: MehhColors.black,
+                          borderRadius: BorderRadius.circular(MehhRadius.chip),
+                        ),
+                        child: Text(
+                          "'${current % 100}",
+                          style: const TextStyle(
+                            fontSize: MehhText.tiny,
+                            fontWeight: FontWeight.w700,
+                            color: MehhColors.white,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
