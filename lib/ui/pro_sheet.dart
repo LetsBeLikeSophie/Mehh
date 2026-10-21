@@ -287,7 +287,9 @@ class ProChip extends ConsumerWidget {
       style: TextButton.styleFrom(
         foregroundColor: MehhColors.text,
         minimumSize: const Size(44, 44),
+        // textStyle을 바꾸면 테마 글꼴이 빠지므로 글꼴도 같이 준다
         textStyle: const TextStyle(
+          fontFamily: mehhFontFamily,
           fontSize: MehhText.caption,
           fontWeight: FontWeight.w600,
         ),
