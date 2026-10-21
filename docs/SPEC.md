@@ -197,7 +197,7 @@
 
 - 유효기간 없음, 주간 구독 없음, 회원 가입 없음.
 - 잔액·연 묶음·더한 구매 번호는 Keystore 암호화 저장소에만 (`data/credits.dart`). 같은 구매 번호는 두 번 더하지 않는다.
-- Google Play 구매 서명을 앱 안 공개키로 확인 (`playPublicKey`, `data/billing.dart`). **출시 전에 Play Console 라이선스 키를 넣는다** (비어 있으면 확인을 건너뜀).
+- Google Play 구매 서명을 앱 안 공개키로 확인 (`playPublicKey`, `data/billing.dart`). **키가 비어 있으면 Play 결제를 모두 거절한다** (2026-10-21 리뷰). 결제를 열려면 Play Console 라이선스 키를 넣는다.
 - 시트에 "앱을 지우면 남은 크레딧도 사라져요"를 알린다. 폰을 바꿀 때 옮기기(백업)는 아직 없음 → 13장.
 - 웹 미리보기는 결제 흉내만 (돈이 나가지 않음).
 

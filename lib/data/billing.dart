@@ -26,7 +26,7 @@ const packCredits = {
 };
 
 /// Play Console > 수익 창출 설정 > 라이선스의 Base64 공개키.
-/// 비어 있으면 서명 확인을 건너뛴다 (출시 전에 꼭 넣는다, SPEC 9장).
+/// 비어 있으면 Play 결제는 모두 거절한다 (가짜 결제 도구 방지, SPEC 9장).
 const playPublicKey = '';
 
 enum BillingStatus { pending, canceled, failed, unavailable }
@@ -112,7 +112,8 @@ class StoreBilling implements Billing {
   }
 
   bool _verified(PurchaseDetails p) {
-    if (p is! GooglePlayPurchaseDetails || playPublicKey.isEmpty) return true;
+    if (p is! GooglePlayPurchaseDetails) return true; // App Store는 StoreKit이 확인
+    if (playPublicKey.isEmpty) return false;
     final b = p.billingClientPurchase;
     return verifyPlaySignature(playPublicKey, b.originalJson, b.signature);
   }
