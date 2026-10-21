@@ -18,4 +18,10 @@ arm64 전용 빌드. 1.4.0부터 출시용 업로드 키로 서명한다 (`andro
 
 ## 폰트
 
-IBM Plex Sans KR (SIL OFL, `fonts/OFL.txt`) — 4굵기 약 11MB. 앱 용량·웹 로딩이 문제가 되면 서브셋으로 줄인다.
+IBM Plex Sans KR (SIL OFL, `fonts/OFL.txt`)을 필요한 글자만 남겨 줄인 **Mehh Sans KR** — 4굵기 약 3MB (원본 11MB).
+영문·문장부호, 자주 쓰는 한글 2,350자, 앱 문구(`lib/l10n/*.arb`)의 모든 글자가 들어 있고, 없는 글자는 폰 기본 글꼴로 보인다.
+OFL의 예약 이름 "Plex" 때문에 줄인 글꼴은 이름을 바꿨다. 문구에 새 글자가 생기면 원본 TTF를 받아 다시 줄인다:
+
+```bash
+python tool/subset_fonts.py <원본 TTF 폴더>
+```

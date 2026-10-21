@@ -64,7 +64,8 @@ abstract final class MehhText {
   static const micro = 10.0;
 }
 
-const mehhFontFamily = 'IBM Plex Sans KR';
+/// IBM Plex Sans KR을 줄인 글꼴 (OFL 예약 이름 때문에 이름을 바꿈, tool/subset_fonts.py)
+const mehhFontFamily = 'Mehh Sans KR';
 
 ThemeData buildMehhTheme() {
   final base = ThemeData(
