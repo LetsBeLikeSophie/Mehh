@@ -225,5 +225,6 @@
   "promiseLearn": "추천은 앱이 먼저 골라 둔 것일 뿐이에요. 언제든 바꿀 수 있어요.",
   "promiseRestore": "휴지통으로 보낸 사진은 30일 동안 갤러리 휴지통에서 되살릴 수 있어요.",
   "allowAccess": "사진 접근 허용",
-  "allowInSettings": "설정에서 허용하기"
+  "allowInSettings": "설정에서 허용하기",
+  "allKept": "전부 킵하기로 했어요"
 }

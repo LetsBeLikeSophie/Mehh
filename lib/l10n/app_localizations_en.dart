@@ -419,4 +419,7 @@ class L10nEn extends L10n {
 
   @override
   String get allowInSettings => 'Allow in Settings';
+
+  @override
+  String get allKept => 'Keeping all of them';
 }

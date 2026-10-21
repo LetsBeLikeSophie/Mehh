@@ -434,15 +434,20 @@ final groupStatusProvider = Provider.autoDispose.family<GroupStatus, DayGroup>((
   ref,
   g,
 ) {
-  final plan = ref.watch(groupPlanProvider(g));
   final decisions = ref.watch(decisionsProvider).value ?? const {};
   final pile = g.photos.any(
     (p) => stateOf(decisions, p.id) == DecisionState.toTrash,
   );
-  if (plan.trash.isNotEmpty || pile) return GroupStatus.needsWork;
-  if (plan.analyzed < g.count) return GroupStatus.analyzing;
   final touched = g.photos.any(
     (p) => stateOf(decisions, p.id) != DecisionState.undecided,
   );
+  // 캡처는 앱이 추천하지 않는다 (정리 화면 SortSource와 같은 기준): X가 있을 때만 할 일
+  if (g.kind == DayGroupKind.screenshots) {
+    if (pile) return GroupStatus.needsWork;
+    return touched ? GroupStatus.done : GroupStatus.nothing;
+  }
+  final plan = ref.watch(groupPlanProvider(g));
+  if (plan.trash.isNotEmpty || pile) return GroupStatus.needsWork;
+  if (plan.analyzed < g.count) return GroupStatus.analyzing;
   return touched ? GroupStatus.done : GroupStatus.nothing;
 });

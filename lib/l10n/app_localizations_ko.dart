@@ -355,4 +355,7 @@ class L10nKo extends L10n {
 
   @override
   String get allowInSettings => '설정에서 허용하기';
+
+  @override
+  String get allKept => '전부 킵하기로 했어요';
 }

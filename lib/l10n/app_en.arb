@@ -94,5 +94,6 @@
   "promiseLearn": "Suggestions are just the app's first pass. Change them anytime.",
   "promiseRestore": "Photos moved to trash can be restored from your gallery's trash for 30 days.",
   "allowAccess": "Allow photo access",
-  "allowInSettings": "Allow in Settings"
+  "allowInSettings": "Allow in Settings",
+  "allKept": "Keeping all of them"
 }

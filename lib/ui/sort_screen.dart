@@ -259,6 +259,9 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                                 marked: marked.length,
                                 reason: summaryText(widget.kind, src, l),
                                 empty: order.isEmpty,
+                                screenshots:
+                                    widget.kind == SortKind.screenshots,
+                                changed: changed.isNotEmpty,
                               ),
                               Align(
                                 alignment: Alignment.centerRight,
@@ -341,12 +344,20 @@ class _Summary extends StatelessWidget {
     required this.marked,
     required this.reason,
     required this.empty,
+    required this.screenshots,
+    required this.changed,
   });
 
   final bool analyzing;
   final int marked;
   final String? reason;
   final bool empty;
+
+  /// 캡처는 앱이 추천하지 않으니 "골라 보세요"
+  final bool screenshots;
+
+  /// 사용자가 직접 정한 게 있다 (X를 다 끄거나 [선택 해제]하면 "전부 킵")
+  final bool changed;
 
   @override
   Widget build(BuildContext context) {
@@ -360,7 +371,14 @@ class _Summary extends StatelessWidget {
       title = Text(l.noPhotos);
       detail = '';
     } else if (marked == 0) {
-      title = Text(l.noneFound);
+      // 세 경우: 다 남기기로 함 / 캡처는 직접 고르기 / 찾은 게 없음
+      title = Text(
+        changed
+            ? l.allKept
+            : screenshots
+            ? l.pickScreenshots
+            : l.noneFound,
+      );
       detail = '';
     } else {
       title = Text.rich(

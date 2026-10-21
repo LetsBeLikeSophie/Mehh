@@ -666,6 +666,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'설정에서 허용하기'**
   String get allowInSettings;
+
+  /// No description provided for @allKept.
+  ///
+  /// In ko, this message translates to:
+  /// **'전부 킵하기로 했어요'**
+  String get allKept;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

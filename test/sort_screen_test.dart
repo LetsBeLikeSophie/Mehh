@@ -181,4 +181,30 @@ void main() {
     expect(find.text('✓ 킵'), findsNothing);
     await flush(tester);
   });
+
+  testWidgets('캡처: 요약은 "골라 보세요", X를 껐다 켜면 "전부 킵", 홈 상태는 X가 있을 때만 할 일', (
+    tester,
+  ) async {
+    final shots = DayGroup(
+      id: 'shots',
+      kind: DayGroupKind.screenshots,
+      photos: photos,
+    );
+    await pump(tester, SortScreen(kind: SortKind.screenshots, group: shots));
+    expect(find.text('지울 캡처를 골라 보세요'), findsOneWidget);
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(SortScreen)),
+    );
+    expect(container.read(groupStatusProvider(shots)), GroupStatus.nothing);
+
+    await tester.tap(find.byType(XToggle).first); // X 켜기
+    await tester.pumpAndSettle();
+    expect(container.read(groupStatusProvider(shots)), GroupStatus.needsWork);
+    await tester.tap(find.byType(XToggle).first); // X 끄기 = 킵
+    await tester.pumpAndSettle();
+    expect(find.text('전부 킵하기로 했어요'), findsOneWidget);
+    expect(container.read(groupStatusProvider(shots)), GroupStatus.done);
+    await flush(tester);
+  });
 }
