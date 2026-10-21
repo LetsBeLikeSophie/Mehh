@@ -12,7 +12,7 @@ https://itssophie.dev/mehh/ — 브라우저는 사진첩에 접근할 수 없�
 ## 테스트 APK
 
 https://itssophie.dev/mehh/download.html (안내 페이지 `web/download.html`) → `mehh.apk`.
-디버그 키로 서명된 arm64 전용 빌드 — 스토어 출시 전 업로드 키로 바꿔야 한다.
+arm64 전용 빌드. 1.4.0부터 출시용 업로드 키로 서명한다 (`android/key.properties`, git에 안 올림. 키 파일은 따로 백업). key.properties가 없으면 디버그 키로 빌드된다.
 
 새 APK를 올리면 `web/download.html`의 버전·크기·SHA-256도 고쳐서 웹과 같이 배포한다.
 
