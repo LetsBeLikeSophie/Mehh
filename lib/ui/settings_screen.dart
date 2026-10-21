@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../config/app_config.dart';
 
 import '../l10n/l10n.dart';
 import '../providers.dart';
@@ -51,6 +55,23 @@ class SettingsScreen extends ConsumerWidget {
     if (context.mounted) showNote(context, context.l.cleared);
   }
 
+  /// 메일 앱으로 문의. 메일 앱이 없으면 주소를 복사해 준다.
+  Future<void> _contact(BuildContext context) async {
+    final l = context.l;
+    final uri = Uri(
+      scheme: 'mailto',
+      path: supportEmail,
+      query: 'subject=${Uri.encodeComponent(l.contactSubject(appVersion))}',
+    );
+    var opened = false;
+    try {
+      opened = await launchUrl(uri);
+    } catch (_) {}
+    if (opened || !context.mounted) return;
+    await Clipboard.setData(const ClipboardData(text: supportEmail));
+    if (context.mounted) showNote(context, l.contactCopied);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
@@ -96,9 +117,28 @@ class SettingsScreen extends ConsumerWidget {
                       child: Text(context.l.clearAll),
                     ),
                   ),
+                  if (supportEmail.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () => _contact(context),
+                        child: Text(context.l.contact),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      context.l.contactNote(supportEmail),
+                      style: const TextStyle(
+                        fontSize: MehhText.caption,
+                        color: MehhColors.textMuted,
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 24),
                   const Text(
-                    'Mehh 1.4.1',
+                    'Mehh $appVersion',
                     style: TextStyle(
                       fontSize: MehhText.label,
                       color: MehhColors.textMuted,

@@ -120,5 +120,9 @@
   "nothingToRestore": "No purchases to restore",
   "proThanks": "Pro is unlocked",
   "proNudge": "{count, plural, =1{Cleaned up 1 photo.} other{Cleaned up {count} photos.}} Want picks for every other set too?",
-  "markedCount": "{count} marked"
+  "markedCount": "{count} marked",
+  "contact": "Contact us",
+  "contactSubject": "Mehh feedback ({version})",
+  "contactNote": "{email} · No photos or records are sent automatically — only what you write.",
+  "contactCopied": "Email address copied"
 }

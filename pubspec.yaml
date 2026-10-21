@@ -24,6 +24,7 @@ dependencies:
   photo_manager_image_provider: ^2.2.0
   pointycastle: ^4.0.0
   sqflite: ^2.4.4+2
+  url_launcher: ^6.3.3
 
 dev_dependencies:
   flutter_test:

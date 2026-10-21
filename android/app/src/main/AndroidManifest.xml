@@ -49,6 +49,11 @@
     <queries>
         <!-- 캡처를 Cortex로 보내기: 설치돼 있는지 확인 (lib/data/handoff.dart) -->
         <package android:name="com.anonymous.cortex" />
+        <!-- 설정 > 문의하기: 메일 앱 열기 -->
+        <intent>
+            <action android:name="android.intent.action.SENDTO"/>
+            <data android:scheme="mailto"/>
+        </intent>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>

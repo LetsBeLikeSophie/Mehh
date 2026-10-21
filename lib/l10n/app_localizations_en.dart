@@ -552,4 +552,20 @@ class L10nEn extends L10n {
 
     return '$countString marked';
   }
+
+  @override
+  String get contact => 'Contact us';
+
+  @override
+  String contactSubject(String version) {
+    return 'Mehh feedback ($version)';
+  }
+
+  @override
+  String contactNote(String email) {
+    return '$email · No photos or records are sent automatically — only what you write.';
+  }
+
+  @override
+  String get contactCopied => 'Email address copied';
 }

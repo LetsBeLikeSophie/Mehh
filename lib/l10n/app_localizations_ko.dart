@@ -471,4 +471,20 @@ class L10nKo extends L10n {
 
     return 'X 표시 $countString장';
   }
+
+  @override
+  String get contact => '문의하기';
+
+  @override
+  String contactSubject(String version) {
+    return 'Mehh 문의 ($version)';
+  }
+
+  @override
+  String contactNote(String email) {
+    return '$email · 사진이나 기록은 저절로 보내지 않아요. 메일에 적은 것만 받아요.';
+  }
+
+  @override
+  String get contactCopied => '메일 주소를 복사했어요';
 }

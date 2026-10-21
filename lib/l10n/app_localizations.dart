@@ -822,6 +822,30 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'X 표시 {count}장'**
   String markedCount(int count);
+
+  /// No description provided for @contact.
+  ///
+  /// In ko, this message translates to:
+  /// **'문의하기'**
+  String get contact;
+
+  /// No description provided for @contactSubject.
+  ///
+  /// In ko, this message translates to:
+  /// **'Mehh 문의 ({version})'**
+  String contactSubject(String version);
+
+  /// No description provided for @contactNote.
+  ///
+  /// In ko, this message translates to:
+  /// **'{email} · 사진이나 기록은 저절로 보내지 않아요. 메일에 적은 것만 받아요.'**
+  String contactNote(String email);
+
+  /// No description provided for @contactCopied.
+  ///
+  /// In ko, this message translates to:
+  /// **'메일 주소를 복사했어요'**
+  String get contactCopied;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {
