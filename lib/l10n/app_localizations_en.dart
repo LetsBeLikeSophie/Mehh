@@ -260,12 +260,6 @@ class L10nEn extends L10n {
   String get noteKeeper => 'Keeping this one';
 
   @override
-  String get sendToCortex => 'Send to Cortex';
-
-  @override
-  String get cortexSent => 'Sent to Cortex · marked for removal';
-
-  @override
   String get cortexFailed => 'Couldn\'t send to Cortex';
 
   @override
@@ -620,4 +614,59 @@ class L10nEn extends L10n {
   @override
   String get accNote =>
       'These records stay on this phone. Above 80% accepted, the picks are trustworthy.';
+
+  @override
+  String get toCortex => 'To Cortex';
+
+  @override
+  String cortexSendCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Send $countString to Cortex',
+      one: 'Send 1 to Cortex',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cortexThenTrash =>
+      'Sent screenshots move to trash · restore within 30 days';
+
+  @override
+  String get pickForCortex => 'Pick screenshots to send to Cortex';
+
+  @override
+  String get cortexWillSendSuffix => ' to send to Cortex';
+
+  @override
+  String cortexSentTrashed(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Sent $countString to Cortex and moved them to trash · restore within 30 days',
+      one: 'Sent 1 to Cortex and moved it to trash · restore within 30 days',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cortexMultiUnsupported =>
+      'Cortex can\'t take several at once yet. Please update Cortex.';
+
+  @override
+  String get trashBarCortexSemantics =>
+      'Pick for Cortex. You can also swipe the photo up';
+
+  @override
+  String get markedCortexPhoto => 'Screenshot to send to Cortex';
 }

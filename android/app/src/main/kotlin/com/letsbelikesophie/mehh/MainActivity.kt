@@ -1,8 +1,10 @@
 package com.letsbelikesophie.mehh
 
+import android.content.ClipData
 import android.content.ContentUris
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.provider.MediaStore
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -24,6 +26,11 @@ class MainActivity : FlutterActivity() {
                         val id = call.argument<String>("id")!!
                         result.success(sendImage(pkg, id))
                     }
+                    "sendImages" -> {
+                        val pkg = call.argument<String>("package")!!
+                        val ids = call.argument<List<String>>("ids")!!
+                        result.success(sendImages(pkg, ids))
+                    }
                     else -> result.notImplemented()
                 }
             }
@@ -34,6 +41,34 @@ class MainActivity : FlutterActivity() {
         true
     } catch (e: PackageManager.NameNotFoundException) {
         false
+    }
+
+    private fun uriOf(id: String): Uri? = id.toLongOrNull()?.let {
+        ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, it)
+    }
+
+    /// 여러 장을 한 번에 보낸다. 반환: "ok", "unsupported"(그 앱이 여러 장 받기를 안 함), "failed"
+    private fun sendImages(pkg: String, ids: List<String>): String {
+        val uris = ArrayList(ids.mapNotNull(::uriOf))
+        if (uris.isEmpty()) return "failed"
+        if (uris.size == 1) return if (sendImage(pkg, ids.first())) "ok" else "failed"
+        val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+            type = "image/*"
+            putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
+            // 받는 앱이 모든 사진을 읽을 수 있게 ClipData로도 넘긴다
+            clipData = ClipData.newRawUri(null, uris.first()).also { clip ->
+                uris.drop(1).forEach { clip.addItem(ClipData.Item(it)) }
+            }
+            setPackage(pkg)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        if (intent.resolveActivity(packageManager) == null) return "unsupported"
+        return try {
+            startActivity(intent)
+            "ok"
+        } catch (e: Exception) {
+            "failed"
+        }
     }
 
     /// 사진첩 사진(MediaStore id)을 그 앱의 공유 받기 화면으로 바로 보낸다.

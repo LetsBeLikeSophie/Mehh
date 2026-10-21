@@ -12,6 +12,7 @@ import '../theme.dart';
 import 'pro_sheet.dart';
 import 'settings_screen.dart';
 import 'sort_screen.dart';
+import 'sort_source.dart';
 import 'widgets.dart';
 
 /// 홈: 중복 카드 + 그날의 묶음 목록 (최신순, 연도별 구분선).
@@ -560,7 +561,9 @@ class _GroupTile extends ConsumerWidget {
         meta.write(' · ${l.allSeen}');
       case GroupStatus.nothing:
         if (group.kind == DayGroupKind.screenshots) {
-          meta.write(' · ${l.pickScreenshots}');
+          meta.write(
+            ' · ${watchCortexMode(ref, SortKind.screenshots) ? l.pickForCortex : l.pickScreenshots}',
+          );
         }
     }
 

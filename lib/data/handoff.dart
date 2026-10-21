@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 /// 캡처를 받아 정리해 주는 Sophie의 다른 앱. 스토어 출시 때 실제 패키지 이름으로 바꾼다.
 const cortexPackage = 'com.anonymous.cortex';
 
+enum SendResult { ok, unsupported, failed }
+
 /// Mehh → 다른 앱으로 사진 넘기기 (사용자가 버튼을 누를 때만).
 /// 일반 공유시트는 쓰지 않는다: 캡처는 Cortex로만 보낸다.
 class Handoff {
@@ -22,6 +24,23 @@ class Handoff {
           false;
     } catch (_) {
       return false;
+    }
+  }
+
+  /// 여러 장을 한 번에 Cortex로. Cortex가 여러 장 받기를 아직 못 하면 [SendResult.unsupported].
+  Future<SendResult> sendManyToCortex(List<String> photoIds) async {
+    try {
+      final r = await _channel.invokeMethod<String>('sendImages', {
+        'package': cortexPackage,
+        'ids': photoIds,
+      });
+      return switch (r) {
+        'ok' => SendResult.ok,
+        'unsupported' => SendResult.unsupported,
+        _ => SendResult.failed,
+      };
+    } catch (_) {
+      return SendResult.failed;
     }
   }
 

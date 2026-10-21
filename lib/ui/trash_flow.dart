@@ -11,8 +11,9 @@ import 'widgets.dart';
 Future<int> sendToTrash(
   BuildContext context,
   WidgetRef ref,
-  Iterable<String> ids,
-) async {
+  Iterable<String> ids, {
+  String Function(int n)? doneNote,
+}) async {
   final list = ids.toSet().toList();
   if (list.isEmpty) return 0;
   int n;
@@ -25,7 +26,7 @@ Future<int> sendToTrash(
     return 0;
   }
   if (n > 0 && context.mounted) {
-    showNote(context, context.l.trashed(n));
+    showNote(context, doneNote?.call(n) ?? context.l.trashed(n));
   }
   return n;
 }

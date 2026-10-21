@@ -113,6 +113,11 @@ bool isMarked(String id, Map<String, Decision> decisions, SortSource src) {
       (s == DecisionState.undecided && src.suggested.contains(id));
 }
 
+/// 캡처 + Cortex 설치: "정리" 대신 "Cortex로 보내기"를 고른다 (보낸 뒤 휴지통으로, SPEC 5-3)
+bool watchCortexMode(WidgetRef ref, SortKind kind) =>
+    kind == SortKind.screenshots &&
+    (ref.watch(cortexInstalledProvider).value ?? false);
+
 SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
   final features = ref.watch(analysisProvider.select((s) => s.features));
   switch (kind) {

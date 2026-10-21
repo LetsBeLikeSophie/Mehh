@@ -54,8 +54,6 @@
   "noteBlurry": "A sharper shot exists",
   "noteJunk": "Looks accidental",
   "noteKeeper": "Keeping this one",
-  "sendToCortex": "Send to Cortex",
-  "cortexSent": "Sent to Cortex · marked for removal",
   "cortexFailed": "Couldn't send to Cortex",
   "photoSemantics": "Photo. Swipe up to remove, down to keep",
   "nextPhoto": "Next photo",
@@ -134,5 +132,14 @@
   "accBest": "Best shots you kept",
   "accByTag": "By reason",
   "accTagLine": "{count}/{total}",
-  "accNote": "These records stay on this phone. Above 80% accepted, the picks are trustworthy."
+  "accNote": "These records stay on this phone. Above 80% accepted, the picks are trustworthy.",
+  "toCortex": "To Cortex",
+  "cortexSendCount": "{count, plural, =1{Send 1 to Cortex} other{Send {count} to Cortex}}",
+  "cortexThenTrash": "Sent screenshots move to trash · restore within 30 days",
+  "pickForCortex": "Pick screenshots to send to Cortex",
+  "cortexWillSendSuffix": " to send to Cortex",
+  "cortexSentTrashed": "{count, plural, =1{Sent 1 to Cortex and moved it to trash · restore within 30 days} other{Sent {count} to Cortex and moved them to trash · restore within 30 days}}",
+  "cortexMultiUnsupported": "Cortex can't take several at once yet. Please update Cortex.",
+  "trashBarCortexSemantics": "Pick for Cortex. You can also swipe the photo up",
+  "markedCortexPhoto": "Screenshot to send to Cortex"
 }

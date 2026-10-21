@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../data/handoff.dart';
 import '../l10n/l10n.dart';
 import '../logic/format.dart';
 import '../logic/pick_stats.dart';
@@ -35,8 +36,60 @@ class SortScreen extends ConsumerStatefulWidget {
   ConsumerState<SortScreen> createState() => _SortScreenState();
 }
 
-class _SortScreenState extends ConsumerState<SortScreen> {
+class _SortScreenState extends ConsumerState<SortScreen>
+    with WidgetsBindingObserver {
   bool _busy = false;
+
+  /// Cortex로 보낸 캡처. Cortex가 다 읽은 뒤(Mehh로 돌아왔을 때) 휴지통으로 옮긴다.
+  List<String>? _sentToCortex;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final ids = _sentToCortex;
+    if (state != AppLifecycleState.resumed || ids == null || !mounted) return;
+    _sentToCortex = null;
+    _trashAfterCortex(ids);
+  }
+
+  /// 여러 장을 한 번에 Cortex로 보낸다. 분석은 Cortex가 하고, 보낸 캡처는 휴지통으로.
+  Future<void> _sendCortex(List<String> ids) async {
+    setState(() => _busy = true);
+    final r = await ref.read(handoffProvider).sendManyToCortex(ids);
+    if (!mounted) return;
+    final l = context.l;
+    switch (r) {
+      case SendResult.ok:
+        _sentToCortex = ids; // 돌아오면 휴지통으로
+      case SendResult.unsupported:
+        setState(() => _busy = false);
+        showNote(context, l.cortexMultiUnsupported);
+      case SendResult.failed:
+        setState(() => _busy = false);
+        showNote(context, l.cortexFailed);
+    }
+  }
+
+  Future<void> _trashAfterCortex(List<String> ids) async {
+    await sendToTrash(
+      context,
+      ref,
+      ids,
+      doneNote: (n) => context.l.cortexSentTrashed(n),
+    );
+    if (mounted) setState(() => _busy = false);
+  }
 
   Future<void> _toggle(String id, bool marked) => ref
       .read(decisionsProvider.notifier)
@@ -180,6 +233,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
   Widget build(BuildContext context) {
     final l = context.l;
     final src = watchSortSource(ref, widget.kind, widget.group);
+    final cortex = watchCortexMode(ref, widget.kind);
     final decisions = ref.watch(decisionsProvider).value ?? const {};
     final entities = ref.read(photoLibraryProvider).entities;
     final order = [
@@ -213,7 +267,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
         onTap: () => _open(id),
         child: Semantics(
           button: true,
-          label: out ? l.markedPhoto : l.photo,
+          label: out ? (cortex ? l.markedCortexPhoto : l.markedPhoto) : l.photo,
           child: Stack(
             fit: StackFit.expand,
             children: [
@@ -310,6 +364,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                                 )
                               else
                                 _Summary(
+                                  cortex: cortex,
                                   analyzing: src.analyzing,
                                   marked: marked.length,
                                   reason: summaryText(widget.kind, src, l),
@@ -367,6 +422,17 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                 ],
               ),
             ),
+            if (cortex && marked.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                child: Text(
+                  l.cortexThenTrash,
+                  style: const TextStyle(
+                    fontSize: MehhText.caption,
+                    color: MehhColors.textMuted,
+                  ),
+                ),
+              ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
               child: SizedBox(
@@ -374,9 +440,15 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                 child: FilledButton(
                   onPressed: _busy || marked.isEmpty
                       ? null
+                      : cortex
+                      ? () => _sendCortex(marked)
                       : () => _send(marked, src, order),
                   child: Text(
-                    marked.isEmpty ? l.noPhotos : l.trashCount(marked.length),
+                    marked.isEmpty
+                        ? l.noPhotos
+                        : cortex
+                        ? l.cortexSendCount(marked.length)
+                        : l.trashCount(marked.length),
                     style: const TextStyle(
                       fontSize: MehhText.body,
                       fontWeight: FontWeight.w500,
@@ -395,6 +467,7 @@ class _SortScreenState extends ConsumerState<SortScreen> {
 /// 회색 요약 박스: "[138장] 정리할게요" + 이유 한 줄
 class _Summary extends StatelessWidget {
   const _Summary({
+    required this.cortex,
     required this.analyzing,
     required this.marked,
     required this.reason,
@@ -403,6 +476,8 @@ class _Summary extends StatelessWidget {
     required this.changed,
   });
 
+  /// 캡처를 Cortex로 보내는 모드 (문구만 바뀐다)
+  final bool cortex;
   final bool analyzing;
   final int marked;
   final String? reason;
@@ -431,7 +506,7 @@ class _Summary extends StatelessWidget {
         changed
             ? l.allKept
             : screenshots
-            ? l.pickScreenshots
+            ? (cortex ? l.pickForCortex : l.pickScreenshots)
             : l.noneFound,
       );
       detail = '';
@@ -457,7 +532,9 @@ class _Summary extends StatelessWidget {
                 ),
               ),
             ),
-            TextSpan(text: l.willRemoveSuffix),
+            TextSpan(
+              text: cortex ? l.cortexWillSendSuffix : l.willRemoveSuffix,
+            ),
           ],
         ),
       );

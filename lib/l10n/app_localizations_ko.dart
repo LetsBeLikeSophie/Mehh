@@ -216,12 +216,6 @@ class L10nKo extends L10n {
   String get noteKeeper => '남길 사진';
 
   @override
-  String get sendToCortex => 'Cortex로 보내기';
-
-  @override
-  String get cortexSent => 'Cortex로 보냈어요 · 정리에 넣어 뒀어요';
-
-  @override
   String get cortexFailed => 'Cortex로 보내지 못했어요';
 
   @override
@@ -525,4 +519,44 @@ class L10nKo extends L10n {
 
   @override
   String get accNote => '이 기록은 이 폰에만 있어요. 받아들인 비율이 80%를 넘으면 추천을 믿을 만해요.';
+
+  @override
+  String get toCortex => 'Cortex로';
+
+  @override
+  String cortexSendCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString장 Cortex로 보내기';
+  }
+
+  @override
+  String get cortexThenTrash => '보낸 캡처는 휴지통으로 옮겨요 · 30일 안에 되살릴 수 있어요';
+
+  @override
+  String get pickForCortex => 'Cortex로 보낼 캡처를 골라 보세요';
+
+  @override
+  String get cortexWillSendSuffix => ' Cortex로 보낼게요';
+
+  @override
+  String cortexSentTrashed(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString장을 Cortex로 보내고 휴지통으로 옮겼어요 · 30일 안에 되살릴 수 있어요';
+  }
+
+  @override
+  String get cortexMultiUnsupported =>
+      'Cortex가 아직 여러 장 받기를 못 해요. Cortex를 업데이트해 주세요.';
+
+  @override
+  String get trashBarCortexSemantics => 'Cortex로 보낼 캡처로 고르기. 사진을 위로 올려도 돼요';
+
+  @override
+  String get markedCortexPhoto => 'Cortex로 보낼 캡처';
 }

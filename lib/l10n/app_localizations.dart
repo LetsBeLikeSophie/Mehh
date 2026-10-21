@@ -421,18 +421,6 @@ abstract class L10n {
   /// **'남길 사진'**
   String get noteKeeper;
 
-  /// No description provided for @sendToCortex.
-  ///
-  /// In ko, this message translates to:
-  /// **'Cortex로 보내기'**
-  String get sendToCortex;
-
-  /// No description provided for @cortexSent.
-  ///
-  /// In ko, this message translates to:
-  /// **'Cortex로 보냈어요 · 정리에 넣어 뒀어요'**
-  String get cortexSent;
-
   /// No description provided for @cortexFailed.
   ///
   /// In ko, this message translates to:
@@ -906,6 +894,60 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'이 기록은 이 폰에만 있어요. 받아들인 비율이 80%를 넘으면 추천을 믿을 만해요.'**
   String get accNote;
+
+  /// No description provided for @toCortex.
+  ///
+  /// In ko, this message translates to:
+  /// **'Cortex로'**
+  String get toCortex;
+
+  /// No description provided for @cortexSendCount.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}장 Cortex로 보내기'**
+  String cortexSendCount(int count);
+
+  /// No description provided for @cortexThenTrash.
+  ///
+  /// In ko, this message translates to:
+  /// **'보낸 캡처는 휴지통으로 옮겨요 · 30일 안에 되살릴 수 있어요'**
+  String get cortexThenTrash;
+
+  /// No description provided for @pickForCortex.
+  ///
+  /// In ko, this message translates to:
+  /// **'Cortex로 보낼 캡처를 골라 보세요'**
+  String get pickForCortex;
+
+  /// No description provided for @cortexWillSendSuffix.
+  ///
+  /// In ko, this message translates to:
+  /// **' Cortex로 보낼게요'**
+  String get cortexWillSendSuffix;
+
+  /// No description provided for @cortexSentTrashed.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}장을 Cortex로 보내고 휴지통으로 옮겼어요 · 30일 안에 되살릴 수 있어요'**
+  String cortexSentTrashed(int count);
+
+  /// No description provided for @cortexMultiUnsupported.
+  ///
+  /// In ko, this message translates to:
+  /// **'Cortex가 아직 여러 장 받기를 못 해요. Cortex를 업데이트해 주세요.'**
+  String get cortexMultiUnsupported;
+
+  /// No description provided for @trashBarCortexSemantics.
+  ///
+  /// In ko, this message translates to:
+  /// **'Cortex로 보낼 캡처로 고르기. 사진을 위로 올려도 돼요'**
+  String get trashBarCortexSemantics;
+
+  /// No description provided for @markedCortexPhoto.
+  ///
+  /// In ko, this message translates to:
+  /// **'Cortex로 보낼 캡처'**
+  String get markedCortexPhoto;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

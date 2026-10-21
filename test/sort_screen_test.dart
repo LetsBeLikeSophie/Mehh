@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mehh/data/billing.dart';
 import 'package:mehh/data/pro.dart';
 import 'package:mehh/data/demo.dart';
+import 'package:mehh/data/handoff.dart';
 import 'package:mehh/data/photo_library.dart';
 import 'package:mehh/data/store.dart';
 import 'package:mehh/l10n/l10n.dart';
@@ -311,4 +312,48 @@ void main() {
     expect(vault.value.yearly, isFalse);
     expect(vault.value.lifetime, isTrue);
   });
+
+  testWidgets('캡처 + Cortex: 여러 장 골라 한 번에 보내고, 돌아오면 휴지통으로', (tester) async {
+    final shots = DayGroup(
+      id: 'shots',
+      kind: DayGroupKind.screenshots,
+      photos: photos,
+    );
+    final handoff = _FakeHandoff();
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.screenshots, group: shots),
+      extra: [
+        cortexInstalledProvider.overrideWith((ref) async => true),
+        handoffProvider.overrideWithValue(handoff),
+      ],
+    );
+    expect(find.text('Cortex로 보낼 캡처를 골라 보세요'), findsOneWidget);
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.tap(find.byType(XToggle).at(1));
+    await tester.pumpAndSettle();
+    expect(find.text('보낸 캡처는 휴지통으로 옮겨요 · 30일 안에 되살릴 수 있어요'), findsOneWidget);
+
+    await tester.tap(find.text('2장 Cortex로 보내기'));
+    await tester.pumpAndSettle();
+    expect(handoff.sent.length, 2);
+    expect(find.text('4장'), findsOneWidget); // 아직 휴지통으로 안 감
+
+    // Cortex에서 돌아오면 휴지통으로
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(find.text('2장'), findsOneWidget);
+    expect(find.textContaining('Cortex로 보내고 휴지통으로'), findsOneWidget);
+    await flush(tester);
+  });
+}
+
+class _FakeHandoff extends Handoff {
+  final sent = <String>[];
+
+  @override
+  Future<SendResult> sendManyToCortex(List<String> photoIds) async {
+    sent.addAll(photoIds);
+    return SendResult.ok;
+  }
 }

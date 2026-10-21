@@ -145,8 +145,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     }
   }
 
-  String? _dragLabel(L10n l) {
-    if (_drag.dy < -40) return l.pile;
+  String? _dragLabel(L10n l, {required bool cortex}) {
+    if (_drag.dy < -40) return cortex ? l.toCortex : l.pile;
     if (_drag.dy > 40) return l.keep;
     return null;
   }
@@ -162,6 +162,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
   Widget build(BuildContext context) {
     final l = context.l;
     final src = watchSortSource(ref, widget.kind, widget.group);
+    // 캡처 + Cortex 설치: 위로 = Cortex로 보낼 캡처 (보낸 뒤 휴지통으로)
+    final cortex = watchCortexMode(ref, widget.kind);
     final decisions = ref.watch(decisionsProvider).value ?? const {};
     final entities = ref.read(photoLibraryProvider).entities;
     final ids = [
@@ -175,7 +177,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     final state = stateOf(decisions, current);
     final (inFrom, outTo) = _slide;
     final kept = state == DecisionState.keep;
-    final label = _dragLabel(l);
+    final label = _dragLabel(l, cortex: cortex);
 
     final card = KeyedSubtree(
       key: ValueKey(current),
@@ -200,7 +202,10 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                   runSpacing: 6,
                   children: [
                     if (marked)
-                      _Chip('✕ ${l.pile}', dark: true)
+                      _Chip(
+                        cortex ? '↗ ${l.toCortex}' : '✕ ${l.pile}',
+                        dark: true,
+                      )
                     else if (kept)
                       _Chip('✓ ${l.keep}', dark: true),
                     if (src.tags[current] case final t?)
@@ -236,34 +241,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                   ),
                   // 위치는 아래 사진 줄이 보여 주므로 "3 / 214" 숫자는 두지 않는다
                   const Spacer(),
-                  if (widget.kind == SortKind.screenshots &&
-                      (ref.watch(cortexInstalledProvider).value ?? false))
-                    TextButton.icon(
-                      onPressed: () async {
-                        final ok = await ref
-                            .read(handoffProvider)
-                            .sendToCortex(current);
-                        if (!context.mounted) return;
-                        if (!ok) {
-                          showNote(context, l.cortexFailed);
-                          return;
-                        }
-                        // 보낸 캡처는 정리(X)에 넣는다. 지우는 건 [휴지통으로]를 눌러야 하고,
-                        // 잘못 넣었으면 되돌리기나 X로 바로 뺄 수 있다.
-                        if (!marked) {
-                          await _decide(ids, DecisionState.toTrash);
-                        }
-                        if (context.mounted) {
-                          showNote(context, l.cortexSent);
-                        }
-                      },
-                      style: TextButton.styleFrom(
-                        foregroundColor: MehhColors.text,
-                        minimumSize: const Size(44, 44),
-                      ),
-                      icon: const Icon(Icons.north_east, size: 16),
-                      label: Text(l.sendToCortex),
-                    ),
+                  // Cortex로 보내기는 여러 장을 모아 그리드 아래 버튼으로 (한 장씩 보내지 않는다)
                   IconButton(
                     tooltip: l.undo,
                     onPressed: _undo.isEmpty ? null : _undoLast,
@@ -279,6 +257,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                 child: _TrashBar(
                   // 위로 끌수록 채워진다 (90px에서 꽉 참)
                   fill: (-_drag.dy / 90).clamp(0.0, 1.0),
+                  cortex: cortex,
                   onTap: () => _up(ids),
                 ),
               ),
@@ -289,7 +268,10 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                   child: Semantics(
                     label: l.photoSemantics,
                     customSemanticsActions: {
-                      CustomSemanticsAction(label: l.pile): () => _up(ids),
+                      CustomSemanticsAction(
+                        label: cortex ? l.toCortex : l.pile,
+                      ): () =>
+                          _up(ids),
                       CustomSemanticsAction(label: l.keep): () => _down(ids),
                       CustomSemanticsAction(label: l.nextPhoto): () =>
                           _go(ids, 1, _Motion.next),
@@ -546,9 +528,16 @@ class _Chip extends StatelessWidget {
 
 /// 맨 위 쓰레기통 줄: 사진을 위로 끌면 점점 검게 채워진다. 눌러도 정리.
 class _TrashBar extends StatelessWidget {
-  const _TrashBar({required this.fill, required this.onTap});
+  const _TrashBar({
+    required this.fill,
+    required this.onTap,
+    this.cortex = false,
+  });
 
   final double fill;
+
+  /// 캡처를 Cortex로 보내는 모드: "정리" 대신 "Cortex로"
+  final bool cortex;
   final VoidCallback onTap;
 
   @override
@@ -557,7 +546,9 @@ class _TrashBar extends StatelessWidget {
     final fg = Color.lerp(MehhColors.text, MehhColors.white, fill)!;
     return Semantics(
       button: true,
-      label: context.l.trashBarSemantics,
+      label: cortex
+          ? context.l.trashBarCortexSemantics
+          : context.l.trashBarSemantics,
       child: GestureDetector(
         onTap: onTap,
         child: AnimatedContainer(
@@ -570,10 +561,14 @@ class _TrashBar extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.delete_outline, size: 22, color: fg),
+              Icon(
+                cortex ? Icons.north_east : Icons.delete_outline,
+                size: 22,
+                color: fg,
+              ),
               const SizedBox(width: 6),
               Text(
-                context.l.pile,
+                cortex ? context.l.toCortex : context.l.pile,
                 style: TextStyle(
                   fontSize: MehhText.bodySmall,
                   fontWeight: FontWeight.w600,
