@@ -77,7 +77,7 @@ class L10nKo extends L10n {
 
   @override
   String freedThisMonth(String size) {
-    return '이번 달 $size 비웠어요';
+    return '이번 달 휴지통으로 $size 보냈어요';
   }
 
   @override
@@ -300,14 +300,15 @@ class L10nKo extends L10n {
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return '$countString장을 휴지통으로 보냈어요 · 갤러리 휴지통에서 30일 동안 되살릴 수 있어요';
+    return '$countString장을 휴지통으로 보냈어요 · 30일 안에 되살릴 수 있고, 휴지통을 비우면 공간이 생겨요';
   }
 
   @override
   String get clearTitle => '모든 기록을 지울까요?';
 
   @override
-  String get clearBody => '사진 분석 결과, 킵·정리 기록, 비운 용량 기록을 지워요.\n사진은 지워지지 않아요.';
+  String get clearBody =>
+      '사진 분석 결과, 킵·정리 기록, 휴지통으로 보낸 용량 기록을 지워요.\n사진은 지워지지 않아요.';
 
   @override
   String get clearConfirm => '지우기';

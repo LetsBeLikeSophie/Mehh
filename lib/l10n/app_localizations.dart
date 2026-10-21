@@ -220,7 +220,7 @@ abstract class L10n {
   /// No description provided for @freedThisMonth.
   ///
   /// In ko, this message translates to:
-  /// **'이번 달 {size} 비웠어요'**
+  /// **'이번 달 휴지통으로 {size} 보냈어요'**
   String freedThisMonth(String size);
 
   /// No description provided for @photoTotal.
@@ -562,7 +562,7 @@ abstract class L10n {
   /// No description provided for @trashed.
   ///
   /// In ko, this message translates to:
-  /// **'{count}장을 휴지통으로 보냈어요 · 갤러리 휴지통에서 30일 동안 되살릴 수 있어요'**
+  /// **'{count}장을 휴지통으로 보냈어요 · 30일 안에 되살릴 수 있고, 휴지통을 비우면 공간이 생겨요'**
   String trashed(int count);
 
   /// No description provided for @clearTitle.
@@ -574,7 +574,7 @@ abstract class L10n {
   /// No description provided for @clearBody.
   ///
   /// In ko, this message translates to:
-  /// **'사진 분석 결과, 킵·정리 기록, 비운 용량 기록을 지워요.\n사진은 지워지지 않아요.'**
+  /// **'사진 분석 결과, 킵·정리 기록, 휴지통으로 보낸 용량 기록을 지워요.\n사진은 지워지지 않아요.'**
   String get clearBody;
 
   /// No description provided for @clearConfirm.

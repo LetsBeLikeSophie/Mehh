@@ -169,7 +169,8 @@ void showNote(BuildContext context, String text) {
         content: Text(text),
         behavior: SnackBarBehavior.floating,
         backgroundColor: MehhColors.black,
-        duration: const Duration(seconds: 2),
+        // 긴 안내는 읽을 시간을 더 준다 (2~5초)
+        duration: Duration(seconds: (2 + text.length ~/ 30).clamp(2, 5)),
       ),
     );
 }

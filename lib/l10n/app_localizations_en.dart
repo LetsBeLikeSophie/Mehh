@@ -83,7 +83,7 @@ class L10nEn extends L10n {
 
   @override
   String freedThisMonth(String size) {
-    return 'Freed $size this month';
+    return 'Sent $size to trash this month';
   }
 
   @override
@@ -356,8 +356,8 @@ class L10nEn extends L10n {
       count,
       locale: localeName,
       other:
-          'Moved $countString photos to trash · restore them from your gallery\'s trash within 30 days',
-      one: 'Moved 1 photo to trash · restore it from your gallery\'s trash within 30 days',
+          'Moved $countString photos to trash · restore them within 30 days, or empty the trash to free up space',
+      one: 'Moved 1 photo to trash · restore it within 30 days, or empty the trash to free up space',
     );
     return '$_temp0';
   }
@@ -367,7 +367,7 @@ class L10nEn extends L10n {
 
   @override
   String get clearBody =>
-      'This clears photo analysis, keep/remove records, and space-freed history.\nYour photos aren\'t deleted.';
+      'This clears photo analysis, keep/remove records, and trashed-size history.\nYour photos aren\'t deleted.';
 
   @override
   String get clearConfirm => 'Clear';
