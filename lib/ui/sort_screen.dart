@@ -148,6 +148,48 @@ class _SortScreenState extends ConsumerState<SortScreen> {
         if (stateOf(decisions, id) != DecisionState.undecided) id,
     ];
     final allSelected = order.isNotEmpty && marked.length == order.length;
+    final sections = widget.kind == SortKind.duplicates
+        ? [
+            for (final u in src.units)
+              [
+                for (final id in u)
+                  if (order.contains(id)) id,
+              ],
+          ].where((u) => u.isNotEmpty).toList()
+        : [order];
+
+    Widget tile(String id) {
+      final out = marked.contains(id);
+      final tag = src.tags[id];
+      return GestureDetector(
+        onTap: () => _open(id),
+        child: Semantics(
+          button: true,
+          label: out ? l.markedPhoto : l.photo,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Opacity(
+                opacity: out ? 0.45 : 1,
+                child: PhotoThumb(entity: entities[id]),
+              ),
+              Positioned(
+                right: 0,
+                top: 0,
+                child: XToggle(on: out, onTap: () => _toggle(id, out)),
+              ),
+              if (tag != null)
+                Positioned(
+                  left: 4,
+                  bottom: 4,
+                  child: MehhBadge(tagText(tag, l), inverted: out),
+                ),
+            ],
+          ),
+        ),
+      );
+    }
+
     final g = widget.group;
 
     return Scaffold(
@@ -244,56 +286,26 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                       ],
                     ),
                   ),
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-                    sliver: SliverGrid.builder(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 4,
-                            mainAxisSpacing: 4,
-                            crossAxisSpacing: 4,
-                          ),
-                      itemCount: order.length,
-                      itemBuilder: (_, i) {
-                        final id = order[i];
-                        final out = marked.contains(id);
-                        final tag = src.tags[id];
-                        return GestureDetector(
-                          onTap: () => _open(id),
-                          child: Semantics(
-                            button: true,
-                            label: out ? l.markedPhoto : l.photo,
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                Opacity(
-                                  opacity: out ? 0.45 : 1,
-                                  child: PhotoThumb(entity: entities[id]),
-                                ),
-                                Positioned(
-                                  right: 0,
-                                  top: 0,
-                                  child: XToggle(
-                                    on: out,
-                                    onTap: () => _toggle(id, out),
-                                  ),
-                                ),
-                                if (tag != null)
-                                  Positioned(
-                                    left: 4,
-                                    bottom: 4,
-                                    child: MehhBadge(
-                                      tagText(tag, l),
-                                      inverted: out,
-                                    ),
-                                  ),
-                              ],
+                  // 똑같은 사진은 묶음마다 새 줄에서 시작해 어떤 사진끼리 같은지 보이게
+                  for (final (i, section) in sections.indexed)
+                    SliverPadding(
+                      padding: EdgeInsets.fromLTRB(
+                        20,
+                        0,
+                        20,
+                        i == sections.length - 1 ? 16 : 14,
+                      ),
+                      sliver: SliverGrid.builder(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 4,
+                              mainAxisSpacing: 4,
+                              crossAxisSpacing: 4,
                             ),
-                          ),
-                        );
-                      },
+                        itemCount: section.length,
+                        itemBuilder: (_, j) => tile(section[j]),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
