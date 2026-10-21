@@ -21,7 +21,7 @@ export 'sort_source.dart' show SortKind;
 /// 앱이 정리 추천한 사진은 흐리게 + X, 왼쪽 아래에 이유를 붙여 둔다.
 /// X를 누르면 정리 ↔ 킵, 사진을 누르면 크게 보기([FocusScreen]).
 /// 위쪽 [되돌리기]는 앱이 처음 고른 상태로, [전체 선택]은 모두 X.
-/// 묶음, 한 장 사진, 캡처, 똑같은 사진 모두 이 화면을 쓴다.
+/// 묶음, 낱장 사진, 캡처, 똑같은 사진 모두 이 화면을 쓴다.
 class SortScreen extends ConsumerStatefulWidget {
   const SortScreen({super.key, required this.kind, this.group, this.place});
 

@@ -62,7 +62,7 @@ void main() {
     expect(keep.length, 1);
   });
 
-  test('캡처는 전부 하나로, 한 장짜리 날은 "한 장 사진"으로 모은다', () {
+  test('캡처는 전부 하나로, 한 장짜리 날은 "낱장 사진"으로 모은다', () {
     final groups = groupPhotos([
       photo(DateTime(2026, 9, 1, 10)),
       photo(DateTime(2026, 9, 1, 10, 5), shot: true),

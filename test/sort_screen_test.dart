@@ -68,7 +68,7 @@ void main() {
 
   Finder card() => find.byType(AnimatedSwitcher);
 
-  // 지금 크게 보고 있는 사진 (한 장 사진은 최신이 앞: p3, p2, p1, p0)
+  // 지금 크게 보고 있는 사진 (낱장 사진은 최신이 앞: p3, p2, p1, p0)
   Finder showing(String id) =>
       find.descendant(of: card(), matching: find.byKey(ValueKey(id)));
 

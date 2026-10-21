@@ -310,7 +310,7 @@ abstract class L10n {
   /// No description provided for @singles.
   ///
   /// In ko, this message translates to:
-  /// **'한 장 사진'**
+  /// **'낱장 사진'**
   String get singles;
 
   /// No description provided for @duplicatesTitle.

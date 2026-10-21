@@ -7,7 +7,7 @@ class GroupingConfig {
     this.minDayPhotos = 2,
   });
 
-  /// 사진이 이보다 적은 묶음은 목록에서 빼서 "한 장 사진"으로 모은다.
+  /// 사진이 이보다 적은 묶음은 목록에서 빼서 "낱장 사진"으로 모은다.
   final int minDayPhotos;
 
   /// 직전 사진과 이 시간 이상 벌어지면 새 묶음.

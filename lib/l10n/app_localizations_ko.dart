@@ -151,7 +151,7 @@ class L10nKo extends L10n {
   String get screenshots => '캡처';
 
   @override
-  String get singles => '한 장 사진';
+  String get singles => '낱장 사진';
 
   @override
   String get duplicatesTitle => '똑같은 사진';

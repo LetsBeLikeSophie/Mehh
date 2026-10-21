@@ -5,7 +5,7 @@ import '../models/day_group.dart';
 import '../models/photo_meta.dart';
 
 /// 사진을 그날의 묶음으로 나눈다. 결과는 최신 묶음이 먼저.
-/// 캡처는 전부 "캡처" 하나로, 사진이 너무 적은 날은 "한 장 사진" 하나로 모은다.
+/// 캡처는 전부 "캡처" 하나로, 사진이 너무 적은 날은 "낱장 사진" 하나로 모은다.
 List<DayGroup> groupPhotos(
   Iterable<PhotoMeta> photos, {
   GroupingConfig config = const GroupingConfig(),

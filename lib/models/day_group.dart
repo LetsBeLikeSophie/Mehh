@@ -1,6 +1,6 @@
 import 'photo_meta.dart';
 
-/// [day]: 그날의 묶음, [singles]: 사진이 적은 날을 모은 "한 장 사진",
+/// [day]: 그날의 묶음, [singles]: 사진이 적은 날을 모은 "낱장 사진",
 /// [screenshots]: 모든 캡처
 enum DayGroupKind { day, singles, screenshots }
 

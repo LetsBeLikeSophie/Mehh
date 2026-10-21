@@ -9,7 +9,7 @@ import '../models/decision.dart';
 import '../models/photo_meta.dart';
 import '../providers.dart';
 
-/// 정리 화면에 들어가는 것: 그날의 묶음, 한 장 사진, 캡처, 똑같은 사진
+/// 정리 화면에 들어가는 것: 그날의 묶음, 낱장 사진, 캡처, 똑같은 사진
 enum SortKind { day, singles, screenshots, duplicates }
 
 /// 사진 위 짧은 표시의 종류 (문구는 [tagText]·[noteText]에서 언어별로)
@@ -170,7 +170,7 @@ SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
           TrashReason.junk => PhotoTag.junk,
         };
       });
-      // 그날의 묶음 추천은 매달 무료 묶음 또는 Pro로 연다. 한 장 사진·캡처·중복은 무료.
+      // 그날의 묶음 추천은 매달 무료 묶음 또는 Pro로 연다. 낱장 사진·캡처·중복은 무료.
       if (kind == SortKind.day &&
           plan.trash.isNotEmpty &&
           !ref.watch(unlockedProvider(g.id))) {
