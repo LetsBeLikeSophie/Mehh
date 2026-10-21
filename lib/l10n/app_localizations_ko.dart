@@ -461,4 +461,13 @@ class L10nKo extends L10n {
 
     return '$countString장 정리했어요. 남은 묶음도 추천대로 바로 정리해 볼까요?';
   }
+
+  @override
+  String markedCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'X 표시 $countString장';
+  }
 }

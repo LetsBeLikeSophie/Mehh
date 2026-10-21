@@ -119,5 +119,6 @@
   "restored": "Purchases restored",
   "nothingToRestore": "No purchases to restore",
   "proThanks": "Pro is unlocked",
-  "proNudge": "{count, plural, =1{Cleaned up 1 photo.} other{Cleaned up {count} photos.}} Want picks for every other set too?"
+  "proNudge": "{count, plural, =1{Cleaned up 1 photo.} other{Cleaned up {count} photos.}} Want picks for every other set too?",
+  "markedCount": "{count} marked"
 }

@@ -543,4 +543,13 @@ class L10nEn extends L10n {
     );
     return '$_temp0 Want picks for every other set too?';
   }
+
+  @override
+  String markedCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString marked';
+  }
 }

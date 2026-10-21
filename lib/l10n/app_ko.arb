@@ -293,5 +293,14 @@
         "format": "decimalPattern"
       }
     }
+  },
+  "markedCount": "X 표시 {count}장",
+  "@markedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
   }
 }

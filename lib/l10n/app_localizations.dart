@@ -816,6 +816,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'{count}장 정리했어요. 남은 묶음도 추천대로 바로 정리해 볼까요?'**
   String proNudge(int count);
+
+  /// No description provided for @markedCount.
+  ///
+  /// In ko, this message translates to:
+  /// **'X 표시 {count}장'**
+  String markedCount(int count);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

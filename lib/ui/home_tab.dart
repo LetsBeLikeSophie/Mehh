@@ -156,36 +156,42 @@ class _HomeTabState extends ConsumerState<HomeTab> {
           final list = CustomScrollView(
             controller: _scroll,
             slivers: [
+              // 로고·Pro·설정 줄은 연도 레일과 상관없이 오른쪽 끝에 붙인다
+              // (아이콘 버튼 자체 여백이 있어서 8만 둔다)
               SliverPadding(
-                padding: EdgeInsets.fromLTRB(20, 16, right, 0),
-                sliver: SliverList.list(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const MehhLogo(),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const ProChip(),
-                            IconButton(
-                              tooltip: l.settings,
-                              onPressed: () => Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => const SettingsScreen(),
-                                ),
-                              ),
-                              icon: const Icon(
-                                Icons.settings_outlined,
-                                size: 22,
-                                color: MehhColors.icon,
+                padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 8, 0),
+                sliver: SliverToBoxAdapter(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const MehhLogo(),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const ProChip(),
+                          IconButton(
+                            tooltip: l.settings,
+                            onPressed: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const SettingsScreen(),
                               ),
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
+                            icon: const Icon(
+                              Icons.settings_outlined,
+                              size: 22,
+                              color: MehhColors.icon,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(20, 24, right, 0),
+                sliver: SliverList.list(
+                  children: [
                     Text(
                       left == 0 ? l.noGroupsLeft : l.groupsLeft(left),
                       style: const TextStyle(
@@ -312,26 +318,60 @@ class _YearRail extends StatelessWidget {
         onVerticalDragUpdate: (d) => _pick(d.localPosition.dy, box.maxHeight),
         child: Semantics(
           label: context.l.jumpToYear,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              for (final y in years)
-                Text(
-                  "'${y % 100}",
-                  style: TextStyle(
-                    fontSize: MehhText.tiny,
-                    fontWeight: y == current
-                        ? FontWeight.w700
-                        : FontWeight.w400,
-                    color: y == current ? MehhColors.black : MehhColors.icon,
+          // 세로 점선 길 위에 연도가 놓여, 목록과 따로 움직이는 손잡이처럼 보이게
+          child: CustomPaint(
+            painter: const _DottedTrack(),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                for (final y in years)
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: y == current ? MehhColors.black : MehhColors.white,
+                      borderRadius: BorderRadius.circular(MehhRadius.chip),
+                    ),
+                    child: Text(
+                      "'${y % 100}",
+                      style: TextStyle(
+                        fontSize: MehhText.tiny,
+                        fontWeight: y == current
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                        color: y == current
+                            ? MehhColors.white
+                            : MehhColors.textMuted,
+                      ),
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+/// 연도 레일 가운데 세로 점선
+class _DottedTrack extends CustomPainter {
+  const _DottedTrack();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = MehhColors.border;
+    final x = size.width / 2;
+    for (var y = 0.0; y < size.height; y += 6) {
+      canvas.drawCircle(Offset(x, y), 1, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DottedTrack old) => false;
 }
 
 /// "이번 달 2.3GB 비웠어요" · 분석/위치 진행 상황
@@ -447,17 +487,20 @@ class _GroupTile extends ConsumerWidget {
     final status = ref.watch(groupStatusProvider(group));
     final done = status == GroupStatus.done;
     final plan = ref.watch(groupPlanProvider(group));
-    final pile =
-        plan.trash.length +
-        group.photos
-            .where((p) => stateOf(decisions, p.id) == DecisionState.toTrash)
-            .length;
+    // 앱이 추천한 것(아직 안 정한 것만)과 사용자가 직접 X한 것을 따로 센다
+    final suggested = plan.trash.keys
+        .where((id) => stateOf(decisions, id) == DecisionState.undecided)
+        .length;
+    final marked = group.photos
+        .where((p) => stateOf(decisions, p.id) == DecisionState.toTrash)
+        .length;
 
     final l = context.l;
     final meta = StringBuffer(l.photos(group.count));
     switch (status) {
       case GroupStatus.needsWork:
-        meta.write(' · ${l.suggestedCount(pile)}');
+        if (suggested > 0) meta.write(' · ${l.suggestedCount(suggested)}');
+        if (marked > 0) meta.write(' · ${l.markedCount(marked)}');
       case GroupStatus.analyzing:
         meta.write(' · ${l.analyzingShort}');
       case GroupStatus.done:
