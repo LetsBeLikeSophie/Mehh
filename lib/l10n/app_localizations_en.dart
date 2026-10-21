@@ -419,4 +419,109 @@ class L10nEn extends L10n {
 
   @override
   String get allKept => 'Keeping all of them';
+
+  @override
+  String unlockTitle(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Picked $countString photos to remove',
+      one: 'Picked 1 photo to remove',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get unlockButton => 'See picks · 1 credit';
+
+  @override
+  String get unlockHint => 'Marking photos yourself is free';
+
+  @override
+  String creditsLeft(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString credits left',
+      one: '1 credit left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditsBuy => 'Get credits';
+
+  @override
+  String creditsChip(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString credits',
+      one: '1 credit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get creditsTitle => 'Credits';
+
+  @override
+  String get creditsBody =>
+      'Seeing the picks for one set uses 1 credit. Once opened, a set stays open.';
+
+  @override
+  String get creditsFree =>
+      'Duplicates, single shots, screenshots and marking photos yourself are free.';
+
+  @override
+  String get creditsNotes =>
+      'No sign-up — credits are stored only on this phone. They never expire, but they\'re lost if you delete the app.';
+
+  @override
+  String packCredits(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString credits';
+  }
+
+  @override
+  String creditsAdded(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Added $countString credits',
+      one: 'Added 1 credit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get billingPending => 'Confirming your purchase…';
+
+  @override
+  String get billingFailed => 'The purchase didn\'t go through';
+
+  @override
+  String get billingUnavailable => 'Can\'t reach the store right now';
+
+  @override
+  String get billingDemo => 'Preview only — no real payment';
 }

@@ -289,10 +289,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                   child: Semantics(
                     label: l.photoSemantics,
                     customSemanticsActions: {
-                      CustomSemanticsAction(label: l.pile): () =>
-                          _up(ids),
-                      CustomSemanticsAction(label: l.keep): () =>
-                          _down(ids),
+                      CustomSemanticsAction(label: l.pile): () => _up(ids),
+                      CustomSemanticsAction(label: l.keep): () => _down(ids),
                       CustomSemanticsAction(label: l.nextPhoto): () =>
                           _go(ids, 1, _Motion.next),
                       CustomSemanticsAction(label: l.prevPhoto): () =>

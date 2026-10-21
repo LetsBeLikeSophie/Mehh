@@ -94,5 +94,21 @@
   "promiseRestore": "Photos moved to trash can be restored from your gallery's trash for 30 days.",
   "allowAccess": "Allow photo access",
   "allowInSettings": "Allow in Settings",
-  "allKept": "Keeping all of them"
+  "allKept": "Keeping all of them",
+  "unlockTitle": "{count, plural, =1{Picked 1 photo to remove} other{Picked {count} photos to remove}}",
+  "unlockButton": "See picks · 1 credit",
+  "unlockHint": "Marking photos yourself is free",
+  "creditsLeft": "{count, plural, =1{1 credit left} other{{count} credits left}}",
+  "creditsBuy": "Get credits",
+  "creditsChip": "{count, plural, =1{1 credit} other{{count} credits}}",
+  "creditsTitle": "Credits",
+  "creditsBody": "Seeing the picks for one set uses 1 credit. Once opened, a set stays open.",
+  "creditsFree": "Duplicates, single shots, screenshots and marking photos yourself are free.",
+  "creditsNotes": "No sign-up — credits are stored only on this phone. They never expire, but they're lost if you delete the app.",
+  "packCredits": "{count} credits",
+  "creditsAdded": "{count, plural, =1{Added 1 credit} other{Added {count} credits}}",
+  "billingPending": "Confirming your purchase…",
+  "billingFailed": "The purchase didn't go through",
+  "billingUnavailable": "Can't reach the store right now",
+  "billingDemo": "Preview only — no real payment"
 }

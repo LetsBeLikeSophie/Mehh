@@ -355,4 +355,84 @@ class L10nKo extends L10n {
 
   @override
   String get allKept => '전부 킵하기로 했어요';
+
+  @override
+  String unlockTitle(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '정리 추천 $countString장을 골라 뒀어요';
+  }
+
+  @override
+  String get unlockButton => '크레딧 1개로 보기';
+
+  @override
+  String get unlockHint => '직접 X를 눌러 고르는 건 무료예요';
+
+  @override
+  String creditsLeft(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '남은 크레딧 $countString개';
+  }
+
+  @override
+  String get creditsBuy => '크레딧 충전';
+
+  @override
+  String creditsChip(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '크레딧 $countString';
+  }
+
+  @override
+  String get creditsTitle => '크레딧';
+
+  @override
+  String get creditsBody =>
+      '묶음 하나의 정리 추천을 보는 데 크레딧 1개가 들어요. 한 번 연 묶음은 계속 볼 수 있어요.';
+
+  @override
+  String get creditsFree => '똑같은 사진·한 장 사진·캡처 정리와 직접 고르기는 무료예요.';
+
+  @override
+  String get creditsNotes =>
+      '회원 가입 없이 이 폰에만 저장돼요. 기간 제한은 없고, 앱을 지우면 남은 크레딧도 사라져요.';
+
+  @override
+  String packCredits(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '크레딧 $countString개';
+  }
+
+  @override
+  String creditsAdded(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '크레딧 $countString개를 받았어요';
+  }
+
+  @override
+  String get billingPending => '결제를 확인하는 중이에요';
+
+  @override
+  String get billingFailed => '결제를 마치지 못했어요';
+
+  @override
+  String get billingUnavailable => '지금은 스토어에 연결할 수 없어요';
+
+  @override
+  String get billingDemo => '미리보기라 실제로 결제되지 않아요';
 }

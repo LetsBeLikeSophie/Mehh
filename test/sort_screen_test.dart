@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mehh/data/billing.dart';
+import 'package:mehh/data/credits.dart';
 import 'package:mehh/data/demo.dart';
 import 'package:mehh/data/photo_library.dart';
 import 'package:mehh/data/store.dart';
 import 'package:mehh/l10n/l10n.dart';
+import 'package:mehh/logic/recommend.dart';
 import 'package:mehh/models/day_group.dart';
 import 'package:mehh/models/photo_meta.dart';
 import 'package:mehh/providers.dart';
@@ -28,7 +32,11 @@ void main() {
     photos: photos,
   );
 
-  Future<void> pump(WidgetTester tester, Widget home) async {
+  Future<void> pump(
+    WidgetTester tester,
+    Widget home, {
+    List<Override> extra = const [],
+  }) async {
     tester.view.physicalSize = const Size(390 * 3, 844 * 3);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
@@ -39,6 +47,9 @@ void main() {
             DemoPhotoLibrary() as PhotoLibrary,
           ),
           storeProvider.overrideWithValue(MemoryStore()),
+          creditVaultProvider.overrideWithValue(MemoryCreditVault()),
+          billingProvider.overrideWithValue(DemoBilling(korean: true)),
+          ...extra,
         ],
         child: MaterialApp(
           locale: const Locale('ko'),
@@ -214,5 +225,64 @@ void main() {
     expect(find.text('전부 킵하기로 했어요'), findsOneWidget);
     expect(container.read(groupStatusProvider(shots)), GroupStatus.done);
     await flush(tester);
+  });
+
+  testWidgets('그날의 묶음: 추천은 크레딧 1개로 연다, 한 번 연 묶음은 계속 열림', (tester) async {
+    final day = DayGroup(id: 'day-p0', kind: DayGroupKind.day, photos: photos);
+    final plan = GroupPlan(
+      bursts: [
+        for (final p in photos) [p],
+      ],
+      best: const {},
+      trash: const {'p1': TrashReason.junk, 'p2': TrashReason.blurry},
+      analyzed: photos.length,
+    );
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.day, group: day),
+      extra: [groupPlanProvider.overrideWith((ref, g) => plan)],
+    );
+    expect(find.text('정리 추천 2장을 골라 뒀어요'), findsOneWidget);
+    expect(find.text('2장 휴지통으로'), findsNothing); // 열기 전엔 X 없음
+    expect(find.textContaining('남은 크레딧 5개'), findsOneWidget);
+
+    await tester.tap(find.text('크레딧 1개로 보기'));
+    await tester.pumpAndSettle();
+    expect(find.text('2장 휴지통으로'), findsOneWidget);
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(SortScreen)),
+    );
+    expect(container.read(creditsProvider).value!.balance, 4);
+    expect(
+      await container.read(creditsProvider.notifier).unlock(day.id),
+      isTrue,
+    );
+    expect(container.read(creditsProvider).value!.balance, 4);
+    await flush(tester);
+  });
+
+  test('크레딧: 처음 5개, 모자라면 못 열고, 사면 늘어난다', () async {
+    final vault = MemoryCreditVault();
+    final billing = DemoBilling(korean: true);
+    final c = ProviderContainer(
+      overrides: [
+        creditVaultProvider.overrideWithValue(vault),
+        billingProvider.overrideWithValue(billing),
+      ],
+    );
+    addTearDown(c.dispose);
+    expect((await c.read(creditsProvider.future)).balance, welcomeCredits);
+    for (var i = 0; i < 5; i++) {
+      expect(await c.read(creditsProvider.notifier).unlock('g$i'), isTrue);
+    }
+    expect(await c.read(creditsProvider.notifier).unlock('g9'), isFalse);
+    expect(await c.read(creditsProvider.notifier).unlock('g0'), isTrue);
+
+    final pack = (await billing.packs()).first;
+    expect(pack.price, '₩1,900');
+    await billing.buy(pack);
+    expect(c.read(creditsProvider).value!.balance, 10);
+    expect(vault.value.balance, 10);
+    expect(vault.value.welcomeGiven, isTrue);
   });
 }

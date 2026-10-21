@@ -9,6 +9,7 @@ import '../models/day_group.dart';
 import '../models/decision.dart';
 import '../providers.dart';
 import '../theme.dart';
+import 'credits_sheet.dart';
 import 'settings_screen.dart';
 import 'sort_screen.dart';
 import 'widgets.dart';
@@ -163,18 +164,24 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const MehhLogo(),
-                        IconButton(
-                          tooltip: l.settings,
-                          onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const SettingsScreen(),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const CreditsChip(),
+                            IconButton(
+                              tooltip: l.settings,
+                              onPressed: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const SettingsScreen(),
+                                ),
+                              ),
+                              icon: const Icon(
+                                Icons.settings_outlined,
+                                size: 22,
+                                color: MehhColors.icon,
+                              ),
                             ),
-                          ),
-                          icon: const Icon(
-                            Icons.settings_outlined,
-                            size: 22,
-                            color: MehhColors.icon,
-                          ),
+                          ],
                         ),
                       ],
                     ),

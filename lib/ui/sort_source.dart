@@ -25,6 +25,7 @@ class SortSource {
     this.plan,
     this.analyzing = false,
     this.units = const [],
+    this.locked = 0,
   });
 
   /// 보여줄 순서 (휴지통으로 간 사진 포함, 화면에서 거른다)
@@ -45,6 +46,10 @@ class SortSource {
 
   /// 연속 컷·중복 묶음 (2장 이상). 통째로 휴지통으로 가면 한 번 묻는다.
   final List<List<String>> units;
+
+  /// 크레딧으로 열기 전이라 가려 둔 정리 추천 장수 (그날의 묶음만, SPEC 9장).
+  /// 0이면 열려 있거나 추천이 없다.
+  final int locked;
 }
 
 String sortTitle(SortKind kind, DayGroup? g, String? place, L10n l) =>
@@ -165,6 +170,17 @@ SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
           TrashReason.junk => PhotoTag.junk,
         };
       });
+      // 그날의 묶음 추천은 크레딧 1개로 연다. 한 장 사진·캡처·중복은 무료.
+      if (kind == SortKind.day &&
+          plan.trash.isNotEmpty &&
+          !ref.watch(unlockedProvider(g.id))) {
+        return SortSource(
+          photos: g.photos,
+          plan: plan,
+          analyzing: plan.analyzed < g.count,
+          locked: plan.trash.length,
+        );
+      }
       return SortSource(
         photos: kind == SortKind.singles
             ? g.photos.reversed.toList()

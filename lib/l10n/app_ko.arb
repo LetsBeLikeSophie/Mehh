@@ -225,5 +225,61 @@
   "promiseRestore": "휴지통으로 보낸 사진은 30일 동안 갤러리 휴지통에서 되살릴 수 있어요.",
   "allowAccess": "사진 접근 허용",
   "allowInSettings": "설정에서 허용하기",
-  "allKept": "전부 킵하기로 했어요"
+  "allKept": "전부 킵하기로 했어요",
+  "unlockTitle": "정리 추천 {count}장을 골라 뒀어요",
+  "@unlockTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "unlockButton": "크레딧 1개로 보기",
+  "unlockHint": "직접 X를 눌러 고르는 건 무료예요",
+  "creditsLeft": "남은 크레딧 {count}개",
+  "@creditsLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "creditsBuy": "크레딧 충전",
+  "creditsChip": "크레딧 {count}",
+  "@creditsChip": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "creditsTitle": "크레딧",
+  "creditsBody": "묶음 하나의 정리 추천을 보는 데 크레딧 1개가 들어요. 한 번 연 묶음은 계속 볼 수 있어요.",
+  "creditsFree": "똑같은 사진·한 장 사진·캡처 정리와 직접 고르기는 무료예요.",
+  "creditsNotes": "회원 가입 없이 이 폰에만 저장돼요. 기간 제한은 없고, 앱을 지우면 남은 크레딧도 사라져요.",
+  "packCredits": "크레딧 {count}개",
+  "@packCredits": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "creditsAdded": "크레딧 {count}개를 받았어요",
+  "@creditsAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "billingPending": "결제를 확인하는 중이에요",
+  "billingFailed": "결제를 마치지 못했어요",
+  "billingUnavailable": "지금은 스토어에 연결할 수 없어요",
+  "billingDemo": "미리보기라 실제로 결제되지 않아요"
 }

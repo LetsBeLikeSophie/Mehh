@@ -666,6 +666,102 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'전부 킵하기로 했어요'**
   String get allKept;
+
+  /// No description provided for @unlockTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'정리 추천 {count}장을 골라 뒀어요'**
+  String unlockTitle(int count);
+
+  /// No description provided for @unlockButton.
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 1개로 보기'**
+  String get unlockButton;
+
+  /// No description provided for @unlockHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'직접 X를 눌러 고르는 건 무료예요'**
+  String get unlockHint;
+
+  /// No description provided for @creditsLeft.
+  ///
+  /// In ko, this message translates to:
+  /// **'남은 크레딧 {count}개'**
+  String creditsLeft(int count);
+
+  /// No description provided for @creditsBuy.
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 충전'**
+  String get creditsBuy;
+
+  /// No description provided for @creditsChip.
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 {count}'**
+  String creditsChip(int count);
+
+  /// No description provided for @creditsTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧'**
+  String get creditsTitle;
+
+  /// No description provided for @creditsBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'묶음 하나의 정리 추천을 보는 데 크레딧 1개가 들어요. 한 번 연 묶음은 계속 볼 수 있어요.'**
+  String get creditsBody;
+
+  /// No description provided for @creditsFree.
+  ///
+  /// In ko, this message translates to:
+  /// **'똑같은 사진·한 장 사진·캡처 정리와 직접 고르기는 무료예요.'**
+  String get creditsFree;
+
+  /// No description provided for @creditsNotes.
+  ///
+  /// In ko, this message translates to:
+  /// **'회원 가입 없이 이 폰에만 저장돼요. 기간 제한은 없고, 앱을 지우면 남은 크레딧도 사라져요.'**
+  String get creditsNotes;
+
+  /// No description provided for @packCredits.
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 {count}개'**
+  String packCredits(int count);
+
+  /// No description provided for @creditsAdded.
+  ///
+  /// In ko, this message translates to:
+  /// **'크레딧 {count}개를 받았어요'**
+  String creditsAdded(int count);
+
+  /// No description provided for @billingPending.
+  ///
+  /// In ko, this message translates to:
+  /// **'결제를 확인하는 중이에요'**
+  String get billingPending;
+
+  /// No description provided for @billingFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'결제를 마치지 못했어요'**
+  String get billingFailed;
+
+  /// No description provided for @billingUnavailable.
+  ///
+  /// In ko, this message translates to:
+  /// **'지금은 스토어에 연결할 수 없어요'**
+  String get billingUnavailable;
+
+  /// No description provided for @billingDemo.
+  ///
+  /// In ko, this message translates to:
+  /// **'미리보기라 실제로 결제되지 않아요'**
+  String get billingDemo;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import 'data/billing.dart';
+import 'data/credits.dart';
 import 'data/demo.dart';
 import 'data/handoff.dart';
 import 'data/photo_library.dart';
@@ -38,6 +40,79 @@ final cortexInstalledProvider = FutureProvider<bool>(
 
 final storeProvider = Provider<Store>(
   (ref) => isDemo ? MemoryStore() : SqliteStore(),
+);
+
+// ───────────────────────── 크레딧 (SPEC 9장)
+
+final creditVaultProvider = Provider<CreditVault>(
+  (ref) => isDemo || !storeBillingSupported
+      ? MemoryCreditVault()
+      : SecureCreditVault(),
+);
+
+final billingProvider = Provider<Billing>((ref) {
+  final b = isDemo || !storeBillingSupported
+      ? DemoBilling(
+          korean: PlatformDispatcher.instance.locale.languageCode == 'ko',
+        )
+      : StoreBilling();
+  ref.onDispose(b.dispose);
+  return b;
+});
+
+class CreditsNotifier extends AsyncNotifier<Credits> {
+  CreditVault get _vault => ref.read(creditVaultProvider);
+
+  @override
+  Future<Credits> build() async {
+    var c = await _vault.load();
+    if (!c.welcomeGiven) {
+      c = c.copyWith(balance: c.balance + welcomeCredits, welcomeGiven: true);
+      await _vault.save(c);
+    }
+    ref.read(billingProvider).listen(_purchased);
+    return c;
+  }
+
+  Future<void> _purchased(String purchaseId, int credits) async {
+    final c = await future;
+    if (c.purchases.contains(purchaseId)) return;
+    await _save(
+      c.copyWith(
+        balance: c.balance + credits,
+        purchases: {...c.purchases, purchaseId},
+      ),
+    );
+  }
+
+  /// 크레딧 1개로 묶음 추천을 연다. 이미 열렸으면 그대로, 모자라면 false.
+  Future<bool> unlock(String groupId) async {
+    final c = await future;
+    if (c.unlocked.contains(groupId)) return true;
+    if (c.balance < unlockCost) return false;
+    await _save(
+      c.copyWith(
+        balance: c.balance - unlockCost,
+        unlocked: {...c.unlocked, groupId},
+      ),
+    );
+    return true;
+  }
+
+  Future<void> _save(Credits c) async {
+    await _vault.save(c);
+    state = AsyncData(c);
+  }
+}
+
+final creditsProvider = AsyncNotifierProvider<CreditsNotifier, Credits>(
+  CreditsNotifier.new,
+);
+
+/// 이 묶음의 앱 추천이 열려 있는가 (불러오는 중엔 닫힌 것으로)
+final unlockedProvider = Provider.family<bool, String>(
+  (ref, groupId) =>
+      ref.watch(creditsProvider).value?.unlocked.contains(groupId) ?? false,
 );
 
 // ───────────────────────── 권한

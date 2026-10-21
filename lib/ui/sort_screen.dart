@@ -7,6 +7,7 @@ import '../models/day_group.dart';
 import '../models/decision.dart';
 import '../providers.dart';
 import '../theme.dart';
+import 'credits_sheet.dart';
 import 'focus_screen.dart';
 import 'sort_source.dart';
 import 'trash_flow.dart';
@@ -52,6 +53,12 @@ class _SortScreenState extends ConsumerState<SortScreen> {
     await ref.read(decisionsProvider.notifier).restore({
       for (final id in changed) id: null,
     });
+  }
+
+  /// 크레딧 1개로 이 묶음의 추천을 연다. 모자라면 충전 시트.
+  Future<void> _unlock(String groupId) async {
+    final ok = await ref.read(creditsProvider.notifier).unlock(groupId);
+    if (!ok && mounted) await showCreditsSheet(context);
   }
 
   void _open(String id) => Navigator.of(context).push(
@@ -260,15 +267,22 @@ class _SortScreenState extends ConsumerState<SortScreen> {
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              _Summary(
-                                analyzing: src.analyzing,
-                                marked: marked.length,
-                                reason: summaryText(widget.kind, src, l),
-                                empty: order.isEmpty,
-                                screenshots:
-                                    widget.kind == SortKind.screenshots,
-                                changed: changed.isNotEmpty,
-                              ),
+                              if (src.locked > 0)
+                                _Unlock(
+                                  count: src.locked,
+                                  reason: summaryText(widget.kind, src, l),
+                                  onTap: () => _unlock(g!.id),
+                                )
+                              else
+                                _Summary(
+                                  analyzing: src.analyzing,
+                                  marked: marked.length,
+                                  reason: summaryText(widget.kind, src, l),
+                                  empty: order.isEmpty,
+                                  screenshots:
+                                      widget.kind == SortKind.screenshots,
+                                  changed: changed.isNotEmpty,
+                                ),
                               Align(
                                 alignment: Alignment.centerRight,
                                 child: TextButton(
@@ -443,6 +457,73 @@ class _Summary extends StatelessWidget {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+/// 크레딧으로 열기 전의 요약: 추천 장수와 이유만 보여 주고 [크레딧 1개로 보기]
+class _Unlock extends ConsumerWidget {
+  const _Unlock({
+    required this.count,
+    required this.reason,
+    required this.onTap,
+  });
+
+  final int count;
+  final String? reason;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l;
+    final balance = ref.watch(creditsProvider).value?.balance ?? 0;
+    const muted = TextStyle(
+      fontSize: MehhText.caption,
+      color: MehhColors.textMuted,
+      height: 1.5,
+    );
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: MehhColors.surface,
+        borderRadius: BorderRadius.circular(MehhRadius.card),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l.unlockTitle(count),
+            style: const TextStyle(
+              fontSize: MehhText.body,
+              fontWeight: FontWeight.w600,
+              color: MehhColors.text,
+            ),
+          ),
+          if (reason != null) ...[
+            const SizedBox(height: 4),
+            Text(reason!, style: muted),
+          ],
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: onTap,
+              style: FilledButton.styleFrom(
+                backgroundColor: MehhColors.black,
+                foregroundColor: MehhColors.white,
+                minimumSize: const Size(44, 48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(MehhRadius.button),
+                ),
+              ),
+              child: Text(balance > 0 ? l.unlockButton : l.creditsBuy),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text('${l.creditsLeft(balance)} · ${l.unlockHint}', style: muted),
         ],
       ),
     );
