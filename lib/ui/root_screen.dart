@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../config/app_config.dart';
 import '../providers.dart';
 import 'home_tab.dart';
 import 'onboarding_screen.dart';
@@ -20,9 +21,12 @@ class _RootScreenState extends ConsumerState<RootScreen> {
   @override
   void initState() {
     super.initState();
-    // 설정 앱에서 권한을 바꾸고 돌아오는 경우
+    // 설정 앱에서 권한을 바꾸고 돌아오는 경우 + 오래 지났으면 그 사이 찍은 사진도 불러온다
     _lifecycle = AppLifecycleListener(
-      onResume: () => ref.read(permissionProvider.notifier).refresh(),
+      onResume: () {
+        ref.read(permissionProvider.notifier).refresh();
+        ref.read(libraryProvider.notifier).refreshIfStale(reloadLibraryAfter);
+      },
     );
   }
 

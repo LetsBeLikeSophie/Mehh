@@ -230,11 +230,13 @@ class LibraryState {
 /// 사진 불러오기 → 묶음. 위치는 백그라운드에서 채우고 다시 묶는다.
 class LibraryNotifier extends AsyncNotifier<LibraryState> {
   List<PhotoMeta> _metas = [];
+  DateTime _loadedAt = DateTime.now();
 
   @override
   Future<LibraryState> build() async {
     final lib = ref.read(photoLibraryProvider);
     _metas = await lib.loadAll();
+    _loadedAt = DateTime.now();
     Future.microtask(_fillLocations);
     return _state();
   }
@@ -271,6 +273,21 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
   }
 
   void reload() => ref.invalidateSelf();
+
+  /// 마지막으로 불러온 지 [after]가 지났으면, 지금 목록을 보여 준 채로 뒤에서 새로 불러온다
+  /// (로딩 화면으로 깜빡이지 않는다)
+  Future<void> refreshIfStale(Duration after, {DateTime? now}) async {
+    if (!state.hasValue ||
+        (now ?? DateTime.now()).difference(_loadedAt) < after) {
+      return;
+    }
+    _loadedAt = now ?? DateTime.now();
+    final metas = await ref.read(photoLibraryProvider).loadAll();
+    if (!ref.mounted) return;
+    _metas = metas;
+    state = AsyncData(_state());
+    Future.microtask(_fillLocations);
+  }
 }
 
 final libraryProvider = AsyncNotifierProvider<LibraryNotifier, LibraryState>(

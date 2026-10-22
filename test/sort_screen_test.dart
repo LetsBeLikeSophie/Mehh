@@ -543,6 +543,28 @@ void main() {
     expect(c.read(yearlyEndedProvider), isTrue);
   });
 
+  test('다시 열 때: 10분이 안 지났으면 그대로, 지났으면 로딩 없이 새로 불러온다', () async {
+    final lib = _CountingLibrary();
+    final c = ProviderContainer(
+      overrides: [
+        photoLibraryProvider.overrideWithValue(lib),
+        storeProvider.overrideWithValue(MemoryStore()),
+      ],
+    );
+    addTearDown(c.dispose);
+    await c.read(libraryProvider.future);
+    expect(lib.loads, 1);
+    final n = c.read(libraryProvider.notifier);
+    await n.refreshIfStale(const Duration(minutes: 10));
+    expect(lib.loads, 1);
+    await n.refreshIfStale(
+      const Duration(minutes: 10),
+      now: DateTime.now().add(const Duration(minutes: 11)),
+    );
+    expect(lib.loads, 2);
+    expect(c.read(libraryProvider).hasValue, isTrue); // 로딩으로 바뀌지 않음
+  });
+
   test('구매 복원: 1년 이용권이 끝나면 꺼지고, 평생권은 남는다', () async {
     final vault = MemoryProVault(const ProState(lifetime: true, yearly: true));
     final c = ProviderContainer(
@@ -606,5 +628,15 @@ class _FakeHandoff extends Handoff {
   Future<SendResult> sendManyToCortex(List<String> photoIds) async {
     sent.addAll(photoIds);
     return SendResult.ok;
+  }
+}
+
+class _CountingLibrary extends DemoPhotoLibrary {
+  var loads = 0;
+
+  @override
+  Future<List<PhotoMeta>> loadAll() {
+    loads++;
+    return super.loadAll();
   }
 }
