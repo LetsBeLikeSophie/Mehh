@@ -435,7 +435,9 @@ class _SortScreenState extends ConsumerState<SortScreen>
                       ? null
                       : () => _send(marked, src, order),
                   child: Text(
-                    marked.isEmpty ? l.noPhotos : l.trashCount(marked.length),
+                    marked.isEmpty
+                        ? l.nothingMarked
+                        : l.trashCount(marked.length),
                     style: const TextStyle(
                       fontSize: MehhText.body,
                       fontWeight: FontWeight.w500,

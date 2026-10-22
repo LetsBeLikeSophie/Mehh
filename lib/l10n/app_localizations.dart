@@ -864,6 +864,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'똑같은 사진은 다 살펴본 뒤 알려 드려요 · 무료'**
   String get duplicatesPending;
+
+  /// No description provided for @nothingMarked.
+  ///
+  /// In ko, this message translates to:
+  /// **'X를 친 사진이 없어요'**
+  String get nothingMarked;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

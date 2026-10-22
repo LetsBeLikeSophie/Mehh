@@ -502,4 +502,7 @@ class L10nKo extends L10n {
 
   @override
   String get duplicatesPending => '똑같은 사진은 다 살펴본 뒤 알려 드려요 · 무료';
+
+  @override
+  String get nothingMarked => 'X를 친 사진이 없어요';
 }

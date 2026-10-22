@@ -89,7 +89,7 @@ void main() {
 
   testWidgets('그리드: X를 켜면 휴지통 버튼, 보내면 그 사진만 빠진다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
-    expect(find.text('정리할 사진이 없어요'), findsWidgets);
+    expect(find.text('X를 친 사진이 없어요'), findsWidgets);
     await tester.tap(find.byType(XToggle).first);
     await tester.pumpAndSettle();
     expect(find.text('1장 휴지통으로'), findsOneWidget);
@@ -97,7 +97,7 @@ void main() {
     await tester.tap(find.text('1장 휴지통으로'));
     await tester.pumpAndSettle();
     expect(find.textContaining('3장'), findsOneWidget); // 남은 사진 수
-    expect(find.text('정리할 사진이 없어요'), findsWidgets);
+    expect(find.text('X를 친 사진이 없어요'), findsWidgets);
     await flush(tester);
   });
 
@@ -187,7 +187,7 @@ void main() {
     expect(find.text('4장 휴지통으로'), findsOneWidget);
     await tester.tap(find.text('선택 해제'));
     await tester.pumpAndSettle();
-    expect(find.text('정리할 사진이 없어요'), findsWidgets);
+    expect(find.text('X를 친 사진이 없어요'), findsWidgets);
 
     expect(find.text('처음대로'), findsNothing);
     await flush(tester);

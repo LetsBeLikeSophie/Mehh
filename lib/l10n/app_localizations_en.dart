@@ -600,4 +600,7 @@ class L10nEn extends L10n {
   @override
   String get duplicatesPending =>
       'We\'ll show exact duplicates once we\'ve looked at everything · Free';
+
+  @override
+  String get nothingMarked => 'No photos marked';
 }
