@@ -109,6 +109,14 @@ class ProNotifier extends AsyncNotifier<ProState> {
     DateTime? now,
   }) async {
     final s = await future;
+    // Pro로 연 묶음도 사진을 기억해 둔다: 1년 이용권이 끝나도 계속 열려 있게 (2026-10-22 Sophie F3-A)
+    if (s.pro) {
+      final ids = photoIds.toSet();
+      if (!s.unlockedPhotos.containsAll(ids)) {
+        await _save(s.copyWith(unlockedPhotos: {...s.unlockedPhotos, ...ids}));
+      }
+      return true;
+    }
     if (s.isOpen(groupId, photoIds: photoIds)) return true;
     final at = now ?? DateTime.now();
     if (s.freeLeft(at) == 0) return false;
