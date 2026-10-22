@@ -183,7 +183,12 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                 sliver: SliverList.list(
                   children: [
                     Text(
-                      left == 0 ? l.noGroupsLeft : l.groupsLeft(left),
+                      left > 0
+                          ? l.groupsLeft(left)
+                          // 분석이 끝나기 전에는 "없어요"라고 하지 않는다 (UX 리뷰 2026-10-22)
+                          : ref.watch(analysisProvider.select((a) => a.done))
+                          ? l.noGroupsLeft
+                          : l.lookingAtPhotos,
                       style: const TextStyle(
                         fontSize: MehhText.display,
                         fontWeight: FontWeight.w700,

@@ -852,6 +852,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'이번 달 무료 묶음을 다 썼어요 · {date}에 {count}개가 다시 생겨요'**
   String picksNoFreeNote(String date, int count);
+
+  /// No description provided for @lookingAtPhotos.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진을\n살펴보고 있어요'**
+  String get lookingAtPhotos;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

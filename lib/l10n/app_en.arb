@@ -125,5 +125,6 @@
   "cortexSend": "Send to Cortex",
   "keepBarSemantics": "Keep. You can also swipe the photo down",
   "picksCostNote": "{count, plural, =1{Uses 1 of this month's free sets · 1 left} other{Uses 1 of this month's free sets · {count} left}}",
-  "picksNoFreeNote": "No free sets left this month · {count} more on {date}"
+  "picksNoFreeNote": "No free sets left this month · {count} more on {date}",
+  "lookingAtPhotos": "Looking through\nyour photos"
 }

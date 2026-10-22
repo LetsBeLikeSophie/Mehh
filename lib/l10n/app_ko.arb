@@ -360,5 +360,6 @@
         "type": "int"
       }
     }
-  }
+  },
+  "lookingAtPhotos": "사진을\n살펴보고 있어요"
 }

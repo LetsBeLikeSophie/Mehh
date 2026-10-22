@@ -593,4 +593,7 @@ class L10nEn extends L10n {
   String picksNoFreeNote(String date, int count) {
     return 'No free sets left this month · $count more on $date';
   }
+
+  @override
+  String get lookingAtPhotos => 'Looking through\nyour photos';
 }
