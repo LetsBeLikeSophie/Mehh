@@ -88,13 +88,25 @@ class StoreBilling implements Billing {
               _status.add(BillingStatus.failed);
             }
         }
-        if (p.pendingCompletePurchase) await _iap.completePurchase(p);
+        // 확인에 실패한 구매는 "전달 완료"로 알리지 않는다: 그래야 Play가 3일 뒤 자동 환불한다
+        final bought =
+            p.status == PurchaseStatus.purchased ||
+            p.status == PurchaseStatus.restored;
+        final ok = !bought || (Plan.of(p.productID) != null && _verified(p));
+        if (shouldComplete(pending: p.pendingCompletePurchase, verified: ok)) {
+          await _iap.completePurchase(p);
+        }
       }
     }, onError: (_) => _status.add(BillingStatus.failed));
   }
 
   @override
   Future<List<Offer>> offers() async {
+    // 확인할 공개키가 없는 안드로이드 빌드는 결제 버튼을 아예 보이지 않는다
+    // (돈은 나갔는데 Pro를 못 받는 일을 막는다, UX 리뷰 2026-10-22)
+    if (!canSell(android: defaultTargetPlatform == TargetPlatform.android)) {
+      return const [];
+    }
     if (!await _iap.isAvailable()) return const [];
     final res = await _iap.queryProductDetails({
       for (final p in Plan.values) p.productId,
@@ -212,6 +224,14 @@ class DemoBilling implements Billing {
   @override
   void dispose() => _status.close();
 }
+
+/// 이 빌드에서 팔아도 되는가: 안드로이드는 구매를 확인할 공개키가 있어야 한다
+bool canSell({required bool android, String publicKey = playPublicKey}) =>
+    !android || publicKey.isNotEmpty;
+
+/// 스토어에 "전달 완료"를 알릴까: 확인된 구매(또는 대기·취소·오류 같은 결제 아닌 것)만
+bool shouldComplete({required bool pending, required bool verified}) =>
+    pending && verified;
 
 bool get storeBillingSupported =>
     !kIsWeb &&

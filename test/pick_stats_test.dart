@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mehh/data/billing.dart';
 import 'package:mehh/logic/pick_stats.dart';
 
 void main() {
@@ -32,5 +33,17 @@ void main() {
     final s = PickStats.of(const []);
     expect(s.sends, 0);
     expect(s.acceptRate, isNull);
+  });
+
+  test('결제: 공개키 없는 안드로이드 빌드는 팔지 않고, 확인 실패 구매는 전달 완료로 알리지 않는다', () {
+    expect(canSell(android: true, publicKey: ''), isFalse);
+    expect(canSell(android: true, publicKey: 'MIIB...'), isTrue);
+    expect(
+      canSell(android: false, publicKey: ''),
+      isTrue,
+    ); // App Store는 StoreKit이 확인
+    expect(shouldComplete(pending: true, verified: false), isFalse);
+    expect(shouldComplete(pending: true, verified: true), isTrue);
+    expect(shouldComplete(pending: false, verified: true), isFalse);
   });
 }
