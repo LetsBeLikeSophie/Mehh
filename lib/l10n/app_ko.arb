@@ -389,5 +389,6 @@
         "format": "decimalPattern"
       }
     }
-  }
+  },
+  "unsentDot": "X를 쳐 두고 아직 휴지통으로 안 보냈어요"
 }

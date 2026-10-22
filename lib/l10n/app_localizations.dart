@@ -894,6 +894,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'지난번에 X를 친 사진 {count}장이 있어요'**
   String earlierMarked(int count);
+
+  /// No description provided for @unsentDot.
+  ///
+  /// In ko, this message translates to:
+  /// **'X를 쳐 두고 아직 휴지통으로 안 보냈어요'**
+  String get unsentDot;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

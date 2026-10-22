@@ -527,4 +527,7 @@ class L10nKo extends L10n {
 
     return '지난번에 X를 친 사진 $countString장이 있어요';
   }
+
+  @override
+  String get unsentDot => 'X를 쳐 두고 아직 휴지통으로 안 보냈어요';
 }

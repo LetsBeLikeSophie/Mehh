@@ -7,6 +7,7 @@ import '../data/pro.dart';
 import '../l10n/l10n.dart';
 import '../logic/format.dart';
 import '../models/day_group.dart';
+import '../models/decision.dart';
 import '../providers.dart';
 import '../theme.dart';
 import 'pro_sheet.dart';
@@ -572,6 +573,10 @@ class _GroupTile extends ConsumerWidget {
     final plan = ref.watch(groupPlanProvider(group));
     // 앱이 고른 추천 장수만 (직접 X는 세지 않는다)
     final suggested = plan.trash.length;
+    final decisions = ref.watch(decisionsProvider).value ?? const {};
+    final unsent = group.photos.any(
+      (p) => stateOf(decisions, p.id) == DecisionState.toTrash,
+    );
 
     final l = context.l;
     final meta = StringBuffer(l.photos(group.count));
@@ -643,6 +648,20 @@ class _GroupTile extends ConsumerWidget {
                   ],
                 ),
               ),
+              // X를 쳐 두고 아직 안 보낸 묶음은 줄 끝 작은 점 (2026-10-22 Sophie R4-A)
+              if (unsent)
+                Semantics(
+                  label: l.unsentDot,
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    margin: const EdgeInsetsDirectional.only(end: 6),
+                    decoration: const BoxDecoration(
+                      color: MehhColors.black,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
               const Icon(Icons.chevron_right, size: 18, color: MehhColors.icon),
             ],
           ),
