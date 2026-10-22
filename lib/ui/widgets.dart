@@ -184,3 +184,68 @@ String formatCount(int n) {
   }
   return buf.toString();
 }
+
+/// 화면 머리의 돌아가기 버튼 (모든 화면 같은 모양·위치, 오른쪽→왼쪽 언어도 시작 쪽)
+class MehhBackButton extends StatelessWidget {
+  const MehhBackButton({super.key});
+
+  @override
+  Widget build(BuildContext context) => Align(
+    alignment: AlignmentDirectional.centerStart,
+    child: IconButton(
+      tooltip: context.l.back,
+      onPressed: () => Navigator.of(context).maybePop(),
+      icon: const Icon(Icons.chevron_left, color: MehhColors.text),
+    ),
+  );
+}
+
+/// 확인 창 (모든 화면 같은 모양). [yes]를 누르면 true.
+Future<bool> askMehh(
+  BuildContext context, {
+  required String title,
+  String? body,
+  required String no,
+  required String yes,
+}) async =>
+    await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        backgroundColor: MehhColors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(MehhRadius.card),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontSize: MehhText.heading,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: body == null
+            ? null
+            : Text(
+                body,
+                style: const TextStyle(
+                  fontSize: MehhText.bodySmall,
+                  height: 1.5,
+                ),
+              ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(c).pop(false),
+            style: TextButton.styleFrom(foregroundColor: MehhColors.textMuted),
+            child: Text(no),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(c).pop(true),
+            style: TextButton.styleFrom(foregroundColor: MehhColors.black),
+            child: Text(
+              yes,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    ) ==
+    true;

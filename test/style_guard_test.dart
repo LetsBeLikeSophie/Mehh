@@ -10,6 +10,7 @@ void main() {
       'fontSize: 숫자': RegExp(r'fontSize:\s*\d'),
       'circular(숫자)': RegExp(r'circular\(\s*\d'),
       'Color(0x…)': RegExp(r'Color\(0x'),
+      'radius: 숫자': RegExp(r'radius:\s*\d'),
     };
     final found = <String>[];
     for (final f in Directory('lib/ui').listSync(recursive: true)) {

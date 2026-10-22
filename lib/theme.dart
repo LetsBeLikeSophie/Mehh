@@ -21,6 +21,12 @@ abstract final class MehhRadius {
   static const button = 8.0;
   static const thumb = 6.0;
 
+  /// 홈 목록 대표 사진
+  static const tile = 8.0;
+
+  /// 아래 사진 줄의 작은 사진
+  static const strip = 4.0;
+
   /// 작은 배지 ("베스트", 장수 칩)
   static const badge = 4.0;
 

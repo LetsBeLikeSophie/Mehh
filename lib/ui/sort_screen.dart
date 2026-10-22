@@ -200,54 +200,14 @@ class _SortScreenState extends ConsumerState<SortScreen>
     );
     if (emptied.isEmpty) return true;
     final l = context.l;
-    final ok = await _ask(
+    return askMehh(
+      context,
       title: l.sceneLossTitle(emptied.length),
       body: l.sceneLossBody,
       no: l.lookAgain,
       yes: l.toTrash,
     );
-    return ok == true;
   }
-
-  Future<bool?> _ask({
-    required String title,
-    String? body,
-    required String no,
-    required String yes,
-  }) => showDialog<bool>(
-    context: context,
-    builder: (c) => AlertDialog(
-      backgroundColor: MehhColors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(MehhRadius.card),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontSize: MehhText.heading,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-      content: body == null
-          ? null
-          : Text(
-              body,
-              style: const TextStyle(fontSize: MehhText.bodySmall, height: 1.5),
-            ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(c).pop(false),
-          style: TextButton.styleFrom(foregroundColor: MehhColors.textMuted),
-          child: Text(no),
-        ),
-        TextButton(
-          onPressed: () => Navigator.of(c).pop(true),
-          style: TextButton.styleFrom(foregroundColor: MehhColors.black),
-          child: Text(yes, style: const TextStyle(fontWeight: FontWeight.w600)),
-        ),
-      ],
-    ),
-  );
 
   @override
   Widget build(BuildContext context) {
@@ -333,17 +293,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
                     padding: const EdgeInsets.fromLTRB(8, 4, 12, 8),
                     sliver: SliverList.list(
                       children: [
-                        Align(
-                          alignment: AlignmentDirectional.centerStart,
-                          child: IconButton(
-                            tooltip: l.back,
-                            onPressed: () => Navigator.of(context).maybePop(),
-                            icon: const Icon(
-                              Icons.chevron_left,
-                              color: MehhColors.text,
-                            ),
-                          ),
-                        ),
+                        const MehhBackButton(),
                         Padding(
                           padding: const EdgeInsetsDirectional.only(start: 12),
                           child: Column(

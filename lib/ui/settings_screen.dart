@@ -16,42 +16,15 @@ class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   Future<void> _confirmClear(BuildContext context, WidgetRef ref) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (c) => AlertDialog(
-        backgroundColor: MehhColors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(MehhRadius.card),
-        ),
-        title: Text(
-          context.l.clearTitle,
-          style: TextStyle(
-            fontSize: MehhText.heading,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        content: Text(
-          context.l.clearBody,
-          style: TextStyle(fontSize: MehhText.bodySmall, height: 1.5),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(c).pop(false),
-            style: TextButton.styleFrom(foregroundColor: MehhColors.textMuted),
-            child: Text(context.l.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(c).pop(true),
-            style: TextButton.styleFrom(foregroundColor: MehhColors.black),
-            child: Text(
-              context.l.clearConfirm,
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
-      ),
+    final l = context.l;
+    final ok = await askMehh(
+      context,
+      title: l.clearTitle,
+      body: l.clearBody,
+      no: l.cancel,
+      yes: l.clearConfirm,
     );
-    if (ok != true) return;
+    if (!ok) return;
     await clearAllRecords(ref);
     if (context.mounted) showNote(context, context.l.cleared);
   }
@@ -78,18 +51,11 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(8, 4, 20, 24),
+          padding: const EdgeInsetsDirectional.fromSTEB(8, 4, 20, 24),
           children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: IconButton(
-                tooltip: context.l.home,
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.chevron_left, color: MehhColors.text),
-              ),
-            ),
+            const MehhBackButton(),
             Padding(
-              padding: const EdgeInsets.only(left: 12),
+              padding: const EdgeInsetsDirectional.only(start: 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

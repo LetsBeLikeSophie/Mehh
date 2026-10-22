@@ -204,20 +204,9 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
           padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
           child: Column(
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    tooltip: l.back,
-                    onPressed: () => Navigator.of(context).maybePop(),
-                    icon: const Icon(
-                      Icons.chevron_left,
-                      color: MehhColors.text,
-                    ),
-                  ),
-                  // 위치는 아래 사진 줄이 보여 주므로 "3 / 214" 숫자는 두지 않는다.
-                  // 되돌리기 버튼도 두지 않는다: 반대로 밀면 된다 (2026-10-22)
-                ],
-              ),
+              // 위치는 아래 사진 줄이 보여 주므로 "3 / 214" 숫자는 두지 않는다.
+              // 되돌리기 버튼도 두지 않는다: 반대로 밀면 된다 (2026-10-22)
+              const MehhBackButton(),
               const SizedBox(height: 4),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -442,7 +431,7 @@ class _LoopStripState extends State<_LoopStrip> {
                 opacity: out ? 0.35 : 1,
                 child: PhotoThumb(
                   entity: widget.entities[id],
-                  radius: 4,
+                  radius: MehhRadius.strip,
                   size: 150,
                 ),
               ),

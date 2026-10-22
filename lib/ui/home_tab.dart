@@ -580,7 +580,11 @@ class _GroupTile extends ConsumerWidget {
               SizedBox(
                 width: 48,
                 height: 48,
-                child: PhotoThumb(entity: entity, radius: 8, size: 144),
+                child: PhotoThumb(
+                  entity: entity,
+                  radius: MehhRadius.tile,
+                  size: 144,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(

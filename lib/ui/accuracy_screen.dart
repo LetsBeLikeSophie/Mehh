@@ -7,6 +7,7 @@ import '../logic/pick_stats.dart';
 import '../providers.dart';
 import '../theme.dart';
 import 'sort_source.dart';
+import 'widgets.dart';
 
 /// 숨은 화면: 추천 정확도 (SPEC 6-8). 설정의 버전 글자를 7번 누르면 열린다.
 final pickStatsProvider = FutureProvider.autoDispose<PickStats>(
@@ -34,14 +35,7 @@ class AccuracyScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsetsDirectional.fromSTEB(8, 4, 20, 24),
           children: [
-            Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: IconButton(
-                tooltip: l.back,
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.chevron_left, color: MehhColors.text),
-              ),
-            ),
+            const MehhBackButton(),
             Padding(
               padding: const EdgeInsetsDirectional.only(start: 12),
               child: Column(
