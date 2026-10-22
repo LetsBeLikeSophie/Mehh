@@ -505,4 +505,9 @@ class L10nKo extends L10n {
 
   @override
   String get nothingMarked => 'X를 친 사진이 없어요';
+
+  @override
+  String yearlyEnded(int count) {
+    return '1년 이용권이 끝났어요 · 이번 달 무료 묶음 $count개로 돌아왔어요';
+  }
 }

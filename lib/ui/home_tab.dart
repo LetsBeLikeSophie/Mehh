@@ -3,6 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../data/pro.dart';
 import '../l10n/l10n.dart';
 import '../logic/format.dart';
 import '../models/day_group.dart';
@@ -90,6 +91,11 @@ class _HomeTabState extends ConsumerState<HomeTab> {
   @override
   Widget build(BuildContext context) {
     final l = context.l;
+    ref.listen(yearlyEndedProvider, (_, ended) {
+      if (!ended) return;
+      ref.read(yearlyEndedProvider.notifier).clear();
+      showNote(context, l.yearlyEnded(freeGroupsPerMonth));
+    });
     final library = ref.watch(libraryProvider);
     final limited = ref.watch(permissionProvider) == PermissionState.limited;
 

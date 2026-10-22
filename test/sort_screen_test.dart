@@ -496,6 +496,22 @@ void main() {
     expect(c.read(proProvider).value!.freeLeft(DateTime.now()), 2); // 한 번만 씀
   });
 
+  test('1년 이용권이 끝나면 한 번 알린다 (평생권이 있으면 알리지 않는다)', () async {
+    final c = ProviderContainer(
+      overrides: [
+        proVaultProvider.overrideWithValue(
+          MemoryProVault(const ProState(yearly: true)),
+        ),
+        billingProvider.overrideWithValue(DemoBilling(korean: true)),
+      ],
+    );
+    addTearDown(c.dispose);
+    await c.read(proProvider.future);
+    await c.read(proProvider.notifier).restore(quiet: true);
+    expect(c.read(proProvider).value!.pro, isFalse);
+    expect(c.read(yearlyEndedProvider), isTrue);
+  });
+
   test('구매 복원: 1년 이용권이 끝나면 꺼지고, 평생권은 남는다', () async {
     final vault = MemoryProVault(const ProState(lifetime: true, yearly: true));
     final c = ProviderContainer(

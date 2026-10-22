@@ -870,6 +870,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'X를 친 사진이 없어요'**
   String get nothingMarked;
+
+  /// No description provided for @yearlyEnded.
+  ///
+  /// In ko, this message translates to:
+  /// **'1년 이용권이 끝났어요 · 이번 달 무료 묶음 {count}개로 돌아왔어요'**
+  String yearlyEnded(int count);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

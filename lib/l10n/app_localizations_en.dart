@@ -603,4 +603,15 @@ class L10nEn extends L10n {
 
   @override
   String get nothingMarked => 'No photos marked';
+
+  @override
+  String yearlyEnded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Your 1-year plan ended · back to $count free sets this month',
+      one: 'Your 1-year plan ended · back to 1 free set this month',
+    );
+    return '$_temp0';
+  }
 }

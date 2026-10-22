@@ -94,6 +94,10 @@ class ProNotifier extends AsyncNotifier<ProState> {
     if (next.lifetime != s.lifetime || next.yearly != s.yearly) {
       await _save(next);
     }
+    // 1년 이용권이 끝나 Pro가 꺼지는 순간 한 번 알린다 (말없이 잠기지 않게, UX 리뷰 2026-10-22)
+    if (s.yearly && !next.yearly && !next.lifetime) {
+      ref.read(yearlyEndedProvider.notifier).raise();
+    }
     return owned.isNotEmpty;
   }
 
@@ -142,6 +146,19 @@ class ProNotifier extends AsyncNotifier<ProState> {
     state = AsyncData(s);
   }
 }
+
+/// 1년 이용권이 방금 끝났다 (홈이 한 번 알리고 내린다)
+class YearlyEndedNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void raise() => state = true;
+  void clear() => state = false;
+}
+
+final yearlyEndedProvider = NotifierProvider<YearlyEndedNotifier, bool>(
+  YearlyEndedNotifier.new,
+);
 
 final proProvider = AsyncNotifierProvider<ProNotifier, ProState>(
   ProNotifier.new,
