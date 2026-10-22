@@ -441,10 +441,10 @@ class L10nEn extends L10n {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Cleaned up $countString photos.',
-      one: 'Cleaned up 1 photo.',
+      other: 'Moved $countString photos to trash.',
+      one: 'Moved 1 photo to trash.',
     );
-    return '$_temp0 Want picks for every other set too?';
+    return '$_temp0 See picks for the other sets right away?';
   }
 
   @override

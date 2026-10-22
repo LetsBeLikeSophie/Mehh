@@ -230,7 +230,7 @@
   "restored": "구매를 복원했어요",
   "nothingToRestore": "복원할 구매가 없어요",
   "proThanks": "Pro가 열렸어요",
-  "proNudge": "{count}장 정리했어요. 남은 묶음도 추천대로 바로 정리해 볼까요?",
+  "proNudge": "{count}장을 휴지통으로 보냈어요. 남은 묶음도 추천을 바로 볼까요?",
   "@proNudge": {
     "placeholders": {
       "count": {
