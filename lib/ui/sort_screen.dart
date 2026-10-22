@@ -169,9 +169,11 @@ class _SortScreenState extends ConsumerState<SortScreen>
         }
       }
     }
-    final ids = widget.kind == SortKind.duplicates || g == null
-        ? src.suggested
-        : ref.read(groupPlanProvider(g)).trash.keys.toSet();
+    // 화면에 보이던 추천을 그대로 X로. 잠겨 있던 묶음만 방금 연 추천을 다시 계산해서 받는다
+    // (캡처는 캡처 추천을 써야 한다: 묶음 추천을 쓰면 일부만 X가 됐다, 2026-10-22 버그)
+    final ids = src.locked > 0 && g != null
+        ? ref.read(groupPlanProvider(g)).trash.keys.toSet()
+        : src.suggested;
     final decisions = ref.read(decisionsProvider).value ?? const {};
     await ref.read(decisionsProvider.notifier).set([
       for (final id in ids)

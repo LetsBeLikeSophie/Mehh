@@ -222,6 +222,37 @@ void main() {
     expect(find.textContaining('Cortex에서 AI로 분석해요'), findsOneWidget);
   });
 
+  testWidgets('캡처: [추천 보기 · N장]을 누르면 N장 모두 X (오래된 캡처)', (tester) async {
+    final old = [
+      for (var i = 0; i < 3; i++)
+        PhotoMeta(
+          id: 's$i',
+          takenAt: DateTime(2026, 1, 1 + i),
+          width: 100,
+          height: 200,
+          isScreenshot: true,
+        ),
+      PhotoMeta(
+        id: 'new',
+        takenAt: DateTime.now(),
+        width: 100,
+        height: 200,
+        isScreenshot: true,
+      ),
+    ];
+    final shots = DayGroup(
+      id: 'shots',
+      kind: DayGroupKind.screenshots,
+      photos: old,
+    );
+    await pump(tester, SortScreen(kind: SortKind.screenshots, group: shots));
+    await tester.tap(find.text('추천 보기 · 3장'));
+    await tester.pumpAndSettle();
+    expect(find.text('3장 휴지통으로'), findsOneWidget);
+    expect(find.text('오래됨'), findsNWidgets(3));
+    await flush(tester);
+  });
+
   testWidgets('그리드: X를 켜면 휴지통 버튼, 보내면 그 사진만 빠진다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     expect(find.text('X를 친 사진이 없어요'), findsWidgets);
