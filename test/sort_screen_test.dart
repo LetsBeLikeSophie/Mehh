@@ -39,6 +39,7 @@ void main() {
     WidgetTester tester,
     Widget home, {
     List<Override> extra = const [],
+    ProVault? vault,
   }) async {
     tester.view.physicalSize = const Size(390 * 3, 844 * 3);
     tester.view.devicePixelRatio = 3;
@@ -50,7 +51,7 @@ void main() {
             DemoPhotoLibrary() as PhotoLibrary,
           ),
           storeProvider.overrideWithValue(MemoryStore()),
-          proVaultProvider.overrideWithValue(MemoryProVault()),
+          proVaultProvider.overrideWithValue(vault ?? MemoryProVault()),
           billingProvider.overrideWithValue(DemoBilling(korean: true)),
           ...extra,
         ],
@@ -296,6 +297,45 @@ void main() {
     expect(container.read(proProvider).value!.freeLeft(now), 2);
     expect(await container.read(proProvider.notifier).unlock(day.id), isTrue);
     expect(container.read(proProvider).value!.freeLeft(now), 2);
+    await flush(tester);
+  });
+
+  testWidgets('무료 묶음을 다 쓴 뒤 Pro를 사면 다시 누르지 않아도 추천이 X로 들어간다', (tester) async {
+    final day = DayGroup(id: 'day-p0', kind: DayGroupKind.day, photos: photos);
+    final features = {
+      for (final p in photos)
+        p.id: PhotoFeatures(
+          id: p.id,
+          hashHi: 1,
+          hashLo: 2,
+          sharpness: 500,
+          brightness: p.id == 'p1' ? 3 : 120,
+        ),
+    };
+    final now = DateTime.now();
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.day, group: day),
+      vault: MemoryProVault(
+        ProState(freeMonth: monthKey(now), freeUsed: freeGroupsPerMonth),
+      ),
+      extra: [
+        groupPlanProvider.overrideWith(
+          (ref, g) => planGroup(
+            g.photos,
+            features,
+            ref.watch(decisionsProvider).value ?? const {},
+          ),
+        ),
+      ],
+    );
+    await tester.tap(find.text('추천 보기 · 1장'));
+    await tester.pumpAndSettle();
+    expect(find.text('Mehh Pro'), findsOneWidget);
+    await tester.tap(find.text('평생 이용권'));
+    await tester.pumpAndSettle();
+    expect(find.text('Mehh Pro'), findsNothing); // 사면 시트가 닫힌다
+    expect(find.text('1장 휴지통으로'), findsOneWidget);
     await flush(tester);
   });
 

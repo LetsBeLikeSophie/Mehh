@@ -114,12 +114,16 @@ class _SortScreenState extends ConsumerState<SortScreen>
     final pro = ref.read(proProvider.notifier);
     if (widget.kind == SortKind.day && src.locked > 0 && g != null) {
       if (!await pro.unlock(g.id, photoIds: g.photos.map((p) => p.id))) {
-        if (mounted) await showProSheet(context);
-        return;
-      }
-      final s = await ref.read(proProvider.future);
-      if (!s.pro && mounted) {
-        showNote(context, context.l.freeLeftNote(s.freeLeft(DateTime.now())));
+        if (!mounted) return;
+        await showProSheet(context);
+        // 시트에서 Pro를 샀으면 다시 누르지 않아도 이어서 추천을 X로 (UX 리뷰 2026-10-22).
+        // 결제 대기·취소면 그대로 끝
+        if (!(ref.read(proProvider).value?.pro ?? false)) return;
+      } else {
+        final s = await ref.read(proProvider.future);
+        if (!s.pro && mounted) {
+          showNote(context, context.l.freeLeftNote(s.freeLeft(DateTime.now())));
+        }
       }
     }
     final ids = widget.kind == SortKind.duplicates || g == null
