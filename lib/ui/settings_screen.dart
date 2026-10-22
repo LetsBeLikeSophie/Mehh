@@ -78,6 +78,8 @@ class SettingsScreen extends ConsumerWidget {
                       context.l.privacyLocal,
                       context.l.privacyGeocode,
                       context.l.privacyTrash,
+                      if (ref.watch(cortexInstalledProvider).value ?? false)
+                        context.l.privacyCortex,
                     ],
                   ),
                   const SizedBox(height: 20),

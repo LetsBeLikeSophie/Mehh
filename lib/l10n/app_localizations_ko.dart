@@ -530,4 +530,8 @@ class L10nKo extends L10n {
 
   @override
   String get unsentDot => 'X를 쳐 두고 아직 휴지통으로 안 보냈어요';
+
+  @override
+  String get privacyCortex =>
+      'Cortex로 직접 보낸 캡처는 Cortex에서 AI로 분석해요. 내가 고른 캡처만, 보낼 때만 넘어가요.';
 }

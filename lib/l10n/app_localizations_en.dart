@@ -646,4 +646,8 @@ class L10nEn extends L10n {
 
   @override
   String get unsentDot => 'Marked, not moved to trash yet';
+
+  @override
+  String get privacyCortex =>
+      'Screenshots you send to Cortex are analyzed by Cortex\'s AI. Only the ones you pick, only when you send them.';
 }

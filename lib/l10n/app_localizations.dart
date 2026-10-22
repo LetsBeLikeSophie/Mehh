@@ -900,6 +900,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'X를 쳐 두고 아직 휴지통으로 안 보냈어요'**
   String get unsentDot;
+
+  /// No description provided for @privacyCortex.
+  ///
+  /// In ko, this message translates to:
+  /// **'Cortex로 직접 보낸 캡처는 Cortex에서 AI로 분석해요. 내가 고른 캡처만, 보낼 때만 넘어가요.'**
+  String get privacyCortex;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

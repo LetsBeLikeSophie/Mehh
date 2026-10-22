@@ -211,6 +211,15 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('설정: Cortex가 있으면 개인정보 안내에 Cortex AI 줄', (tester) async {
+    await pump(
+      tester,
+      const SettingsScreen(),
+      extra: [cortexInstalledProvider.overrideWith((ref) async => true)],
+    );
+    expect(find.textContaining('Cortex에서 AI로 분석해요'), findsOneWidget);
+  });
+
   testWidgets('그리드: X를 켜면 휴지통 버튼, 보내면 그 사진만 빠진다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     expect(find.text('X를 친 사진이 없어요'), findsWidgets);

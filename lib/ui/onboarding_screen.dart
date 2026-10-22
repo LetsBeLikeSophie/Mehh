@@ -70,6 +70,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 child: Column(
                   children: [
                     _Promise(Icons.lock_outline, context.l.promiseLocal),
+                    // Cortex가 있으면 "폰 밖으로 안 나간다"의 예외를 바로 알린다 (2026-10-22 Sophie C1-A)
+                    if (ref.watch(cortexInstalledProvider).value ?? false) ...[
+                      const SizedBox(height: 12),
+                      _Promise(Icons.north_east, context.l.privacyCortex),
+                    ],
                     const SizedBox(height: 12),
                     _Promise(Icons.tune, context.l.promiseLearn),
                     const SizedBox(height: 12),
