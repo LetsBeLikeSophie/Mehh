@@ -340,12 +340,8 @@ class L10nKo extends L10n {
   String get proBody => '모든 묶음의 정리 추천을 바로 봐요.';
 
   @override
-  String proFree(int limit, int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    return '무료로는 매달 묶음 $limit개까지 추천을 볼 수 있어요. 이번 달 $countString개 남았어요.';
+  String proFree(int limit, int count, String date) {
+    return '무료로는 매달 묶음 $limit개까지 추천을 볼 수 있어요. 이번 달 $count개 남았고, $date에 다시 $limit개가 돼요.';
   }
 
   @override
@@ -496,5 +492,7 @@ class L10nKo extends L10n {
   }
 
   @override
-  String get picksNoFreeNote => '이번 달 무료 묶음을 다 썼어요 · Pro면 모든 묶음의 추천을 볼 수 있어요';
+  String picksNoFreeNote(String date, int count) {
+    return '이번 달 무료 묶음을 다 썼어요 · $date에 $count개가 다시 생겨요';
+  }
 }

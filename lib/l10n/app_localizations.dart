@@ -634,8 +634,8 @@ abstract class L10n {
   /// No description provided for @proFree.
   ///
   /// In ko, this message translates to:
-  /// **'무료로는 매달 묶음 {limit}개까지 추천을 볼 수 있어요. 이번 달 {count}개 남았어요.'**
-  String proFree(int limit, int count);
+  /// **'무료로는 매달 묶음 {limit}개까지 추천을 볼 수 있어요. 이번 달 {count}개 남았고, {date}에 다시 {limit}개가 돼요.'**
+  String proFree(int limit, int count, String date);
 
   /// No description provided for @proActive.
   ///
@@ -850,8 +850,8 @@ abstract class L10n {
   /// No description provided for @picksNoFreeNote.
   ///
   /// In ko, this message translates to:
-  /// **'이번 달 무료 묶음을 다 썼어요 · Pro면 모든 묶음의 추천을 볼 수 있어요'**
-  String get picksNoFreeNote;
+  /// **'이번 달 무료 묶음을 다 썼어요 · {date}에 {count}개가 다시 생겨요'**
+  String picksNoFreeNote(String date, int count);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

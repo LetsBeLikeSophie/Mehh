@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/billing.dart';
 import '../data/pro.dart';
 import '../l10n/l10n.dart';
+import '../logic/format.dart';
 import '../providers.dart';
 import '../theme.dart';
 import 'widgets.dart';
@@ -135,7 +136,11 @@ class _ProSheetState extends ConsumerState<_ProSheet> {
             else ...[
               Text(l.proBody, style: muted),
               Text(
-                l.proFree(freeGroupsPerMonth, pro.freeLeft(DateTime.now())),
+                l.proFree(
+                  freeGroupsPerMonth,
+                  pro.freeLeft(DateTime.now()),
+                  formatDate(nextFreeReset(DateTime.now()), l.localeName),
+                ),
                 style: muted,
               ),
               const SizedBox(height: 16),

@@ -390,12 +390,8 @@ class L10nEn extends L10n {
   String get proBody => 'See the picks for every set, right away.';
 
   @override
-  String proFree(int limit, int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    return 'Free: picks for $limit sets each month. $countString left this month.';
+  String proFree(int limit, int count, String date) {
+    return 'Free: picks for $limit sets each month. $count left this month, back to $limit on $date.';
   }
 
   @override
@@ -593,6 +589,7 @@ class L10nEn extends L10n {
   }
 
   @override
-  String get picksNoFreeNote =>
-      'No free sets left this month · Pro shows picks for every set';
+  String picksNoFreeNote(String date, int count) {
+    return 'No free sets left this month · $count more on $date';
+  }
 }

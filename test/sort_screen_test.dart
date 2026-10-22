@@ -372,6 +372,8 @@ void main() {
     expect(await pro.unlock('g9', now: oct), isFalse);
     expect(await pro.unlock('g0', now: oct), isTrue); // 이미 연 묶음
     expect(await pro.unlock('g9', now: DateTime(2026, 11, 1)), isTrue);
+    expect(nextFreeReset(oct), DateTime(2026, 11, 1));
+    expect(nextFreeReset(DateTime(2026, 12, 15)), DateTime(2027, 1, 1));
 
     final offers = await billing.offers();
     expect(offers.first.plan, Plan.lifetime);

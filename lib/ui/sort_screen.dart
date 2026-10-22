@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/handoff.dart';
+import '../data/pro.dart';
 import '../l10n/l10n.dart';
 import '../logic/format.dart';
 import '../logic/pick_stats.dart';
@@ -370,7 +371,13 @@ class _SortScreenState extends ConsumerState<SortScreen>
                                 Text(
                                   freeLeft > 0
                                       ? l.picksCostNote(freeLeft)
-                                      : l.picksNoFreeNote,
+                                      : l.picksNoFreeNote(
+                                          formatDate(
+                                            nextFreeReset(DateTime.now()),
+                                            l.localeName,
+                                          ),
+                                          freeGroupsPerMonth,
+                                        ),
                                   style: const TextStyle(
                                     fontSize: MehhText.caption,
                                     color: MehhColors.textMuted,

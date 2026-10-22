@@ -92,6 +92,9 @@ class ProState {
   );
 }
 
+/// 무료 묶음이 다시 채워지는 날 (다음 달 1일)
+DateTime nextFreeReset(DateTime now) => DateTime(now.year, now.month + 1, 1);
+
 abstract class ProVault {
   Future<ProState> load();
   Future<void> save(ProState s);

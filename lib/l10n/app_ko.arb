@@ -207,15 +207,17 @@
   },
   "proTitle": "Mehh Pro",
   "proBody": "모든 묶음의 정리 추천을 바로 봐요.",
-  "proFree": "무료로는 매달 묶음 {limit}개까지 추천을 볼 수 있어요. 이번 달 {count}개 남았어요.",
+  "proFree": "무료로는 매달 묶음 {limit}개까지 추천을 볼 수 있어요. 이번 달 {count}개 남았고, {date}에 다시 {limit}개가 돼요.",
   "@proFree": {
     "placeholders": {
       "limit": {
         "type": "int"
       },
       "count": {
-        "type": "int",
-        "format": "decimalPattern"
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
       }
     }
   },
@@ -348,5 +350,15 @@
       }
     }
   },
-  "picksNoFreeNote": "이번 달 무료 묶음을 다 썼어요 · Pro면 모든 묶음의 추천을 볼 수 있어요"
+  "picksNoFreeNote": "이번 달 무료 묶음을 다 썼어요 · {date}에 {count}개가 다시 생겨요",
+  "@picksNoFreeNote": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
