@@ -49,10 +49,12 @@ GroupPlan planGroup(
   final best = <String>{};
   final trash = <String, TrashReason>{};
 
-  // 예전에 저장된 보류(hold)는 표시 없음으로 본다
+  // 추천 후보: 킵·휴지통이 아닌 사진. [추천 보기]로 X(toTrash)가 된 사진도 계속 추천으로 센다
+  // (안 그러면 누르자마자 이유 표시·홈 숫자·정확도 기록에서 빠진다, 리뷰 2026-10-22).
+  // 예전에 저장된 보류(hold)는 표시 없음으로 본다.
   bool open(PhotoMeta p) {
     final s = decisions[p.id]?.state;
-    return s == null || s == DecisionState.undecided || s == DecisionState.hold;
+    return s != DecisionState.keep && s != DecisionState.trashed;
   }
 
   bool gone(PhotoMeta p) {

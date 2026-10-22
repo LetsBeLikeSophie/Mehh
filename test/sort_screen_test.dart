@@ -9,7 +9,9 @@ import 'package:mehh/data/handoff.dart';
 import 'package:mehh/data/photo_library.dart';
 import 'package:mehh/data/store.dart';
 import 'package:mehh/l10n/l10n.dart';
+import 'package:mehh/logic/pick_stats.dart';
 import 'package:mehh/logic/recommend.dart';
+import 'package:mehh/models/features.dart';
 import 'package:mehh/models/day_group.dart';
 import 'package:mehh/models/photo_meta.dart';
 import 'package:mehh/providers.dart';
@@ -237,18 +239,29 @@ void main() {
     tester,
   ) async {
     final day = DayGroup(id: 'day-p0', kind: DayGroupKind.day, photos: photos);
-    final plan = GroupPlan(
-      bursts: [
-        for (final p in photos) [p],
-      ],
-      best: const {},
-      trash: const {'p1': TrashReason.junk, 'p2': TrashReason.blurry},
-      analyzed: photos.length,
-    );
+    // 실제 planGroup을 거친다 (p1·p2는 까만 사진 = 실수로 찍힘)
+    final features = {
+      for (final p in photos)
+        p.id: PhotoFeatures(
+          id: p.id,
+          hashHi: 1,
+          hashLo: 2,
+          sharpness: 500,
+          brightness: p.id == 'p1' || p.id == 'p2' ? 3 : 120,
+        ),
+    };
     await pump(
       tester,
       SortScreen(kind: SortKind.day, group: day),
-      extra: [groupPlanProvider.overrideWith((ref, g) => plan)],
+      extra: [
+        groupPlanProvider.overrideWith(
+          (ref, g) => planGroup(
+            g.photos,
+            features,
+            ref.watch(decisionsProvider).value ?? const {},
+          ),
+        ),
+      ],
     );
     expect(find.text('2장 휴지통으로'), findsNothing); // 누르기 전엔 X 없음
 
@@ -256,6 +269,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('2장 휴지통으로'), findsOneWidget);
     expect(find.text('이번 달 무료 묶음이 2개 남았어요'), findsOneWidget);
+    // X를 쳐도 추천은 그대로: 이유 표시와 [추천 보기]가 남는다
+    expect(find.text('실수'), findsNWidgets(2));
+    expect(find.text('추천 보기 · 2장'), findsOneWidget);
     final container = ProviderScope.containerOf(
       tester.element(find.byType(SortScreen)),
     );
@@ -268,8 +284,11 @@ void main() {
     await tester.tap(find.text('1장 휴지통으로'));
     await tester.pumpAndSettle();
     final picks = await container.read(storeProvider).loadPicks();
-    expect(picks.where((p) => p.suggested).length, 2);
-    expect(picks.where((p) => p.suggested && p.sent).length, 1);
+    final stats = PickStats.of(picks);
+    expect(stats.suggested, 2);
+    expect(stats.accepted, 1);
+    expect(stats.added, 0);
+    expect(stats.byTag['junk'], (1, 2));
     expect(container.read(proProvider).value!.freeLeft(now), 2);
     expect(await container.read(proProvider.notifier).unlock(day.id), isTrue);
     expect(container.read(proProvider).value!.freeLeft(now), 2);

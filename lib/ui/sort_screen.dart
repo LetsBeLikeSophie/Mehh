@@ -40,8 +40,12 @@ class _SortScreenState extends ConsumerState<SortScreen>
     with WidgetsBindingObserver {
   bool _busy = false;
 
-  /// 이번에 [추천 보기]를 눌렀다 (추천 정확도는 추천을 본 경우만 센다)
-  bool _applied = false;
+  /// 이번에 [추천 보기]로 X를 친 사진 (추천 정확도는 추천을 본 경우만, 이 목록으로 센다.
+  /// 나중에 X를 꺼서 킵하면 추천에서 빠지므로, 누른 순간의 목록을 기억한다)
+  final _picked = <String>{};
+
+  /// 화면에 보였던 이유 표시 (킵해서 사라진 표시도 기록에 남기려고)
+  final _seenTags = <String, String>{};
 
   /// Cortex로 보낸 캡처. Cortex가 다 읽은 뒤(Mehh로 돌아왔을 때) 휴지통으로 옮긴다.
   List<String>? _sentToCortex;
@@ -125,7 +129,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
       for (final id in ids)
         if (stateOf(decisions, id) != DecisionState.trashed) id,
     ], DecisionState.toTrash);
-    if (mounted) setState(() => _applied = true);
+    if (mounted) setState(() => _picked.addAll(ids));
   }
 
   void _open(String id) => Navigator.of(context).push(
@@ -165,7 +169,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
     SortSource src,
     List<String> shown,
   ) async {
-    if (widget.kind == SortKind.screenshots || !_applied) return;
+    if (widget.kind == SortKind.screenshots || _picked.isEmpty) return;
     await ref
         .read(storeProvider)
         .addPicks(
@@ -174,8 +178,11 @@ class _SortScreenState extends ConsumerState<SortScreen>
             kind: widget.kind.name,
             shown: shown,
             sent: sent.toSet(),
-            suggested: src.suggested,
-            tags: {for (final e in src.tags.entries) e.key: e.value.name},
+            suggested: {..._picked, ...src.suggested},
+            tags: {
+              ..._seenTags,
+              for (final e in src.tags.entries) e.key: e.value.name,
+            },
           ),
         );
   }
@@ -246,6 +253,9 @@ class _SortScreenState extends ConsumerState<SortScreen>
   Widget build(BuildContext context) {
     final l = context.l;
     final src = watchSortSource(ref, widget.kind, widget.group);
+    for (final e in src.tags.entries) {
+      _seenTags[e.key] = e.value.name;
+    }
     final cortex =
         widget.kind == SortKind.screenshots &&
         (ref.watch(cortexInstalledProvider).value ?? false);

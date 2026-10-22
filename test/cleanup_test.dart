@@ -150,7 +150,8 @@ void main() {
         'b': Decision(photoId: 'b', state: DecisionState.toTrash, at: t0),
       });
       expect(plan.best, {'c'}); // b 다음으로 선명한 c
-      expect(plan.trash.keys, ['a']);
+      // 정리 줄에 넣은 b도 추천으로 남는다 (X를 쳐도 추천에서 빠지지 않는다)
+      expect(plan.trash.keys, unorderedEquals(['a', 'b']));
     });
 
     test('중복 원본을 정리하면 다음 사진이 남길 사진이 된다', () {
@@ -161,6 +162,26 @@ void main() {
       expect(keeperOf(s, (_) => false), 'orig');
       expect(keeperOf(s, (id) => id == 'orig'), 'copy1');
       expect(keeperOf(s, (_) => true), isNull);
+    });
+
+    test('[추천 보기]로 X(정리)가 된 추천은 이유와 함께 그대로 추천으로 남는다', () {
+      final photos = [
+        meta('a', t0),
+        meta('b', t0.add(const Duration(seconds: 20))),
+        meta('c', t0.add(const Duration(seconds: 50))),
+      ];
+      final f = {
+        'a': feat('a', sharp: 300),
+        'b': feat('b', sharp: 900),
+        'c': feat('c', sharp: 5),
+      };
+      final before = planGroup(photos, f, {});
+      final after = planGroup(photos, f, {
+        for (final id in before.trash.keys)
+          id: Decision(photoId: id, state: DecisionState.toTrash, at: t0),
+      });
+      expect(after.trash, before.trash);
+      expect(after.best, before.best);
     });
 
     test('킵한 사진은 추천에서 빠진다', () {
