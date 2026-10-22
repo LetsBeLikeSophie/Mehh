@@ -876,6 +876,18 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'1년 이용권이 끝났어요 · 이번 달 무료 묶음 {count}개로 돌아왔어요'**
   String yearlyEnded(int count);
+
+  /// No description provided for @proUsing.
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro를 쓰고 있어요'**
+  String get proUsing;
+
+  /// No description provided for @freeSetsLeft.
+  ///
+  /// In ko, this message translates to:
+  /// **'무료 묶음 {count}개 남음'**
+  String freeSetsLeft(int count);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

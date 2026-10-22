@@ -371,5 +371,14 @@
         "type": "int"
       }
     }
+  },
+  "proUsing": "Pro를 쓰고 있어요",
+  "freeSetsLeft": "무료 묶음 {count}개 남음",
+  "@freeSetsLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

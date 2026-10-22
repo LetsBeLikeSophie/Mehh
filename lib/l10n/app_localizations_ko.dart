@@ -510,4 +510,12 @@ class L10nKo extends L10n {
   String yearlyEnded(int count) {
     return '1년 이용권이 끝났어요 · 이번 달 무료 묶음 $count개로 돌아왔어요';
   }
+
+  @override
+  String get proUsing => 'Pro를 쓰고 있어요';
+
+  @override
+  String freeSetsLeft(int count) {
+    return '무료 묶음 $count개 남음';
+  }
 }

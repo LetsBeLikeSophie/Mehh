@@ -17,6 +17,7 @@ import 'package:mehh/models/photo_meta.dart';
 import 'package:mehh/providers.dart';
 import 'package:mehh/ui/focus_screen.dart';
 import 'package:mehh/ui/home_tab.dart';
+import 'package:mehh/ui/settings_screen.dart';
 import 'package:mehh/ui/sort_screen.dart';
 import 'package:mehh/ui/widgets.dart';
 
@@ -85,6 +86,14 @@ void main() {
     expect(find.text('사진을\n살펴보고 있어요'), findsOneWidget);
     expect(find.text('똑같은 사진은 다 살펴본 뒤 알려 드려요 · 무료'), findsOneWidget);
     await flush(tester);
+  });
+
+  testWidgets('설정: 맨 위 Mehh Pro 줄을 누르면 Pro 안내(구매 복원)가 열린다', (tester) async {
+    await pump(tester, const SettingsScreen());
+    expect(find.text('무료 묶음 3개 남음'), findsOneWidget);
+    await tester.tap(find.text('Mehh Pro'));
+    await tester.pumpAndSettle();
+    expect(find.text('구매 복원'), findsOneWidget);
   });
 
   testWidgets('그리드: X를 켜면 휴지통 버튼, 보내면 그 사진만 빠진다', (tester) async {

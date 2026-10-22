@@ -9,6 +9,7 @@ import '../l10n/l10n.dart';
 import '../providers.dart';
 import '../theme.dart';
 import 'accuracy_screen.dart';
+import 'pro_sheet.dart';
 import 'widgets.dart';
 
 /// 설정: 개인정보 안내 + 이 폰에 남긴 기록 지우기
@@ -68,6 +69,9 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
+                  // 구매 복원은 여기서도 찾을 수 있게 (UX 리뷰 2026-10-22). 새 화면 없이 Pro 안내를 연다
+                  const _ProRow(),
+                  const SizedBox(height: 12),
                   _Section(
                     title: context.l.privacyTitle,
                     lines: [
@@ -187,4 +191,51 @@ class _VersionTapState extends State<_VersionTap> {
       ),
     ),
   );
+}
+
+/// 설정 맨 위 "Mehh Pro" 줄: 지금 상태 한 줄, 누르면 Pro 안내(구매·구매 복원)
+class _ProRow extends ConsumerWidget {
+  const _ProRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l;
+    final s = ref.watch(proProvider).value;
+    final status = s == null
+        ? ''
+        : s.pro
+        ? l.proUsing
+        : l.freeSetsLeft(s.freeLeft(DateTime.now()));
+    return Material(
+      color: MehhColors.surface,
+      borderRadius: BorderRadius.circular(MehhRadius.card),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(MehhRadius.card),
+        onTap: () => showProSheet(context),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Text(
+                l.proTitle,
+                style: const TextStyle(
+                  fontSize: MehhText.body,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                status,
+                style: const TextStyle(
+                  fontSize: MehhText.caption,
+                  color: MehhColors.textMuted,
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: MehhColors.icon),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

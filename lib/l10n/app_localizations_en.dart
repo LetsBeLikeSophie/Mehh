@@ -614,4 +614,18 @@ class L10nEn extends L10n {
     );
     return '$_temp0';
   }
+
+  @override
+  String get proUsing => 'You have Pro';
+
+  @override
+  String freeSetsLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count free sets left',
+      one: '1 free set left',
+    );
+    return '$_temp0';
+  }
 }
