@@ -151,15 +151,15 @@ class _SortScreenState extends ConsumerState<SortScreen>
   ) async {
     if (!await _confirmSceneLoss(ids, src) || !mounted) return;
     setState(() => _busy = true);
-    final n = await sendToTrash(context, ref, ids);
+    // 정리를 끝낸 순간에 Pro 안내 (Pro가 아니면 하루 한 번까지). 안내 시트가 아래 알림을 덮으니
+    // 그때는 알림 대신 시트 첫 줄에 "30일 안에 되살릴 수 있어요"까지 넣는다 (UX 리뷰 2026-10-22)
+    final pro = ref.read(proProvider.notifier);
+    final nudge = widget.kind == SortKind.day && await pro.canNudge();
+    if (!mounted) return;
+    final n = await sendToTrash(context, ref, ids, quiet: nudge);
     if (n > 0) await _recordPicks(ids, src, shown);
     if (mounted) setState(() => _busy = false);
-    // 정리를 끝낸 순간에 Pro 안내 (Pro가 아니면 하루 한 번까지)
-    if (n > 0 &&
-        widget.kind == SortKind.day &&
-        mounted &&
-        await ref.read(proProvider.notifier).takeNudge() &&
-        mounted) {
+    if (n > 0 && nudge && await pro.takeNudge() && mounted) {
       await showProSheet(context, lead: context.l.proNudge(n));
     }
   }

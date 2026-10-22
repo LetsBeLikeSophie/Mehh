@@ -13,6 +13,7 @@ Future<int> sendToTrash(
   WidgetRef ref,
   Iterable<String> ids, {
   String Function(int n)? doneNote,
+  bool quiet = false,
 }) async {
   final list = ids.toSet().toList();
   if (list.isEmpty) return 0;
@@ -25,7 +26,7 @@ Future<int> sendToTrash(
     }
     return 0;
   }
-  if (n > 0 && context.mounted) {
+  if (n > 0 && !quiet && context.mounted) {
     showNote(context, doneNote?.call(n) ?? context.l.trashed(n));
   }
   return n;

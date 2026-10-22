@@ -285,6 +285,9 @@ void main() {
     await tester.tap(find.text('1장 휴지통으로'));
     await tester.pumpAndSettle();
     final picks = await container.read(storeProvider).loadPicks();
+    // 정리 후 Pro 안내가 뜨면 알림 대신 시트 첫 줄에 되살릴 수 있다는 말이 들어간다
+    expect(find.textContaining('30일 안에 되살릴 수 있어요. 남은 묶음도'), findsOneWidget);
+    expect(find.textContaining('휴지통을 비우면'), findsNothing);
     final stats = PickStats.of(picks);
     expect(stats.suggested, 2);
     expect(stats.accepted, 1);

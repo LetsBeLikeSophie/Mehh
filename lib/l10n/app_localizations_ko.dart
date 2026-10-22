@@ -384,7 +384,7 @@ class L10nKo extends L10n {
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return '$countString장을 휴지통으로 보냈어요. 남은 묶음도 추천을 바로 볼까요?';
+    return '$countString장을 휴지통으로 보냈어요 · 30일 안에 되살릴 수 있어요. 남은 묶음도 추천을 바로 볼까요?';
   }
 
   @override

@@ -122,13 +122,20 @@ class ProNotifier extends AsyncNotifier<ProState> {
 
   /// 정리를 끝낸 뒤 Pro 안내를 띄울까 (Pro가 아니고 오늘 아직 안 띄웠으면). 띄우면 기록.
   Future<bool> takeNudge({DateTime? now}) async {
+    if (!await canNudge(now: now)) return false;
     final s = await future;
-    final at = now ?? DateTime.now();
-    final day = '${monthKey(at)}-${at.day.toString().padLeft(2, '0')}';
-    if (s.pro || s.lastNudge == day) return false;
-    await _save(s.copyWith(lastNudge: day));
+    await _save(s.copyWith(lastNudge: _day(now ?? DateTime.now())));
     return true;
   }
+
+  /// [takeNudge]를 쓰지 않고 오늘 안내를 띄울 수 있는지만 본다
+  Future<bool> canNudge({DateTime? now}) async {
+    final s = await future;
+    return !s.pro && s.lastNudge != _day(now ?? DateTime.now());
+  }
+
+  static String _day(DateTime at) =>
+      '${monthKey(at)}-${at.day.toString().padLeft(2, '0')}';
 
   Future<void> _save(ProState s) async {
     await _vault.save(s);

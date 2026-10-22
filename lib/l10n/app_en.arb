@@ -101,7 +101,7 @@
   "restored": "Purchases restored",
   "nothingToRestore": "No purchases to restore",
   "proThanks": "Pro is unlocked",
-  "proNudge": "{count, plural, =1{Moved 1 photo to trash.} other{Moved {count} photos to trash.}} See picks for the other sets right away?",
+  "proNudge": "{count, plural, =1{Moved 1 photo to trash · restore it within 30 days.} other{Moved {count} photos to trash · restore them within 30 days.}} See picks for the other sets right away?",
   "contact": "Contact us",
   "contactSubject": "Mehh feedback ({version})",
   "contactNote": "{email} · No photos or records are sent automatically — only what you write.",
