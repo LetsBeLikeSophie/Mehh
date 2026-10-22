@@ -112,7 +112,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
     final g = widget.group;
     final pro = ref.read(proProvider.notifier);
     if (widget.kind == SortKind.day && src.locked > 0 && g != null) {
-      if (!await pro.unlock(g.id)) {
+      if (!await pro.unlock(g.id, photoIds: g.photos.map((p) => p.id))) {
         if (mounted) await showProSheet(context);
         return;
       }

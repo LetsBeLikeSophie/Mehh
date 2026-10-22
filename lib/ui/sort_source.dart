@@ -159,7 +159,7 @@ SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
       ];
       if (kind == SortKind.day &&
           plan.trash.isNotEmpty &&
-          !ref.watch(unlockedProvider(g.id))) {
+          !ref.watch(unlockedProvider(g))) {
         return SortSource(
           photos: g.photos,
           plan: plan,

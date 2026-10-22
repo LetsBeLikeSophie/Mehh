@@ -14,6 +14,7 @@ class ProState {
     this.lifetime = false,
     this.yearly = false,
     this.unlocked = const {},
+    this.unlockedPhotos = const {},
     this.freeMonth = '',
     this.freeUsed = 0,
     this.lastNudge = '',
@@ -28,6 +29,10 @@ class ProState {
   /// 무료로 추천을 연 묶음 (한 번 열면 계속 열려 있다)
   final Set<String> unlocked;
 
+  /// 무료로 연 묶음의 사진들. 위치를 다 읽어 묶음이 나뉘거나 맨 앞 사진을 지워
+  /// 묶음 id가 바뀌어도, 사진이 하나라도 겹치면 계속 열린 것으로 본다 (UX 리뷰 2026-10-22)
+  final Set<String> unlockedPhotos;
+
   /// [freeUsed]를 센 달 ('yyyy-MM')
   final String freeMonth;
   final int freeUsed;
@@ -41,12 +46,16 @@ class ProState {
       ? (freeGroupsPerMonth - freeUsed).clamp(0, freeGroupsPerMonth)
       : freeGroupsPerMonth;
 
-  bool isOpen(String groupId) => pro || unlocked.contains(groupId);
+  bool isOpen(String groupId, {Iterable<String> photoIds = const []}) =>
+      pro ||
+      unlocked.contains(groupId) ||
+      photoIds.any(unlockedPhotos.contains);
 
   ProState copyWith({
     bool? lifetime,
     bool? yearly,
     Set<String>? unlocked,
+    Set<String>? unlockedPhotos,
     String? freeMonth,
     int? freeUsed,
     String? lastNudge,
@@ -54,6 +63,7 @@ class ProState {
     lifetime: lifetime ?? this.lifetime,
     yearly: yearly ?? this.yearly,
     unlocked: unlocked ?? this.unlocked,
+    unlockedPhotos: unlockedPhotos ?? this.unlockedPhotos,
     freeMonth: freeMonth ?? this.freeMonth,
     freeUsed: freeUsed ?? this.freeUsed,
     lastNudge: lastNudge ?? this.lastNudge,
@@ -63,6 +73,7 @@ class ProState {
     'lifetime': lifetime,
     'yearly': yearly,
     'unlocked': unlocked.toList(),
+    'unlockedPhotos': unlockedPhotos.toList(),
     'freeMonth': freeMonth,
     'freeUsed': freeUsed,
     'lastNudge': lastNudge,
@@ -72,6 +83,9 @@ class ProState {
     lifetime: j['lifetime'] as bool? ?? false,
     yearly: j['yearly'] as bool? ?? false,
     unlocked: {...(j['unlocked'] as List? ?? const []).cast<String>()},
+    unlockedPhotos: {
+      ...(j['unlockedPhotos'] as List? ?? const []).cast<String>(),
+    },
     freeMonth: j['freeMonth'] as String? ?? '',
     freeUsed: j['freeUsed'] as int? ?? 0,
     lastNudge: j['lastNudge'] as String? ?? '',

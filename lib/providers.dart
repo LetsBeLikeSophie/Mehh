@@ -99,15 +99,20 @@ class ProNotifier extends AsyncNotifier<ProState> {
 
   /// 묶음 추천을 연다. Pro면 그대로, 아니면 이번 달 무료 묶음을 하나 쓴다.
   /// 무료가 다 떨어졌으면 false.
-  Future<bool> unlock(String groupId, {DateTime? now}) async {
+  Future<bool> unlock(
+    String groupId, {
+    Iterable<String> photoIds = const [],
+    DateTime? now,
+  }) async {
     final s = await future;
-    if (s.isOpen(groupId)) return true;
+    if (s.isOpen(groupId, photoIds: photoIds)) return true;
     final at = now ?? DateTime.now();
     if (s.freeLeft(at) == 0) return false;
     final month = monthKey(at);
     await _save(
       s.copyWith(
         unlocked: {...s.unlocked, groupId},
+        unlockedPhotos: {...s.unlockedPhotos, ...photoIds},
         freeMonth: month,
         freeUsed: (s.freeMonth == month ? s.freeUsed : 0) + 1,
       ),
@@ -136,8 +141,13 @@ final proProvider = AsyncNotifierProvider<ProNotifier, ProState>(
 );
 
 /// 이 묶음의 앱 추천이 열려 있는가 (불러오는 중엔 닫힌 것으로)
-final unlockedProvider = Provider.family<bool, String>(
-  (ref, groupId) => ref.watch(proProvider).value?.isOpen(groupId) ?? false,
+final unlockedProvider = Provider.family<bool, DayGroup>(
+  (ref, g) =>
+      ref
+          .watch(proProvider)
+          .value
+          ?.isOpen(g.id, photoIds: g.photos.map((p) => p.id)) ??
+      false,
 );
 
 // ───────────────────────── 권한

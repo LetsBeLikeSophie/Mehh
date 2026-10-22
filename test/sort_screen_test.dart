@@ -383,6 +383,60 @@ void main() {
     expect(vault.value.lifetime, isTrue);
   });
 
+  test('무료로 연 묶음은 다시 묶여 id가 바뀌어도 열려 있다 (첫 사진을 빼거나 둘로 나뉘어도)', () async {
+    final c = ProviderContainer(
+      overrides: [
+        proVaultProvider.overrideWithValue(MemoryProVault()),
+        billingProvider.overrideWithValue(DemoBilling(korean: true)),
+      ],
+    );
+    addTearDown(c.dispose);
+    await c.read(proProvider.future);
+    final opened = DayGroup(
+      id: 'day-p0',
+      kind: DayGroupKind.day,
+      photos: photos,
+    );
+    expect(
+      await c
+          .read(proProvider.notifier)
+          .unlock(opened.id, photoIds: photos.map((p) => p.id)),
+      isTrue,
+    );
+    // 맨 앞 사진을 휴지통으로 보내 id가 바뀜
+    final rest = DayGroup(
+      id: 'day-p1',
+      kind: DayGroupKind.day,
+      photos: photos.sublist(1),
+    );
+    expect(c.read(unlockedProvider(rest)), isTrue);
+    // 위치를 읽어 둘로 나뉨
+    final a = DayGroup(
+      id: 'day-p0',
+      kind: DayGroupKind.day,
+      photos: photos.sublist(0, 2),
+    );
+    final b = DayGroup(
+      id: 'day-p2',
+      kind: DayGroupKind.day,
+      photos: photos.sublist(2),
+    );
+    expect(c.read(unlockedProvider(a)), isTrue);
+    expect(c.read(unlockedProvider(b)), isTrue);
+    // 처음 보는 사진만 있는 묶음은 닫혀 있다
+    final other = DayGroup(
+      id: 'day-x',
+      kind: DayGroupKind.day,
+      photos: [
+        PhotoMeta(id: 'x', takenAt: DateTime(2026, 1, 1), width: 1, height: 1),
+      ],
+    );
+    expect(c.read(unlockedProvider(other)), isFalse);
+    // 옛 기록(묶음 id만 있는 것)도 계속 인정
+    expect(const ProState(unlocked: {'old'}).isOpen('old'), isTrue);
+    expect(c.read(proProvider).value!.freeLeft(DateTime.now()), 2); // 한 번만 씀
+  });
+
   test('구매 복원: 1년 이용권이 끝나면 꺼지고, 평생권은 남는다', () async {
     final vault = MemoryProVault(const ProState(lifetime: true, yearly: true));
     final c = ProviderContainer(
