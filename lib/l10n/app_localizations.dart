@@ -858,6 +858,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'사진을\n살펴보고 있어요'**
   String get lookingAtPhotos;
+
+  /// No description provided for @duplicatesPending.
+  ///
+  /// In ko, this message translates to:
+  /// **'똑같은 사진은 다 살펴본 뒤 알려 드려요 · 무료'**
+  String get duplicatesPending;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

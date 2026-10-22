@@ -499,4 +499,7 @@ class L10nKo extends L10n {
 
   @override
   String get lookingAtPhotos => '사진을\n살펴보고 있어요';
+
+  @override
+  String get duplicatesPending => '똑같은 사진은 다 살펴본 뒤 알려 드려요 · 무료';
 }

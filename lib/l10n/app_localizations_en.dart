@@ -596,4 +596,8 @@ class L10nEn extends L10n {
 
   @override
   String get lookingAtPhotos => 'Looking through\nyour photos';
+
+  @override
+  String get duplicatesPending =>
+      'We\'ll show exact duplicates once we\'ve looked at everything · Free';
 }

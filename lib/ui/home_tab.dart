@@ -469,6 +469,27 @@ class _DuplicateCard extends ConsumerWidget {
     final sets = ref.watch(duplicatesProvider).value;
     final decisions = ref.watch(decisionsProvider).value ?? const {};
     final n = duplicatesLeft(sets, decisions);
+    // 분석이 끝나야 찾을 수 있으니, 그 전에는 같은 자리에 흐린 한 줄 (UX 리뷰 2026-10-22)
+    if (sets == null && !ref.watch(analysisProvider.select((a) => a.done))) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 24),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: MehhColors.surface,
+            borderRadius: BorderRadius.circular(MehhRadius.card),
+          ),
+          child: Text(
+            context.l.duplicatesPending,
+            style: const TextStyle(
+              fontSize: MehhText.caption,
+              color: MehhColors.textMuted,
+            ),
+          ),
+        ),
+      );
+    }
     if (n == 0) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(top: 24),

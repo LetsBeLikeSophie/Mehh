@@ -16,6 +16,7 @@ import 'package:mehh/models/day_group.dart';
 import 'package:mehh/models/photo_meta.dart';
 import 'package:mehh/providers.dart';
 import 'package:mehh/ui/focus_screen.dart';
+import 'package:mehh/ui/home_tab.dart';
 import 'package:mehh/ui/sort_screen.dart';
 import 'package:mehh/ui/widgets.dart';
 
@@ -75,6 +76,16 @@ void main() {
   // 지금 크게 보고 있는 사진 (낱장 사진은 최신이 앞: p3, p2, p1, p0)
   Finder showing(String id) =>
       find.descendant(of: card(), matching: find.byKey(ValueKey(id)));
+
+  testWidgets('홈: 분석 중에는 "살펴보고 있어요"와 흐린 똑같은 사진 줄 ("없어요"라고 하지 않는다)', (
+    tester,
+  ) async {
+    await pump(tester, const Scaffold(body: HomeTab()));
+    expect(find.text('지금은\n정리할 묶음이 없어요'), findsNothing);
+    expect(find.text('사진을\n살펴보고 있어요'), findsOneWidget);
+    expect(find.text('똑같은 사진은 다 살펴본 뒤 알려 드려요 · 무료'), findsOneWidget);
+    await flush(tester);
+  });
 
   testWidgets('그리드: X를 켜면 휴지통 버튼, 보내면 그 사진만 빠진다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
