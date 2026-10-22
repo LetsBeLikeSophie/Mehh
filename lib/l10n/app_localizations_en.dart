@@ -650,4 +650,8 @@ class L10nEn extends L10n {
   @override
   String get privacyCortex =>
       'Screenshots you send to Cortex are analyzed by Cortex\'s AI. Only the ones you pick, only when you send them.';
+
+  @override
+  String get cortexNotSaved =>
+      'Cortex didn\'t confirm it saved them, so nothing was moved to trash · your marks are kept';
 }

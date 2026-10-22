@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -66,15 +68,29 @@ class _SortScreenState extends ConsumerState<SortScreen>
 
   @override
   void dispose() {
+    _savedSub?.cancel();
     _scroll.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
+  StreamSubscription<int>? _savedSub;
+
+  /// Cortex에서 돌아왔는데 "저장 완료" 신호가 없으면, 조금 기다렸다가 옮기지 않고 알린다
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed || _sentToCortex == null) return;
+    Future<void>.delayed(const Duration(milliseconds: 1500), () {
+      if (!mounted || _sentToCortex == null) return;
+      _sentToCortex = null;
+      setState(() => _busy = false);
+      showNote(context, context.l.cortexNotSaved);
+    });
+  }
+
+  void _onCortexSaved(int count) {
     final ids = _sentToCortex;
-    if (state != AppLifecycleState.resumed || ids == null || !mounted) return;
+    if (ids == null || !mounted) return;
     _sentToCortex = null;
     _trashAfterCortex(ids);
   }
@@ -87,7 +103,12 @@ class _SortScreenState extends ConsumerState<SortScreen>
     final l = context.l;
     switch (r) {
       case SendResult.ok:
-        _sentToCortex = ids; // 돌아오면 휴지통으로
+        // Cortex가 저장을 마쳤다고 알려 오면 휴지통으로 (안 알려 오면 그대로 둔다)
+        _savedSub ??= ref
+            .read(handoffProvider)
+            .cortexSaved
+            .listen(_onCortexSaved);
+        _sentToCortex = ids;
       case SendResult.unsupported:
         setState(() => _busy = false);
         showNote(context, l.cortexMultiUnsupported);

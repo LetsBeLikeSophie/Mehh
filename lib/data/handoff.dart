@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -11,7 +12,22 @@ enum SendResult { ok, unsupported, failed }
 /// Mehh → 다른 앱으로 사진 넘기기 (사용자가 버튼을 누를 때만).
 /// 일반 공유시트는 쓰지 않는다: 캡처는 Cortex로만 보낸다.
 class Handoff {
+  Handoff() {
+    if (!kIsWeb) {
+      _channel.setMethodCallHandler((call) async {
+        if (call.method == 'cortexSaved') {
+          _saved.add(call.arguments as int? ?? 0);
+        }
+      });
+    }
+  }
+
   static const _channel = MethodChannel('mehh/handoff');
+  final _saved = StreamController<int>.broadcast();
+
+  /// Cortex가 "저장 완료"를 알려 왔다 (mehh://cortex-saved?count=N). 값은 저장한 장수.
+  /// 이 신호가 와야 보낸 캡처를 휴지통으로 옮긴다 (2026-10-22 Sophie C2-A)
+  Stream<int> get cortexSaved => _saved.stream;
 
   /// Cortex가 이 폰에 설치돼 있을 때만 버튼을 보여 준다.
   /// (설치 안 된 경우 스토어로 안내하는 건 나라별 출시 확인 후 5단계에서)

@@ -12,10 +12,12 @@ import io.flutter.plugin.common.MethodChannel
 
 /// Mehh → 다른 앱(Cortex) 연결. 사용자가 버튼을 누를 때만 사진을 넘긴다.
 class MainActivity : FlutterActivity() {
+    private var channel: MethodChannel? = null
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "mehh/handoff")
-            .setMethodCallHandler { call, result ->
+        channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "mehh/handoff")
+        channel!!.setMethodCallHandler { call, result ->
                 when (call.method) {
                     "isInstalled" -> {
                         val pkg = call.argument<String>("package")!!
@@ -34,6 +36,16 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    /// Cortex가 저장을 마치면 mehh://cortex-saved?count=N 으로 Mehh를 다시 연다 (2026-10-22 Sophie C2-A)
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        val data = intent.data ?: return
+        if (data.scheme == "mehh" && data.host == "cortex-saved") {
+            val count = data.getQueryParameter("count")?.toIntOrNull() ?: 0
+            channel?.invokeMethod("cortexSaved", count)
+        }
     }
 
     private fun isInstalled(pkg: String): Boolean = try {
@@ -55,6 +67,7 @@ class MainActivity : FlutterActivity() {
         val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
             type = "image/*"
             putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
+            putExtra(Intent.EXTRA_TEXT, RETURN_URL)
             // 받는 앱이 모든 사진을 읽을 수 있게 ClipData로도 넘긴다
             clipData = ClipData.newRawUri(null, uris.first()).also { clip ->
                 uris.drop(1).forEach { clip.addItem(ClipData.Item(it)) }
@@ -80,6 +93,7 @@ class MainActivity : FlutterActivity() {
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "image/*"
             putExtra(Intent.EXTRA_STREAM, uri)
+            putExtra(Intent.EXTRA_TEXT, RETURN_URL)
             setPackage(pkg)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
@@ -89,5 +103,10 @@ class MainActivity : FlutterActivity() {
         } catch (e: Exception) {
             false
         }
+    }
+
+    companion object {
+        /// 받는 앱(Cortex)이 저장을 마친 뒤 열 주소. 공유 글(EXTRA_TEXT)로 같이 넘긴다.
+        const val RETURN_URL = "mehh://cortex-saved"
     }
 }

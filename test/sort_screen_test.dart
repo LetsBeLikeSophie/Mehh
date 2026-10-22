@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
@@ -714,8 +716,19 @@ void main() {
     expect(handoff.sent.length, 2);
     expect(find.textContaining('4장'), findsOneWidget); // 아직 휴지통으로 안 감
 
-    // Cortex에서 돌아오면 휴지통으로
+    // "저장 완료" 신호 없이 돌아오면 옮기지 않는다
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('4장'), findsOneWidget);
+    expect(find.textContaining('신호가 없어서 휴지통으로 옮기지 않았어요'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 6)); // 알림이 사라지게
+    await tester.pumpAndSettle();
+
+    // 다시 보내고 Cortex가 저장 완료를 알려 오면 휴지통으로
+    await tester.tap(find.text('2장 Cortex로 보내기'));
+    await tester.pumpAndSettle();
+    handoff.saved.add(2);
     await tester.pumpAndSettle();
     expect(find.text('2장'), findsOneWidget); // 남은 캡처 수
     expect(find.textContaining('Cortex로 보내고 휴지통으로'), findsOneWidget);
@@ -725,6 +738,10 @@ void main() {
 
 class _FakeHandoff extends Handoff {
   final sent = <String>[];
+  final saved = StreamController<int>.broadcast();
+
+  @override
+  Stream<int> get cortexSaved => saved.stream;
 
   @override
   Future<SendResult> sendManyToCortex(List<String> photoIds) async {
