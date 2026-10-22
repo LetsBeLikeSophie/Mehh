@@ -616,7 +616,7 @@ abstract class L10n {
   /// No description provided for @freeChip.
   ///
   /// In ko, this message translates to:
-  /// **'무료 {count}개'**
+  /// **'무료 묶음 {count}개'**
   String freeChip(int count);
 
   /// No description provided for @proTitle.
@@ -840,6 +840,18 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'킵. 사진을 아래로 내려도 돼요'**
   String get keepBarSemantics;
+
+  /// No description provided for @picksCostNote.
+  ///
+  /// In ko, this message translates to:
+  /// **'누르면 이번 달 무료 묶음 1개를 써요 · {count}개 남음'**
+  String picksCostNote(int count);
+
+  /// No description provided for @picksNoFreeNote.
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 달 무료 묶음을 다 썼어요 · Pro면 모든 묶음의 추천을 볼 수 있어요'**
+  String get picksNoFreeNote;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

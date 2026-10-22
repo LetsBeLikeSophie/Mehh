@@ -330,7 +330,7 @@ class L10nKo extends L10n {
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return '무료 $countString개';
+    return '무료 묶음 $countString개';
   }
 
   @override
@@ -489,4 +489,12 @@ class L10nKo extends L10n {
 
   @override
   String get keepBarSemantics => '킵. 사진을 아래로 내려도 돼요';
+
+  @override
+  String picksCostNote(int count) {
+    return '누르면 이번 달 무료 묶음 1개를 써요 · $count개 남음';
+  }
+
+  @override
+  String get picksNoFreeNote => '이번 달 무료 묶음을 다 썼어요 · Pro면 모든 묶음의 추천을 볼 수 있어요';
 }

@@ -86,7 +86,7 @@
   "billingUnavailable": "Can't reach the store right now",
   "billingDemo": "Preview only — no real payment",
   "proChip": "Pro",
-  "freeChip": "{count} free",
+  "freeChip": "{count, plural, =1{1 free set} other{{count} free sets}}",
   "proTitle": "Mehh Pro",
   "proBody": "See the picks for every set, right away.",
   "proFree": "Free: picks for {limit} sets each month. {count} left this month.",
@@ -123,5 +123,7 @@
   "showPicks": "Show picks · {count}",
   "freeLeftNote": "{count, plural, =0{No free sets left this month} =1{1 free set left this month} other{{count} free sets left this month}}",
   "cortexSend": "Send to Cortex",
-  "keepBarSemantics": "Keep. You can also swipe the photo down"
+  "keepBarSemantics": "Keep. You can also swipe the photo down",
+  "picksCostNote": "{count, plural, =1{Uses 1 of this month's free sets · 1 left} other{Uses 1 of this month's free sets · {count} left}}",
+  "picksNoFreeNote": "No free sets left this month · Pro shows picks for every set"
 }

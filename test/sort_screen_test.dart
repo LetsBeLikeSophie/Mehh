@@ -264,6 +264,7 @@ void main() {
       ],
     );
     expect(find.text('2장 휴지통으로'), findsNothing); // 누르기 전엔 X 없음
+    expect(find.text('누르면 이번 달 무료 묶음 1개를 써요 · 3개 남음'), findsOneWidget);
 
     await tester.tap(find.text('추천 보기 · 2장'));
     await tester.pumpAndSettle();

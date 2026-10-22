@@ -270,6 +270,8 @@ class _SortScreenState extends ConsumerState<SortScreen>
         if (isMarked(id, decisions, src)) id,
     ];
     final allSelected = order.isNotEmpty && marked.length == order.length;
+    final freeLeft =
+        ref.watch(proProvider).value?.freeLeft(DateTime.now()) ?? 0;
     // 앱이 고른 추천 장수 (잠긴 묶음은 열기 전 장수)
     final picks = src.locked > 0 ? src.locked : src.suggested.length;
     final sections = widget.kind == SortKind.duplicates
@@ -413,6 +415,17 @@ class _SortScreenState extends ConsumerState<SortScreen>
                                   ),
                                 ],
                               ),
+                              // 무료 묶음을 쓰는 버튼은 누르기 전에 무엇이 쓰이는지 보여 준다
+                              if (src.locked > 0)
+                                Text(
+                                  freeLeft > 0
+                                      ? l.picksCostNote(freeLeft)
+                                      : l.picksNoFreeNote,
+                                  style: const TextStyle(
+                                    fontSize: MehhText.caption,
+                                    color: MehhColors.textMuted,
+                                  ),
+                                ),
                               if (cortex && marked.isNotEmpty)
                                 Text(
                                   l.cortexThenTrash,

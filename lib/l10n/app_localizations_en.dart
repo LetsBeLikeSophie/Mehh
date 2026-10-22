@@ -374,7 +374,13 @@ class L10nEn extends L10n {
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return '$countString free';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString free sets',
+      one: '1 free set',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -574,4 +580,19 @@ class L10nEn extends L10n {
 
   @override
   String get keepBarSemantics => 'Keep. You can also swipe the photo down';
+
+  @override
+  String picksCostNote(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Uses 1 of this month\'s free sets · $count left',
+      one: 'Uses 1 of this month\'s free sets · 1 left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get picksNoFreeNote =>
+      'No free sets left this month · Pro shows picks for every set';
 }
