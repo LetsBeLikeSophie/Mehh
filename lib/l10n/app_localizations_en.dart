@@ -438,8 +438,8 @@ class L10nEn extends L10n {
       count,
       locale: localeName,
       other:
-          'Moved $countString photos to trash · restore them within 30 days.',
-      one: 'Moved 1 photo to trash · restore it within 30 days.',
+          'Moved $countString photos to trash · restore them within 30 days, or empty the trash to free up space.',
+      one: 'Moved 1 photo to trash · restore it within 30 days, or empty the trash to free up space.',
     );
     return '$_temp0 See picks for the other sets right away?';
   }
