@@ -26,6 +26,7 @@ class SortSource {
     this.analyzing = false,
     this.units = const [],
     this.locked = 0,
+    this.preMarked = const {},
   });
 
   /// 보여줄 순서 (휴지통으로 간 사진 포함, 화면에서 거른다)
@@ -50,6 +51,11 @@ class SortSource {
   /// 무료 묶음·Pro로 열기 전이라 가려 둔 정리 추천 장수 (그날의 묶음만, SPEC 9장).
   /// 0이면 열려 있거나 추천이 없다.
   final int locked;
+
+  /// 틀릴 일이 거의 없어 [추천 보기] 없이 처음부터 X로 보이는 사진 (무료 종류만, 2026-10-22 Sophie R1-C):
+  /// 낱장 사진의 "실수"(까맣거나 주머니 속), 똑같은 사진 중 그림 해시·크기까지 같은 사본.
+  /// 결정으로 저장하지 않고 보이기만 한다 (X를 끄면 킵으로 저장).
+  final Set<String> preMarked;
 }
 
 String sortTitle(SortKind kind, DayGroup? g, String? place, L10n l) =>
@@ -91,8 +97,12 @@ String noteText(PhotoTag t, List<BestReason> reasons, L10n l) => switch (t) {
 };
 
 /// 정리할 사진(X)인가. 앱 추천은 [추천 보기]를 눌러야 X로 들어간다 (2026-10-22).
-bool isMarked(String id, Map<String, Decision> decisions, SortSource src) =>
-    stateOf(decisions, id) == DecisionState.toTrash;
+/// 예외: [SortSource.preMarked]는 아직 안 정했으면 처음부터 X.
+bool isMarked(String id, Map<String, Decision> decisions, SortSource src) {
+  final s = stateOf(decisions, id);
+  return s == DecisionState.toTrash ||
+      (s == DecisionState.undecided && src.preMarked.contains(id));
+}
 
 SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
   final features = ref.watch(analysisProvider.select((s) => s.features));
@@ -111,11 +121,29 @@ SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
       final all = [
         for (final s in sets) ...[s.keep, ...s.remove],
       ];
+      // 남길 사진과 그림 해시·크기가 완전히 같은 사본은 처음부터 X
+      bool identical(PhotoMeta a, PhotoMeta b) {
+        final fa = features[a.id], fb = features[b.id];
+        return fa != null &&
+            fb != null &&
+            fa.hashHi == fb.hashHi &&
+            fa.hashLo == fb.hashLo &&
+            a.width == b.width &&
+            a.height == b.height;
+      }
+
+      final byId = {for (final p in all) p.id: p};
       return SortSource(
         photos: all,
         suggested: {
           for (final p in all)
             if (!keepers.contains(p.id)) p.id,
+        },
+        preMarked: {
+          for (final s in sets)
+            if (keeperOf(s, gone) case final k?)
+              for (final p in [s.keep, ...s.remove])
+                if (p.id != k && identical(p, byId[k]!)) p.id,
         },
         tags: {
           for (final p in all)
@@ -173,6 +201,12 @@ SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
             ? g.photos.reversed.toList()
             : g.photos,
         suggested: plan.trash.keys.toSet(),
+        preMarked: kind == SortKind.singles
+            ? {
+                for (final e in plan.trash.entries)
+                  if (e.value == TrashReason.junk) e.key,
+              }
+            : const {},
         tags: tags,
         bestReasons: reasons,
         plan: plan,

@@ -111,9 +111,23 @@ class _SortScreenState extends ConsumerState<SortScreen>
       .read(decisionsProvider.notifier)
       .set([id], marked ? DecisionState.keep : DecisionState.toTrash);
 
-  /// [전체 선택] = 모두 X, [선택 해제] = 모두 킵
-  Future<void> _setAll(List<String> ids, DecisionState s) =>
-      ref.read(decisionsProvider.notifier).set(ids, s);
+  /// [전체 선택] = 모두 X
+  Future<void> _selectAll(List<String> ids) =>
+      ref.read(decisionsProvider.notifier).set(ids, DecisionState.toTrash);
+
+  /// [선택 해제] = 모두 표시 없음 (처음 상태). 추천이 지워지지 않아 [추천 보기]로 다시 받을 수 있다.
+  /// 처음부터 X로 보이는 사진(preMarked)만은 킵으로 저장해야 X가 꺼진다 (2026-10-22 Sophie R2-A)
+  Future<void> _clearAll(List<String> ids, SortSource src) async {
+    final notifier = ref.read(decisionsProvider.notifier);
+    await notifier.restore({
+      for (final id in ids)
+        if (!src.preMarked.contains(id)) id: null,
+    });
+    await notifier.set([
+      for (final id in ids)
+        if (src.preMarked.contains(id)) id,
+    ], DecisionState.keep);
+  }
 
   /// [추천 보기]: 앱이 고른 사진에 X를 친다. 그날의 묶음은 이번 달 무료 묶음이나 Pro로 열고,
   /// 다 썼으면 Pro 안내. 다시 누르면 추천대로 다시 X.
@@ -199,7 +213,10 @@ class _SortScreenState extends ConsumerState<SortScreen>
     SortSource src,
     List<String> shown,
   ) async {
-    if (widget.kind == SortKind.screenshots || _picked.isEmpty) return;
+    if (widget.kind == SortKind.screenshots ||
+        (_picked.isEmpty && src.preMarked.isEmpty)) {
+      return;
+    }
     await ref
         .read(storeProvider)
         .addPicks(
@@ -260,10 +277,15 @@ class _SortScreenState extends ConsumerState<SortScreen>
         if (isMarked(id, decisions, src)) id,
     ];
     final allSelected = order.isNotEmpty && marked.length == order.length;
+    // "지난번 X"는 사용자가 직접 정한 X만 센다 (처음부터 X인 것은 빼고)
+    final chosen = [
+      for (final id in order)
+        if (stateOf(decisions, id) == DecisionState.toTrash) id,
+    ];
     if (_markedAtOpen == null && ref.read(decisionsProvider).hasValue) {
-      _markedAtOpen = marked.length;
+      _markedAtOpen = chosen.length;
     }
-    final earlier = (_markedAtOpen ?? 0) > 0 && marked.isNotEmpty;
+    final earlier = (_markedAtOpen ?? 0) > 0 && chosen.isNotEmpty;
     final freeLeft =
         ref.watch(proProvider).value?.freeLeft(DateTime.now()) ?? 0;
     // 앱이 고른 추천 장수 (잠긴 묶음은 열기 전 장수)
@@ -384,12 +406,9 @@ class _SortScreenState extends ConsumerState<SortScreen>
                                   TextButton(
                                     onPressed: order.isEmpty
                                         ? null
-                                        : () => _setAll(
-                                            order,
-                                            allSelected
-                                                ? DecisionState.keep
-                                                : DecisionState.toTrash,
-                                          ),
+                                        : allSelected
+                                        ? () => _clearAll(order, src)
+                                        : () => _selectAll(order),
                                     style: TextButton.styleFrom(
                                       foregroundColor: MehhColors.text,
                                       minimumSize: const Size(44, 44),
@@ -423,13 +442,13 @@ class _SortScreenState extends ConsumerState<SortScreen>
                                 GestureDetector(
                                   behavior: HitTestBehavior.opaque,
                                   onTap: () =>
-                                      _scrollToFirstMarked(order, marked),
+                                      _scrollToFirstMarked(order, chosen),
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
                                       vertical: 4,
                                     ),
                                     child: Text(
-                                      l.earlierMarked(marked.length),
+                                      l.earlierMarked(chosen.length),
                                       style: const TextStyle(
                                         fontSize: MehhText.caption,
                                         fontWeight: FontWeight.w600,

@@ -118,6 +118,73 @@ void main() {
     await flush(tester);
   });
 
+  Override realPlan(Map<String, PhotoFeatures> features) =>
+      groupPlanProvider.overrideWith(
+        (ref, g) => planGroup(
+          g.photos,
+          features,
+          ref.watch(decisionsProvider).value ?? const {},
+        ),
+      );
+
+  Map<String, PhotoFeatures> darkOn(Set<String> ids) => {
+    for (final p in photos)
+      p.id: PhotoFeatures(
+        id: p.id,
+        hashHi: 1,
+        hashLo: 2,
+        sharpness: 500,
+        brightness: ids.contains(p.id) ? 3 : 120,
+      ),
+  };
+
+  testWidgets('낱장 사진: 까만 사진(실수)은 [추천 보기] 없이 처음부터 X, 끄면 킵', (tester) async {
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.singles, group: group),
+      extra: [
+        realPlan(darkOn({'p1'})),
+      ],
+    );
+    expect(find.text('1장 휴지통으로'), findsOneWidget);
+    expect(find.textContaining('지난번에 X를'), findsNothing); // 직접 친 X가 아니다
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(SortScreen)),
+    );
+    await tester.tap(find.byType(XToggle).at(2)); // p1 (낱장은 최신이 앞)
+    await tester.pumpAndSettle();
+    expect(find.text('X를 친 사진이 없어요'), findsOneWidget);
+    expect(
+      stateOf(container.read(decisionsProvider).value!, 'p1'),
+      DecisionState.keep,
+    );
+    await flush(tester);
+  });
+
+  testWidgets('[선택 해제]는 표시 없음: 연 묶음의 추천이 남아 [추천 보기]로 다시 받는다', (tester) async {
+    final day = DayGroup(id: 'day-p0', kind: DayGroupKind.day, photos: photos);
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.day, group: day),
+      extra: [
+        realPlan(darkOn({'p1', 'p2'})),
+      ],
+    );
+    await tester.tap(find.text('추천 보기 · 2장'));
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('전체 선택'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('선택 해제'));
+    await tester.pumpAndSettle();
+    expect(find.text('X를 친 사진이 없어요'), findsOneWidget);
+    expect(find.text('추천 보기 · 2장'), findsOneWidget); // 추천은 그대로
+    await tester.tap(find.text('추천 보기 · 2장'));
+    await tester.pumpAndSettle();
+    expect(find.text('2장 휴지통으로'), findsOneWidget);
+    await flush(tester);
+  });
+
   testWidgets('그리드: X를 켜면 휴지통 버튼, 보내면 그 사진만 빠진다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     expect(find.text('X를 친 사진이 없어요'), findsWidgets);
