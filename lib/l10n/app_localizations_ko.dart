@@ -518,4 +518,13 @@ class L10nKo extends L10n {
   String freeSetsLeft(int count) {
     return '무료 묶음 $count개 남음';
   }
+
+  @override
+  String earlierMarked(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '지난번에 X를 친 사진 $countString장이 있어요';
+  }
 }

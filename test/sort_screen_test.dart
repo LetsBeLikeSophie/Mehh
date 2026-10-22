@@ -13,6 +13,7 @@ import 'package:mehh/logic/pick_stats.dart';
 import 'package:mehh/logic/recommend.dart';
 import 'package:mehh/models/features.dart';
 import 'package:mehh/models/day_group.dart';
+import 'package:mehh/models/decision.dart';
 import 'package:mehh/models/photo_meta.dart';
 import 'package:mehh/providers.dart';
 import 'package:mehh/ui/focus_screen.dart';
@@ -42,6 +43,7 @@ void main() {
     Widget home, {
     List<Override> extra = const [],
     ProVault? vault,
+    Store? store,
   }) async {
     tester.view.physicalSize = const Size(390 * 3, 844 * 3);
     tester.view.devicePixelRatio = 3;
@@ -52,7 +54,7 @@ void main() {
           photoLibraryProvider.overrideWithValue(
             DemoPhotoLibrary() as PhotoLibrary,
           ),
-          storeProvider.overrideWithValue(MemoryStore()),
+          storeProvider.overrideWithValue(store ?? MemoryStore()),
           proVaultProvider.overrideWithValue(vault ?? MemoryProVault()),
           billingProvider.overrideWithValue(DemoBilling(korean: true)),
           ...extra,
@@ -94,6 +96,26 @@ void main() {
     await tester.tap(find.text('Mehh Pro'));
     await tester.pumpAndSettle();
     expect(find.text('구매 복원'), findsOneWidget);
+  });
+
+  testWidgets('그리드: 열 때 이미 X가 있으면 "지난번에 X를 친 사진 N장"을 알린다', (tester) async {
+    final store = MemoryStore();
+    await store.saveDecisions([
+      Decision(
+        photoId: 'p0',
+        state: DecisionState.toTrash,
+        at: DateTime(2026, 10, 1),
+      ),
+    ]);
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.singles, group: group),
+      store: store,
+    );
+    expect(find.text('지난번에 X를 친 사진 1장이 있어요'), findsOneWidget);
+    await tester.tap(find.text('지난번에 X를 친 사진 1장이 있어요'));
+    await tester.pumpAndSettle();
+    await flush(tester);
   });
 
   testWidgets('그리드: X를 켜면 휴지통 버튼, 보내면 그 사진만 빠진다', (tester) async {

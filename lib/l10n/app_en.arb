@@ -131,5 +131,6 @@
   "nothingMarked": "No photos marked",
   "yearlyEnded": "{count, plural, =1{Your 1-year plan ended · back to 1 free set this month} other{Your 1-year plan ended · back to {count} free sets this month}}",
   "proUsing": "You have Pro",
-  "freeSetsLeft": "{count, plural, =1{1 free set left} other{{count} free sets left}}"
+  "freeSetsLeft": "{count, plural, =1{1 free set left} other{{count} free sets left}}",
+  "earlierMarked": "{count, plural, =1{1 photo marked earlier} other{{count} photos marked earlier}}"
 }

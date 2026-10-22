@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/handoff.dart';
@@ -45,6 +46,12 @@ class _SortScreenState extends ConsumerState<SortScreen>
   /// 나중에 X를 꺼서 킵하면 추천에서 빠지므로, 누른 순간의 목록을 기억한다)
   final _picked = <String>{};
 
+  final _scroll = ScrollController();
+  final _gridKey = GlobalKey();
+
+  /// 화면을 열 때 이미 X였던 사진 수 (지난번에 쳐 둔 X를 알려 주려고, UX 리뷰 2026-10-22)
+  int? _markedAtOpen;
+
   /// 화면에 보였던 이유 표시 (킵해서 사라진 표시도 기록에 남기려고)
   final _seenTags = <String, String>{};
 
@@ -59,6 +66,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
 
   @override
   void dispose() {
+    _scroll.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -135,6 +143,23 @@ class _SortScreenState extends ConsumerState<SortScreen>
         if (stateOf(decisions, id) != DecisionState.trashed) id,
     ], DecisionState.toTrash);
     if (mounted) setState(() => _picked.addAll(ids));
+  }
+
+  /// 첫 X 사진이 보이게 스크롤 (4열 그리드에서 그 줄의 위치를 계산)
+  void _scrollToFirstMarked(List<String> order, List<String> marked) {
+    final ro = _gridKey.currentContext?.findRenderObject();
+    if (ro is! RenderSliver || marked.isEmpty || !_scroll.hasClients) return;
+    final c = ro.constraints;
+    final tile = (c.crossAxisExtent - 40 - 3 * 4) / 4;
+    final row = order.indexOf(marked.first) ~/ 4;
+    _scroll.animateTo(
+      (c.precedingScrollExtent + row * (tile + 4)).clamp(
+        0.0,
+        _scroll.position.maxScrollExtent,
+      ),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutCubic,
+    );
   }
 
   void _open(String id) => Navigator.of(context).push(
@@ -235,6 +260,10 @@ class _SortScreenState extends ConsumerState<SortScreen>
         if (isMarked(id, decisions, src)) id,
     ];
     final allSelected = order.isNotEmpty && marked.length == order.length;
+    if (_markedAtOpen == null && ref.read(decisionsProvider).hasValue) {
+      _markedAtOpen = marked.length;
+    }
+    final earlier = (_markedAtOpen ?? 0) > 0 && marked.isNotEmpty;
     final freeLeft =
         ref.watch(proProvider).value?.freeLeft(DateTime.now()) ?? 0;
     // 앱이 고른 추천 장수 (잠긴 묶음은 열기 전 장수)
@@ -293,6 +322,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
           children: [
             Expanded(
               child: CustomScrollView(
+                controller: _scroll,
                 slivers: [
                   SliverPadding(
                     padding: const EdgeInsets.fromLTRB(8, 4, 12, 8),
@@ -388,6 +418,27 @@ class _SortScreenState extends ConsumerState<SortScreen>
                                   ),
                                 ),
                               // Cortex 버튼이 보이면 고르기 전에도: 보낸 캡처가 어디로 가는지 (UX 리뷰 2026-10-22)
+                              // 지난번에 쳐 둔 X는 화면 밖에 있을 수 있다: 한 줄로 알리고 누르면 그 자리로
+                              if (earlier)
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () =>
+                                      _scrollToFirstMarked(order, marked),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 4,
+                                    ),
+                                    child: Text(
+                                      l.earlierMarked(marked.length),
+                                      style: const TextStyle(
+                                        fontSize: MehhText.caption,
+                                        fontWeight: FontWeight.w600,
+                                        color: MehhColors.text,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               if (cortex)
                                 Text(
                                   l.cortexThenTrash,
@@ -406,6 +457,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
                   // 똑같은 사진은 묶음마다 새 줄에서 시작해 어떤 사진끼리 같은지 보이게
                   for (final (i, section) in sections.indexed)
                     SliverPadding(
+                      key: i == 0 ? _gridKey : null,
                       padding: EdgeInsets.fromLTRB(
                         20,
                         0,

@@ -888,6 +888,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'무료 묶음 {count}개 남음'**
   String freeSetsLeft(int count);
+
+  /// No description provided for @earlierMarked.
+  ///
+  /// In ko, this message translates to:
+  /// **'지난번에 X를 친 사진 {count}장이 있어요'**
+  String earlierMarked(int count);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

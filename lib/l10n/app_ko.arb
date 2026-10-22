@@ -380,5 +380,14 @@
         "type": "int"
       }
     }
+  },
+  "earlierMarked": "지난번에 X를 친 사진 {count}장이 있어요",
+  "@earlierMarked": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
   }
 }
