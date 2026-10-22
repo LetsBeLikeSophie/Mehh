@@ -152,6 +152,11 @@ SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
         };
       });
       // 그날의 묶음 추천은 매달 무료 묶음 또는 Pro로 연다. 낱장 사진·캡처·중복은 무료.
+      // 연속 컷 묶음(units)은 잠겨 있어도 넣는다: 전부 X로 보내면 "장면이 하나도 안 남아요"를 묻도록
+      final units = [
+        for (final b in plan.bursts)
+          if (b.length > 1) [for (final p in b) p.id],
+      ];
       if (kind == SortKind.day &&
           plan.trash.isNotEmpty &&
           !ref.watch(unlockedProvider(g.id))) {
@@ -159,6 +164,7 @@ SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
           photos: g.photos,
           plan: plan,
           analyzing: plan.analyzed < g.count,
+          units: units,
           locked: plan.trash.length,
         );
       }
@@ -171,10 +177,7 @@ SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
         bestReasons: reasons,
         plan: plan,
         analyzing: plan.analyzed < g.count,
-        units: [
-          for (final b in plan.bursts)
-            if (b.length > 1) [for (final p in b) p.id],
-        ],
+        units: units,
       );
   }
 }

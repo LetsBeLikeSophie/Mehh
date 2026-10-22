@@ -296,6 +296,63 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('잠긴 묶음도 연속 컷을 전부 보내면 "장면이 하나도 안 남아요"를 묻는다', (tester) async {
+    // p0·p1이 10초 간격 비슷한 연속 컷, p1은 흔들림 → 추천이 있어서 잠긴 묶음
+    final burst = [
+      PhotoMeta(
+        id: 'p0',
+        takenAt: DateTime(2026, 9, 1, 10),
+        width: 100,
+        height: 100,
+      ),
+      PhotoMeta(
+        id: 'p1',
+        takenAt: DateTime(2026, 9, 1, 10, 0, 10),
+        width: 100,
+        height: 100,
+      ),
+    ];
+    final day = DayGroup(id: 'day-b', kind: DayGroupKind.day, photos: burst);
+    final features = {
+      'p0': const PhotoFeatures(
+        id: 'p0',
+        hashHi: 1,
+        hashLo: 2,
+        sharpness: 500,
+        brightness: 120,
+      ),
+      'p1': const PhotoFeatures(
+        id: 'p1',
+        hashHi: 1,
+        hashLo: 2,
+        sharpness: 5,
+        brightness: 120,
+      ),
+    };
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.day, group: day),
+      extra: [
+        groupPlanProvider.overrideWith(
+          (ref, g) => planGroup(
+            g.photos,
+            features,
+            ref.watch(decisionsProvider).value ?? const {},
+          ),
+        ),
+      ],
+    );
+    expect(find.text('추천 보기 · 1장'), findsOneWidget); // 잠김
+    await tester.tap(find.text('전체 선택'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('2장 휴지통으로'));
+    await tester.pumpAndSettle();
+    expect(find.text('1개 장면은 사진이 하나도 안 남아요'), findsOneWidget);
+    await tester.tap(find.text('다시 볼게요'));
+    await tester.pumpAndSettle();
+    await flush(tester);
+  });
+
   test('무료 묶음은 매달 3개, 다음 달에 다시 채워지고, Pro면 모두 열림', () async {
     final vault = MemoryProVault();
     final billing = DemoBilling(korean: true);
