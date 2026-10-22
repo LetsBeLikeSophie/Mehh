@@ -11,7 +11,15 @@ class CleanupConfig {
     this.pocketContrast = 12,
     this.textScreenshot = 0.2,
     this.oldScreenshot = const Duration(days: 90),
+    this.learnMinSamples = 20,
+    this.learnMinAcceptRate = 0.5,
   });
+
+  /// 취향 학습 (6단계 작게 시작, 2026-10-22 Sophie L1-A): 한 이유(비슷한 컷·흔들림·실수)로
+  /// 추천한 사진을 [learnMinSamples]장 넘게 봤는데 받아들인 비율이 [learnMinAcceptRate]보다
+  /// 낮으면, 그 이유로는 더 추천하지 않는다.
+  final int learnMinSamples;
+  final double learnMinAcceptRate;
 
   /// 이보다 오래된 캡처는 정리 추천 (2026-10-22 Sophie C4-A). 연달아 찍은 비슷한 캡처는
   /// [burstMaxGap]·[burstMaxHamming] 기준으로 묶어 마지막 한 장만 남긴다.

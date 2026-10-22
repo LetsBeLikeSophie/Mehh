@@ -667,4 +667,9 @@ class L10nEn extends L10n {
 
   @override
   String get noteRepeatShot => 'You took the same screen again right after';
+
+  @override
+  String accMuted(String names) {
+    return 'Reasons no longer suggested (you often undid them): $names';
+  }
 }

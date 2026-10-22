@@ -936,6 +936,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'바로 뒤에 같은 화면을 또 찍었어요'**
   String get noteRepeatShot;
+
+  /// No description provided for @accMuted.
+  ///
+  /// In ko, this message translates to:
+  /// **'자주 되돌려서 이제 추천하지 않는 이유: {names}'**
+  String accMuted(String names);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

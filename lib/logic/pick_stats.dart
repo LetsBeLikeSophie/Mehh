@@ -1,4 +1,6 @@
+import '../config/cleanup_config.dart';
 import '../models/pick.dart';
+import 'recommend.dart';
 
 /// [휴지통으로]를 누른 순간의 기록을 만든다 (SPEC 6-8).
 /// 추천했거나, 보냈거나, 베스트였던 사진만 남긴다 (나머지는 셀 게 없다).
@@ -20,6 +22,23 @@ List<PickRecord> pickRecords({
         sent: sent.contains(id),
       ),
 ];
+
+/// 자주 되돌린 추천 이유 (취향 학습, [CleanupConfig.learnMinSamples]).
+/// 표시 이름(burst·blurry·junk) → 정리 추천 이유.
+Set<TrashReason> mutedReasons(
+  PickStats s, {
+  CleanupConfig config = const CleanupConfig(),
+}) => {
+  for (final (tag, reason) in const [
+    ('burst', TrashReason.burst),
+    ('blurry', TrashReason.blurry),
+    ('junk', TrashReason.junk),
+  ])
+    if (s.byTag[tag] case (final accepted, final total)
+        when total >= config.learnMinSamples &&
+            accepted / total < config.learnMinAcceptRate)
+      reason,
+};
 
 /// 추천 정확도 요약
 class PickStats {

@@ -139,5 +139,6 @@
   "tagOldShot": "Old",
   "tagRepeatShot": "Repeat",
   "noteOldShot": "Over 90 days old",
-  "noteRepeatShot": "You took the same screen again right after"
+  "noteRepeatShot": "You took the same screen again right after",
+  "accMuted": "Reasons no longer suggested (you often undid them): {names}"
 }

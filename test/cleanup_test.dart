@@ -207,6 +207,21 @@ void main() {
       expect(kept.containsKey('old'), isFalse);
     });
 
+    test('꺼 둔 이유(취향 학습)는 추천에서 빠진다', () {
+      final photos = [
+        meta('a', t0),
+        meta('b', t0.add(const Duration(seconds: 20))),
+        meta('c', t0.add(const Duration(seconds: 50))),
+      ];
+      final f = {
+        'a': feat('a', sharp: 300),
+        'b': feat('b', sharp: 900),
+        'c': feat('c', sharp: 5),
+      };
+      final plan = planGroup(photos, f, {}, muted: {TrashReason.blurry});
+      expect(plan.trash, {'a': TrashReason.burst});
+    });
+
     test('킵한 사진은 추천에서 빠진다', () {
       final photos = [
         meta('a', t0),

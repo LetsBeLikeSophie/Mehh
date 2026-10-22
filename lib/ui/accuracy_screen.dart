@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/l10n.dart';
 import '../logic/format.dart';
 import '../logic/pick_stats.dart';
+import '../logic/recommend.dart';
 import '../providers.dart';
 import '../theme.dart';
 import 'sort_source.dart';
@@ -73,6 +74,20 @@ class AccuracyScreen extends ConsumerWidget {
                       style: row,
                     ),
                     Text('${l.accBest} ${pct(stats.bestRate)}', style: row),
+                    if (mutedReasons(stats) case final off when off.isNotEmpty)
+                      Text(
+                        l.accMuted(
+                          [
+                            for (final r in off)
+                              switch (r) {
+                                TrashReason.burst => l.tagBurst,
+                                TrashReason.blurry => l.tagBlurry,
+                                TrashReason.junk => l.tagJunk,
+                              },
+                          ].join(', '),
+                        ),
+                        style: row,
+                      ),
                     const SizedBox(height: 20),
                     Text(l.accByTag, style: muted),
                     for (final e in stats.byTag.entries)

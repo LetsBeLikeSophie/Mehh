@@ -550,4 +550,9 @@ class L10nKo extends L10n {
 
   @override
   String get noteRepeatShot => '바로 뒤에 같은 화면을 또 찍었어요';
+
+  @override
+  String accMuted(String names) {
+    return '자주 되돌려서 이제 추천하지 않는 이유: $names';
+  }
 }

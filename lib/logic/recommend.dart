@@ -44,6 +44,7 @@ GroupPlan planGroup(
   Map<String, PhotoFeatures> features,
   Map<String, Decision> decisions, {
   CleanupConfig config = const CleanupConfig(),
+  Set<TrashReason> muted = const {},
 }) {
   final bursts = findBursts(photos, features, config: config);
   final best = <String>{};
@@ -88,6 +89,8 @@ GroupPlan planGroup(
       }
     }
   }
+  // 사용자가 자주 되돌린 이유는 빼기 (취향 학습)
+  trash.removeWhere((_, r) => muted.contains(r));
   return GroupPlan(
     bursts: bursts,
     best: best,

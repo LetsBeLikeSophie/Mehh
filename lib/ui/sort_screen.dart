@@ -259,6 +259,8 @@ class _SortScreenState extends ConsumerState<SortScreen>
             },
           ),
         );
+    // 기록이 쌓였으니 자주 되돌린 이유를 다시 계산 (취향 학습)
+    ref.invalidate(mutedReasonsProvider);
   }
 
   /// 연속 컷·중복 묶음이 통째로 사라지면 한 번 묻는다 (묶음마다 최소 1장)

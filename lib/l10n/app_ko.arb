@@ -396,5 +396,13 @@
   "tagOldShot": "오래됨",
   "tagRepeatShot": "연달아 찍음",
   "noteOldShot": "90일 넘은 캡처",
-  "noteRepeatShot": "바로 뒤에 같은 화면을 또 찍었어요"
+  "noteRepeatShot": "바로 뒤에 같은 화면을 또 찍었어요",
+  "accMuted": "자주 되돌려서 이제 추천하지 않는 이유: {names}",
+  "@accMuted": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mehh/data/billing.dart';
 import 'package:mehh/logic/pick_stats.dart';
+import 'package:mehh/logic/recommend.dart';
+import 'package:mehh/models/pick.dart';
 
 void main() {
   test('추천 정확도: 받아들인 비율, 놓친 것, 베스트, 이유별', () {
@@ -45,5 +47,17 @@ void main() {
     expect(shouldComplete(pending: true, verified: false), isFalse);
     expect(shouldComplete(pending: true, verified: true), isTrue);
     expect(shouldComplete(pending: false, verified: true), isFalse);
+  });
+
+  test('취향 학습: 20장 넘게 봤는데 절반도 안 받아들인 이유는 더 추천하지 않는다', () {
+    final at = DateTime(2026, 10, 22);
+    PickRecord r(String tag, bool sent) =>
+        PickRecord(at: at, kind: 'day', tag: tag, suggested: true, sent: sent);
+    final records = [
+      for (var i = 0; i < 20; i++) r('blurry', i < 6), // 30%
+      for (var i = 0; i < 20; i++) r('burst', i < 15), // 75%
+      for (var i = 0; i < 5; i++) r('junk', false), // 아직 적음
+    ];
+    expect(mutedReasons(PickStats.of(records)), {TrashReason.blurry});
   });
 }

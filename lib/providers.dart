@@ -12,6 +12,7 @@ import 'data/sqlite_store.dart';
 import 'data/store.dart';
 import 'logic/day_grouper.dart';
 import 'logic/duplicates.dart';
+import 'logic/pick_stats.dart';
 import 'logic/recommend.dart';
 import 'models/day_group.dart';
 import 'models/decision.dart';
@@ -565,13 +566,20 @@ int duplicatesLeft(List<DuplicateSet>? sets, Map<String, Decision> decisions) =>
       }).length;
 
 /// 묶음 하나의 추천 정리
+/// 자주 되돌린 추천 이유 (취향 학습). 추천 정확도 기록에서 계산하고, 기록이 쌓이면 다시 계산한다.
+final mutedReasonsProvider = FutureProvider<Set<TrashReason>>(
+  (ref) async =>
+      mutedReasons(PickStats.of(await ref.read(storeProvider).loadPicks())),
+);
+
 final groupPlanProvider = Provider.autoDispose.family<GroupPlan, DayGroup>((
   ref,
   g,
 ) {
   final features = ref.watch(analysisProvider.select((s) => s.features));
   final decisions = ref.watch(decisionsProvider).value ?? const {};
-  return planGroup(g.photos, features, decisions);
+  final muted = ref.watch(mutedReasonsProvider).value ?? const {};
+  return planGroup(g.photos, features, decisions, muted: muted);
 });
 
 /// 묶음 상태 (홈 목록·"정리할 묶음 N개")
