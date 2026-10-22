@@ -892,7 +892,7 @@ abstract class L10n {
   /// No description provided for @earlierMarked.
   ///
   /// In ko, this message translates to:
-  /// **'지난번에 X를 친 사진 {count}장이 있어요'**
+  /// **'X 친 사진 {count}장 보러 가기 ›'**
   String earlierMarked(int count);
 
   /// No description provided for @unsentDot.

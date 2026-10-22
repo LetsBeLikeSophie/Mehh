@@ -639,8 +639,8 @@ class L10nEn extends L10n {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$countString photos marked earlier',
-      one: '1 photo marked earlier',
+      other: 'See the $countString marked photos ›',
+      one: 'See the 1 marked photo ›',
     );
     return '$_temp0';
   }

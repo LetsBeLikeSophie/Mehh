@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
@@ -75,18 +75,22 @@ class MehhBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-      decoration: BoxDecoration(
-        color: inverted ? MehhColors.white : MehhColors.black,
-        borderRadius: BorderRadius.circular(MehhRadius.badge),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: MehhText.micro,
-          fontWeight: FontWeight.w500,
-          color: inverted ? MehhColors.text : MehhColors.white,
+    // 사진 칸은 크기가 정해져 있어서 큰 글씨 설정에서도 배지가 사진을 덮지 않게 묶는다
+    return MediaQuery.withClampedTextScaling(
+      maxScaleFactor: 1.15,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+        decoration: BoxDecoration(
+          color: inverted ? MehhColors.white : MehhColors.black,
+          borderRadius: BorderRadius.circular(MehhRadius.badge),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: MehhText.micro,
+            fontWeight: FontWeight.w500,
+            color: inverted ? MehhColors.text : MehhColors.white,
+          ),
         ),
       ),
     );

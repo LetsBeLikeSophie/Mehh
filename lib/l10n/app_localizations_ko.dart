@@ -525,7 +525,7 @@ class L10nKo extends L10n {
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return '지난번에 X를 친 사진 $countString장이 있어요';
+    return 'X 친 사진 $countString장 보러 가기 ›';
   }
 
   @override

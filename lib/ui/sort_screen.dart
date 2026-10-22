@@ -331,7 +331,12 @@ class _SortScreenState extends ConsumerState<SortScreen>
 
     Widget tile(String id) {
       final out = marked.contains(id);
-      final tag = src.tags[id];
+      // 이유 표시는 X가 쳐진 사진에만 ("왜 X인지"). 남길 사진·베스트는 추천을 받은 뒤에만 (2026-10-22)
+      final t = src.tags[id];
+      final keepTag = t == PhotoTag.best || t == PhotoTag.original;
+      final tag = keepTag
+          ? (_picked.isNotEmpty || src.preMarked.isNotEmpty ? t : null)
+          : (out ? t : null);
       return GestureDetector(
         onTap: () => _open(id),
         child: Semantics(
@@ -408,30 +413,37 @@ class _SortScreenState extends ConsumerState<SortScreen>
                               ),
                               const SizedBox(height: 12),
                               Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  if (picks > 0)
-                                    Flexible(
-                                      child: _PillButton(
-                                        label: l.showPicks(picks),
-                                        filled: true,
-                                        onTap: _busy
-                                            ? null
-                                            : () => _showPicks(src),
-                                      ),
+                                  // 자리가 모자라면 줄을 바꾼다 (글자가 잘리지 않게, 큰 글씨 설정 포함)
+                                  Expanded(
+                                    child: Wrap(
+                                      spacing: 6,
+                                      runSpacing: 6,
+                                      children: [
+                                        if (picks > 0)
+                                          _PillButton(
+                                            label: l.showPicks(picks),
+                                            filled: true,
+                                            onTap: _busy
+                                                ? null
+                                                : () => _showPicks(src),
+                                          ),
+                                        if (cortex)
+                                          _PillButton(
+                                            label: marked.isEmpty
+                                                ? l.cortexSend
+                                                : l.cortexSendCount(
+                                                    marked.length,
+                                                  ),
+                                            icon: Icons.north_east,
+                                            onTap: _busy || marked.isEmpty
+                                                ? null
+                                                : () => _sendCortex(marked),
+                                          ),
+                                      ],
                                     ),
-                                  if (cortex)
-                                    Flexible(
-                                      child: _PillButton(
-                                        label: marked.isEmpty
-                                            ? l.cortexSend
-                                            : l.cortexSendCount(marked.length),
-                                        icon: Icons.north_east,
-                                        onTap: _busy || marked.isEmpty
-                                            ? null
-                                            : () => _sendCortex(marked),
-                                      ),
-                                    ),
-                                  const Spacer(),
+                                  ),
                                   TextButton(
                                     onPressed: order.isEmpty
                                         ? null
@@ -574,35 +586,32 @@ class _PillButton extends StatelessWidget {
     );
     const pad = EdgeInsets.symmetric(horizontal: 12);
     const size = Size(44, 36);
-    final text = Text(label, overflow: TextOverflow.ellipsis);
+    final text = Text(label);
     final iconWidget = icon == null ? null : Icon(icon, size: 16);
-    return Padding(
-      padding: const EdgeInsetsDirectional.only(end: 6),
-      child: filled
-          ? FilledButton.icon(
-              onPressed: onTap,
-              icon: iconWidget,
-              label: text,
-              style: FilledButton.styleFrom(
-                backgroundColor: MehhColors.black,
-                foregroundColor: MehhColors.white,
-                padding: pad,
-                minimumSize: size,
-                shape: shape,
-              ),
-            )
-          : OutlinedButton.icon(
-              onPressed: onTap,
-              icon: iconWidget,
-              label: text,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: MehhColors.text,
-                padding: pad,
-                minimumSize: size,
-                shape: shape,
-              ),
+    return filled
+        ? FilledButton.icon(
+            onPressed: onTap,
+            icon: iconWidget,
+            label: text,
+            style: FilledButton.styleFrom(
+              backgroundColor: MehhColors.black,
+              foregroundColor: MehhColors.white,
+              padding: pad,
+              minimumSize: size,
+              shape: shape,
             ),
-    );
+          )
+        : OutlinedButton.icon(
+            onPressed: onTap,
+            icon: iconWidget,
+            label: text,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: MehhColors.text,
+              padding: pad,
+              minimumSize: size,
+              shape: shape,
+            ),
+          );
   }
 }
 

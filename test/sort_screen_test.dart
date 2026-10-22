@@ -100,7 +100,7 @@ void main() {
     expect(find.text('구매 복원'), findsOneWidget);
   });
 
-  testWidgets('그리드: 열 때 이미 X가 있으면 "지난번에 X를 친 사진 N장"을 알린다', (tester) async {
+  testWidgets('그리드: 열 때 이미 X가 있으면 "X 친 사진 N장 보러 가기"', (tester) async {
     final store = MemoryStore();
     await store.saveDecisions([
       Decision(
@@ -114,8 +114,8 @@ void main() {
       SortScreen(kind: SortKind.singles, group: group),
       store: store,
     );
-    expect(find.text('지난번에 X를 친 사진 1장이 있어요'), findsOneWidget);
-    await tester.tap(find.text('지난번에 X를 친 사진 1장이 있어요'));
+    expect(find.text('X 친 사진 1장 보러 가기 ›'), findsOneWidget);
+    await tester.tap(find.text('X 친 사진 1장 보러 가기 ›'));
     await tester.pumpAndSettle();
     await flush(tester);
   });
@@ -149,7 +149,7 @@ void main() {
       ],
     );
     expect(find.text('1장 휴지통으로'), findsOneWidget);
-    expect(find.textContaining('지난번에 X를'), findsNothing); // 직접 친 X가 아니다
+    expect(find.textContaining('X 친 사진'), findsNothing); // 직접 친 X가 아니다
     final container = ProviderScope.containerOf(
       tester.element(find.byType(SortScreen)),
     );
@@ -411,6 +411,7 @@ void main() {
       ],
     );
     expect(find.text('2장 휴지통으로'), findsNothing); // 누르기 전엔 X 없음
+    expect(find.text('실수'), findsNothing); // 이유 표시는 X가 쳐진 사진에만
     expect(find.text('누르면 이번 달 무료 묶음 1개를 써요 · 3개 남음'), findsOneWidget);
 
     await tester.tap(find.text('추천 보기 · 2장'));

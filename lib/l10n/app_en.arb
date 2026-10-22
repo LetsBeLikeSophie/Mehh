@@ -132,7 +132,7 @@
   "yearlyEnded": "{count, plural, =1{Your 1-year plan ended · sets you opened stay open; new sets use your 1 free set this month} other{Your 1-year plan ended · sets you opened stay open; new sets use your {count} free sets this month}}",
   "proUsing": "You have Pro",
   "freeSetsLeft": "{count, plural, =1{1 free set left} other{{count} free sets left}}",
-  "earlierMarked": "{count, plural, =1{1 photo marked earlier} other{{count} photos marked earlier}}",
+  "earlierMarked": "{count, plural, =1{See the 1 marked photo ›} other{See the {count} marked photos ›}}",
   "unsentDot": "Marked, not moved to trash yet",
   "privacyCortex": "Screenshots you send to Cortex are analyzed by Cortex's AI. Only the ones you pick, only when you send them.",
   "cortexNotSaved": "Cortex didn't confirm it saved them, so nothing was moved to trash · your marks are kept",
