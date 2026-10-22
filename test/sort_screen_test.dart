@@ -515,10 +515,13 @@ void main() {
       ],
     );
     expect(find.text('Cortex로 보내기'), findsOneWidget); // 고르기 전엔 흐리게
+    expect(
+      find.textContaining('Cortex가 AI로 정리해요'),
+      findsOneWidget,
+    ); // 고르기 전에도 보인다
     await tester.tap(find.byType(XToggle).at(0));
     await tester.tap(find.byType(XToggle).at(1));
     await tester.pumpAndSettle();
-    expect(find.text('보낸 캡처는 휴지통으로 옮겨요 · 30일 안에 되살릴 수 있어요'), findsOneWidget);
 
     expect(find.text('2장 휴지통으로'), findsOneWidget); // 그냥 지울 수도 있다
     await tester.tap(find.text('2장 Cortex로 보내기'));

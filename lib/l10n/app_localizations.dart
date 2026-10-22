@@ -802,7 +802,7 @@ abstract class L10n {
   /// No description provided for @cortexThenTrash.
   ///
   /// In ko, this message translates to:
-  /// **'보낸 캡처는 휴지통으로 옮겨요 · 30일 안에 되살릴 수 있어요'**
+  /// **'보낸 캡처는 Cortex가 AI로 정리해요 · 보낸 뒤 Mehh에서는 휴지통으로 옮겨요'**
   String get cortexThenTrash;
 
   /// No description provided for @cortexSentTrashed.

@@ -451,7 +451,8 @@ class L10nKo extends L10n {
   }
 
   @override
-  String get cortexThenTrash => '보낸 캡처는 휴지통으로 옮겨요 · 30일 안에 되살릴 수 있어요';
+  String get cortexThenTrash =>
+      '보낸 캡처는 Cortex가 AI로 정리해요 · 보낸 뒤 Mehh에서는 휴지통으로 옮겨요';
 
   @override
   String cortexSentTrashed(int count) {

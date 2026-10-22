@@ -117,7 +117,7 @@
   "accTagLine": "{count}/{total}",
   "accNote": "These records stay on this phone. Above 80% accepted, the picks are trustworthy.",
   "cortexSendCount": "{count, plural, =1{Send 1 to Cortex} other{Send {count} to Cortex}}",
-  "cortexThenTrash": "Sent screenshots move to trash · restore within 30 days",
+  "cortexThenTrash": "Cortex sorts sent screenshots with AI · Mehh then moves them to trash",
   "cortexSentTrashed": "{count, plural, =1{Sent 1 to Cortex and moved it to trash · restore within 30 days} other{Sent {count} to Cortex and moved them to trash · restore within 30 days}}",
   "cortexMultiUnsupported": "Cortex can't take several at once yet. Please update Cortex.",
   "showPicks": "Show picks · {count}",

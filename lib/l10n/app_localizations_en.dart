@@ -529,7 +529,7 @@ class L10nEn extends L10n {
 
   @override
   String get cortexThenTrash =>
-      'Sent screenshots move to trash · restore within 30 days';
+      'Cortex sorts sent screenshots with AI · Mehh then moves them to trash';
 
   @override
   String cortexSentTrashed(int count) {

@@ -387,7 +387,8 @@ class _SortScreenState extends ConsumerState<SortScreen>
                                     color: MehhColors.textMuted,
                                   ),
                                 ),
-                              if (cortex && marked.isNotEmpty)
+                              // Cortex 버튼이 보이면 고르기 전에도: 보낸 캡처가 어디로 가는지 (UX 리뷰 2026-10-22)
+                              if (cortex)
                                 Text(
                                   l.cortexThenTrash,
                                   style: const TextStyle(
