@@ -184,6 +184,29 @@ void main() {
       expect(after.best, before.best);
     });
 
+    test('캡처: 연달아 찍은 같은 화면은 마지막 한 장만, 90일 넘은 캡처는 추천', () {
+      final now = DateTime(2026, 10, 22);
+      final shots = [
+        meta('old', DateTime(2026, 6, 1), shot: true),
+        meta('a', t0, shot: true),
+        meta('b', t0.add(const Duration(seconds: 5)), shot: true),
+        meta('c', t0.add(const Duration(minutes: 30)), shot: true),
+      ];
+      final f = {
+        'old': feat('old', hi: 1),
+        'a': feat('a'),
+        'b': feat('b'),
+        'c': feat('c', hi: 0x7FFFFFFF, lo: 0x7FFFFFFF),
+      };
+      final picks = planScreenshots(shots, f, {}, now: now);
+      expect(picks, {'old': ShotReason.old, 'a': ShotReason.repeat});
+      // 킵한 캡처는 빠진다
+      final kept = planScreenshots(shots, f, {
+        'old': Decision(photoId: 'old', state: DecisionState.keep, at: now),
+      }, now: now);
+      expect(kept.containsKey('old'), isFalse);
+    });
+
     test('킵한 사진은 추천에서 빠진다', () {
       final photos = [
         meta('a', t0),

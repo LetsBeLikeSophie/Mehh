@@ -654,4 +654,16 @@ class L10nEn extends L10n {
   @override
   String get cortexNotSaved =>
       'Cortex didn\'t confirm it saved them, so nothing was moved to trash · your marks are kept';
+
+  @override
+  String get tagOldShot => 'Old';
+
+  @override
+  String get tagRepeatShot => 'Repeat';
+
+  @override
+  String get noteOldShot => 'Over 90 days old';
+
+  @override
+  String get noteRepeatShot => 'You took the same screen again right after';
 }

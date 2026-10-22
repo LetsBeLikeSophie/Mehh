@@ -235,14 +235,13 @@ class _SortScreenState extends ConsumerState<SortScreen>
     }
   }
 
-  /// 추천 정확도 기록 (SPEC 6-8). [추천 보기]를 누른 경우만 센다 (캡처는 추천이 없다).
+  /// 추천 정확도 기록 (SPEC 6-8). [추천 보기]를 눌렀거나 처음부터 X인 추천이 있을 때만 센다.
   Future<void> _recordPicks(
     List<String> sent,
     SortSource src,
     List<String> shown,
   ) async {
-    if (widget.kind == SortKind.screenshots ||
-        (_picked.isEmpty && src.preMarked.isEmpty)) {
+    if (_picked.isEmpty && src.preMarked.isEmpty) {
       return;
     }
     await ref

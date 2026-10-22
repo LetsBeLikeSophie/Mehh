@@ -13,7 +13,16 @@ import '../providers.dart';
 enum SortKind { day, singles, screenshots, duplicates }
 
 /// 사진 위 짧은 표시의 종류 (문구는 [tagText]·[noteText]에서 언어별로)
-enum PhotoTag { best, burst, blurry, junk, original, duplicate }
+enum PhotoTag {
+  best,
+  burst,
+  blurry,
+  junk,
+  original,
+  duplicate,
+  oldShot,
+  repeatShot,
+}
 
 /// 정리 화면(그리드)과 크게 보기가 함께 쓰는 사진 목록과 앱 추천
 class SortSource {
@@ -72,6 +81,8 @@ String tagText(PhotoTag t, L10n l) => switch (t) {
   PhotoTag.junk => l.tagJunk,
   PhotoTag.original => l.tagOriginal,
   PhotoTag.duplicate => l.tagDuplicate,
+  PhotoTag.oldShot => l.tagOldShot,
+  PhotoTag.repeatShot => l.tagRepeatShot,
 };
 
 /// 크게 볼 때 한 줄
@@ -94,6 +105,8 @@ String noteText(PhotoTag t, List<BestReason> reasons, L10n l) => switch (t) {
   PhotoTag.junk => l.noteJunk,
   PhotoTag.original => l.noteKeeper,
   PhotoTag.duplicate => l.tagDuplicate,
+  PhotoTag.oldShot => l.noteOldShot,
+  PhotoTag.repeatShot => l.noteRepeatShot,
 };
 
 /// 정리할 사진(X)인가. 앱 추천은 [추천 보기]를 눌러야 X로 들어간다 (2026-10-22).
@@ -156,7 +169,24 @@ SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
         ],
       );
     case SortKind.screenshots:
-      return SortSource(photos: g!.photos.reversed.toList());
+      // 캡처 추천은 무료 (2026-10-22 Sophie C4-A): 오래된 캡처, 연달아 찍은 캡처의 지난 장
+      final decisions = ref.watch(decisionsProvider).value ?? const {};
+      final picks = planScreenshots(
+        g!.photos,
+        features,
+        decisions,
+        now: DateTime.now(),
+      );
+      return SortSource(
+        photos: g.photos.reversed.toList(),
+        suggested: picks.keys.toSet(),
+        tags: {
+          for (final e in picks.entries)
+            e.key: e.value == ShotReason.old
+                ? PhotoTag.oldShot
+                : PhotoTag.repeatShot,
+        },
+      );
     case SortKind.day:
     case SortKind.singles:
       final plan = ref.watch(groupPlanProvider(g!));

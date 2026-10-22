@@ -10,7 +10,12 @@ class CleanupConfig {
     this.pocketBrightness = 40,
     this.pocketContrast = 12,
     this.textScreenshot = 0.2,
+    this.oldScreenshot = const Duration(days: 90),
   });
+
+  /// 이보다 오래된 캡처는 정리 추천 (2026-10-22 Sophie C4-A). 연달아 찍은 비슷한 캡처는
+  /// [burstMaxGap]·[burstMaxHamming] 기준으로 묶어 마지막 한 장만 남긴다.
+  final Duration oldScreenshot;
 
   /// 글자 점수가 이 이상이면 "글자 있는 캡처"
   final double textScreenshot;

@@ -135,5 +135,9 @@
   "earlierMarked": "{count, plural, =1{1 photo marked earlier} other{{count} photos marked earlier}}",
   "unsentDot": "Marked, not moved to trash yet",
   "privacyCortex": "Screenshots you send to Cortex are analyzed by Cortex's AI. Only the ones you pick, only when you send them.",
-  "cortexNotSaved": "Cortex didn't confirm it saved them, so nothing was moved to trash · your marks are kept"
+  "cortexNotSaved": "Cortex didn't confirm it saved them, so nothing was moved to trash · your marks are kept",
+  "tagOldShot": "Old",
+  "tagRepeatShot": "Repeat",
+  "noteOldShot": "Over 90 days old",
+  "noteRepeatShot": "You took the same screen again right after"
 }

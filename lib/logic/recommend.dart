@@ -96,6 +96,46 @@ GroupPlan planGroup(
   );
 }
 
+enum ShotReason { old, repeat }
+
+/// 캡처 추천 (무료, [추천 보기]로 X): 연달아 찍은 비슷한 캡처는 마지막 한 장만 남기고,
+/// 그 밖에는 [CleanupConfig.oldScreenshot]보다 오래된 캡처. 킵·휴지통으로 정한 캡처는 뺀다.
+/// [shots]는 시간순.
+Map<String, ShotReason> planScreenshots(
+  List<PhotoMeta> shots,
+  Map<String, PhotoFeatures> features,
+  Map<String, Decision> decisions, {
+  required DateTime now,
+  CleanupConfig config = const CleanupConfig(),
+}) {
+  bool open(PhotoMeta p) {
+    final s = decisions[p.id]?.state;
+    return s != DecisionState.keep && s != DecisionState.trashed;
+  }
+
+  final out = <String, ShotReason>{};
+  for (var i = 0; i < shots.length; i++) {
+    final p = shots[i];
+    if (!open(p)) continue;
+    // 바로 다음 캡처가 같은 화면을 곧이어 찍은 것이면 이것은 지난 장
+    if (i + 1 < shots.length) {
+      final q = shots[i + 1];
+      final fp = features[p.id], fq = features[q.id];
+      if (fp != null &&
+          fq != null &&
+          q.takenAt.difference(p.takenAt) <= config.burstMaxGap &&
+          fp.hammingTo(fq) <= config.burstMaxHamming) {
+        out[p.id] = ShotReason.repeat;
+        continue;
+      }
+    }
+    if (now.difference(p.takenAt) > config.oldScreenshot) {
+      out[p.id] = ShotReason.old;
+    }
+  }
+  return out;
+}
+
 /// 까만 사진, 주머니 속·렌즈를 가린 사진처럼 실수로 찍힌 사진
 bool isJunk(PhotoFeatures f, CleanupConfig c) =>
     f.brightness < c.darkBrightness ||

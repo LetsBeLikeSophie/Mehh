@@ -912,6 +912,30 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'Cortex에 저장됐다는 신호가 없어서 휴지통으로 옮기지 않았어요 · X는 그대로예요'**
   String get cortexNotSaved;
+
+  /// No description provided for @tagOldShot.
+  ///
+  /// In ko, this message translates to:
+  /// **'오래됨'**
+  String get tagOldShot;
+
+  /// No description provided for @tagRepeatShot.
+  ///
+  /// In ko, this message translates to:
+  /// **'연달아 찍음'**
+  String get tagRepeatShot;
+
+  /// No description provided for @noteOldShot.
+  ///
+  /// In ko, this message translates to:
+  /// **'90일 넘은 캡처'**
+  String get noteOldShot;
+
+  /// No description provided for @noteRepeatShot.
+  ///
+  /// In ko, this message translates to:
+  /// **'바로 뒤에 같은 화면을 또 찍었어요'**
+  String get noteRepeatShot;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

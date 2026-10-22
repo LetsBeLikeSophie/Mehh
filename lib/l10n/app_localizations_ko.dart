@@ -538,4 +538,16 @@ class L10nKo extends L10n {
   @override
   String get cortexNotSaved =>
       'Cortex에 저장됐다는 신호가 없어서 휴지통으로 옮기지 않았어요 · X는 그대로예요';
+
+  @override
+  String get tagOldShot => '오래됨';
+
+  @override
+  String get tagRepeatShot => '연달아 찍음';
+
+  @override
+  String get noteOldShot => '90일 넘은 캡처';
+
+  @override
+  String get noteRepeatShot => '바로 뒤에 같은 화면을 또 찍었어요';
 }
