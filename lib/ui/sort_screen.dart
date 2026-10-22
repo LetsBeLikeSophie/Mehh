@@ -201,6 +201,13 @@ class _SortScreenState extends ConsumerState<SortScreen>
     if (!mounted) return;
     final n = await sendToTrash(context, ref, ids, quiet: nudge);
     if (n > 0) await _recordPicks(ids, src, shown);
+    // 잠긴 묶음을 직접 정리해 보냈으면 다음부터 "다 봤어요" (2026-10-22 Sophie R3-A)
+    if (n > 0 && src.locked > 0) {
+      final sent = ids.toSet();
+      await ref
+          .read(seenProvider.notifier)
+          .mark(shown.where((id) => !sent.contains(id)));
+    }
     if (mounted) setState(() => _busy = false);
     if (n > 0 && nudge && await pro.takeNudge() && mounted) {
       await showProSheet(context, lead: context.l.proNudge(n));

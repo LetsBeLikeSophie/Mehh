@@ -185,6 +185,32 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('잠긴 묶음을 직접 정리해 한 번 보내면 "다 봤어요"', (tester) async {
+    final day = DayGroup(id: 'day-p0', kind: DayGroupKind.day, photos: photos);
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.day, group: day),
+      extra: [
+        realPlan(darkOn({'p1'})),
+      ],
+    );
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(SortScreen)),
+    );
+    expect(container.read(groupStatusProvider(day)), GroupStatus.needsWork);
+    await tester.tap(find.byType(XToggle).at(3)); // p3을 직접 X
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('1장 휴지통으로'));
+    await tester.pumpAndSettle();
+    final rest = DayGroup(
+      id: 'day-p0',
+      kind: DayGroupKind.day,
+      photos: photos.sublist(0, 3),
+    );
+    expect(container.read(groupStatusProvider(rest)), GroupStatus.done);
+    await flush(tester);
+  });
+
   testWidgets('그리드: X를 켜면 휴지통 버튼, 보내면 그 사진만 빠진다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     expect(find.text('X를 친 사진이 없어요'), findsWidgets);

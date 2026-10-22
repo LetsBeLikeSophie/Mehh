@@ -17,12 +17,14 @@ const _picksTable = '''
   CREATE TABLE picks (
     at INTEGER, kind TEXT, tag TEXT, suggested INTEGER, sent INTEGER)''';
 
+const _seenTable = 'CREATE TABLE seen (id TEXT PRIMARY KEY)';
+
 class SqliteStore implements Store {
   Database? _db;
 
   Future<Database> get _database async => _db ??= await openDatabase(
     'mehh.db',
-    version: 4,
+    version: 5,
     onUpgrade: (db, from, _) async {
       // 분석 결과는 캐시라서 버리고 다시 계산한다
       if (from < 3) {
@@ -30,6 +32,7 @@ class SqliteStore implements Store {
         await db.execute(_featuresTable);
       }
       if (from < 4) await db.execute(_picksTable);
+      if (from < 5) await db.execute(_seenTable);
     },
     onCreate: (db, _) async {
       await db.execute(_featuresTable);
@@ -45,6 +48,7 @@ class SqliteStore implements Store {
       await db.execute('''
         CREATE TABLE freed (month TEXT PRIMARY KEY, bytes INTEGER)''');
       await db.execute(_picksTable);
+      await db.execute(_seenTable);
     },
   );
 
@@ -201,6 +205,22 @@ class SqliteStore implements Store {
   ];
 
   @override
+  Future<void> addSeen(Iterable<String> photoIds) async {
+    final batch = (await _database).batch();
+    for (final id in photoIds) {
+      batch.insert('seen', {
+        'id': id,
+      }, conflictAlgorithm: ConflictAlgorithm.ignore);
+    }
+    await batch.commit(noResult: true);
+  }
+
+  @override
+  Future<Set<String>> loadSeen() async => {
+    for (final r in await (await _database).query('seen')) r['id'] as String,
+  };
+
+  @override
   Future<void> clearAll() async {
     final db = await _database;
     await db.transaction((tx) async {
@@ -211,6 +231,7 @@ class SqliteStore implements Store {
         'views',
         'freed',
         'picks',
+        'seen',
       ]) {
         await tx.delete(t);
       }

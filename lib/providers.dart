@@ -581,6 +581,23 @@ enum GroupStatus {
 
 /// "다 봤어요" 기준 (2026-10-21): 모든 사진을 정할 필요 없이, 추천을 다 처리하면 끝.
 /// 표시 없는 사진은 앱이 다시 추천하지 않으니 그대로 둔다.
+/// 잠긴 채로 직접 정리해 보낸 묶음의 사진 (R3, [Store.addSeen])
+class SeenNotifier extends AsyncNotifier<Set<String>> {
+  @override
+  Future<Set<String>> build() => ref.read(storeProvider).loadSeen();
+
+  Future<void> mark(Iterable<String> photoIds) async {
+    final ids = photoIds.toList();
+    if (ids.isEmpty) return;
+    await ref.read(storeProvider).addSeen(ids);
+    state = AsyncData({...state.value ?? {}, ...ids});
+  }
+}
+
+final seenProvider = AsyncNotifierProvider<SeenNotifier, Set<String>>(
+  SeenNotifier.new,
+);
+
 final groupStatusProvider = Provider.autoDispose.family<GroupStatus, DayGroup>((
   ref,
   g,
@@ -598,7 +615,17 @@ final groupStatusProvider = Provider.autoDispose.family<GroupStatus, DayGroup>((
     return touched ? GroupStatus.done : GroupStatus.nothing;
   }
   final plan = ref.watch(groupPlanProvider(g));
-  if (plan.trash.isNotEmpty || pile) return GroupStatus.needsWork;
+  if (pile) return GroupStatus.needsWork;
+  if (plan.trash.isNotEmpty) {
+    // 잠긴 묶음을 추천 없이 직접 정리해 한 번 보냈으면 "다 봤어요" (보이지 않는 추천으로 남지 않게)
+    final seen = ref.watch(seenProvider).value ?? const {};
+    final locked =
+        g.kind == DayGroupKind.day && !ref.watch(unlockedProvider(g));
+    if (locked && g.photos.any((p) => seen.contains(p.id))) {
+      return GroupStatus.done;
+    }
+    return GroupStatus.needsWork;
+  }
   if (plan.analyzed < g.count) return GroupStatus.analyzing;
   return touched ? GroupStatus.done : GroupStatus.nothing;
 });

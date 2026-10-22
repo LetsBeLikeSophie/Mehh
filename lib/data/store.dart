@@ -23,6 +23,11 @@ abstract class Store {
   Future<void> addPicks(List<PickRecord> list);
   Future<List<PickRecord>> loadPicks();
 
+  /// 잠긴 채로(추천을 열지 않고) 직접 정리해 휴지통으로 보낸 묶음의 남은 사진.
+  /// 이 사진이 든 잠긴 묶음은 "다 봤어요"로 본다 (2026-10-22 Sophie R3-A)
+  Future<void> addSeen(Iterable<String> photoIds);
+  Future<Set<String>> loadSeen();
+
   /// 이 폰에 남긴 모든 기록을 지운다 (분석 결과, 결정, 열람, 비운 용량).
   Future<void> clearAll();
 }
@@ -38,6 +43,14 @@ class MemoryStore implements Store {
   final views = <String, ViewRecord>{};
   final freed = <String, int>{};
   final picks = <PickRecord>[];
+  final seen = <String>{};
+
+  @override
+  Future<void> addSeen(Iterable<String> photoIds) async =>
+      seen.addAll(photoIds);
+
+  @override
+  Future<Set<String>> loadSeen() async => {...seen};
 
   @override
   Future<void> addPicks(List<PickRecord> list) async => picks.addAll(list);
@@ -91,5 +104,6 @@ class MemoryStore implements Store {
     views.clear();
     freed.clear();
     picks.clear();
+    seen.clear();
   }
 }
