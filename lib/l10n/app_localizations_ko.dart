@@ -555,4 +555,7 @@ class L10nKo extends L10n {
   String accMuted(String names) {
     return '자주 되돌려서 이제 추천하지 않는 이유: $names';
   }
+
+  @override
+  String get privacyPolicy => '개인정보처리방침';
 }

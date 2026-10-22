@@ -942,6 +942,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'자주 되돌려서 이제 추천하지 않는 이유: {names}'**
   String accMuted(String names);
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In ko, this message translates to:
+  /// **'개인정보처리방침'**
+  String get privacyPolicy;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

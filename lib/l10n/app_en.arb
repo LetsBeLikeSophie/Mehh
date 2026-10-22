@@ -140,5 +140,6 @@
   "tagRepeatShot": "Repeat",
   "noteOldShot": "Over 90 days old",
   "noteRepeatShot": "You took the same screen again right after",
-  "accMuted": "Reasons no longer suggested (you often undid them): {names}"
+  "accMuted": "Reasons no longer suggested (you often undid them): {names}",
+  "privacyPolicy": "Privacy policy"
 }

@@ -672,4 +672,7 @@ class L10nEn extends L10n {
   String accMuted(String names) {
     return 'Reasons no longer suggested (you often undid them): $names';
   }
+
+  @override
+  String get privacyPolicy => 'Privacy policy';
 }

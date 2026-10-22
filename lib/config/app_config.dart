@@ -6,4 +6,7 @@ const appVersion = '1.7.2';
 /// (그 사이 찍은 사진·새 묶음이 보이게, UX 리뷰 2026-10-22)
 const reloadLibraryAfter = Duration(minutes: 10);
 
+/// 개인정보처리방침 (web/privacy.html, 스토어 등록 정보에도 같은 주소)
+const privacyPolicyUrl = 'https://itssophie.dev/mehh/privacy.html';
+
 const supportEmail = 'hello@itssophie.dev';

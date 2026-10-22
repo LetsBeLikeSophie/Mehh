@@ -110,6 +110,21 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ],
                   const SizedBox(height: 24),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TextButton(
+                      onPressed: () => launchUrl(
+                        Uri.parse(privacyPolicyUrl),
+                        mode: LaunchMode.externalApplication,
+                      ),
+                      style: TextButton.styleFrom(
+                        foregroundColor: MehhColors.textMuted,
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(44, 44),
+                      ),
+                      child: Text(context.l.privacyPolicy),
+                    ),
+                  ),
                   // 버전 글자를 7번 누르면 추천 정확도 (숨은 화면, SPEC 6-8)
                   const _VersionTap(),
                 ],

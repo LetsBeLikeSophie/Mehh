@@ -56,6 +56,11 @@
     <queries>
         <!-- 캡처를 Cortex로 보내기: 설치돼 있는지 확인 (lib/data/handoff.dart) -->
         <package android:name="com.anonymous.cortex" />
+        <!-- 설정 > 개인정보처리방침: 브라우저 열기 -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
         <!-- 설정 > 문의하기: 메일 앱 열기 -->
         <intent>
             <action android:name="android.intent.action.SENDTO"/>
