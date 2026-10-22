@@ -135,7 +135,9 @@ class ProNotifier extends AsyncNotifier<ProState> {
   /// [takeNudge]를 쓰지 않고 오늘 안내를 띄울 수 있는지만 본다
   Future<bool> canNudge({DateTime? now}) async {
     final s = await future;
-    return !s.pro && s.lastNudge != _day(now ?? DateTime.now());
+    final at = now ?? DateTime.now();
+    // 무료 묶음을 다 쓴 뒤에만 (무료가 남은 사람에게는 띄우지 않는다, 2026-10-22 Sophie F1-B)
+    return !s.pro && s.freeLeft(at) == 0 && s.lastNudge != _day(at);
   }
 
   static String _day(DateTime at) =>

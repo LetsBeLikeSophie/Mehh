@@ -432,12 +432,9 @@ void main() {
     await tester.tap(find.text('1장 휴지통으로'));
     await tester.pumpAndSettle();
     final picks = await container.read(storeProvider).loadPicks();
-    // 정리 후 Pro 안내가 뜨면 알림 대신 시트 첫 줄에 되살릴 수 있다는 말이 들어간다
-    // 알림이 꺼지는 대신 시트에 되살리기·휴지통 비우기 안내가 모두 들어간다
-    expect(
-      find.textContaining('30일 안에 되살릴 수 있고, 휴지통을 비우면 공간이 생겨요. 남은 묶음도'),
-      findsOneWidget,
-    );
+    // 무료가 아직 남았으니 Pro 안내는 뜨지 않고, 휴지통 알림이 그대로 보인다 (F1-B)
+    expect(find.text('Mehh Pro'), findsNothing);
+    expect(find.textContaining('휴지통을 비우면 공간이 생겨요'), findsOneWidget);
     final stats = PickStats.of(picks);
     expect(stats.suggested, 2);
     expect(stats.accepted, 1);
@@ -561,6 +558,8 @@ void main() {
     for (var i = 0; i < freeGroupsPerMonth; i++) {
       expect(await pro.unlock('g$i', now: oct), isTrue);
     }
+    expect(await pro.canNudge(now: DateTime(2026, 9, 1)), isFalse); // 무료가 남은 달
+    expect(await pro.canNudge(now: oct), isTrue); // 다 쓴 달에만 Pro 안내
     expect(await pro.unlock('g9', now: oct), isFalse);
     expect(await pro.unlock('g0', now: oct), isTrue); // 이미 연 묶음
     expect(await pro.unlock('g9', now: DateTime(2026, 11, 1)), isTrue);
