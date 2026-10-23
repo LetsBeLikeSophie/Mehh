@@ -392,7 +392,7 @@
   },
   "unsentDot": "X를 쳐 두고 아직 휴지통으로 안 보냈어요",
   "privacyCortex": "Cortex로 직접 보낸 캡처는 Cortex에서 AI로 분석해요. 내가 고른 캡처만, 보낼 때만 넘어가요.",
-  "cortexNotSaved": "Cortex에 저장됐다는 신호가 없어서 휴지통으로 보내지 않았어요 · X는 그대로예요",
+  "cortexNotSaved": "Cortex에 저장됐다는 신호가 없어서 휴지통으로 보내지 않았어요 · X는 그대로예요. Cortex에서 저장된 걸 확인했다면 [{count}장 휴지통으로]를 누르면 돼요. 다시 보내면 Cortex에 한 번 더 저장돼요.",
   "tagOldShot": "오래됨",
   "tagRepeatShot": "연달아 찍음",
   "noteOldShot": "90일 넘은 캡처",
@@ -406,7 +406,7 @@
     }
   },
   "privacyPolicy": "개인정보처리방침",
-  "cortexPartial": "Cortex가 {count}장만 저장했다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요",
+  "cortexPartial": "Cortex가 {count}장만 저장했다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요. 어떤 캡처가 저장됐는지 Cortex에서 확인해 주세요. 다시 보내면 Cortex에 한 번 더 저장돼요.",
   "@cortexPartial": {
     "placeholders": {
       "count": {
@@ -424,6 +424,14 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "@cortexNotSaved": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
       }
     }
   }

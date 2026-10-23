@@ -536,8 +536,13 @@ class L10nKo extends L10n {
       'Cortex로 직접 보낸 캡처는 Cortex에서 AI로 분석해요. 내가 고른 캡처만, 보낼 때만 넘어가요.';
 
   @override
-  String get cortexNotSaved =>
-      'Cortex에 저장됐다는 신호가 없어서 휴지통으로 보내지 않았어요 · X는 그대로예요';
+  String cortexNotSaved(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Cortex에 저장됐다는 신호가 없어서 휴지통으로 보내지 않았어요 · X는 그대로예요. Cortex에서 저장된 걸 확인했다면 [$countString장 휴지통으로]를 누르면 돼요. 다시 보내면 Cortex에 한 번 더 저장돼요.';
+  }
 
   @override
   String get tagOldShot => '오래됨';
@@ -561,7 +566,7 @@ class L10nKo extends L10n {
 
   @override
   String cortexPartial(int count) {
-    return 'Cortex가 $count장만 저장했다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요';
+    return 'Cortex가 $count장만 저장했다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요. 어떤 캡처가 저장됐는지 Cortex에서 확인해 주세요. 다시 보내면 Cortex에 한 번 더 저장돼요.';
   }
 
   @override

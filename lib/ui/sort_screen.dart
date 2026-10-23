@@ -84,10 +84,11 @@ class _SortScreenState extends ConsumerState<SortScreen>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed || _sentToCortex == null) return;
     Future<void>.delayed(const Duration(milliseconds: 1500), () {
-      if (!mounted || _sentToCortex == null) return;
+      final sent = _sentToCortex;
+      if (!mounted || sent == null) return;
       _sentToCortex = null;
       setState(() => _busy = false);
-      showNote(context, context.l.cortexNotSaved);
+      showNote(context, context.l.cortexNotSaved(sent.length));
     });
   }
 

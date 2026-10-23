@@ -653,8 +653,20 @@ class L10nEn extends L10n {
       'Screenshots you send to Cortex are analyzed by Cortex\'s AI. Only the ones you pick, only when you send them.';
 
   @override
-  String get cortexNotSaved =>
-      'Cortex didn\'t confirm it saved them, so nothing was moved to trash · your marks are kept';
+  String cortexNotSaved(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Cortex didn\'t confirm it saved them, so nothing was moved to trash · your marks are kept. If you see them in Cortex, tap Move $countString to trash. Sending again saves them to Cortex a second time.',
+      one: 'Cortex didn\'t confirm it saved it, so nothing was moved to trash · your mark is kept. If you see it in Cortex, tap Move 1 to trash. Sending again saves it to Cortex a second time.',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get tagOldShot => 'Old';
@@ -682,9 +694,9 @@ class L10nEn extends L10n {
       count,
       locale: localeName,
       other:
-          'Cortex reported saving only $count · nothing was moved to trash · your marks are kept',
-      one: 'Cortex reported saving only 1 · nothing was moved to trash · your marks are kept',
-      zero: 'Cortex didn\'t report saving any · nothing was moved to trash · your marks are kept',
+          'Cortex reported saving only $count · nothing was moved to trash · your marks are kept. Check in Cortex which ones were saved. Sending again saves them a second time.',
+      one: 'Cortex reported saving only 1 · nothing was moved to trash · your marks are kept. Check in Cortex which one was saved. Sending again saves them a second time.',
+      zero: 'Cortex didn\'t report saving any · nothing was moved to trash · your marks are kept. Check in Cortex which ones were saved. Sending again saves them a second time.',
     );
     return '$_temp0';
   }
