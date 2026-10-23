@@ -46,3 +46,7 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# 폰 없이 뽑은 화면 이미지 (tool/capture)
+tool/capture/goldens/
+tool/capture/failures/
