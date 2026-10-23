@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-/// 캡처를 받아 정리해 주는 Sophie의 다른 앱. 스토어 출시 때 실제 패키지 이름으로 바꾼다.
-const cortexPackage = 'com.anonymous.cortex';
+/// 캡처를 받아 정리해 주는 Sophie의 다른 앱 (Cortex mobile/app.json의 android.package와 같아야 한다).
+const cortexPackage = 'dev.itssophie.cortex';
 
 enum SendResult { ok, unsupported, failed }
 
