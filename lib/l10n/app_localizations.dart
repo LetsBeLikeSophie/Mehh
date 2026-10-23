@@ -1012,25 +1012,13 @@ abstract class L10n {
   /// No description provided for @cortexAskTitle.
   ///
   /// In ko, this message translates to:
-  /// **'캡처 {count}장을 Cortex로 보낼까요?'**
+  /// **'캡처 {count}장을 Cortex로 보내고 지울까요?'**
   String cortexAskTitle(int count);
-
-  /// No description provided for @cortexAskBody.
-  ///
-  /// In ko, this message translates to:
-  /// **'Cortex가 AI로 분석해 메모로 저장해요. 대화·계좌 같은 내용도 함께 가요. 저장되면 Mehh가 이 캡처를 휴지통으로 보내요(30일 안에 되살릴 수 있어요).'**
-  String get cortexAskBody;
-
-  /// No description provided for @cortexAskIncludesPicks.
-  ///
-  /// In ko, this message translates to:
-  /// **'앱이 추천한 {count}장도 포함돼요.'**
-  String cortexAskIncludesPicks(int count);
 
   /// No description provided for @cortexAskYes.
   ///
   /// In ko, this message translates to:
-  /// **'보내기'**
+  /// **'보내고 지우기'**
   String get cortexAskYes;
 
   /// No description provided for @noFreeLead.

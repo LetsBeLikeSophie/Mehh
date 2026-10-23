@@ -152,9 +152,7 @@
   "useFreeSetBody": "{count, plural, =1{Seeing 1 pick (similar or blurry shots) in this set uses 1 free set this month. {left} left. Once opened, a set stays open.} other{Seeing {count} picks (similar or blurry shots) in this set uses 1 free set this month. {left} left. Once opened, a set stays open.}}",
   "useFreeSetYes": "Use a free set",
   "toCortex": "To Cortex",
-  "cortexAskTitle": "{count, plural, =1{Send 1 screenshot to Cortex?} other{Send {count} screenshots to Cortex?}}",
-  "cortexAskBody": "Cortex analyzes them with AI and saves them as notes, including things like chats or account details. Once saved, Mehh moves these screenshots to trash (restorable for 30 days).",
-  "cortexAskIncludesPicks": "{count, plural, =1{Includes 1 the app picked.} other{Includes {count} the app picked.}}",
-  "cortexAskYes": "Send",
+  "cortexAskTitle": "{count, plural, =1{Send 1 screenshot to Cortex and delete it?} other{Send {count} screenshots to Cortex and delete them?}}",
+  "cortexAskYes": "Send & delete",
   "noFreeLead": "No free sets left this month · {count} more on {date}"
 }
