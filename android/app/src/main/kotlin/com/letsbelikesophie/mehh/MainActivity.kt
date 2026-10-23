@@ -44,7 +44,10 @@ class MainActivity : FlutterActivity() {
         val data = intent.data ?: return
         if (data.scheme == "mehh" && data.host == "cortex-saved") {
             val count = data.getQueryParameter("count")?.toIntOrNull() ?: 0
-            channel?.invokeMethod("cortexSaved", count)
+            // 다음 버전 Cortex는 저장한 사진 id 목록도 돌려준다 (ids=1,2,3). 없으면 장수만
+            val ids = data.getQueryParameter("ids")
+                ?.split(',')?.map { it.trim() }?.filter { it.isNotEmpty() }
+            channel?.invokeMethod("cortexSaved", mapOf("count" to count, "ids" to ids))
         }
     }
 
@@ -67,7 +70,7 @@ class MainActivity : FlutterActivity() {
         val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
             type = "image/*"
             putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
-            putExtra(Intent.EXTRA_TEXT, RETURN_URL)
+            putExtra(Intent.EXTRA_TEXT, returnUrl(ids))
             // 받는 앱이 모든 사진을 읽을 수 있게 ClipData로도 넘긴다
             clipData = ClipData.newRawUri(null, uris.first()).also { clip ->
                 uris.drop(1).forEach { clip.addItem(ClipData.Item(it)) }
@@ -93,7 +96,7 @@ class MainActivity : FlutterActivity() {
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "image/*"
             putExtra(Intent.EXTRA_STREAM, uri)
-            putExtra(Intent.EXTRA_TEXT, RETURN_URL)
+            putExtra(Intent.EXTRA_TEXT, returnUrl(listOf(id)))
             setPackage(pkg)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
@@ -108,5 +111,9 @@ class MainActivity : FlutterActivity() {
     companion object {
         /// 받는 앱(Cortex)이 저장을 마친 뒤 열 주소. 공유 글(EXTRA_TEXT)로 같이 넘긴다.
         const val RETURN_URL = "mehh://cortex-saved"
+
+        /// 보내는 사진 id를 보낸 순서대로 붙인다. Cortex는 저장한 것의 id만 돌려준다
+        /// (mehh://cortex-saved?count=N&ids=…, 2026-10-23 Sophie C1-B)
+        fun returnUrl(ids: List<String>) = "$RETURN_URL?ids=${ids.joinToString(",")}"
     }
 }

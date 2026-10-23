@@ -78,7 +78,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
     super.dispose();
   }
 
-  StreamSubscription<int>? _savedSub;
+  StreamSubscription<CortexSaved>? _savedSub;
 
   /// Cortex에서 돌아왔는데 "저장 완료" 신호가 없으면, 조금 기다렸다가 옮기지 않고 알린다
   @override
@@ -93,14 +93,28 @@ class _SortScreenState extends ConsumerState<SortScreen>
     });
   }
 
-  void _onCortexSaved(int count) {
+  void _onCortexSaved(CortexSaved saved) {
     final ids = _sentToCortex;
     if (ids == null || !mounted) return;
     _sentToCortex = null;
-    // 보낸 장수만큼 저장했다고 알려 왔을 때만 휴지통으로 (시니어 리뷰 2026-10-23 S-2)
-    if (count < ids.length) {
+    // 저장한 사진 목록이 오면 그 사진만 휴지통으로, 나머지는 X 그대로 (C1-B)
+    if (saved.ids case final savedIds?) {
+      final done = [
+        for (final id in ids)
+          if (savedIds.contains(id)) id,
+      ];
+      if (done.isEmpty) {
+        setState(() => _busy = false);
+        showNote(context, context.l.cortexPartial(0));
+        return;
+      }
+      _trashAfterCortex(done, kept: ids.length - done.length);
+      return;
+    }
+    // 장수만 오면(지금 Cortex) 보낸 장수만큼 저장했을 때만 휴지통으로 (S-2)
+    if (saved.count < ids.length) {
       setState(() => _busy = false);
-      showNote(context, context.l.cortexPartial(count));
+      showNote(context, context.l.cortexPartial(saved.count));
       return;
     }
     _trashAfterCortex(ids);
@@ -129,12 +143,14 @@ class _SortScreenState extends ConsumerState<SortScreen>
     }
   }
 
-  Future<void> _trashAfterCortex(List<String> ids) async {
+  Future<void> _trashAfterCortex(List<String> ids, {int kept = 0}) async {
     await sendToTrash(
       context,
       ref,
       ids,
-      doneNote: (n) => context.l.cortexSentTrashed(n),
+      doneNote: (n) => kept == 0
+          ? context.l.cortexSentTrashed(n)
+          : context.l.cortexSentSomeTrashed(n, kept),
     );
     if (mounted) setState(() => _busy = false);
   }

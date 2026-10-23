@@ -626,4 +626,9 @@ class L10nKo extends L10n {
 
   @override
   String get mutedJunk => '실수로 찍힌 사진은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요';
+
+  @override
+  String cortexSentSomeTrashed(int count, int kept) {
+    return '$count장은 Cortex에 저장돼서 휴지통으로 보냈어요 · Cortex가 저장하지 않은 $kept장은 X 그대로예요';
+  }
 }

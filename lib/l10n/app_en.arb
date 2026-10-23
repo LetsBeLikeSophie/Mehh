@@ -156,5 +156,6 @@
   "accRateAll": "All kinds together {rate} (for reference)",
   "mutedBurst": "You often keep similar shots, so we'll stop suggesting them for now · we'll try again in 30 days",
   "mutedBlurry": "You often keep blurry shots, so we'll stop suggesting them for now · we'll try again in 30 days",
-  "mutedJunk": "You often keep accidental shots, so we'll stop suggesting them for now · we'll try again in 30 days"
+  "mutedJunk": "You often keep accidental shots, so we'll stop suggesting them for now · we'll try again in 30 days",
+  "cortexSentSomeTrashed": "Moved {count} saved in Cortex to trash · {kept} Cortex didn't save are still marked"
 }

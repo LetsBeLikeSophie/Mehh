@@ -769,4 +769,9 @@ class L10nEn extends L10n {
   @override
   String get mutedJunk =>
       'You often keep accidental shots, so we\'ll stop suggesting them for now · we\'ll try again in 30 days';
+
+  @override
+  String cortexSentSomeTrashed(int count, int kept) {
+    return 'Moved $count saved in Cortex to trash · $kept Cortex didn\'t save are still marked';
+  }
 }

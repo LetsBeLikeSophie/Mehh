@@ -1126,17 +1126,29 @@ void main() {
     // 보낸 것보다 적게 저장했다고 알려 오면 옮기지 않는다
     await tester.tap(find.text('2장 Cortex로 보내기'));
     await tester.pumpAndSettle();
-    handoff.saved.add(1);
+    handoff.saved.add(const CortexSaved(1, null));
     await tester.pumpAndSettle();
     expect(find.textContaining('1장만 저장했다고'), findsOneWidget);
     expect(find.textContaining('4장'), findsOneWidget);
     await tester.pump(const Duration(seconds: 6));
     await tester.pumpAndSettle();
 
-    // 다시 보내고 Cortex가 다 저장했다고 알려 오면 휴지통으로
+    // 다음 버전 Cortex: 저장한 사진 목록이 오면 그 사진만 휴지통으로, 나머지는 X 그대로
     await tester.tap(find.text('2장 Cortex로 보내기'));
     await tester.pumpAndSettle();
-    handoff.saved.add(2);
+    final first = handoff.sent.first;
+    handoff.sent.clear();
+    handoff.saved.add(CortexSaved(1, {first}));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Cortex가 저장하지 않은 1장은 X 그대로'), findsOneWidget);
+    expect(find.text('3장'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 9));
+    await tester.pumpAndSettle();
+
+    // 지금 Cortex: 장수만 와도 다 저장했으면 휴지통으로
+    await tester.tap(find.text('1장 Cortex로 보내기'));
+    await tester.pumpAndSettle();
+    handoff.saved.add(const CortexSaved(1, null));
     await tester.pumpAndSettle();
     expect(find.text('2장'), findsOneWidget); // 남은 캡처 수
     expect(find.textContaining('Cortex로 보내고 휴지통으로'), findsOneWidget);
@@ -1146,10 +1158,10 @@ void main() {
 
 class _FakeHandoff extends Handoff {
   final sent = <String>[];
-  final saved = StreamController<int>.broadcast();
+  final saved = StreamController<CortexSaved>.broadcast();
 
   @override
-  Stream<int> get cortexSaved => saved.stream;
+  Stream<CortexSaved> get cortexSaved => saved.stream;
 
   @override
   Future<SendResult> sendManyToCortex(List<String> photoIds) async {
