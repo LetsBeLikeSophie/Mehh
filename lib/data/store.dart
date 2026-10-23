@@ -28,7 +28,7 @@ abstract class Store {
   Future<void> addSeen(Iterable<String> photoIds);
   Future<Set<String>> loadSeen();
 
-  /// Cortex로 보냈는데 아직 "저장 완료" 신호를 못 받은 사진. 그리드에 "Cortex로 보냄" 표시 (2026-10-23 Sophie)
+  /// Cortex로 보냈는데 아직 "받았어요" 신호가 없는 사진. 그리드에 "Cortex로 보냄" 표시 (2026-10-23 Sophie)
   Future<void> addCortexSent(Iterable<String> photoIds);
   Future<void> removeCortexSent(Iterable<String> photoIds);
   Future<Set<String>> loadCortexSent();

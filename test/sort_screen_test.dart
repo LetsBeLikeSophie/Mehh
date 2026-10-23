@@ -1111,13 +1111,25 @@ void main() {
     await sendCortex(tester);
     expect(handoff.sent.length, 2);
     expect(find.textContaining('4장'), findsOneWidget); // 아직 휴지통으로 안 감
+    // 기다리는 동안 버튼은 잠그지 않는다
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.ancestor(
+              of: find.text('2장 휴지통으로'),
+              matching: find.byType(FilledButton),
+            ),
+          )
+          .onPressed,
+      isNotNull,
+    );
 
     // "저장 완료" 신호 없이 돌아오면 옮기지 않는다
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump(const Duration(seconds: 2));
     await tester.pumpAndSettle();
     expect(find.textContaining('4장'), findsOneWidget);
-    expect(find.textContaining('신호가 없어서 휴지통으로 보내지 않았어요'), findsOneWidget);
+    expect(find.textContaining('받았다는 신호가 없어서 휴지통으로 보내지 않았어요'), findsOneWidget);
     // 보냈는데 저장 신호가 없는 사진은 "Cortex로 보냄" 표시로 남는다
     expect(find.text('Cortex로 보냄'), findsNWidgets(2));
     await tester.pump(const Duration(seconds: 6)); // 알림이 사라지게
@@ -1127,7 +1139,7 @@ void main() {
     await sendCortex(tester);
     handoff.saved.add(const CortexSaved(1, null));
     await tester.pumpAndSettle();
-    expect(find.textContaining('1장만 저장했다고'), findsOneWidget);
+    expect(find.textContaining('1장만 받았다고'), findsOneWidget);
     expect(find.textContaining('4장'), findsOneWidget);
     await tester.pump(const Duration(seconds: 6));
     await tester.pumpAndSettle();
@@ -1140,11 +1152,11 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     // 휴지통으로 보내기 전에 저장 확인을 먼저 알린다
-    expect(find.textContaining('Cortex에 1장 저장 확인'), findsOneWidget);
+    expect(find.textContaining('Cortex가 1장 받았어요'), findsOneWidget);
     expect(find.textContaining('  4장'), findsOneWidget);
     await tester.pump(const Duration(seconds: 2));
     await tester.pumpAndSettle();
-    expect(find.textContaining('Cortex가 저장하지 않은 1장은 X 그대로'), findsOneWidget);
+    expect(find.textContaining('받지 못한 1장은 X 그대로'), findsOneWidget);
     expect(find.textContaining('  3장'), findsOneWidget);
     expect(find.text('Cortex로 보냄'), findsOneWidget); // 저장 안 된 1장만 표시가 남는다
     await tester.pump(const Duration(seconds: 9));
@@ -1158,6 +1170,25 @@ void main() {
     expect(find.textContaining('  2장'), findsOneWidget); // 남은 캡처 수
     expect(find.text('Cortex로 보냄'), findsNothing);
     expect(find.textContaining('Cortex로 보내고 휴지통으로'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 9));
+    await tester.pumpAndSettle();
+
+    // 늦게 온 신호: 신호 없이 돌아온 뒤에 "받았어요"가 와도 표시가 남은 사진은 휴지통으로
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.pumpAndSettle();
+    handoff.sent.clear();
+    await sendCortex(tester);
+    final late = handoff.sent.first;
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+    expect(find.text('Cortex로 보냄'), findsOneWidget);
+    handoff.saved.add(CortexSaved(1, {late}));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('  1장'), findsOneWidget);
+    expect(find.text('Cortex로 보냄'), findsNothing);
     await flush(tester);
   });
 }

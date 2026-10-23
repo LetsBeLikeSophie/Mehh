@@ -522,8 +522,8 @@ class L10nEn extends L10n {
       count,
       locale: localeName,
       other:
-          'Sent $countString to Cortex and moved them to trash · restore them within 30 days, or empty the trash to free up space',
-      one: 'Sent 1 to Cortex and moved it to trash · restore it within 30 days, or empty the trash to free up space',
+          'Sent $countString to Cortex and moved them to trash · Cortex takes it from here · restore within 30 days',
+      one: 'Sent 1 to Cortex and moved it to trash · Cortex takes it from here · restore within 30 days',
     );
     return '$_temp0';
   }
@@ -597,8 +597,8 @@ class L10nEn extends L10n {
       count,
       locale: localeName,
       other:
-          'Cortex didn\'t confirm it saved them, so nothing was moved to trash · your marks are kept. If you see them in Cortex, tap Move $countString to trash. Sending again saves them to Cortex a second time.',
-      one: 'Cortex didn\'t confirm it saved it, so nothing was moved to trash · your mark is kept. If you see it in Cortex, tap Move 1 to trash. Sending again saves it to Cortex a second time.',
+          'Cortex didn\'t confirm it got them, so nothing was moved to trash · your marks are kept. If you see them in Cortex, tap Move $countString to trash.',
+      one: 'Cortex didn\'t confirm it got it, so nothing was moved to trash · your mark is kept. If you see it in Cortex, tap Move 1 to trash.',
     );
     return '$_temp0';
   }
@@ -629,9 +629,9 @@ class L10nEn extends L10n {
       count,
       locale: localeName,
       other:
-          'Cortex reported saving only $count · nothing was moved to trash · your marks are kept. Check in Cortex which ones were saved. Sending again saves them a second time.',
-      one: 'Cortex reported saving only 1 · nothing was moved to trash · your marks are kept. Check in Cortex which one was saved. Sending again saves them a second time.',
-      zero: 'Cortex didn\'t report saving any · nothing was moved to trash · your marks are kept. Check in Cortex which ones were saved. Sending again saves them a second time.',
+          'Cortex reported getting only $count · nothing was moved to trash · your marks are kept.',
+      one: 'Cortex reported getting only 1 · nothing was moved to trash · your marks are kept.',
+      zero: 'Cortex didn\'t report getting any · nothing was moved to trash · your marks are kept.',
     );
     return '$_temp0';
   }
@@ -697,7 +697,7 @@ class L10nEn extends L10n {
 
   @override
   String cortexSentSomeTrashed(int count, int kept) {
-    return 'Moved $count saved in Cortex to trash · $kept Cortex didn\'t save are still marked';
+    return 'Moved $count Cortex got to trash · $kept it didn\'t get are still marked';
   }
 
   @override
@@ -758,8 +758,8 @@ class L10nEn extends L10n {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '✓ Cortex saved $countString · moving them to trash',
-      one: '✓ Cortex saved 1 · moving it to trash',
+      other: '✓ Cortex got $countString · moving them to trash',
+      one: '✓ Cortex got 1 · moving it to trash',
     );
     return '$_temp0';
   }

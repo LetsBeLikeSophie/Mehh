@@ -86,11 +86,25 @@ class _SortScreenState extends ConsumerState<SortScreen>
     });
   }
 
+  /// Cortex가 "받았어요"(파일을 자기 쪽에 복사함) 신호를 보내면 그 사진을 휴지통으로.
+  /// 분석·저장은 그 뒤 Cortex가 혼자 한다 (2026-10-23 Sophie: 보내면 끝)
   void _onCortexSaved(CortexSaved saved) {
+    if (!mounted) return;
     final ids = _sentToCortex;
-    if (ids == null || !mounted) return;
+    if (ids == null) {
+      // 늦게 온 신호: "Cortex로 보냄" 표시가 남은 사진 중 받았다고 한 것만
+      final waiting = ref.read(cortexSentProvider).value ?? const {};
+      final done = [
+        for (final id in saved.ids ?? const <String>{})
+          if (waiting.contains(id)) id,
+      ];
+      if (done.isEmpty) return;
+      ref.read(cortexSentProvider.notifier).remove(done);
+      _trashAfterCortex(done);
+      return;
+    }
     _sentToCortex = null;
-    // 저장한 사진 목록이 오면 그 사진만 휴지통으로, 나머지는 X 그대로 (C1-B)
+    // 받은 사진 목록이 오면 그 사진만 휴지통으로, 나머지는 X 그대로 (C1-B)
     if (saved.ids case final savedIds?) {
       final done = [
         for (final id in ids)
@@ -105,7 +119,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
       _trashAfterCortex(done, kept: ids.length - done.length);
       return;
     }
-    // 장수만 오면(지금 Cortex) 보낸 장수만큼 저장했을 때만 휴지통으로 (S-2)
+    // 장수만 오면(예전 Cortex) 보낸 장수만큼 받았을 때만 휴지통으로 (S-2)
     if (saved.count < ids.length) {
       setState(() => _busy = false);
       showNote(context, context.l.cortexPartial(saved.count));
@@ -115,7 +129,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
     _trashAfterCortex(ids);
   }
 
-  /// 여러 장을 한 번에 Cortex로 보낸다. 분석은 Cortex가 하고, 보낸 캡처는 휴지통으로.
+  /// 여러 장을 한 번에 Cortex로 보낸다. Cortex가 받으면 휴지통으로, 분석은 Cortex가 나중에.
   Future<void> _sendCortex(List<String> ids) async {
     // 매번 한 줄로 묻는다: "보내고 지울까요?" (UX-43, 2026-10-23 Sophie: 설명 없이 한 번에, 매번)
     final l = context.l;
@@ -131,14 +145,15 @@ class _SortScreenState extends ConsumerState<SortScreen>
     if (!mounted) return;
     switch (r) {
       case SendResult.ok:
-        // Cortex가 저장을 마쳤다고 알려 오면 휴지통으로 (안 알려 오면 그대로 둔다)
+        // Cortex가 받았다고 알려 오면 휴지통으로 (안 알려 오면 그대로 둔다)
         _savedSub ??= ref
             .read(handoffProvider)
             .cortexSaved
             .listen(_onCortexSaved);
         _sentToCortex = ids;
-        // 저장 신호가 올 때까지 "Cortex로 보냄" 표시 (신호가 오면 지운다)
+        // 받았다는 신호가 올 때까지 "Cortex로 보냄" 표시. 기다리는 동안 버튼은 잠그지 않는다
         await ref.read(cortexSentProvider.notifier).add(ids);
+        if (mounted) setState(() => _busy = false);
       case SendResult.unsupported:
         setState(() => _busy = false);
         showNote(context, l.cortexMultiUnsupported);
@@ -149,7 +164,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
   }
 
   Future<void> _trashAfterCortex(List<String> ids, {int kept = 0}) async {
-    // 휴지통 확인 창(안드로이드)이 뜨기 전에 저장이 확인됐다고 먼저 알린다 (2026-10-23 Sophie)
+    // 휴지통 확인 창(안드로이드)이 뜨기 전에 Cortex가 받았다고 먼저 알린다 (2026-10-23 Sophie)
     showNote(context, context.l.cortexSavedTrashing(ids.length));
     await Future<void>.delayed(cortexSavedPause);
     if (!mounted) return;
@@ -418,7 +433,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
                   bottom: 4,
                   child: MehhBadge(tagText(tag, l), inverted: out),
                 ),
-              // 보냈는데 저장 신호를 못 받은 사진: 어디서 멈췄는지 보이게
+              // 보냈는데 받았다는 신호가 없는 사진: 어디서 멈췄는지 보이게
               if (cortexSent.contains(id))
                 Positioned(
                   left: 4,

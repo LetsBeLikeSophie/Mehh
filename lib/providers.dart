@@ -652,7 +652,7 @@ final seenProvider = AsyncNotifierProvider<SeenNotifier, Set<String>>(
   SeenNotifier.new,
 );
 
-/// Cortex로 보냈는데 저장 신호를 아직 못 받은 사진 ([Store.addCortexSent])
+/// Cortex로 보냈는데 받았다는 신호가 아직 없는 사진 ([Store.addCortexSent])
 class CortexSentNotifier extends AsyncNotifier<Set<String>> {
   @override
   Future<Set<String>> build() => ref.read(storeProvider).loadCortexSent();
