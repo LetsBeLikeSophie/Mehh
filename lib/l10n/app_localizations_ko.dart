@@ -588,4 +588,7 @@ class L10nKo extends L10n {
   String freeRefilled(int count) {
     return '이번 달 무료 묶음 $count개가 다시 생겼어요';
   }
+
+  @override
+  String get lockedSet => '무료 묶음이나 Pro로 추천을 볼 수 있는 묶음';
 }

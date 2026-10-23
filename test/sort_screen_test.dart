@@ -134,6 +134,36 @@ void main() {
         ),
       );
 
+  // 잠기는 추천(비슷한 컷·흔들림)을 만드는 묶음: p0·p1·p2는 10초 간격 같은 장면(p0 베스트, p1 흔들림,
+  // p2 비슷한 컷), p3은 5분 뒤 다른 장면. "실수" 사진은 무료라 잠기지 않는다 (P2-A)
+  final t0 = DateTime(2026, 9, 1, 10);
+  final burstPhotos = [
+    for (final (i, d) in [0, 10, 20, 300].indexed)
+      PhotoMeta(
+        id: 'p$i',
+        takenAt: t0.add(Duration(seconds: d)),
+        width: 100,
+        height: 100,
+      ),
+  ];
+  final paid = {
+    for (final (id, sharp) in [('p0', 900.0), ('p1', 5.0), ('p2', 300.0)])
+      id: PhotoFeatures(
+        id: id,
+        hashHi: 1,
+        hashLo: 2,
+        sharpness: sharp,
+        brightness: 120,
+      ),
+    'p3': const PhotoFeatures(
+      id: 'p3',
+      hashHi: 0x7FFFFFFF,
+      hashLo: 0x7FFFFFFF,
+      sharpness: 500,
+      brightness: 120,
+    ),
+  };
+
   Map<String, PhotoFeatures> darkOn(Set<String> ids) => {
     for (final p in photos)
       p.id: PhotoFeatures(
@@ -169,13 +199,15 @@ void main() {
   });
 
   testWidgets('[선택 해제]는 표시 없음: 연 묶음의 추천이 남아 [추천 보기]로 다시 받는다', (tester) async {
-    final day = DayGroup(id: 'day-p0', kind: DayGroupKind.day, photos: photos);
+    final day = DayGroup(
+      id: 'day-p0',
+      kind: DayGroupKind.day,
+      photos: burstPhotos,
+    );
     await pump(
       tester,
       SortScreen(kind: SortKind.day, group: day),
-      extra: [
-        realPlan(darkOn({'p1', 'p2'})),
-      ],
+      extra: [realPlan(paid)],
     );
     await tester.tap(find.text('추천 보기 · 2장'));
     await tester.pump(const Duration(seconds: 5));
@@ -193,13 +225,15 @@ void main() {
   });
 
   testWidgets('잠긴 묶음을 직접 정리해 한 번 보내면 "다 봤어요"', (tester) async {
-    final day = DayGroup(id: 'day-p0', kind: DayGroupKind.day, photos: photos);
+    final day = DayGroup(
+      id: 'day-p0',
+      kind: DayGroupKind.day,
+      photos: burstPhotos,
+    );
     await pump(
       tester,
       SortScreen(kind: SortKind.day, group: day),
-      extra: [
-        realPlan(darkOn({'p1'})),
-      ],
+      extra: [realPlan(paid)],
     );
     final container = ProviderScope.containerOf(
       tester.element(find.byType(SortScreen)),
@@ -212,7 +246,7 @@ void main() {
     final rest = DayGroup(
       id: 'day-p0',
       kind: DayGroupKind.day,
-      photos: photos.sublist(0, 3),
+      photos: burstPhotos.sublist(0, 3),
     );
     expect(container.read(groupStatusProvider(rest)), GroupStatus.done);
     await flush(tester);
@@ -444,6 +478,41 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('잠긴 묶음에서도 실수 사진은 무료로 처음부터 X, 자물쇠는 비슷한 컷·흔들림에만', (tester) async {
+    final day = DayGroup(
+      id: 'day-p0',
+      kind: DayGroupKind.day,
+      photos: burstPhotos,
+    );
+    final f = {
+      ...paid,
+      'p3': const PhotoFeatures(
+        id: 'p3',
+        hashHi: 0x7FFFFFFF,
+        hashLo: 0x7FFFFFFF,
+        sharpness: 500,
+        brightness: 3, // 까만 사진 = 실수
+      ),
+    };
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.day, group: day),
+      extra: [realPlan(f)],
+    );
+    expect(find.text('1장 휴지통으로'), findsOneWidget); // 실수 사진만 처음부터 X
+    expect(find.text('추천 보기 · 2장'), findsOneWidget); // 잠긴 추천 장수
+    expect(find.text('실수'), findsOneWidget);
+    final c = ProviderScope.containerOf(
+      tester.element(find.byType(SortScreen)),
+    );
+    expect(c.read(lockedProvider(day)), isTrue);
+    await tester.tap(find.text('추천 보기 · 2장'));
+    await tester.pumpAndSettle();
+    expect(find.text('3장 휴지통으로'), findsOneWidget);
+    expect(c.read(lockedProvider(day)), isFalse);
+    await flush(tester);
+  });
+
   testWidgets('그리드: X를 켜면 휴지통 버튼, 보내면 그 사진만 빠진다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     expect(find.text('X를 친 사진이 없어요'), findsWidgets);
@@ -607,33 +676,20 @@ void main() {
   testWidgets('그날의 묶음: [추천 보기]를 눌러야 X, 이번 달 무료 묶음으로 열고 연 묶음은 계속 열림', (
     tester,
   ) async {
-    final day = DayGroup(id: 'day-p0', kind: DayGroupKind.day, photos: photos);
-    // 실제 planGroup을 거친다 (p1·p2는 까만 사진 = 실수로 찍힘)
-    final features = {
-      for (final p in photos)
-        p.id: PhotoFeatures(
-          id: p.id,
-          hashHi: 1,
-          hashLo: 2,
-          sharpness: 500,
-          brightness: p.id == 'p1' || p.id == 'p2' ? 3 : 120,
-        ),
-    };
+    final day = DayGroup(
+      id: 'day-p0',
+      kind: DayGroupKind.day,
+      photos: burstPhotos,
+    );
+    // 실제 planGroup을 거친다 (p1 흔들림, p2 비슷한 컷)
     await pump(
       tester,
       SortScreen(kind: SortKind.day, group: day),
-      extra: [
-        groupPlanProvider.overrideWith(
-          (ref, g) => planGroup(
-            g.photos,
-            features,
-            ref.watch(decisionsProvider).value ?? const {},
-          ),
-        ),
-      ],
+      extra: [realPlan(paid)],
     );
+
     expect(find.text('2장 휴지통으로'), findsNothing); // 누르기 전엔 X 없음
-    expect(find.text('실수'), findsNothing); // 이유 표시는 X가 쳐진 사진에만
+    expect(find.text('흔들림'), findsNothing); // 이유 표시는 X가 쳐진 사진에만
     expect(find.text('누르면 이번 달 무료 묶음 1개를 써요 · 3개 남음'), findsOneWidget);
 
     await tester.tap(find.text('추천 보기 · 2장'));
@@ -642,7 +698,8 @@ void main() {
     expect(find.text('이번 달 무료 묶음이 2개 남았어요'), findsOneWidget);
     expect(find.text('이미 연 묶음이에요 · 무료 묶음을 더 쓰지 않아요'), findsOneWidget);
     // X를 쳐도 추천은 그대로: 이유 표시와 [추천 보기]가 남는다
-    expect(find.text('실수'), findsNWidgets(2));
+    expect(find.text('흔들림'), findsOneWidget);
+    expect(find.text('비슷한 컷'), findsOneWidget);
     expect(find.text('추천 보기 · 2장'), findsOneWidget);
     final container = ProviderScope.containerOf(
       tester.element(find.byType(SortScreen)),
@@ -663,7 +720,8 @@ void main() {
     expect(stats.suggested, 2);
     expect(stats.accepted, 1);
     expect(stats.added, 0);
-    expect(stats.byTag['junk'], (1, 2));
+    expect(stats.byTag['blurry'], (1, 1));
+    expect(stats.byTag['burst'], (0, 1));
     expect(container.read(proProvider).value!.freeLeft(now), 2);
     expect(await container.read(proProvider.notifier).unlock(day.id), isTrue);
     expect(container.read(proProvider).value!.freeLeft(now), 2);
@@ -671,17 +729,11 @@ void main() {
   });
 
   testWidgets('무료 묶음을 다 쓴 뒤 Pro를 사면 다시 누르지 않아도 추천이 X로 들어간다', (tester) async {
-    final day = DayGroup(id: 'day-p0', kind: DayGroupKind.day, photos: photos);
-    final features = {
-      for (final p in photos)
-        p.id: PhotoFeatures(
-          id: p.id,
-          hashHi: 1,
-          hashLo: 2,
-          sharpness: 500,
-          brightness: p.id == 'p1' ? 3 : 120,
-        ),
-    };
+    final day = DayGroup(
+      id: 'day-p0',
+      kind: DayGroupKind.day,
+      photos: burstPhotos,
+    );
     final now = DateTime.now();
     await pump(
       tester,
@@ -689,23 +741,15 @@ void main() {
       vault: MemoryProVault(
         ProState(freeMonth: monthKey(now), freeUsed: freeGroupsPerMonth),
       ),
-      extra: [
-        groupPlanProvider.overrideWith(
-          (ref, g) => planGroup(
-            g.photos,
-            features,
-            ref.watch(decisionsProvider).value ?? const {},
-          ),
-        ),
-      ],
+      extra: [realPlan(paid)],
     );
-    await tester.tap(find.text('추천 보기 · 1장'));
+    await tester.tap(find.text('추천 보기 · 2장'));
     await tester.pumpAndSettle();
     expect(find.text('Mehh Pro'), findsOneWidget);
     await tester.tap(find.text('평생 이용권'));
     await tester.pumpAndSettle();
     expect(find.text('Mehh Pro'), findsNothing); // 사면 시트가 닫힌다
-    expect(find.text('1장 휴지통으로'), findsOneWidget);
+    expect(find.text('2장 휴지통으로'), findsOneWidget);
     await flush(tester);
   });
 

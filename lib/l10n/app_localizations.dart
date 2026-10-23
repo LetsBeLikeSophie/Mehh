@@ -990,6 +990,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'이번 달 무료 묶음 {count}개가 다시 생겼어요'**
   String freeRefilled(int count);
+
+  /// No description provided for @lockedSet.
+  ///
+  /// In ko, this message translates to:
+  /// **'무료 묶음이나 Pro로 추천을 볼 수 있는 묶음'**
+  String get lockedSet;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

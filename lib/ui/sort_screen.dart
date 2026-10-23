@@ -167,7 +167,11 @@ class _SortScreenState extends ConsumerState<SortScreen>
     final pro = ref.read(proProvider.notifier);
     // 그날의 묶음은 열려 있어도 늘 unlock을 부른다: Pro면 사진만 기억해서
     // 1년 이용권이 끝나도 계속 열려 있게 한다 (F3-A, UX 리뷰 2026-10-23 UX-35)
-    if (widget.kind == SortKind.day && g != null) {
+    final proNow = (await ref.read(proProvider.future)).pro;
+    // 잠긴 묶음만 무료 묶음·Pro로 연다. 무료 추천(실수 사진)만 있는 묶음은 열 게 없다 (P2-A)
+    if (widget.kind == SortKind.day &&
+        g != null &&
+        (src.locked > 0 || proNow)) {
       final photoIds = [for (final p in g.photos) p.id];
       final now = DateTime.now();
       final freeBefore = (await ref.read(proProvider.future)).freeLeft(now);

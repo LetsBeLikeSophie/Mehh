@@ -223,15 +223,23 @@ SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
         for (final b in plan.bursts)
           if (b.length > 1) [for (final p in b) p.id],
       ];
-      if (kind == SortKind.day &&
-          plan.trash.isNotEmpty &&
-          !ref.watch(unlockedProvider(g))) {
+      // 틀릴 일이 거의 없는 "실수"(까맣거나 주머니 속) 사진은 무료로 처음부터 X (낱장·그날의 묶음, Sophie P2-A).
+      // 잠금(무료 묶음·Pro)은 비슷한 컷·흔들림·베스트 고르기에만 건다
+      final junk = {
+        for (final e in plan.trash.entries)
+          if (e.value == TrashReason.junk) e.key,
+      };
+      final paid = plan.trash.length - junk.length;
+      if (kind == SortKind.day && paid > 0 && !ref.watch(unlockedProvider(g))) {
         return SortSource(
           photos: g.photos,
           plan: plan,
           analyzing: plan.analyzed < g.count,
           units: units,
-          locked: plan.trash.length,
+          locked: paid,
+          suggested: junk,
+          preMarked: junk,
+          tags: {for (final id in junk) id: PhotoTag.junk},
         );
       }
       return SortSource(
@@ -239,12 +247,7 @@ SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
             ? g.photos.reversed.toList()
             : g.photos,
         suggested: plan.trash.keys.toSet(),
-        preMarked: kind == SortKind.singles
-            ? {
-                for (final e in plan.trash.entries)
-                  if (e.value == TrashReason.junk) e.key,
-              }
-            : const {},
+        preMarked: junk,
         tags: tags,
         bestReasons: reasons,
         plan: plan,

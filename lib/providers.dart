@@ -205,6 +205,18 @@ final proProvider = AsyncNotifierProvider<ProNotifier, ProState>(
   ProNotifier.new,
 );
 
+/// 그날의 묶음이 잠겨 있는가: 무료 묶음·Pro로 열어야 볼 추천(비슷한 컷·흔들림)이 있고 아직 안 열었다.
+/// "실수" 사진은 무료라 잠금에 세지 않는다 (Sophie P2-A). 홈 자물쇠(H2-A)와 정리 화면이 같이 쓴다.
+final lockedProvider = Provider.autoDispose.family<bool, DayGroup>((ref, g) {
+  if (g.kind != DayGroupKind.day || ref.watch(unlockedProvider(g)))
+    return false;
+  return ref
+      .watch(groupPlanProvider(g))
+      .trash
+      .values
+      .any((r) => r != TrashReason.junk);
+});
+
 /// 이 묶음의 앱 추천이 열려 있는가 (불러오는 중엔 닫힌 것으로)
 final unlockedProvider = Provider.family<bool, DayGroup>(
   (ref, g) =>
