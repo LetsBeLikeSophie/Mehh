@@ -146,28 +146,34 @@ Map<String, ShotReason> planScreenshots(
 }
 
 /// 연달아 찍은 같은 화면 캡처 묶음 (2장 이상). 통째로 휴지통으로 가면 한 번 묻는다.
+/// 마지막 장까지 오래된 묶음은 앱이 통째로 추천하므로 넣지 않는다 (UX 리뷰 2026-10-23).
 List<List<String>> screenshotRuns(
   List<PhotoMeta> shots,
   Map<String, PhotoFeatures> features,
   Map<String, Decision> decisions, {
+  required DateTime now,
   CleanupConfig config = const CleanupConfig(),
 }) {
   final live = [
     for (final p in shots)
       if (decisions[p.id]?.state != DecisionState.trashed) p,
   ];
-  final runs = <List<String>>[];
-  var cur = <String>[];
+  final runs = <List<PhotoMeta>>[];
+  var cur = <PhotoMeta>[];
   for (var i = 0; i < live.length; i++) {
     if (i > 0 && _sameShot(live[i - 1], live[i], features, config)) {
-      cur.add(live[i].id);
+      cur.add(live[i]);
     } else {
       if (cur.length > 1) runs.add(cur);
-      cur = [live[i].id];
+      cur = [live[i]];
     }
   }
   if (cur.length > 1) runs.add(cur);
-  return runs;
+  return [
+    for (final r in runs)
+      if (now.difference(r.last.takenAt) <= config.oldScreenshot)
+        [for (final p in r) p.id],
+  ];
 }
 
 bool _sameShot(

@@ -377,6 +377,70 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('캡처 연속 묶음: 오래된 것은 추천대로 보내도 확인 창 없음, 최근 것은 전부 X면 확인', (
+    tester,
+  ) async {
+    PhotoMeta shot(String id, DateTime t) => PhotoMeta(
+      id: id,
+      takenAt: t,
+      width: 100,
+      height: 200,
+      isScreenshot: true,
+    );
+    final oldT = DateTime(2026, 1, 1, 10);
+    final newT = DateTime.now().subtract(const Duration(days: 1));
+    final g = DayGroup(
+      id: 'shots',
+      kind: DayGroupKind.screenshots,
+      photos: [
+        shot('o1', oldT),
+        shot('o2', oldT.add(const Duration(seconds: 5))),
+        shot('n1', newT),
+        shot('n2', newT.add(const Duration(seconds: 5))),
+      ],
+    );
+    final f = {
+      for (final id in ['o1', 'o2'])
+        id: PhotoFeatures(
+          id: id,
+          hashHi: 1,
+          hashLo: 1,
+          sharpness: 500,
+          brightness: 120,
+        ),
+      for (final id in ['n1', 'n2'])
+        id: PhotoFeatures(
+          id: id,
+          hashHi: 0x7FFFFFFF,
+          hashLo: 0x7FFFFFFF,
+          sharpness: 500,
+          brightness: 120,
+        ),
+    };
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.screenshots, group: g),
+      extra: [analysisProvider.overrideWith(() => _FixedAnalysis(f))],
+    );
+    // 전부 X하면 최근 연속 묶음만 장면 확인 (오래된 묶음은 앱이 통째로 추천하니 세지 않는다)
+    await tester.tap(find.text('전체 선택'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('4장 휴지통으로'));
+    await tester.pumpAndSettle();
+    expect(find.text('1개 장면은 사진이 하나도 안 남아요'), findsOneWidget);
+    await tester.tap(find.text('다시 볼게요'));
+    await tester.pumpAndSettle();
+    // 추천대로(오래된 묶음 둘 + 최근 묶음의 지난 장) 보내면 확인 창 없음
+    await tester.tap(find.text('선택 해제'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('추천 보기 · 3장'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('3장 휴지통으로'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('장면은 사진이 하나도 안 남아요'), findsNothing);
+    await flush(tester);
+  });
+
   testWidgets('그리드: X를 켜면 휴지통 버튼, 보내면 그 사진만 빠진다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     expect(find.text('X를 친 사진이 없어요'), findsWidgets);
@@ -948,4 +1012,13 @@ class _CountingLibrary extends DemoPhotoLibrary {
     loads++;
     return super.loadAll();
   }
+}
+
+class _FixedAnalysis extends AnalysisNotifier {
+  _FixedAnalysis(this.features);
+  final Map<String, PhotoFeatures> features;
+
+  @override
+  AnalysisState build() =>
+      AnalysisState(features: features, total: features.length, done: true);
 }

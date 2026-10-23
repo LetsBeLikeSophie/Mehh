@@ -246,9 +246,14 @@ void main() {
       }, now: now);
       expect(picks.containsKey('b'), isFalse);
       expect(picks['a'], ShotReason.repeat);
-      expect(screenshotRuns(shots, f, {}), [
+      expect(screenshotRuns(shots, f, {}, now: now), [
         ['a', 'b', 'c'],
       ]);
+      // 마지막 장까지 오래된 묶음은 장면 확인에 넣지 않는다 (앱이 통째로 추천하므로)
+      expect(
+        screenshotRuns(shots, f, {}, now: t0.add(const Duration(days: 200))),
+        isEmpty,
+      );
     });
 
     test('♥(즐겨찾기) 사진은 비슷한 컷·캡처 추천에서 빠진다', () {
