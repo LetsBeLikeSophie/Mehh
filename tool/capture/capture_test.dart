@@ -196,6 +196,8 @@ void main() {
     );
     await tester.tap(find.text('전체 선택'));
     await shot(tester, '05c_screenshots_cortex');
+    await tester.tap(find.text('Cortex로'));
+    await shot(tester, '05d_cortex_confirm');
   });
 
   testWidgets('02b 잠긴 묶음 [추천 보기] 누름 → 무료 묶음 확인', (tester) async {
