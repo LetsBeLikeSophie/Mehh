@@ -430,7 +430,7 @@ abstract class L10n {
   /// No description provided for @sceneLossBody.
   ///
   /// In ko, this message translates to:
-  /// **'비슷한 사진에 전부 X를 쳤어요. 그래도 휴지통으로 보낼까요?'**
+  /// **'비슷한 사진을 전부 선택했어요. 그래도 휴지통으로 보낼까요?'**
   String get sceneLossBody;
 
   /// No description provided for @lookAgain.
@@ -826,7 +826,7 @@ abstract class L10n {
   /// No description provided for @nothingMarked.
   ///
   /// In ko, this message translates to:
-  /// **'X를 친 사진이 없어요'**
+  /// **'정리할 사진이 없어요'**
   String get nothingMarked;
 
   /// No description provided for @yearlyEnded.
@@ -850,7 +850,7 @@ abstract class L10n {
   /// No description provided for @unsentDot.
   ///
   /// In ko, this message translates to:
-  /// **'X를 쳐 두고 아직 휴지통으로 안 보냈어요'**
+  /// **'선택해 두고 아직 휴지통으로 안 보냈어요'**
   String get unsentDot;
 
   /// No description provided for @privacyCortex.
@@ -1021,18 +1021,6 @@ abstract class L10n {
   /// **'Cortex로 보냄'**
   String get cortexSentBadge;
 
-  /// No description provided for @markedLeft.
-  ///
-  /// In ko, this message translates to:
-  /// **'X 쳐 둔 {size}가 남았어요'**
-  String markedLeft(Object size);
-
-  /// No description provided for @markedAllSent.
-  ///
-  /// In ko, this message translates to:
-  /// **'쳐 둔 X를 다 보냈어요'**
-  String get markedAllSent;
-
   /// No description provided for @cortexGotTitle.
   ///
   /// In ko, this message translates to:
@@ -1072,13 +1060,13 @@ abstract class L10n {
   /// No description provided for @focusFinishBody.
   ///
   /// In ko, this message translates to:
-  /// **'{total}장 중 {count}장에 X를 쳤어요.'**
+  /// **'{total}장 중 {count}장을 선택했어요.'**
   String focusFinishBody(int total, int count);
 
   /// No description provided for @focusFinishNone.
   ///
   /// In ko, this message translates to:
-  /// **'X 친 사진이 없어요. 끝낼까요?'**
+  /// **'정리할 사진이 없어요. 끝낼까요?'**
   String get focusFinishNone;
 
   /// No description provided for @focusKeepLooking.
@@ -1104,6 +1092,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'정리 끝내기'**
   String get focusFinishSemantics;
+
+  /// No description provided for @selectedSize.
+  ///
+  /// In ko, this message translates to:
+  /// **'선택 {size}'**
+  String selectedSize(Object size);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

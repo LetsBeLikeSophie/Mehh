@@ -139,7 +139,7 @@
       }
     }
   },
-  "sceneLossBody": "비슷한 사진에 전부 X를 쳤어요. 그래도 휴지통으로 보낼까요?",
+  "sceneLossBody": "비슷한 사진을 전부 선택했어요. 그래도 휴지통으로 보낼까요?",
   "lookAgain": "다시 볼게요",
   "selectAll": "전체 선택",
   "deselectAll": "선택 해제",
@@ -319,7 +319,7 @@
   "keepBarSemantics": "킵. 사진을 아래로 내려도 돼요",
   "lookingAtPhotos": "사진을\n살펴보고 있어요",
   "duplicatesPending": "똑같은 사진은 다 살펴본 뒤 알려 드려요 · 무료",
-  "nothingMarked": "X를 친 사진이 없어요",
+  "nothingMarked": "정리할 사진이 없어요",
   "yearlyEnded": "1년 이용권이 끝났어요 · 추천을 본 묶음은 그대로 열려 있고, 새 묶음은 이번 달 무료 묶음 {count}개로 볼 수 있어요",
   "@yearlyEnded": {
     "placeholders": {
@@ -337,7 +337,7 @@
       }
     }
   },
-  "unsentDot": "X를 쳐 두고 아직 휴지통으로 안 보냈어요",
+  "unsentDot": "선택해 두고 아직 휴지통으로 안 보냈어요",
   "privacyCortex": "Cortex로 직접 보낸 캡처는 Cortex에서 AI로 분석해요. 내가 고른 캡처만, 보낼 때만 넘어가요.",
   "cortexNotSaved": "Cortex가 받았다는 신호가 없어서 휴지통으로 보내지 않았어요 · X는 그대로예요. Cortex에서 받은 걸 확인했다면 [{count}장 휴지통으로]를 누르면 돼요.",
   "tagOldShot": "오래됨",
@@ -447,16 +447,14 @@
     }
   },
   "cortexSentBadge": "Cortex로 보냄",
-  "markedLeft": "X 쳐 둔 {size}가 남았어요",
-  "markedAllSent": "쳐 둔 X를 다 보냈어요",
   "cortexGotTitle": "✓ Cortex로 {count}장 옮겼어요",
   "cortexGotBody": "분석은 Cortex가 뒤에서 해요. 앱을 닫아도 돼요.\n이 사진을 휴지통으로 지울까요?",
   "cortexGotKept": "Cortex가 받지 못한 {kept}장은 그대로 둬요.",
   "cortexGotBadge": "Cortex에 있음",
   "later": "나중에",
   "focusFinishTitle": "{count}장을 휴지통으로 보내고 끝낼까요?",
-  "focusFinishBody": "{total}장 중 {count}장에 X를 쳤어요.",
-  "focusFinishNone": "X 친 사진이 없어요. 끝낼까요?",
+  "focusFinishBody": "{total}장 중 {count}장을 선택했어요.",
+  "focusFinishNone": "정리할 사진이 없어요. 끝낼까요?",
   "focusKeepLooking": "계속 보기",
   "focusFinishYes": "끝내기",
   "focusHint": "길게 누르면 정리를 끝낼 수 있어요",
@@ -496,5 +494,6 @@
         "format": "decimalPattern"
       }
     }
-  }
+  },
+  "selectedSize": "선택 {size}"
 }

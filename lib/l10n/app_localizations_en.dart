@@ -247,7 +247,7 @@ class L10nEn extends L10n {
 
   @override
   String get sceneLossBody =>
-      'You marked every similar photo. Move them to trash anyway?';
+      'You selected every similar photo. Move them to trash anyway?';
 
   @override
   String get lookAgain => 'Look again';
@@ -537,7 +537,7 @@ class L10nEn extends L10n {
       'We\'ll show exact duplicates once we\'ve looked at everything · Free';
 
   @override
-  String get nothingMarked => 'No photos marked';
+  String get nothingMarked => 'Nothing to clean up';
 
   @override
   String yearlyEnded(int count) {
@@ -566,7 +566,7 @@ class L10nEn extends L10n {
   }
 
   @override
-  String get unsentDot => 'Marked, not moved to trash yet';
+  String get unsentDot => 'Selected, not moved to trash yet';
 
   @override
   String get privacyCortex =>
@@ -733,14 +733,6 @@ class L10nEn extends L10n {
   String get cortexSentBadge => 'Sent to Cortex';
 
   @override
-  String markedLeft(Object size) {
-    return '$size marked with X still to go';
-  }
-
-  @override
-  String get markedAllSent => 'Everything you marked is sent';
-
-  @override
   String cortexGotTitle(int count) {
     final intl.NumberFormat countNumberFormat =
         intl.NumberFormat.decimalPattern(localeName);
@@ -808,14 +800,14 @@ class L10nEn extends L10n {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'You marked $countString of $totalString with X.',
-      one: 'You marked 1 of $totalString with X.',
+      other: 'You selected $countString of $totalString.',
+      one: 'You selected 1 of $totalString.',
     );
     return '$_temp0';
   }
 
   @override
-  String get focusFinishNone => 'Nothing is marked with X. Finish?';
+  String get focusFinishNone => 'Nothing to clean up. Finish?';
 
   @override
   String get focusKeepLooking => 'Keep looking';
@@ -828,4 +820,9 @@ class L10nEn extends L10n {
 
   @override
   String get focusFinishSemantics => 'Finish sorting';
+
+  @override
+  String selectedSize(Object size) {
+    return '$size selected';
+  }
 }

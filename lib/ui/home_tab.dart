@@ -3,7 +3,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-import '../config/app_config.dart';
 import '../data/pro.dart';
 import '../l10n/l10n.dart';
 import '../logic/format.dart';
@@ -12,6 +11,7 @@ import '../models/day_group.dart';
 import '../models/decision.dart';
 import '../providers.dart';
 import '../theme.dart';
+import 'freed_bar.dart';
 import 'pro_sheet.dart';
 import 'settings_screen.dart';
 import 'sort_screen.dart';
@@ -217,7 +217,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                     ),
                     const SizedBox(height: 6),
                     const _Subtitle(),
-                    const _FreedBar(),
+                    const FreedBar(),
                     if (limited) ...[
                       const SizedBox(height: 20),
                       _LimitedBanner(
@@ -451,20 +451,19 @@ class _DottedTrack extends CustomPainter {
   bool shouldRepaint(_DottedTrack old) => false;
 }
 
-/// "이번 달 2.3GB 비웠어요" · 분석/위치 진행 상황
+/// "사진 N장" · 분석/위치 진행 상황
 class _Subtitle extends ConsumerWidget {
   const _Subtitle();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final freed = ref.watch(freedThisMonthProvider).value ?? 0;
     final analysis = ref.watch(analysisProvider);
     final loc = ref.watch(libraryProvider.select((s) => s.value?.locating));
 
     final l = context.l;
     final parts = <String>[
-      if (freed > 0) l.freedThisMonth(formatBytes(freed)),
-      if (freed == 0) l.photoTotal(analysis.total),
+      // 이번 달 보낸 용량은 아래 막대 밑에 (2026-10-24 Sophie)
+      l.photoTotal(analysis.total),
       if (!analysis.done && analysis.total > 0)
         l.analyzingPercent(analysis.analyzed * 100 ~/ analysis.total)
       else if (loc != null && loc.$1 < loc.$2)
@@ -475,49 +474,6 @@ class _Subtitle extends ConsumerWidget {
       style: const TextStyle(
         fontSize: MehhText.bodySmall,
         color: MehhColors.textMuted,
-      ),
-    );
-  }
-}
-
-/// 이번 달 보낸 용량 vs 쳐 둔 X 용량 막대. 보낼 때마다 검은 부분이 차오른다 (2026-10-23 Sophie)
-class _FreedBar extends ConsumerWidget {
-  const _FreedBar();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final freed = ref.watch(freedThisMonthProvider).value ?? 0;
-    final marked = ref.watch(markedBytesProvider).value ?? 0;
-    if (freed + marked == 0) return const SizedBox.shrink();
-    final l = context.l;
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TweenAnimationBuilder<double>(
-            tween: Tween(end: freed / (freed + marked)),
-            duration: freedBarAnimation,
-            curve: Curves.easeOutCubic,
-            builder: (context, v, _) => ClipRRect(
-              borderRadius: BorderRadius.circular(MehhRadius.strip),
-              child: LinearProgressIndicator(
-                value: v,
-                minHeight: 8,
-                color: MehhColors.black,
-                backgroundColor: MehhColors.border,
-              ),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            marked > 0 ? l.markedLeft(formatBytes(marked)) : l.markedAllSent,
-            style: const TextStyle(
-              fontSize: MehhText.caption,
-              color: MehhColors.textMuted,
-            ),
-          ),
-        ],
       ),
     );
   }

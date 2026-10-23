@@ -539,6 +539,13 @@ final markedBytesProvider = FutureProvider<int>((ref) async {
   return sizes.values.fold<int>(0, (a, b) => a + b);
 });
 
+/// 사진 몇 장의 용량 합. 키는 정렬한 id를 쉼표로 이은 것 (정리 화면의 "처음부터 X"용)
+final idsBytesProvider = FutureProvider.family<int, String>((ref, key) async {
+  if (key.isEmpty) return 0;
+  final sizes = await ref.read(photoLibraryProvider).fileSizes(key.split(','));
+  return sizes.values.fold<int>(0, (a, b) => a + b);
+});
+
 // ───────────────────────── 정리 동작
 
 class Cleaner {

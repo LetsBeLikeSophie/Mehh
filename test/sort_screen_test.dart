@@ -102,7 +102,7 @@ void main() {
       ..freed[monthKey(DateTime.now())] = 5 * 1024 * 1024;
     await pump(tester, const Scaffold(body: HomeTab()), store: store);
     expect(find.byType(LinearProgressIndicator), findsOneWidget);
-    expect(find.text('쳐 둔 X를 다 보냈어요'), findsOneWidget);
+    expect(find.text('이번 달 휴지통으로 5MB 보냈어요'), findsOneWidget); // 막대 바로 아래
     await flush(tester);
   });
 
@@ -202,7 +202,7 @@ void main() {
     );
     await tester.tap(find.byType(XToggle).at(2)); // p1 (낱장은 최신이 앞)
     await tester.pumpAndSettle();
-    expect(find.text('X를 친 사진이 없어요'), findsOneWidget);
+    expect(find.text('정리할 사진이 없어요'), findsOneWidget);
     expect(
       stateOf(container.read(decisionsProvider).value!, 'p1'),
       DecisionState.keep,
@@ -226,7 +226,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('선택 해제'));
     await tester.pumpAndSettle();
-    expect(find.text('X를 친 사진이 없어요'), findsOneWidget);
+    expect(find.text('정리할 사진이 없어요'), findsOneWidget);
     expect(find.text('추천 보기 · 2장'), findsOneWidget); // 추천은 그대로
     await tester.tap(find.text('추천 보기 · 2장'));
     await tester.pumpAndSettle();
@@ -563,7 +563,7 @@ void main() {
 
   testWidgets('그리드: X를 켜면 휴지통 버튼, 보내면 그 사진만 빠진다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
-    expect(find.text('X를 친 사진이 없어요'), findsWidgets);
+    expect(find.text('정리할 사진이 없어요'), findsWidgets);
     await tester.tap(find.byType(XToggle).first);
     await tester.pumpAndSettle();
     expect(find.text('1장 휴지통으로'), findsOneWidget);
@@ -571,7 +571,7 @@ void main() {
     await tester.tap(find.text('1장 휴지통으로'));
     await tester.pumpAndSettle();
     expect(find.textContaining('3장'), findsOneWidget); // 남은 사진 수
-    expect(find.text('X를 친 사진이 없어요'), findsWidgets);
+    expect(find.text('정리할 사진이 없어요'), findsWidgets);
     await flush(tester);
   });
 
@@ -606,7 +606,7 @@ void main() {
     await tester.longPress(card());
     await tester.pumpAndSettle();
     expect(find.text('2장을 휴지통으로 보내고 끝낼까요?'), findsOneWidget);
-    expect(find.text('4장 중 2장에 X를 쳤어요.'), findsOneWidget);
+    expect(find.text('4장 중 2장을 선택했어요.'), findsOneWidget);
     await tester.tap(find.text('계속 보기')); // 취소하면 그대로
     await tester.pumpAndSettle();
     expect(find.byType(FocusScreen), findsOneWidget);
@@ -627,7 +627,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.longPress(card());
     await tester.pumpAndSettle();
-    expect(find.text('X 친 사진이 없어요. 끝낼까요?'), findsOneWidget);
+    expect(find.text('정리할 사진이 없어요. 끝낼까요?'), findsOneWidget);
     await tester.tap(find.text('끝내기'));
     await tester.pumpAndSettle();
     expect(find.byType(FocusScreen), findsNothing);
@@ -735,7 +735,7 @@ void main() {
     expect(find.text('4장 휴지통으로'), findsOneWidget);
     await tester.tap(find.text('선택 해제'));
     await tester.pumpAndSettle();
-    expect(find.text('X를 친 사진이 없어요'), findsWidgets);
+    expect(find.text('정리할 사진이 없어요'), findsWidgets);
 
     expect(find.text('처음대로'), findsNothing);
     await flush(tester);

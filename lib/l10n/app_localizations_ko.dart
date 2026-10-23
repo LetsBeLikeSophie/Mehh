@@ -215,7 +215,7 @@ class L10nKo extends L10n {
   }
 
   @override
-  String get sceneLossBody => '비슷한 사진에 전부 X를 쳤어요. 그래도 휴지통으로 보낼까요?';
+  String get sceneLossBody => '비슷한 사진을 전부 선택했어요. 그래도 휴지통으로 보낼까요?';
 
   @override
   String get lookAgain => '다시 볼게요';
@@ -464,7 +464,7 @@ class L10nKo extends L10n {
   String get duplicatesPending => '똑같은 사진은 다 살펴본 뒤 알려 드려요 · 무료';
 
   @override
-  String get nothingMarked => 'X를 친 사진이 없어요';
+  String get nothingMarked => '정리할 사진이 없어요';
 
   @override
   String yearlyEnded(int count) {
@@ -480,7 +480,7 @@ class L10nKo extends L10n {
   }
 
   @override
-  String get unsentDot => 'X를 쳐 두고 아직 휴지통으로 안 보냈어요';
+  String get unsentDot => '선택해 두고 아직 휴지통으로 안 보냈어요';
 
   @override
   String get privacyCortex =>
@@ -608,14 +608,6 @@ class L10nKo extends L10n {
   String get cortexSentBadge => 'Cortex로 보냄';
 
   @override
-  String markedLeft(Object size) {
-    return 'X 쳐 둔 $size가 남았어요';
-  }
-
-  @override
-  String get markedAllSent => '쳐 둔 X를 다 보냈어요';
-
-  @override
   String cortexGotTitle(int count) {
     final intl.NumberFormat countNumberFormat =
         intl.NumberFormat.decimalPattern(localeName);
@@ -662,11 +654,11 @@ class L10nKo extends L10n {
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return '$totalString장 중 $countString장에 X를 쳤어요.';
+    return '$totalString장 중 $countString장을 선택했어요.';
   }
 
   @override
-  String get focusFinishNone => 'X 친 사진이 없어요. 끝낼까요?';
+  String get focusFinishNone => '정리할 사진이 없어요. 끝낼까요?';
 
   @override
   String get focusKeepLooking => '계속 보기';
@@ -679,4 +671,9 @@ class L10nKo extends L10n {
 
   @override
   String get focusFinishSemantics => '정리 끝내기';
+
+  @override
+  String selectedSize(Object size) {
+    return '선택 $size';
+  }
 }

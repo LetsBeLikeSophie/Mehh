@@ -15,6 +15,7 @@ import '../providers.dart';
 import '../theme.dart';
 import 'pro_sheet.dart';
 import 'focus_screen.dart';
+import 'freed_bar.dart';
 import 'sort_source.dart';
 import 'trash_flow.dart';
 import 'widgets.dart';
@@ -522,6 +523,15 @@ class _SortScreenState extends ConsumerState<SortScreen>
                                   ),
                                 ),
                               ],
+                              // 홈과 같은 막대: 선택하면 회색이, 보내면 검정이 바로 늘어난다
+                              FreedBar(
+                                extra: [
+                                  for (final id in marked)
+                                    if (stateOf(decisions, id) !=
+                                        DecisionState.toTrash)
+                                      id,
+                                ],
+                              ),
                               const SizedBox(height: 12),
                               Row(
                                 // 버튼은 글자 길이만큼, 자리가 모자랄 때만 줄인다 (가운데 빈칸 없이 양 끝으로)
