@@ -441,5 +441,25 @@
         "type": "int"
       }
     }
+  },
+  "cortexAskTitle": "캡처 {count}장을 Cortex로 보낼까요?",
+  "cortexAskBody": "Cortex가 AI로 분석해 메모로 저장해요. 대화·계좌 같은 내용도 함께 가요. 저장되면 Mehh가 이 캡처를 휴지통으로 보내요(30일 안에 되살릴 수 있어요).",
+  "cortexAskIncludesPicks": "앱이 추천한 {count}장도 포함돼요.",
+  "cortexAskYes": "보내기",
+  "@cortexAskTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "@cortexAskIncludesPicks": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
   }
 }

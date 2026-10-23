@@ -144,6 +144,15 @@ void main() {
     ),
   };
 
+  // [Cortex로]는 보내기 전에 장수·AI·휴지통을 한 번 묻는다
+  Future<void> sendCortex(WidgetTester tester) async {
+    await tester.tap(find.text('Cortex로'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Cortex로 보낼까요?'), findsOneWidget);
+    await tester.tap(find.text('보내기'));
+    await tester.pumpAndSettle();
+  }
+
   // 잠긴 [추천 보기]는 "무료 묶음을 쓸까요?"를 묻는다: 누르고 [무료 묶음 쓰기]까지
   Future<void> openLocked(WidgetTester tester, String label) async {
     await tester.tap(find.text(label));
@@ -1088,8 +1097,14 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('2장 휴지통으로'), findsOneWidget); // 그냥 지울 수도 있다
+    // [취소]면 보내지 않는다
     await tester.tap(find.text('Cortex로'));
     await tester.pumpAndSettle();
+    expect(find.text('캡처 2장을 Cortex로 보낼까요?'), findsOneWidget);
+    await tester.tap(find.text('취소'));
+    await tester.pumpAndSettle();
+    expect(handoff.sent, isEmpty);
+    await sendCortex(tester);
     expect(handoff.sent.length, 2);
     expect(find.textContaining('4장'), findsOneWidget); // 아직 휴지통으로 안 감
 
@@ -1103,8 +1118,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // 보낸 것보다 적게 저장했다고 알려 오면 옮기지 않는다
-    await tester.tap(find.text('Cortex로'));
-    await tester.pumpAndSettle();
+    await sendCortex(tester);
     handoff.saved.add(const CortexSaved(1, null));
     await tester.pumpAndSettle();
     expect(find.textContaining('1장만 저장했다고'), findsOneWidget);
@@ -1113,8 +1127,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // 다음 버전 Cortex: 저장한 사진 목록이 오면 그 사진만 휴지통으로, 나머지는 X 그대로
-    await tester.tap(find.text('Cortex로'));
-    await tester.pumpAndSettle();
+    await sendCortex(tester);
     final first = handoff.sent.first;
     handoff.sent.clear();
     handoff.saved.add(CortexSaved(1, {first}));
@@ -1125,8 +1138,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // 지금 Cortex: 장수만 와도 다 저장했으면 휴지통으로
-    await tester.tap(find.text('Cortex로'));
-    await tester.pumpAndSettle();
+    await sendCortex(tester);
     handoff.saved.add(const CortexSaved(1, null));
     await tester.pumpAndSettle();
     expect(find.textContaining('  2장'), findsOneWidget); // 남은 캡처 수

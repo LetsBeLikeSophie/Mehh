@@ -113,10 +113,23 @@ class _SortScreenState extends ConsumerState<SortScreen>
 
   /// 여러 장을 한 번에 Cortex로 보낸다. 분석은 Cortex가 하고, 보낸 캡처는 휴지통으로.
   Future<void> _sendCortex(List<String> ids) async {
+    // 보내기 전에 한 번 묻는다: 몇 장이, 어디로(AI), 그 뒤 어떻게 되는지 (UX 리뷰 2026-10-23 UX-43).
+    // 매번 물을지 처음만 물을지는 Sophie 질문 — 답이 오기 전에는 매번
+    final l = context.l;
+    final appPicked = ids.where(_picked.contains).length;
+    final ok = await askMehh(
+      context,
+      title: l.cortexAskTitle(ids.length),
+      body: appPicked > 0
+          ? '${l.cortexAskBody}\n${l.cortexAskIncludesPicks(appPicked)}'
+          : l.cortexAskBody,
+      no: l.cancel,
+      yes: l.cortexAskYes,
+    );
+    if (!ok || !mounted) return;
     setState(() => _busy = true);
     final r = await ref.read(handoffProvider).sendManyToCortex(ids);
     if (!mounted) return;
-    final l = context.l;
     switch (r) {
       case SendResult.ok:
         // Cortex가 저장을 마쳤다고 알려 오면 휴지통으로 (안 알려 오면 그대로 둔다)

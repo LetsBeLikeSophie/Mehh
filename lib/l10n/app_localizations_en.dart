@@ -725,4 +725,41 @@ class L10nEn extends L10n {
 
   @override
   String get toCortex => 'To Cortex';
+
+  @override
+  String cortexAskTitle(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Send $countString screenshots to Cortex?',
+      one: 'Send 1 screenshot to Cortex?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cortexAskBody =>
+      'Cortex analyzes them with AI and saves them as notes, including things like chats or account details. Once saved, Mehh moves these screenshots to trash (restorable for 30 days).';
+
+  @override
+  String cortexAskIncludesPicks(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Includes $countString the app picked.',
+      one: 'Includes 1 the app picked.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cortexAskYes => 'Send';
 }

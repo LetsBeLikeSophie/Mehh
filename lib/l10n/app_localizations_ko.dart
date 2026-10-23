@@ -600,4 +600,29 @@ class L10nKo extends L10n {
 
   @override
   String get toCortex => 'Cortex로';
+
+  @override
+  String cortexAskTitle(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '캡처 $countString장을 Cortex로 보낼까요?';
+  }
+
+  @override
+  String get cortexAskBody =>
+      'Cortex가 AI로 분석해 메모로 저장해요. 대화·계좌 같은 내용도 함께 가요. 저장되면 Mehh가 이 캡처를 휴지통으로 보내요(30일 안에 되살릴 수 있어요).';
+
+  @override
+  String cortexAskIncludesPicks(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '앱이 추천한 $countString장도 포함돼요.';
+  }
+
+  @override
+  String get cortexAskYes => '보내기';
 }
