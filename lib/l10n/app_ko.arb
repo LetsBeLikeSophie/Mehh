@@ -207,7 +207,7 @@
   },
   "proTitle": "Mehh Pro",
   "proBody": "모든 묶음의 정리 추천을 바로 봐요.",
-  "proFree": "무료로는 매달 묶음 {limit}개까지 추천을 볼 수 있어요. 이번 달 {count}개 남았고, {date}에 다시 {limit}개가 돼요.",
+  "proFree": "무료로는 그날의 묶음 추천을 매달 {limit}개까지 볼 수 있어요. 이번 달 {count}개 남았고, {date}에 다시 {limit}개가 돼요.",
   "@proFree": {
     "placeholders": {
       "limit": {
@@ -416,5 +416,6 @@
   },
   "accByKind": "종류별 (결제 기준은 그날의 묶음)",
   "kindDay": "그날의 묶음",
-  "picksFreeKind": "무료예요 · 무료 묶음을 쓰지 않아요"
+  "picksFreeKind": "무료예요 · 무료 묶음을 쓰지 않아요",
+  "proFreeKinds": "캡처·낱장 사진·똑같은 사진 추천은 Pro 없이도 늘 무료예요."
 }

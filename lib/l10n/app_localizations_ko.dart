@@ -341,7 +341,7 @@ class L10nKo extends L10n {
 
   @override
   String proFree(int limit, int count, String date) {
-    return '무료로는 매달 묶음 $limit개까지 추천을 볼 수 있어요. 이번 달 $count개 남았고, $date에 다시 $limit개가 돼요.';
+    return '무료로는 그날의 묶음 추천을 매달 $limit개까지 볼 수 있어요. 이번 달 $count개 남았고, $date에 다시 $limit개가 돼요.';
   }
 
   @override
@@ -572,4 +572,7 @@ class L10nKo extends L10n {
 
   @override
   String get picksFreeKind => '무료예요 · 무료 묶음을 쓰지 않아요';
+
+  @override
+  String get proFreeKinds => '캡처·낱장 사진·똑같은 사진 추천은 Pro 없이도 늘 무료예요.';
 }

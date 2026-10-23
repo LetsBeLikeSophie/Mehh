@@ -391,7 +391,7 @@ class L10nEn extends L10n {
 
   @override
   String proFree(int limit, int count, String date) {
-    return 'Free: picks for $limit sets each month. $count left this month, back to $limit on $date.';
+    return 'Free: picks for $limit day sets each month. $count left this month, back to $limit on $date.';
   }
 
   @override
@@ -697,4 +697,8 @@ class L10nEn extends L10n {
 
   @override
   String get picksFreeKind => 'Free · doesn\'t use your free sets';
+
+  @override
+  String get proFreeKinds =>
+      'Picks for screenshots, single shots and exact duplicates are always free, no Pro needed.';
 }

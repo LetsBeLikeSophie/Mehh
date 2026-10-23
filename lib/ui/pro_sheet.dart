@@ -141,6 +141,8 @@ class _ProSheetState extends ConsumerState<_ProSheet> {
                 ),
                 style: muted,
               ),
+              // 무료 종류 추천은 Pro 없이도 늘 무료 (UX-37)
+              Text(l.proFreeKinds, style: muted),
               const SizedBox(height: 16),
               FutureBuilder(
                 future: _offers,
