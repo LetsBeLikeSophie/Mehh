@@ -10,7 +10,12 @@ class PhotoMeta {
     this.isScreenshot = false,
     this.modifiedAt = 0,
     this.isFavorite = false,
+    this.movedToAlbum = false,
   });
+
+  /// 캡처를 캡처 폴더 밖의 다른 앨범으로 옮겼다 (안드로이드). 남긴다는 신호라 추천하지 않는다
+  /// (2026-10-23 Sophie L2-B)
+  final bool movedToAlbum;
 
   /// 갤러리에서 ♥(즐겨찾기)를 눌러 둔 사진. 앱이 정리 추천하지 않는다 (UX 리뷰 2026-10-23)
   final bool isFavorite;
@@ -38,6 +43,7 @@ class PhotoMeta {
     isScreenshot: isScreenshot,
     modifiedAt: modifiedAt,
     isFavorite: isFavorite,
+    movedToAlbum: movedToAlbum,
   );
 
   double get aspect => height == 0 ? 0 : width / height;

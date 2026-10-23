@@ -256,7 +256,7 @@ void main() {
       );
     });
 
-    test('♥(즐겨찾기) 사진은 비슷한 컷·캡처 추천에서 빠진다', () {
+    test('♥(즐겨찾기) 사진·다른 앨범으로 옮긴 캡처는 추천에서 빠진다', () {
       final photos = [
         meta('a', t0, fav: true),
         meta('b', t0.add(const Duration(seconds: 20))),
@@ -271,10 +271,22 @@ void main() {
       final shots = [
         meta('old', DateTime(2026, 1, 1), shot: true, fav: true),
         meta('old2', DateTime(2026, 1, 2), shot: true),
+        PhotoMeta(
+          id: 'moved',
+          takenAt: DateTime(2026, 1, 3),
+          width: 4000,
+          height: 3000,
+          isScreenshot: true,
+          movedToAlbum: true,
+        ),
       ];
       final picks = planScreenshots(
         shots,
-        {'old': feat('old', hi: 1), 'old2': feat('old2', hi: 0x7FFFFFFF)},
+        {
+          'old': feat('old', hi: 1),
+          'old2': feat('old2', hi: 0x7FFFFFFF),
+          'moved': feat('moved', hi: 3, lo: 3),
+        },
         {},
         now: DateTime(2026, 10, 23),
       );

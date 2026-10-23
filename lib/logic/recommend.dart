@@ -126,8 +126,10 @@ Map<String, ShotReason> planScreenshots(
   final out = <String, ShotReason>{};
   for (var i = 0; i < live.length; i++) {
     final p = live[i];
-    // 킵·♥(즐겨찾기)는 추천하지 않는다
-    if (stateOf(p) == DecisionState.keep || p.isFavorite) continue;
+    // 킵·♥(즐겨찾기)·다른 앨범으로 옮긴 캡처는 추천하지 않는다
+    if (stateOf(p) == DecisionState.keep || p.isFavorite || p.movedToAlbum) {
+      continue;
+    }
     // 다음의 남는 장이 같은 화면을 곧이어 찍은 것이면 이것은 지난 장
     for (var j = i + 1; j < live.length; j++) {
       final q = live[j];

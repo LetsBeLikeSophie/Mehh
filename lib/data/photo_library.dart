@@ -72,6 +72,7 @@ class PhotoLibrary {
             isScreenshot: _isScreenshot(e),
             modifiedAt: e.modifiedDateSecond ?? 0,
             isFavorite: e.isFavorite,
+            movedToAlbum: _movedToAlbum(e),
           ),
         );
       }
@@ -180,6 +181,14 @@ class PhotoLibrary {
 
   static bool _valid(double? lat, double? lng) =>
       lat != null && lng != null && !(lat == 0 && lng == 0);
+
+  /// 이름은 캡처인데 캡처 폴더 밖에 있다 = 사용자가 다른 앨범으로 옮긴 캡처 (안드로이드만)
+  static bool _movedToAlbum(AssetEntity e) {
+    if (Platform.isIOS) return false;
+    final path = (e.relativePath ?? '').toLowerCase();
+    final title = (e.title ?? '').toLowerCase();
+    return title.startsWith('screenshot') && !path.contains('screenshot');
+  }
 
   static bool _isScreenshot(AssetEntity e) {
     if (Platform.isIOS) {
