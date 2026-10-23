@@ -18,13 +18,15 @@ const _picksTable = '''
     at INTEGER, kind TEXT, tag TEXT, suggested INTEGER, sent INTEGER)''';
 
 const _seenTable = 'CREATE TABLE seen (id TEXT PRIMARY KEY)';
+const _cortexSentTable =
+    'CREATE TABLE cortex_sent (id TEXT PRIMARY KEY, at INTEGER)';
 
 class SqliteStore implements Store {
   Database? _db;
 
   Future<Database> get _database async => _db ??= await openDatabase(
     'mehh.db',
-    version: 5,
+    version: 6,
     onUpgrade: (db, from, _) async {
       // 분석 결과는 캐시라서 버리고 다시 계산한다
       if (from < 3) {
@@ -33,6 +35,7 @@ class SqliteStore implements Store {
       }
       if (from < 4) await db.execute(_picksTable);
       if (from < 5) await db.execute(_seenTable);
+      if (from < 6) await db.execute(_cortexSentTable);
     },
     onCreate: (db, _) async {
       await db.execute(_featuresTable);
@@ -49,6 +52,7 @@ class SqliteStore implements Store {
         CREATE TABLE freed (month TEXT PRIMARY KEY, bytes INTEGER)''');
       await db.execute(_picksTable);
       await db.execute(_seenTable);
+      await db.execute(_cortexSentTable);
     },
   );
 
@@ -221,6 +225,34 @@ class SqliteStore implements Store {
   };
 
   @override
+  Future<void> addCortexSent(Iterable<String> photoIds) async {
+    final batch = (await _database).batch();
+    final at = DateTime.now().millisecondsSinceEpoch;
+    for (final id in photoIds) {
+      batch.insert('cortex_sent', {
+        'id': id,
+        'at': at,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+    }
+    await batch.commit(noResult: true);
+  }
+
+  @override
+  Future<void> removeCortexSent(Iterable<String> photoIds) async {
+    final batch = (await _database).batch();
+    for (final id in photoIds) {
+      batch.delete('cortex_sent', where: 'id = ?', whereArgs: [id]);
+    }
+    await batch.commit(noResult: true);
+  }
+
+  @override
+  Future<Set<String>> loadCortexSent() async => {
+    for (final r in await (await _database).query('cortex_sent'))
+      r['id'] as String,
+  };
+
+  @override
   Future<void> clearAll() async {
     final db = await _database;
     await db.transaction((tx) async {
@@ -232,6 +264,7 @@ class SqliteStore implements Store {
         'freed',
         'picks',
         'seen',
+        'cortex_sent',
       ]) {
         await tx.delete(t);
       }

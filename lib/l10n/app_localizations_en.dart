@@ -748,4 +748,22 @@ class L10nEn extends L10n {
   String noFreeLead(String date, int count) {
     return 'No free sets left this month · $count more on $date';
   }
+
+  @override
+  String cortexSavedTrashing(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '✓ Cortex saved $countString · moving them to trash',
+      one: '✓ Cortex saved 1 · moving it to trash',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cortexSentBadge => 'Sent to Cortex';
 }

@@ -28,6 +28,11 @@ abstract class Store {
   Future<void> addSeen(Iterable<String> photoIds);
   Future<Set<String>> loadSeen();
 
+  /// Cortex로 보냈는데 아직 "저장 완료" 신호를 못 받은 사진. 그리드에 "Cortex로 보냄" 표시 (2026-10-23 Sophie)
+  Future<void> addCortexSent(Iterable<String> photoIds);
+  Future<void> removeCortexSent(Iterable<String> photoIds);
+  Future<Set<String>> loadCortexSent();
+
   /// 이 폰에 남긴 모든 기록을 지운다 (분석 결과, 결정, 열람, 비운 용량).
   Future<void> clearAll();
 }
@@ -44,6 +49,18 @@ class MemoryStore implements Store {
   final freed = <String, int>{};
   final picks = <PickRecord>[];
   final seen = <String>{};
+  final cortexSent = <String>{};
+
+  @override
+  Future<void> addCortexSent(Iterable<String> photoIds) async =>
+      cortexSent.addAll(photoIds);
+
+  @override
+  Future<void> removeCortexSent(Iterable<String> photoIds) async =>
+      cortexSent.removeAll(photoIds);
+
+  @override
+  Future<Set<String>> loadCortexSent() async => {...cortexSent};
 
   @override
   Future<void> addSeen(Iterable<String> photoIds) async =>
@@ -98,6 +115,7 @@ class MemoryStore implements Store {
 
   @override
   Future<void> clearAll() async {
+    cortexSent.clear();
     features.clear();
     decisions.clear();
     log.clear();

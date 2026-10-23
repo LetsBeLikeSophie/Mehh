@@ -1118,6 +1118,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('4장'), findsOneWidget);
     expect(find.textContaining('신호가 없어서 휴지통으로 보내지 않았어요'), findsOneWidget);
+    // 보냈는데 저장 신호가 없는 사진은 "Cortex로 보냄" 표시로 남는다
+    expect(find.text('Cortex로 보냄'), findsNWidgets(2));
     await tester.pump(const Duration(seconds: 6)); // 알림이 사라지게
     await tester.pumpAndSettle();
 
@@ -1135,17 +1137,26 @@ void main() {
     final first = handoff.sent.first;
     handoff.sent.clear();
     handoff.saved.add(CortexSaved(1, {first}));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    // 휴지통으로 보내기 전에 저장 확인을 먼저 알린다
+    expect(find.textContaining('Cortex에 1장 저장 확인'), findsOneWidget);
+    expect(find.textContaining('  4장'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 2));
     await tester.pumpAndSettle();
     expect(find.textContaining('Cortex가 저장하지 않은 1장은 X 그대로'), findsOneWidget);
     expect(find.textContaining('  3장'), findsOneWidget);
+    expect(find.text('Cortex로 보냄'), findsOneWidget); // 저장 안 된 1장만 표시가 남는다
     await tester.pump(const Duration(seconds: 9));
     await tester.pumpAndSettle();
 
     // 지금 Cortex: 장수만 와도 다 저장했으면 휴지통으로
     await sendCortex(tester);
     handoff.saved.add(const CortexSaved(1, null));
+    await tester.pump(const Duration(seconds: 2));
     await tester.pumpAndSettle();
     expect(find.textContaining('  2장'), findsOneWidget); // 남은 캡처 수
+    expect(find.text('Cortex로 보냄'), findsNothing);
     expect(find.textContaining('Cortex로 보내고 휴지통으로'), findsOneWidget);
     await flush(tester);
   });

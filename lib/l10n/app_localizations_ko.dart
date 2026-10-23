@@ -617,4 +617,16 @@ class L10nKo extends L10n {
   String noFreeLead(String date, int count) {
     return '이번 달 무료 묶음을 다 썼어요 · $date에 $count개가 다시 생겨요';
   }
+
+  @override
+  String cortexSavedTrashing(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '✓ Cortex에 $countString장 저장 확인 · 휴지통으로 보내요';
+  }
+
+  @override
+  String get cortexSentBadge => 'Cortex로 보냄';
 }

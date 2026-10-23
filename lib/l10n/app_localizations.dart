@@ -1026,6 +1026,18 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'이번 달 무료 묶음을 다 썼어요 · {date}에 {count}개가 다시 생겨요'**
   String noFreeLead(String date, int count);
+
+  /// No description provided for @cortexSavedTrashing.
+  ///
+  /// In ko, this message translates to:
+  /// **'✓ Cortex에 {count}장 저장 확인 · 휴지통으로 보내요'**
+  String cortexSavedTrashing(int count);
+
+  /// No description provided for @cortexSentBadge.
+  ///
+  /// In ko, this message translates to:
+  /// **'Cortex로 보냄'**
+  String get cortexSentBadge;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

@@ -154,5 +154,7 @@
   "toCortex": "To Cortex",
   "cortexAskTitle": "{count, plural, =1{Send 1 screenshot to Cortex and delete it?} other{Send {count} screenshots to Cortex and delete them?}}",
   "cortexAskYes": "Send & delete",
-  "noFreeLead": "No free sets left this month · {count} more on {date}"
+  "noFreeLead": "No free sets left this month · {count} more on {date}",
+  "cortexSavedTrashing": "{count, plural, =1{✓ Cortex saved 1 · moving it to trash} other{✓ Cortex saved {count} · moving them to trash}}",
+  "cortexSentBadge": "Sent to Cortex"
 }

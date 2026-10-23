@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../config/app_config.dart';
 import '../data/handoff.dart';
 import '../data/pro.dart';
 import '../l10n/l10n.dart';
@@ -100,6 +101,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
         showNote(context, context.l.cortexPartial(0));
         return;
       }
+      ref.read(cortexSentProvider.notifier).remove(done);
       _trashAfterCortex(done, kept: ids.length - done.length);
       return;
     }
@@ -109,6 +111,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
       showNote(context, context.l.cortexPartial(saved.count));
       return;
     }
+    ref.read(cortexSentProvider.notifier).remove(ids);
     _trashAfterCortex(ids);
   }
 
@@ -134,6 +137,8 @@ class _SortScreenState extends ConsumerState<SortScreen>
             .cortexSaved
             .listen(_onCortexSaved);
         _sentToCortex = ids;
+        // 저장 신호가 올 때까지 "Cortex로 보냄" 표시 (신호가 오면 지운다)
+        await ref.read(cortexSentProvider.notifier).add(ids);
       case SendResult.unsupported:
         setState(() => _busy = false);
         showNote(context, l.cortexMultiUnsupported);
@@ -144,6 +149,10 @@ class _SortScreenState extends ConsumerState<SortScreen>
   }
 
   Future<void> _trashAfterCortex(List<String> ids, {int kept = 0}) async {
+    // 휴지통 확인 창(안드로이드)이 뜨기 전에 저장이 확인됐다고 먼저 알린다 (2026-10-23 Sophie)
+    showNote(context, context.l.cortexSavedTrashing(ids.length));
+    await Future<void>.delayed(cortexSavedPause);
+    if (!mounted) return;
     await sendToTrash(
       context,
       ref,
@@ -376,6 +385,8 @@ class _SortScreenState extends ConsumerState<SortScreen>
           ].where((u) => u.isNotEmpty).toList()
         : [order];
 
+    final cortexSent = ref.watch(cortexSentProvider).value ?? const {};
+
     Widget tile(String id) {
       final out = marked.contains(id);
       // 이유 표시는 X가 쳐진 사진에만 ("왜 X인지"). 남길 사진·베스트는 추천을 받은 뒤에만 (2026-10-22)
@@ -406,6 +417,13 @@ class _SortScreenState extends ConsumerState<SortScreen>
                   left: 4,
                   bottom: 4,
                   child: MehhBadge(tagText(tag, l), inverted: out),
+                ),
+              // 보냈는데 저장 신호를 못 받은 사진: 어디서 멈췄는지 보이게
+              if (cortexSent.contains(id))
+                Positioned(
+                  left: 4,
+                  top: 4,
+                  child: MehhBadge(l.cortexSentBadge, inverted: out),
                 ),
             ],
           ),

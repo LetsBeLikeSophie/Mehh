@@ -652,6 +652,31 @@ final seenProvider = AsyncNotifierProvider<SeenNotifier, Set<String>>(
   SeenNotifier.new,
 );
 
+/// Cortex로 보냈는데 저장 신호를 아직 못 받은 사진 ([Store.addCortexSent])
+class CortexSentNotifier extends AsyncNotifier<Set<String>> {
+  @override
+  Future<Set<String>> build() => ref.read(storeProvider).loadCortexSent();
+
+  Future<void> add(Iterable<String> photoIds) async {
+    final ids = photoIds.toList();
+    if (ids.isEmpty) return;
+    await ref.read(storeProvider).addCortexSent(ids);
+    state = AsyncData({...state.value ?? {}, ...ids});
+  }
+
+  Future<void> remove(Iterable<String> photoIds) async {
+    final ids = photoIds.toList();
+    if (ids.isEmpty) return;
+    await ref.read(storeProvider).removeCortexSent(ids);
+    state = AsyncData({...state.value ?? {}}..removeAll(ids));
+  }
+}
+
+final cortexSentProvider =
+    AsyncNotifierProvider<CortexSentNotifier, Set<String>>(
+      CortexSentNotifier.new,
+    );
+
 final groupStatusProvider = Provider.autoDispose.family<GroupStatus, DayGroup>((
   ref,
   g,

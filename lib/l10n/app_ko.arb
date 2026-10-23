@@ -462,5 +462,15 @@
         "type": "int"
       }
     }
+  },
+  "cortexSavedTrashing": "✓ Cortex에 {count}장 저장 확인 · 휴지통으로 보내요",
+  "cortexSentBadge": "Cortex로 보냄",
+  "@cortexSavedTrashing": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
   }
 }
