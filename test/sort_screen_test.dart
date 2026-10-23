@@ -959,6 +959,27 @@ void main() {
     expect(c.read(proStartedProvider), isTrue);
   });
 
+  test('달이 바뀌어 무료 묶음이 다시 생기면 신호 한 번 (같은 달에 다시 확인하면 없음)', () async {
+    final c = ProviderContainer(
+      overrides: [
+        proVaultProvider.overrideWithValue(
+          MemoryProVault(const ProState(freeMonth: '2026-10', freeUsed: 3)),
+        ),
+        billingProvider.overrideWithValue(DemoBilling(korean: true)),
+      ],
+    );
+    addTearDown(c.dispose);
+    await c.read(proProvider.future);
+    final pro = c.read(proProvider.notifier);
+    final nov = DateTime(2026, 11, 2);
+    await pro.checkMonth(now: nov);
+    expect(c.read(freeRefilledProvider), isTrue);
+    expect(c.read(proProvider).value!.freeLeft(nov), 3);
+    c.read(freeRefilledProvider.notifier).clear();
+    await pro.checkMonth(now: nov);
+    expect(c.read(freeRefilledProvider), isFalse);
+  });
+
   test('구매 복원: 1년 이용권이 끝나면 꺼지고, 평생권은 남는다', () async {
     final vault = MemoryProVault(const ProState(lifetime: true, yearly: true));
     final c = ProviderContainer(

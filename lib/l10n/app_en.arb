@@ -147,5 +147,6 @@
   "kindDay": "Day sets",
   "picksFreeKind": "Free · doesn't use your free sets",
   "proFreeKinds": "Picks for screenshots, single shots and exact duplicates are always free, no Pro needed.",
-  "picksAlreadyOpen": "Already opened · doesn't use another free set"
+  "picksAlreadyOpen": "Already opened · doesn't use another free set",
+  "freeRefilled": "{count, plural, =1{Your free set for this month is back} other{Your {count} free sets for this month are back}}"
 }

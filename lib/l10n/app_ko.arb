@@ -418,5 +418,13 @@
   "kindDay": "그날의 묶음",
   "picksFreeKind": "무료예요 · 무료 묶음을 쓰지 않아요",
   "proFreeKinds": "캡처·낱장 사진·똑같은 사진 추천은 Pro 없이도 늘 무료예요.",
-  "picksAlreadyOpen": "이미 연 묶음이에요 · 무료 묶음을 더 쓰지 않아요"
+  "picksAlreadyOpen": "이미 연 묶음이에요 · 무료 묶음을 더 쓰지 않아요",
+  "freeRefilled": "이번 달 무료 묶음 {count}개가 다시 생겼어요",
+  "@freeRefilled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

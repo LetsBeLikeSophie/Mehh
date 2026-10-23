@@ -578,4 +578,9 @@ class L10nKo extends L10n {
 
   @override
   String get picksAlreadyOpen => '이미 연 묶음이에요 · 무료 묶음을 더 쓰지 않아요';
+
+  @override
+  String freeRefilled(int count) {
+    return '이번 달 무료 묶음 $count개가 다시 생겼어요';
+  }
 }

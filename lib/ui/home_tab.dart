@@ -98,6 +98,11 @@ class _HomeTabState extends ConsumerState<HomeTab> {
       ref.read(yearlyEndedProvider.notifier).clear();
       showNote(context, l.yearlyEnded(freeGroupsPerMonth));
     });
+    ref.listen(freeRefilledProvider, (_, refilled) {
+      if (!refilled) return;
+      ref.read(freeRefilledProvider.notifier).clear();
+      showNote(context, l.freeRefilled(freeGroupsPerMonth));
+    });
     ref.listen(proStartedProvider, (_, started) {
       if (!started) return;
       ref.read(proStartedProvider.notifier).clear();

@@ -705,4 +705,15 @@ class L10nEn extends L10n {
   @override
   String get picksAlreadyOpen =>
       'Already opened · doesn\'t use another free set';
+
+  @override
+  String freeRefilled(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Your $count free sets for this month are back',
+      one: 'Your free set for this month is back',
+    );
+    return '$_temp0';
+  }
 }

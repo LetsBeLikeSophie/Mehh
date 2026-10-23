@@ -70,7 +70,24 @@ class ProNotifier extends AsyncNotifier<ProState> {
     _billing.listen(_owned);
     // 1년 이용권이 끝났는지, 다른 폰에서 산 게 있는지 조용히 확인
     Future.microtask(() => restore(quiet: true));
+    // 새 달이 됐으면 무료 묶음이 다시 생겼다고 한 번 알린다
+    Future.microtask(checkMonth);
     return s;
+  }
+
+  /// 달이 바뀌어 무료 묶음이 다시 채워졌으면 한 번 알린다 (UX 리뷰 2026-10-23 UX-40).
+  /// 앱을 켤 때와 다시 열 때 부른다. 새 달 기록으로 저장해 같은 달에 두 번 뜨지 않는다.
+  Future<void> checkMonth({DateTime? now}) async {
+    final s = await future;
+    final month = monthKey(now ?? DateTime.now());
+    if (s.pro ||
+        s.freeMonth.isEmpty ||
+        s.freeMonth == month ||
+        s.freeUsed == 0) {
+      return;
+    }
+    await _save(s.copyWith(freeMonth: month, freeUsed: 0));
+    ref.read(freeRefilledProvider.notifier).raise();
   }
 
   Future<void> _owned(Plan plan) async {
@@ -171,6 +188,11 @@ class OneShotNotifier extends Notifier<bool> {
 }
 
 final yearlyEndedProvider = NotifierProvider<OneShotNotifier, bool>(
+  OneShotNotifier.new,
+);
+
+/// 이번 달 무료 묶음이 방금 다시 생겼다 (홈이 한 번 알리고 내린다)
+final freeRefilledProvider = NotifierProvider<OneShotNotifier, bool>(
   OneShotNotifier.new,
 );
 

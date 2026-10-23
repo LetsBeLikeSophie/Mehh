@@ -984,6 +984,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'이미 연 묶음이에요 · 무료 묶음을 더 쓰지 않아요'**
   String get picksAlreadyOpen;
+
+  /// No description provided for @freeRefilled.
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 달 무료 묶음 {count}개가 다시 생겼어요'**
+  String freeRefilled(int count);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {
