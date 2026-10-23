@@ -57,6 +57,9 @@ class _SortScreenState extends ConsumerState<SortScreen>
   /// 화면에 보였던 이유 표시 (킵해서 사라진 표시도 기록에 남기려고)
   final _seenTags = <String, String>{};
 
+  /// 처음부터 X로 보였던 사진 (끄면 킵이 되어 목록에서 빠지므로 기억해 둔다)
+  final _preMarkedSeen = <String>{};
+
   /// Cortex로 보낸 캡처. Cortex가 다 읽은 뒤(Mehh로 돌아왔을 때) 휴지통으로 옮긴다.
   List<String>? _sentToCortex;
 
@@ -243,9 +246,10 @@ class _SortScreenState extends ConsumerState<SortScreen>
     SortSource src,
     List<String> shown,
   ) async {
-    if (_picked.isEmpty && src.preMarked.isEmpty) {
-      return;
-    }
+    // 사용자에게 X로 보였던 추천만 센다: [추천 보기]로 받은 것 + 처음부터 X였던 것.
+    // 보지 못한 추천을 "거절"로 세면 취향 학습이 멀쩡한 추천을 끈다 (시니어 리뷰 2026-10-23 S-1)
+    final shownPicks = {..._picked, ..._preMarkedSeen, ...src.preMarked};
+    if (shownPicks.isEmpty) return;
     await ref
         .read(storeProvider)
         .addPicks(
@@ -254,7 +258,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
             kind: widget.kind.name,
             shown: shown,
             sent: sent.toSet(),
-            suggested: {..._picked, ...src.suggested},
+            suggested: shownPicks,
             tags: {
               ..._seenTags,
               for (final e in src.tags.entries) e.key: e.value.name,
@@ -294,6 +298,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
     for (final e in src.tags.entries) {
       _seenTags[e.key] = e.value.name;
     }
+    _preMarkedSeen.addAll(src.preMarked);
     final cortex =
         widget.kind == SortKind.screenshots &&
         (ref.watch(cortexInstalledProvider).value ?? false);

@@ -253,6 +253,69 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('처음부터 X만 보내면 보지 못한 추천은 "거절"로 세지 않는다 (취향 학습이 끄지 않게)', (
+    tester,
+  ) async {
+    // q0·q1: 20초 간격 같은 화면, q1 흔들림 → 흔들림 추천(보이지 않음) / q2: 까만 사진 → 처음부터 X
+    final t = DateTime(2026, 9, 1, 10);
+    final qs = [
+      PhotoMeta(id: 'q0', takenAt: t, width: 100, height: 100),
+      PhotoMeta(
+        id: 'q1',
+        takenAt: t.add(const Duration(seconds: 20)),
+        width: 100,
+        height: 100,
+      ),
+      PhotoMeta(
+        id: 'q2',
+        takenAt: DateTime(2026, 9, 5),
+        width: 100,
+        height: 100,
+      ),
+    ];
+    final g = DayGroup(id: 'singles', kind: DayGroupKind.singles, photos: qs);
+    final f = {
+      'q0': const PhotoFeatures(
+        id: 'q0',
+        hashHi: 1,
+        hashLo: 2,
+        sharpness: 500,
+        brightness: 120,
+      ),
+      'q1': const PhotoFeatures(
+        id: 'q1',
+        hashHi: 1,
+        hashLo: 2,
+        sharpness: 5,
+        brightness: 120,
+      ),
+      'q2': const PhotoFeatures(
+        id: 'q2',
+        hashHi: 9,
+        hashLo: 9,
+        sharpness: 500,
+        brightness: 3,
+      ),
+    };
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.singles, group: g),
+      extra: [realPlan(f)],
+    );
+    expect(find.text('1장 휴지통으로'), findsOneWidget); // q2만 처음부터 X
+    await tester.tap(find.text('1장 휴지통으로'));
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(SortScreen)),
+    );
+    final stats = PickStats.of(await container.read(storeProvider).loadPicks());
+    expect(stats.suggested, 1);
+    expect(stats.accepted, 1);
+    expect(stats.byTag.containsKey('blurry'), isFalse);
+    expect(mutedReasons(stats), isEmpty);
+    await flush(tester);
+  });
+
   testWidgets('그리드: X를 켜면 휴지통 버튼, 보내면 그 사진만 빠진다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     expect(find.text('X를 친 사진이 없어요'), findsWidgets);
