@@ -640,6 +640,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('2장 휴지통으로'), findsOneWidget);
     expect(find.text('이번 달 무료 묶음이 2개 남았어요'), findsOneWidget);
+    expect(find.text('이미 연 묶음이에요 · 무료 묶음을 더 쓰지 않아요'), findsOneWidget);
     // X를 쳐도 추천은 그대로: 이유 표시와 [추천 보기]가 남는다
     expect(find.text('실수'), findsNWidgets(2));
     expect(find.text('추천 보기 · 2장'), findsOneWidget);

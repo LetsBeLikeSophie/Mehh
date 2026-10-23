@@ -575,4 +575,7 @@ class L10nKo extends L10n {
 
   @override
   String get proFreeKinds => '캡처·낱장 사진·똑같은 사진 추천은 Pro 없이도 늘 무료예요.';
+
+  @override
+  String get picksAlreadyOpen => '이미 연 묶음이에요 · 무료 묶음을 더 쓰지 않아요';
 }

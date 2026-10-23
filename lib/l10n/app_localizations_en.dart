@@ -701,4 +701,8 @@ class L10nEn extends L10n {
   @override
   String get proFreeKinds =>
       'Picks for screenshots, single shots and exact duplicates are always free, no Pro needed.';
+
+  @override
+  String get picksAlreadyOpen =>
+      'Already opened · doesn\'t use another free set';
 }

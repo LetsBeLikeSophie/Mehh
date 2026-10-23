@@ -497,6 +497,18 @@ class _SortScreenState extends ConsumerState<SortScreen>
                                     color: MehhColors.textMuted,
                                   ),
                                 ),
+                              // 이미 연 그날의 묶음: 다시 눌러도 무료 묶음을 더 쓰지 않는다 (UX-38)
+                              if (picks > 0 &&
+                                  widget.kind == SortKind.day &&
+                                  src.locked == 0 &&
+                                  !(ref.watch(proProvider).value?.pro ?? false))
+                                Text(
+                                  l.picksAlreadyOpen,
+                                  style: const TextStyle(
+                                    fontSize: MehhText.caption,
+                                    color: MehhColors.textMuted,
+                                  ),
+                                ),
                               // 무료 종류(낱장·캡처·똑같은 사진)의 [추천 보기]는 무료 묶음을 쓰지 않는다고 알린다
                               // (UX 리뷰 2026-10-23, Pro면 숨김)
                               if (picks > 0 &&

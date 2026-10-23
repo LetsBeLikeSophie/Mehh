@@ -978,6 +978,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'캡처·낱장 사진·똑같은 사진 추천은 Pro 없이도 늘 무료예요.'**
   String get proFreeKinds;
+
+  /// No description provided for @picksAlreadyOpen.
+  ///
+  /// In ko, this message translates to:
+  /// **'이미 연 묶음이에요 · 무료 묶음을 더 쓰지 않아요'**
+  String get picksAlreadyOpen;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

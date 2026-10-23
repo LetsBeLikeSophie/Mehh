@@ -146,5 +146,6 @@
   "accByKind": "By kind (day sets are the paid part)",
   "kindDay": "Day sets",
   "picksFreeKind": "Free · doesn't use your free sets",
-  "proFreeKinds": "Picks for screenshots, single shots and exact duplicates are always free, no Pro needed."
+  "proFreeKinds": "Picks for screenshots, single shots and exact duplicates are always free, no Pro needed.",
+  "picksAlreadyOpen": "Already opened · doesn't use another free set"
 }
