@@ -942,6 +942,22 @@ void main() {
     expect(c.read(libraryProvider).hasValue, isTrue); // 로딩으로 바뀌지 않음
   });
 
+  test('Pro가 켜지는 순간(복원 포함) 신호가 한 번 올라간다', () async {
+    final billing = DemoBilling(korean: true)..owned.add(Plan.lifetime);
+    final c = ProviderContainer(
+      overrides: [
+        proVaultProvider.overrideWithValue(MemoryProVault()),
+        billingProvider.overrideWithValue(billing),
+      ],
+    );
+    addTearDown(c.dispose);
+    await c.read(proProvider.future);
+    expect(c.read(proStartedProvider), isFalse);
+    await c.read(proProvider.notifier).restore(quiet: true); // 새 폰 조용한 복원
+    expect(c.read(proProvider).value!.pro, isTrue);
+    expect(c.read(proStartedProvider), isTrue);
+  });
+
   test('구매 복원: 1년 이용권이 끝나면 꺼지고, 평생권은 남는다', () async {
     final vault = MemoryProVault(const ProState(lifetime: true, yearly: true));
     final c = ProviderContainer(

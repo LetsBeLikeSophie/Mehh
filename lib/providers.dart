@@ -153,13 +153,16 @@ class ProNotifier extends AsyncNotifier<ProState> {
       '${monthKey(at)}-${at.day.toString().padLeft(2, '0')}';
 
   Future<void> _save(ProState s) async {
+    final was = state.value?.pro ?? false;
     await _vault.save(s);
     state = AsyncData(s);
+    // Pro가 켜지는 순간 한 번 알린다: 시트 밖(결제 대기 뒤 완료, 새 폰 조용한 복원)도 (UX-36)
+    if (!was && s.pro) ref.read(proStartedProvider.notifier).raise();
   }
 }
 
-/// 1년 이용권이 방금 끝났다 (홈이 한 번 알리고 내린다)
-class YearlyEndedNotifier extends Notifier<bool> {
+/// 돈이 걸린 상태가 방금 바뀌었다는 한 번짜리 신호 (홈이 알리고 내린다)
+class OneShotNotifier extends Notifier<bool> {
   @override
   bool build() => false;
 
@@ -167,8 +170,13 @@ class YearlyEndedNotifier extends Notifier<bool> {
   void clear() => state = false;
 }
 
-final yearlyEndedProvider = NotifierProvider<YearlyEndedNotifier, bool>(
-  YearlyEndedNotifier.new,
+final yearlyEndedProvider = NotifierProvider<OneShotNotifier, bool>(
+  OneShotNotifier.new,
+);
+
+/// Pro가 방금 켜졌다 (홈이 "Pro가 열렸어요"를 한 번 알리고 내린다)
+final proStartedProvider = NotifierProvider<OneShotNotifier, bool>(
+  OneShotNotifier.new,
 );
 
 final proProvider = AsyncNotifierProvider<ProNotifier, ProState>(

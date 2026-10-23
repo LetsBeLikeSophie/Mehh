@@ -95,10 +95,8 @@ class _ProSheetState extends ConsumerState<_ProSheet> {
       was,
       now,
     ) {
-      if (now && was == false) {
-        showNote(context, l.proThanks);
-        Navigator.of(context).maybePop();
-      }
+      // 알림은 홈이 한 번만 띄운다 (proStartedProvider). 시트는 닫기만
+      if (now && was == false) Navigator.of(context).maybePop();
     });
     const muted = TextStyle(
       fontSize: MehhText.caption,

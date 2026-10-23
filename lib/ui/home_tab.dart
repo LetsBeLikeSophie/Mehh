@@ -98,6 +98,11 @@ class _HomeTabState extends ConsumerState<HomeTab> {
       ref.read(yearlyEndedProvider.notifier).clear();
       showNote(context, l.yearlyEnded(freeGroupsPerMonth));
     });
+    ref.listen(proStartedProvider, (_, started) {
+      if (!started) return;
+      ref.read(proStartedProvider.notifier).clear();
+      showNote(context, l.proThanks);
+    });
     final library = ref.watch(libraryProvider);
     final limited = ref.watch(permissionProvider) == PermissionState.limited;
 
