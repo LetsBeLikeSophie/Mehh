@@ -14,7 +14,7 @@ val keyProps = Properties().apply {
 }
 
 android {
-    namespace = "com.letsbelikesophie.mehh"
+    namespace = "dev.itssophie.mehh"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -25,7 +25,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.letsbelikesophie.mehh"
+        applicationId = "dev.itssophie.mehh"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         // 안드로이드 11(API 30)부터: 휴대폰 휴지통이 있어야 "바로 지우지 않는다"를 지킬 수 있다

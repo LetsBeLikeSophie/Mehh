@@ -20,7 +20,7 @@ Sophie가 Play Console에서 그대로 붙여 넣을 수 있게 정리한 문서
 - 앱 이름: **Mehh**
 - 기본 언어: 한국어
 - 앱 / 게임: 앱 · 무료 / 유료: **무료** (앱 안에서 이용권 판매)
-- 패키지 이름: `com.letsbelikesophie.mehh` (AAB를 올리면 정해짐, 바꿀 수 없음)
+- 패키지 이름: `dev.itssophie.mehh` (AAB를 올리면 정해짐, 바꿀 수 없음)
 - **Play 앱 서명: 사용** (업로드 키는 `C:\Projects\key\mehh-upload.jks`)
 
 ## 2. 스토어 등록정보

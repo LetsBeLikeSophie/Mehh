@@ -1,4 +1,4 @@
-package com.letsbelikesophie.mehh
+package dev.itssophie.mehh
 
 import android.content.ClipData
 import android.content.ContentUris
