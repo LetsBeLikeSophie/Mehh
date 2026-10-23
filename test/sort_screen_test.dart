@@ -148,7 +148,7 @@ void main() {
   Future<void> sendCortex(WidgetTester tester) async {
     await tester.tap(find.text('Cortex로'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('Cortex로 보내고 지울까요?'), findsOneWidget);
+    expect(find.textContaining('보내고 지울까요?'), findsOneWidget);
     await tester.tap(find.text('보내고 지우기'));
     await tester.pumpAndSettle();
   }
@@ -1104,7 +1104,7 @@ void main() {
     // [취소]면 보내지 않는다
     await tester.tap(find.text('Cortex로'));
     await tester.pumpAndSettle();
-    expect(find.text('캡처 2장을 Cortex로 보내고 지울까요?'), findsOneWidget);
+    expect(find.text('캡처 2장을 Cortex로\n보내고 지울까요?'), findsOneWidget);
     await tester.tap(find.text('취소'));
     await tester.pumpAndSettle();
     expect(handoff.sent, isEmpty);

@@ -607,7 +607,7 @@ class L10nKo extends L10n {
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return '캡처 $countString장을 Cortex로 보내고 지울까요?';
+    return '캡처 $countString장을 Cortex로\n보내고 지울까요?';
   }
 
   @override

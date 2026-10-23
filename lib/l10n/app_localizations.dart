@@ -1012,7 +1012,7 @@ abstract class L10n {
   /// No description provided for @cortexAskTitle.
   ///
   /// In ko, this message translates to:
-  /// **'캡처 {count}장을 Cortex로 보내고 지울까요?'**
+  /// **'캡처 {count}장을 Cortex로\n보내고 지울까요?'**
   String cortexAskTitle(int count);
 
   /// No description provided for @cortexAskYes.

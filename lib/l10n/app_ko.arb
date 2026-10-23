@@ -442,7 +442,7 @@
       }
     }
   },
-  "cortexAskTitle": "캡처 {count}장을 Cortex로 보내고 지울까요?",
+  "cortexAskTitle": "캡처 {count}장을 Cortex로\n보내고 지울까요?",
   "cortexAskYes": "보내고 지우기",
   "@cortexAskTitle": {
     "placeholders": {
