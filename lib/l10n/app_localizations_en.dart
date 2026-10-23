@@ -675,4 +675,17 @@ class L10nEn extends L10n {
 
   @override
   String get privacyPolicy => 'Privacy policy';
+
+  @override
+  String cortexPartial(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Cortex reported saving only $count · nothing was moved to trash · your marks are kept',
+      one: 'Cortex reported saving only 1 · nothing was moved to trash · your marks are kept',
+      zero: 'Cortex didn\'t report saving any · nothing was moved to trash · your marks are kept',
+    );
+    return '$_temp0';
+  }
 }

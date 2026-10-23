@@ -948,6 +948,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'개인정보처리방침'**
   String get privacyPolicy;
+
+  /// No description provided for @cortexPartial.
+  ///
+  /// In ko, this message translates to:
+  /// **'Cortex가 {count}장만 저장했다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요'**
+  String cortexPartial(int count);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

@@ -95,6 +95,12 @@ class _SortScreenState extends ConsumerState<SortScreen>
     final ids = _sentToCortex;
     if (ids == null || !mounted) return;
     _sentToCortex = null;
+    // 보낸 장수만큼 저장했다고 알려 왔을 때만 휴지통으로 (시니어 리뷰 2026-10-23 S-2)
+    if (count < ids.length) {
+      setState(() => _busy = false);
+      showNote(context, context.l.cortexPartial(count));
+      return;
+    }
     _trashAfterCortex(ids);
   }
 

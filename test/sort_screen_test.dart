@@ -844,7 +844,17 @@ void main() {
     await tester.pump(const Duration(seconds: 6)); // 알림이 사라지게
     await tester.pumpAndSettle();
 
-    // 다시 보내고 Cortex가 저장 완료를 알려 오면 휴지통으로
+    // 보낸 것보다 적게 저장했다고 알려 오면 옮기지 않는다
+    await tester.tap(find.text('2장 Cortex로 보내기'));
+    await tester.pumpAndSettle();
+    handoff.saved.add(1);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('1장만 저장했다고'), findsOneWidget);
+    expect(find.textContaining('4장'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 6));
+    await tester.pumpAndSettle();
+
+    // 다시 보내고 Cortex가 다 저장했다고 알려 오면 휴지통으로
     await tester.tap(find.text('2장 Cortex로 보내기'));
     await tester.pumpAndSettle();
     handoff.saved.add(2);

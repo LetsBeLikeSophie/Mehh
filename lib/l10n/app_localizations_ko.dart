@@ -558,4 +558,9 @@ class L10nKo extends L10n {
 
   @override
   String get privacyPolicy => '개인정보처리방침';
+
+  @override
+  String cortexPartial(int count) {
+    return 'Cortex가 $count장만 저장했다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요';
+  }
 }
