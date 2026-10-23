@@ -610,8 +610,8 @@ class L10nEn extends L10n {
       count,
       locale: localeName,
       other:
-          'Your 1-year plan ended · sets you opened stay open; new sets use your $count free sets this month',
-      one: 'Your 1-year plan ended · sets you opened stay open; new sets use your 1 free set this month',
+          'Your 1-year plan ended · sets whose picks you saw stay open; new sets use your $count free sets this month',
+      one: 'Your 1-year plan ended · sets whose picks you saw stay open; new sets use your 1 free set this month',
     );
     return '$_temp0';
   }

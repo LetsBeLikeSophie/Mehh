@@ -129,7 +129,7 @@
   "lookingAtPhotos": "Looking through\nyour photos",
   "duplicatesPending": "We'll show exact duplicates once we've looked at everything · Free",
   "nothingMarked": "No photos marked",
-  "yearlyEnded": "{count, plural, =1{Your 1-year plan ended · sets you opened stay open; new sets use your 1 free set this month} other{Your 1-year plan ended · sets you opened stay open; new sets use your {count} free sets this month}}",
+  "yearlyEnded": "{count, plural, =1{Your 1-year plan ended · sets whose picks you saw stay open; new sets use your 1 free set this month} other{Your 1-year plan ended · sets whose picks you saw stay open; new sets use your {count} free sets this month}}",
   "proUsing": "You have Pro",
   "freeSetsLeft": "{count, plural, =1{1 free set left} other{{count} free sets left}}",
   "earlierMarked": "{count, plural, =1{See the 1 marked photo ›} other{See the {count} marked photos ›}}",

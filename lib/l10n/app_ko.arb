@@ -364,7 +364,7 @@
   "lookingAtPhotos": "사진을\n살펴보고 있어요",
   "duplicatesPending": "똑같은 사진은 다 살펴본 뒤 알려 드려요 · 무료",
   "nothingMarked": "X를 친 사진이 없어요",
-  "yearlyEnded": "1년 이용권이 끝났어요 · 열어 본 묶음은 그대로 열려 있고, 새 묶음은 이번 달 무료 묶음 {count}개로 볼 수 있어요",
+  "yearlyEnded": "1년 이용권이 끝났어요 · 추천을 본 묶음은 그대로 열려 있고, 새 묶음은 이번 달 무료 묶음 {count}개로 볼 수 있어요",
   "@yearlyEnded": {
     "placeholders": {
       "count": {

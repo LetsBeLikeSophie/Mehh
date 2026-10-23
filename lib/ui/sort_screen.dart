@@ -164,17 +164,24 @@ class _SortScreenState extends ConsumerState<SortScreen>
   Future<void> _showPicks(SortSource src) async {
     final g = widget.group;
     final pro = ref.read(proProvider.notifier);
-    if (widget.kind == SortKind.day && src.locked > 0 && g != null) {
-      if (!await pro.unlock(g.id, photoIds: g.photos.map((p) => p.id))) {
+    // 그날의 묶음은 열려 있어도 늘 unlock을 부른다: Pro면 사진만 기억해서
+    // 1년 이용권이 끝나도 계속 열려 있게 한다 (F3-A, UX 리뷰 2026-10-23 UX-35)
+    if (widget.kind == SortKind.day && g != null) {
+      final photoIds = [for (final p in g.photos) p.id];
+      final now = DateTime.now();
+      final freeBefore = (await ref.read(proProvider.future)).freeLeft(now);
+      if (!await pro.unlock(g.id, photoIds: photoIds)) {
         if (!mounted) return;
         await showProSheet(context);
         // 시트에서 Pro를 샀으면 다시 누르지 않아도 이어서 추천을 X로 (UX 리뷰 2026-10-22).
         // 결제 대기·취소면 그대로 끝
         if (!(ref.read(proProvider).value?.pro ?? false)) return;
+        await pro.unlock(g.id, photoIds: photoIds); // Pro로 본 묶음 기억
       } else {
+        // 무료 묶음을 실제로 쓴 경우에만 남은 개수를 알린다
         final s = await ref.read(proProvider.future);
-        if (!s.pro && mounted) {
-          showNote(context, context.l.freeLeftNote(s.freeLeft(DateTime.now())));
+        if (!s.pro && s.freeLeft(now) < freeBefore && mounted) {
+          showNote(context, context.l.freeLeftNote(s.freeLeft(now)));
         }
       }
     }

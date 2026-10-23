@@ -48,6 +48,7 @@ void main() {
     List<Override> extra = const [],
     ProVault? vault,
     Store? store,
+    Billing? billing,
   }) async {
     tester.view.physicalSize = const Size(390 * 3, 844 * 3);
     tester.view.devicePixelRatio = 3;
@@ -60,7 +61,9 @@ void main() {
           ),
           storeProvider.overrideWithValue(store ?? MemoryStore()),
           proVaultProvider.overrideWithValue(vault ?? MemoryProVault()),
-          billingProvider.overrideWithValue(DemoBilling(korean: true)),
+          billingProvider.overrideWithValue(
+            billing ?? DemoBilling(korean: true),
+          ),
           ...extra,
         ],
         child: MaterialApp(
@@ -848,6 +851,32 @@ void main() {
     // 옛 기록(묶음 id만 있는 것)도 계속 인정
     expect(const ProState(unlocked: {'old'}).isOpen('old'), isTrue);
     expect(c.read(proProvider).value!.freeLeft(DateTime.now()), 2); // 한 번만 씀
+  });
+
+  testWidgets('Pro일 때 정리 화면에서 [추천 보기]로 본 묶음은 1년권이 끝나도 열려 있다', (tester) async {
+    final billing = DemoBilling(korean: true)..owned.add(Plan.yearly);
+    final day = DayGroup(id: 'day-p0', kind: DayGroupKind.day, photos: photos);
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.day, group: day),
+      vault: MemoryProVault(const ProState(yearly: true)),
+      billing: billing,
+      extra: [
+        realPlan(darkOn({'p1'})),
+      ],
+    );
+    await tester.tap(find.text('추천 보기 · 1장'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('무료 묶음이'), findsNothing); // Pro는 무료를 안 쓴다
+    final c = ProviderScope.containerOf(
+      tester.element(find.byType(SortScreen)),
+    );
+    billing.owned.clear(); // 1년권 끝남
+    await c.read(proProvider.notifier).restore(quiet: true);
+    expect(c.read(proProvider).value!.pro, isFalse);
+    expect(c.read(unlockedProvider(day)), isTrue);
+    expect(c.read(proProvider).value!.freeLeft(DateTime.now()), 3);
+    await flush(tester);
   });
 
   test('Pro일 때 연 묶음은 1년 이용권이 끝나도 열려 있다', () async {

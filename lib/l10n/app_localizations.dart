@@ -874,7 +874,7 @@ abstract class L10n {
   /// No description provided for @yearlyEnded.
   ///
   /// In ko, this message translates to:
-  /// **'1년 이용권이 끝났어요 · 열어 본 묶음은 그대로 열려 있고, 새 묶음은 이번 달 무료 묶음 {count}개로 볼 수 있어요'**
+  /// **'1년 이용권이 끝났어요 · 추천을 본 묶음은 그대로 열려 있고, 새 묶음은 이번 달 무료 묶음 {count}개로 볼 수 있어요'**
   String yearlyEnded(int count);
 
   /// No description provided for @proUsing.

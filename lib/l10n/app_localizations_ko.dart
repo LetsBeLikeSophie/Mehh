@@ -508,7 +508,7 @@ class L10nKo extends L10n {
 
   @override
   String yearlyEnded(int count) {
-    return '1년 이용권이 끝났어요 · 열어 본 묶음은 그대로 열려 있고, 새 묶음은 이번 달 무료 묶음 $count개로 볼 수 있어요';
+    return '1년 이용권이 끝났어요 · 추천을 본 묶음은 그대로 열려 있고, 새 묶음은 이번 달 무료 묶음 $count개로 볼 수 있어요';
   }
 
   @override
