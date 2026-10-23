@@ -569,4 +569,7 @@ class L10nKo extends L10n {
 
   @override
   String get kindDay => '그날의 묶음';
+
+  @override
+  String get picksFreeKind => '무료예요 · 무료 묶음을 쓰지 않아요';
 }

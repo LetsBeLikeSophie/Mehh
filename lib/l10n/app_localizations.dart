@@ -966,6 +966,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'그날의 묶음'**
   String get kindDay;
+
+  /// No description provided for @picksFreeKind.
+  ///
+  /// In ko, this message translates to:
+  /// **'무료예요 · 무료 묶음을 쓰지 않아요'**
+  String get picksFreeKind;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

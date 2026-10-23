@@ -490,6 +490,18 @@ class _SortScreenState extends ConsumerState<SortScreen>
                                     color: MehhColors.textMuted,
                                   ),
                                 ),
+                              // 무료 종류(낱장·캡처·똑같은 사진)의 [추천 보기]는 무료 묶음을 쓰지 않는다고 알린다
+                              // (UX 리뷰 2026-10-23, Pro면 숨김)
+                              if (picks > 0 &&
+                                  widget.kind != SortKind.day &&
+                                  !(ref.watch(proProvider).value?.pro ?? false))
+                                Text(
+                                  l.picksFreeKind,
+                                  style: const TextStyle(
+                                    fontSize: MehhText.caption,
+                                    color: MehhColors.textMuted,
+                                  ),
+                                ),
                               // Cortex 버튼이 보이면 고르기 전에도: 보낸 캡처가 어디로 가는지 (UX 리뷰 2026-10-22)
                               // 지난번에 쳐 둔 X는 화면 밖에 있을 수 있다: 한 줄로 알리고 누르면 그 자리로
                               if (earlier)

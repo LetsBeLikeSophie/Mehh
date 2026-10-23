@@ -694,4 +694,7 @@ class L10nEn extends L10n {
 
   @override
   String get kindDay => 'Day sets';
+
+  @override
+  String get picksFreeKind => 'Free · doesn\'t use your free sets';
 }

@@ -248,6 +248,7 @@ void main() {
       photos: old,
     );
     await pump(tester, SortScreen(kind: SortKind.screenshots, group: shots));
+    expect(find.text('무료예요 · 무료 묶음을 쓰지 않아요'), findsOneWidget);
     await tester.tap(find.text('추천 보기 · 3장'));
     await tester.pumpAndSettle();
     expect(find.text('3장 휴지통으로'), findsOneWidget);
