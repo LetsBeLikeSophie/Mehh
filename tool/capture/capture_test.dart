@@ -181,6 +181,33 @@ void main() {
     await shot(tester, '05b_screenshots_picks');
   });
 
+  testWidgets('05c 캡처 + Cortex (고르면 [휴지통으로] 옆 [Cortex로])', (tester) async {
+    final c = await start(tester);
+    await open(
+      tester,
+      ProviderScope(
+        // Cortex가 깔린 폰처럼
+        overrides: [cortexInstalledProvider.overrideWith((ref) async => true)],
+        child: SortScreen(
+          kind: SortKind.screenshots,
+          group: kindGroup(c, DayGroupKind.screenshots),
+        ),
+      ),
+    );
+    await tester.tap(find.text('전체 선택'));
+    await shot(tester, '05c_screenshots_cortex');
+  });
+
+  testWidgets('02b 잠긴 묶음 [추천 보기] 누름 → 무료 묶음 확인', (tester) async {
+    final c = await start(tester);
+    await open(
+      tester,
+      SortScreen(kind: SortKind.day, group: firstDayWithPicks(c)),
+    );
+    await tester.tap(find.textContaining('추천 보기'));
+    await shot(tester, '02b_day_confirm');
+  });
+
   testWidgets('06 Pro 안내', (tester) async {
     await start(tester);
     showProSheet(navKey.currentContext!);

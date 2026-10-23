@@ -463,6 +463,9 @@ class _SortScreenState extends ConsumerState<SortScreen>
                               ],
                               const SizedBox(height: 12),
                               Row(
+                                // 버튼은 글자 길이만큼, 자리가 모자랄 때만 줄인다 (가운데 빈칸 없이 양 끝으로)
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   if (picks > 0)
                                     Flexible(
@@ -478,7 +481,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
                                             : () => _showPicks(src),
                                       ),
                                     ),
-                                  const Spacer(),
+                                  const SizedBox(width: 8),
                                   TextButton(
                                     onPressed: order.isEmpty
                                         ? null
