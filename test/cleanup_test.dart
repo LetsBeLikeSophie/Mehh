@@ -15,7 +15,15 @@ PhotoMeta meta(
   int w = 4000,
   int h = 3000,
   bool shot = false,
-}) => PhotoMeta(id: id, takenAt: t, width: w, height: h, isScreenshot: shot);
+  bool fav = false,
+}) => PhotoMeta(
+  id: id,
+  takenAt: t,
+  width: w,
+  height: h,
+  isScreenshot: shot,
+  isFavorite: fav,
+);
 
 PhotoFeatures feat(
   String id, {
@@ -241,6 +249,31 @@ void main() {
       expect(screenshotRuns(shots, f, {}), [
         ['a', 'b', 'c'],
       ]);
+    });
+
+    test('♥(즐겨찾기) 사진은 비슷한 컷·캡처 추천에서 빠진다', () {
+      final photos = [
+        meta('a', t0, fav: true),
+        meta('b', t0.add(const Duration(seconds: 20))),
+        meta('c', t0.add(const Duration(seconds: 50))),
+      ];
+      final f = {
+        'a': feat('a', sharp: 300),
+        'b': feat('b', sharp: 900),
+        'c': feat('c', sharp: 5),
+      };
+      expect(planGroup(photos, f, {}).trash, {'c': TrashReason.blurry});
+      final shots = [
+        meta('old', DateTime(2026, 1, 1), shot: true, fav: true),
+        meta('old2', DateTime(2026, 1, 2), shot: true),
+      ];
+      final picks = planScreenshots(
+        shots,
+        {'old': feat('old', hi: 1), 'old2': feat('old2', hi: 0x7FFFFFFF)},
+        {},
+        now: DateTime(2026, 10, 23),
+      );
+      expect(picks.keys, ['old2']);
     });
 
     test('킵한 사진은 추천에서 빠진다', () {

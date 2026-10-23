@@ -9,7 +9,11 @@ class PhotoMeta {
     this.lng,
     this.isScreenshot = false,
     this.modifiedAt = 0,
+    this.isFavorite = false,
   });
+
+  /// 갤러리에서 ♥(즐겨찾기)를 눌러 둔 사진. 앱이 정리 추천하지 않는다 (UX 리뷰 2026-10-23)
+  final bool isFavorite;
 
   /// 사진 수정 시각 (초). 분석 캐시 무효화용.
   final int modifiedAt;
@@ -33,6 +37,7 @@ class PhotoMeta {
     lng: lng,
     isScreenshot: isScreenshot,
     modifiedAt: modifiedAt,
+    isFavorite: isFavorite,
   );
 
   double get aspect => height == 0 ? 0 : width / height;

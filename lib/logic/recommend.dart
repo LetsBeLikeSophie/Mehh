@@ -53,9 +53,12 @@ GroupPlan planGroup(
   // 추천 후보: 킵·휴지통이 아닌 사진. [추천 보기]로 X(toTrash)가 된 사진도 계속 추천으로 센다
   // (안 그러면 누르자마자 이유 표시·홈 숫자·정확도 기록에서 빠진다, 리뷰 2026-10-22).
   // 예전에 저장된 보류(hold)는 표시 없음으로 본다.
+  // ♥(즐겨찾기) 사진은 킵처럼 추천에서 뺀다
   bool open(PhotoMeta p) {
     final s = decisions[p.id]?.state;
-    return s != DecisionState.keep && s != DecisionState.trashed;
+    return !p.isFavorite &&
+        s != DecisionState.keep &&
+        s != DecisionState.trashed;
   }
 
   bool gone(PhotoMeta p) {
@@ -123,7 +126,8 @@ Map<String, ShotReason> planScreenshots(
   final out = <String, ShotReason>{};
   for (var i = 0; i < live.length; i++) {
     final p = live[i];
-    if (stateOf(p) == DecisionState.keep) continue;
+    // 킵·♥(즐겨찾기)는 추천하지 않는다
+    if (stateOf(p) == DecisionState.keep || p.isFavorite) continue;
     // 다음의 남는 장이 같은 화면을 곧이어 찍은 것이면 이것은 지난 장
     for (var j = i + 1; j < live.length; j++) {
       final q = live[j];

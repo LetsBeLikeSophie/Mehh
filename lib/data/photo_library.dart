@@ -71,6 +71,7 @@ class PhotoLibrary {
             lng: lng,
             isScreenshot: _isScreenshot(e),
             modifiedAt: e.modifiedDateSecond ?? 0,
+            isFavorite: e.isFavorite,
           ),
         );
       }
