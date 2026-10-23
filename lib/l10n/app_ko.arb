@@ -435,5 +435,23 @@
       }
     }
   },
-  "lockedSet": "무료 묶음이나 Pro로 추천을 볼 수 있는 묶음"
+  "lockedSet": "무료 묶음이나 Pro로 추천을 볼 수 있는 묶음",
+  "freeTodoShots": "지금 무료로: 캡처 추천 {count}장 보기 ›",
+  "freeTodoDuplicates": "지금 무료로: 똑같은 사진 {count}장 보기 ›",
+  "@freeTodoShots": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "@freeTodoDuplicates": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  }
 }

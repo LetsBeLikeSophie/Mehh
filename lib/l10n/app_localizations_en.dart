@@ -731,4 +731,22 @@ class L10nEn extends L10n {
 
   @override
   String get lockedSet => 'Picks open with a free set or Pro';
+
+  @override
+  String freeTodoShots(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Free right now: see $countString screenshot picks ›';
+  }
+
+  @override
+  String freeTodoDuplicates(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Free right now: see $countString exact duplicates ›';
+  }
 }

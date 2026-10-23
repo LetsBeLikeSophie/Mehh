@@ -513,6 +513,47 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('무료 묶음을 다 쓴 달의 Pro 안내: "지금 무료로: 캡처 추천 N장 보기" → 캡처 화면', (
+    tester,
+  ) async {
+    final shots = DayGroup(
+      id: 'shots',
+      kind: DayGroupKind.screenshots,
+      photos: [
+        for (var i = 0; i < 3; i++)
+          PhotoMeta(
+            id: 's$i',
+            takenAt: DateTime(2026, 1, 1 + i),
+            width: 100,
+            height: 200,
+            isScreenshot: true,
+          ),
+      ],
+    );
+    final now = DateTime.now();
+    await pump(
+      tester,
+      const SettingsScreen(),
+      vault: MemoryProVault(
+        ProState(freeMonth: monthKey(now), freeUsed: freeGroupsPerMonth),
+      ),
+      extra: [
+        libraryProvider.overrideWith(
+          () => _FixedLibrary(
+            LibraryState(photos: shots.photos, groups: [shots]),
+          ),
+        ),
+      ],
+    );
+    await tester.tap(find.text('Mehh Pro'));
+    await tester.pumpAndSettle();
+    expect(find.text('지금 무료로: 캡처 추천 3장 보기 ›'), findsOneWidget);
+    await tester.tap(find.text('지금 무료로: 캡처 추천 3장 보기 ›'));
+    await tester.pumpAndSettle();
+    expect(find.text('추천 보기 · 3장'), findsOneWidget);
+    await flush(tester);
+  });
+
   testWidgets('그리드: X를 켜면 휴지통 버튼, 보내면 그 사진만 빠진다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     expect(find.text('X를 친 사진이 없어요'), findsWidgets);
@@ -1132,4 +1173,12 @@ class _FixedAnalysis extends AnalysisNotifier {
   @override
   AnalysisState build() =>
       AnalysisState(features: features, total: features.length, done: true);
+}
+
+class _FixedLibrary extends LibraryNotifier {
+  _FixedLibrary(this.value);
+  final LibraryState value;
+
+  @override
+  Future<LibraryState> build() async => value;
 }

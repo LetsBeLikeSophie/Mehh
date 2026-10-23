@@ -188,6 +188,17 @@ void main() {
     await shot(tester, '06_pro_sheet');
   });
 
+  testWidgets('06b Pro 안내 (무료를 다 쓴 달)', (tester) async {
+    final now = DateTime.now();
+    await start(
+      tester,
+      pro: ProState(freeMonth: monthKey(now), freeUsed: freeGroupsPerMonth),
+    );
+    showProSheet(navKey.currentContext!);
+    await tester.pump(const Duration(seconds: 1));
+    await shot(tester, '06b_pro_sheet_no_free');
+  });
+
   testWidgets('07 숨은 추천 정확도 화면 (예시 기록)', (tester) async {
     final store = MemoryStore();
     final at = DateTime(2026, 10, 22);

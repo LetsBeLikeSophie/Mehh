@@ -7,8 +7,11 @@ import '../data/billing.dart';
 import '../data/pro.dart';
 import '../l10n/l10n.dart';
 import '../logic/format.dart';
+import '../logic/recommend.dart';
+import '../models/day_group.dart';
 import '../providers.dart';
 import '../theme.dart';
+import 'sort_screen.dart';
 import 'widgets.dart';
 
 /// Mehh Pro 안내 (SPEC 9장): 평생 이용권 / 1년 이용권 / 구매 복원.
@@ -143,6 +146,8 @@ class _ProSheetState extends ConsumerState<_ProSheet> {
               ),
               // 무료 종류 추천은 Pro 없이도 늘 무료 (UX-37)
               Text(l.proFreeKinds, style: muted),
+              // 무료를 다 썼으면 지금 무료로 할 수 있는 일을 하나 보여 준다 (Sophie P1-A)
+              if (pro.freeLeft(DateTime.now()) == 0) const _FreeTodo(),
               const SizedBox(height: 16),
               FutureBuilder(
                 future: _offers,
@@ -300,6 +305,56 @@ class ProChip extends ConsumerWidget {
         ),
       ),
       child: Text(s.pro ? l.proChip : l.freeChip(s.freeLeft(DateTime.now()))),
+    );
+  }
+}
+
+/// Pro 안내에서 "지금 무료로 할 수 있는 일" 한 줄: 캡처 추천과 똑같은 사진 중 많은 쪽 (P1-A)
+class _FreeTodo extends ConsumerWidget {
+  const _FreeTodo();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l;
+    final groups = ref.watch(libraryProvider).value?.groups ?? const [];
+    final decisions = ref.watch(decisionsProvider).value ?? const {};
+    final shots = [
+      for (final g in groups)
+        if (g.kind == DayGroupKind.screenshots) g,
+    ].firstOrNull;
+    final shotPicks = shots == null
+        ? 0
+        : planScreenshots(
+            shots.photos,
+            ref.watch(analysisProvider.select((a) => a.features)),
+            decisions,
+            now: DateTime.now(),
+          ).length;
+    final dups = duplicatesLeft(ref.watch(duplicatesProvider).value, decisions);
+    if (shotPicks == 0 && dups == 0) return const SizedBox.shrink();
+    final useShots = shotPicks >= dups;
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: TextButton(
+        onPressed: () {
+          final nav = Navigator.of(context);
+          nav.pop();
+          nav.push(
+            useShots
+                ? sortRoute(SortKind.screenshots, group: shots)
+                : sortRoute(SortKind.duplicates),
+          );
+        },
+        style: TextButton.styleFrom(
+          foregroundColor: MehhColors.text,
+          padding: EdgeInsets.zero,
+          minimumSize: const Size(44, 44),
+        ),
+        child: Text(
+          useShots ? l.freeTodoShots(shotPicks) : l.freeTodoDuplicates(dups),
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+      ),
     );
   }
 }

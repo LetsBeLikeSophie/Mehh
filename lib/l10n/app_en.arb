@@ -149,5 +149,7 @@
   "proFreeKinds": "Picks for screenshots, single shots and exact duplicates are always free, no Pro needed.",
   "picksAlreadyOpen": "Already opened · doesn't use another free set",
   "freeRefilled": "{count, plural, =1{Your free set for this month is back} other{Your {count} free sets for this month are back}}",
-  "lockedSet": "Picks open with a free set or Pro"
+  "lockedSet": "Picks open with a free set or Pro",
+  "freeTodoShots": "Free right now: see {count} screenshot picks ›",
+  "freeTodoDuplicates": "Free right now: see {count} exact duplicates ›"
 }

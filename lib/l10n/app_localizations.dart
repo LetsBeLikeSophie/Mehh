@@ -996,6 +996,18 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'무료 묶음이나 Pro로 추천을 볼 수 있는 묶음'**
   String get lockedSet;
+
+  /// No description provided for @freeTodoShots.
+  ///
+  /// In ko, this message translates to:
+  /// **'지금 무료로: 캡처 추천 {count}장 보기 ›'**
+  String freeTodoShots(int count);
+
+  /// No description provided for @freeTodoDuplicates.
+  ///
+  /// In ko, this message translates to:
+  /// **'지금 무료로: 똑같은 사진 {count}장 보기 ›'**
+  String freeTodoDuplicates(int count);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

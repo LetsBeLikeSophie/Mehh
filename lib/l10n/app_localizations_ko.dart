@@ -591,4 +591,22 @@ class L10nKo extends L10n {
 
   @override
   String get lockedSet => '무료 묶음이나 Pro로 추천을 볼 수 있는 묶음';
+
+  @override
+  String freeTodoShots(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '지금 무료로: 캡처 추천 $countString장 보기 ›';
+  }
+
+  @override
+  String freeTodoDuplicates(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '지금 무료로: 똑같은 사진 $countString장 보기 ›';
+  }
 }
