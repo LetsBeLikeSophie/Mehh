@@ -13,7 +13,12 @@ class CleanupConfig {
     this.oldScreenshot = const Duration(days: 90),
     this.learnMinSamples = 20,
     this.learnMinAcceptRate = 0.5,
+    this.learnWindow = const Duration(days: 30),
   });
+
+  /// 취향 학습은 이 기간의 기록만 본다. 꺼진 이유는 새 기록이 안 쌓이니 이 기간이 지나면
+  /// 다시 추천해 볼 기회가 생긴다 (2026-10-23 Sophie L1-B)
+  final Duration learnWindow;
 
   /// 취향 학습 (6단계 작게 시작, 2026-10-22 Sophie L1-A): 한 이유(비슷한 컷·흔들림·실수)로
   /// 추천한 사진을 [learnMinSamples]장 넘게 봤는데 받아들인 비율이 [learnMinAcceptRate]보다

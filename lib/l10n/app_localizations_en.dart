@@ -682,7 +682,7 @@ class L10nEn extends L10n {
 
   @override
   String accMuted(String names) {
-    return 'Reasons no longer suggested (you often undid them): $names';
+    return 'Reasons paused for now (you often undid them, last 30 days): $names';
   }
 
   @override
@@ -757,4 +757,16 @@ class L10nEn extends L10n {
   String accRateAll(String rate) {
     return 'All kinds together $rate (for reference)';
   }
+
+  @override
+  String get mutedBurst =>
+      'You often keep similar shots, so we\'ll stop suggesting them for now · we\'ll try again in 30 days';
+
+  @override
+  String get mutedBlurry =>
+      'You often keep blurry shots, so we\'ll stop suggesting them for now · we\'ll try again in 30 days';
+
+  @override
+  String get mutedJunk =>
+      'You often keep accidental shots, so we\'ll stop suggesting them for now · we\'ll try again in 30 days';
 }

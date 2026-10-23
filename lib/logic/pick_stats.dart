@@ -23,7 +23,18 @@ List<PickRecord> pickRecords({
       ),
 ];
 
+/// 취향 학습에 쓰는 최근 기록 ([CleanupConfig.learnWindow])
+List<PickRecord> recentPicks(
+  List<PickRecord> all, {
+  required DateTime now,
+  CleanupConfig config = const CleanupConfig(),
+}) => [
+  for (final p in all)
+    if (now.difference(p.at) <= config.learnWindow) p,
+];
+
 /// 자주 되돌린 추천 이유 (취향 학습, [CleanupConfig.learnMinSamples]).
+/// [s]는 최근 기록([recentPicks])으로 만든 것을 넘긴다.
 /// 표시 이름(burst·blurry·junk) → 정리 추천 이유.
 Set<TrashReason> mutedReasons(
   PickStats s, {

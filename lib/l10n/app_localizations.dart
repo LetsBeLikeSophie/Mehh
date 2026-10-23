@@ -940,7 +940,7 @@ abstract class L10n {
   /// No description provided for @accMuted.
   ///
   /// In ko, this message translates to:
-  /// **'자주 되돌려서 이제 추천하지 않는 이유: {names}'**
+  /// **'자주 되돌려서 당분간 추천하지 않는 이유(최근 30일): {names}'**
   String accMuted(String names);
 
   /// No description provided for @privacyPolicy.
@@ -1020,6 +1020,24 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'모든 종류 합계 {rate} (참고)'**
   String accRateAll(String rate);
+
+  /// No description provided for @mutedBurst.
+  ///
+  /// In ko, this message translates to:
+  /// **'비슷한 연속 컷은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요'**
+  String get mutedBurst;
+
+  /// No description provided for @mutedBlurry.
+  ///
+  /// In ko, this message translates to:
+  /// **'흔들린 사진은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요'**
+  String get mutedBlurry;
+
+  /// No description provided for @mutedJunk.
+  ///
+  /// In ko, this message translates to:
+  /// **'실수로 찍힌 사진은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요'**
+  String get mutedJunk;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

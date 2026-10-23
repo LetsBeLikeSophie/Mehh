@@ -60,4 +60,28 @@ void main() {
     ];
     expect(mutedReasons(PickStats.of(records)), {TrashReason.blurry});
   });
+
+  test('취향 학습은 최근 30일 기록만 본다 (꺼진 이유도 30일 뒤엔 다시 추천)', () {
+    PickRecord r(DateTime at, bool sent) => PickRecord(
+      at: at,
+      kind: 'day',
+      tag: 'blurry',
+      suggested: true,
+      sent: sent,
+    );
+    final old = DateTime(2026, 9, 1);
+    final records = [for (var i = 0; i < 20; i++) r(old, false)];
+    expect(
+      mutedReasons(
+        PickStats.of(recentPicks(records, now: DateTime(2026, 9, 10))),
+      ),
+      {TrashReason.blurry},
+    );
+    expect(
+      mutedReasons(
+        PickStats.of(recentPicks(records, now: DateTime(2026, 10, 15))),
+      ),
+      isEmpty,
+    );
+  });
 }

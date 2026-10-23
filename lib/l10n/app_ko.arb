@@ -397,7 +397,7 @@
   "tagRepeatShot": "연달아 찍음",
   "noteOldShot": "90일 넘은 캡처",
   "noteRepeatShot": "바로 뒤에 같은 화면을 또 찍었어요",
-  "accMuted": "자주 되돌려서 이제 추천하지 않는 이유: {names}",
+  "accMuted": "자주 되돌려서 당분간 추천하지 않는 이유(최근 30일): {names}",
   "@accMuted": {
     "placeholders": {
       "names": {
@@ -462,5 +462,8 @@
         "type": "String"
       }
     }
-  }
+  },
+  "mutedBurst": "비슷한 연속 컷은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요",
+  "mutedBlurry": "흔들린 사진은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요",
+  "mutedJunk": "실수로 찍힌 사진은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요"
 }

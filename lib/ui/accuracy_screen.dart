@@ -94,7 +94,12 @@ class AccuracyScreen extends ConsumerWidget {
                       style: row,
                     ),
                     Text('${l.accBest} ${pct(stats.bestRate)}', style: row),
-                    if (mutedReasons(stats) case final off when off.isNotEmpty)
+                    if (mutedReasons(
+                          PickStats.of(
+                            recentPicks(records!, now: DateTime.now()),
+                          ),
+                        )
+                        case final off when off.isNotEmpty)
                       Text(
                         l.accMuted(
                           [

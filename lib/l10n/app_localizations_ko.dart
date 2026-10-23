@@ -558,7 +558,7 @@ class L10nKo extends L10n {
 
   @override
   String accMuted(String names) {
-    return '자주 되돌려서 이제 추천하지 않는 이유: $names';
+    return '자주 되돌려서 당분간 추천하지 않는 이유(최근 30일): $names';
   }
 
   @override
@@ -617,4 +617,13 @@ class L10nKo extends L10n {
   String accRateAll(String rate) {
     return '모든 종류 합계 $rate (참고)';
   }
+
+  @override
+  String get mutedBurst => '비슷한 연속 컷은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요';
+
+  @override
+  String get mutedBlurry => '흔들린 사진은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요';
+
+  @override
+  String get mutedJunk => '실수로 찍힌 사진은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요';
 }

@@ -611,8 +611,14 @@ int duplicatesLeft(List<DuplicateSet>? sets, Map<String, Decision> decisions) =>
 /// 묶음 하나의 추천 정리
 /// 자주 되돌린 추천 이유 (취향 학습). 추천 정확도 기록에서 계산하고, 기록이 쌓이면 다시 계산한다.
 final mutedReasonsProvider = FutureProvider<Set<TrashReason>>(
-  (ref) async =>
-      mutedReasons(PickStats.of(await ref.read(storeProvider).loadPicks())),
+  (ref) async => mutedReasons(
+    PickStats.of(
+      recentPicks(
+        await ref.read(storeProvider).loadPicks(),
+        now: DateTime.now(),
+      ),
+    ),
+  ),
 );
 
 final groupPlanProvider = Provider.autoDispose.family<GroupPlan, DayGroup>((

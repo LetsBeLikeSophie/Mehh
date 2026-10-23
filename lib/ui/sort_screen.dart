@@ -9,6 +9,7 @@ import '../data/pro.dart';
 import '../l10n/l10n.dart';
 import '../logic/format.dart';
 import '../logic/pick_stats.dart';
+import '../logic/recommend.dart';
 import '../models/day_group.dart';
 import '../models/decision.dart';
 import '../providers.dart';
@@ -283,8 +284,25 @@ class _SortScreenState extends ConsumerState<SortScreen>
             },
           ),
         );
-    // 기록이 쌓였으니 자주 되돌린 이유를 다시 계산 (취향 학습)
+    // 기록이 쌓였으니 자주 되돌린 이유를 다시 계산 (취향 학습). 새로 꺼진 이유는 한 줄로 알린다 (L1-B)
+    final before = ref.read(mutedReasonsProvider).value ?? const {};
     ref.invalidate(mutedReasonsProvider);
+    final after = await ref.read(mutedReasonsProvider.future);
+    final newly = after.difference(before);
+    if (newly.isNotEmpty && mounted) {
+      final l = context.l;
+      showNote(
+        context,
+        [
+          for (final r in newly)
+            switch (r) {
+              TrashReason.burst => l.mutedBurst,
+              TrashReason.blurry => l.mutedBlurry,
+              TrashReason.junk => l.mutedJunk,
+            },
+        ].join('\n'),
+      );
+    }
   }
 
   /// 연속 컷·중복 묶음이 통째로 사라지면 한 번 묻는다 (묶음마다 최소 1장)
