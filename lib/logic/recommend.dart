@@ -103,6 +103,8 @@ enum ShotReason { old, repeat }
 
 /// 캡처 추천 (무료, [추천 보기]로 X): 연달아 찍은 비슷한 캡처는 마지막 한 장만 남기고,
 /// 그 밖에는 [CleanupConfig.oldScreenshot]보다 오래된 캡처. 킵·휴지통으로 정한 캡처는 뺀다.
+/// "연달아 찍음"은 **다음의 남는 장**(정리·휴지통이 아닌 장)과 비교한다: 다음 장을 이미 지웠거나
+/// X를 쳤으면 이 장이 마지막이 되어 한 화면이 통째로 사라지지 않는다 (시니어 리뷰 2026-10-23 S-7).
 /// [shots]는 시간순.
 Map<String, ShotReason> planScreenshots(
   List<PhotoMeta> shots,
@@ -111,32 +113,71 @@ Map<String, ShotReason> planScreenshots(
   required DateTime now,
   CleanupConfig config = const CleanupConfig(),
 }) {
-  bool open(PhotoMeta p) {
-    final s = decisions[p.id]?.state;
-    return s != DecisionState.keep && s != DecisionState.trashed;
-  }
+  DecisionState? stateOf(PhotoMeta p) => decisions[p.id]?.state;
+  final live = [
+    for (final p in shots)
+      if (stateOf(p) != DecisionState.trashed) p,
+  ];
+  bool gone(PhotoMeta p) => stateOf(p) == DecisionState.toTrash;
 
   final out = <String, ShotReason>{};
-  for (var i = 0; i < shots.length; i++) {
-    final p = shots[i];
-    if (!open(p)) continue;
-    // 바로 다음 캡처가 같은 화면을 곧이어 찍은 것이면 이것은 지난 장
-    if (i + 1 < shots.length) {
-      final q = shots[i + 1];
-      final fp = features[p.id], fq = features[q.id];
-      if (fp != null &&
-          fq != null &&
-          q.takenAt.difference(p.takenAt) <= config.burstMaxGap &&
-          fp.hammingTo(fq) <= config.burstMaxHamming) {
+  for (var i = 0; i < live.length; i++) {
+    final p = live[i];
+    if (stateOf(p) == DecisionState.keep) continue;
+    // 다음의 남는 장이 같은 화면을 곧이어 찍은 것이면 이것은 지난 장
+    for (var j = i + 1; j < live.length; j++) {
+      final q = live[j];
+      if (gone(q)) continue;
+      if (_sameShot(p, q, features, config, steps: j - i)) {
         out[p.id] = ShotReason.repeat;
-        continue;
       }
+      break;
     }
+    if (out.containsKey(p.id)) continue;
     if (now.difference(p.takenAt) > config.oldScreenshot) {
       out[p.id] = ShotReason.old;
     }
   }
   return out;
+}
+
+/// 연달아 찍은 같은 화면 캡처 묶음 (2장 이상). 통째로 휴지통으로 가면 한 번 묻는다.
+List<List<String>> screenshotRuns(
+  List<PhotoMeta> shots,
+  Map<String, PhotoFeatures> features,
+  Map<String, Decision> decisions, {
+  CleanupConfig config = const CleanupConfig(),
+}) {
+  final live = [
+    for (final p in shots)
+      if (decisions[p.id]?.state != DecisionState.trashed) p,
+  ];
+  final runs = <List<String>>[];
+  var cur = <String>[];
+  for (var i = 0; i < live.length; i++) {
+    if (i > 0 && _sameShot(live[i - 1], live[i], features, config)) {
+      cur.add(live[i].id);
+    } else {
+      if (cur.length > 1) runs.add(cur);
+      cur = [live[i].id];
+    }
+  }
+  if (cur.length > 1) runs.add(cur);
+  return runs;
+}
+
+bool _sameShot(
+  PhotoMeta p,
+  PhotoMeta q,
+  Map<String, PhotoFeatures> features,
+  CleanupConfig config, {
+  int steps = 1,
+}) {
+  final fp = features[p.id], fq = features[q.id];
+  return fp != null &&
+      fq != null &&
+      q.takenAt.difference(p.takenAt) <= config.burstMaxGap * steps &&
+      fp.hammingTo(fq) <= config.burstMaxHamming;
 }
 
 /// 까만 사진, 주머니 속·렌즈를 가린 사진처럼 실수로 찍힌 사진

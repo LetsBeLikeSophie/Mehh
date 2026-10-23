@@ -186,6 +186,8 @@ SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
                 ? PhotoTag.oldShot
                 : PhotoTag.repeatShot,
         },
+        // 같은 화면을 연달아 찍은 묶음: 통째로 보내면 "장면이 하나도 안 남아요"를 묻는다
+        units: screenshotRuns(g.photos, features, decisions),
       );
     case SortKind.day:
     case SortKind.singles:

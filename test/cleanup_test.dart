@@ -222,6 +222,27 @@ void main() {
       expect(plan.trash, {'a': TrashReason.burst});
     });
 
+    test('캡처: 다음 장을 이미 X·휴지통으로 보냈으면 이 장이 마지막이 되어 남는다', () {
+      final now = DateTime(2026, 10, 22);
+      final shots = [
+        meta('a', t0, shot: true),
+        meta('b', t0.add(const Duration(seconds: 5)), shot: true),
+        meta('c', t0.add(const Duration(seconds: 10)), shot: true),
+      ];
+      final f = {'a': feat('a'), 'b': feat('b'), 'c': feat('c')};
+      // 그대로면 a·b가 지난 장, c가 마지막
+      expect(planScreenshots(shots, f, {}, now: now).keys, ['a', 'b']);
+      // c를 X로 정리하면 b가 남는 장이 된다 (한 화면이 통째로 사라지지 않게)
+      final picks = planScreenshots(shots, f, {
+        'c': Decision(photoId: 'c', state: DecisionState.toTrash, at: now),
+      }, now: now);
+      expect(picks.containsKey('b'), isFalse);
+      expect(picks['a'], ShotReason.repeat);
+      expect(screenshotRuns(shots, f, {}), [
+        ['a', 'b', 'c'],
+      ]);
+    });
+
     test('킵한 사진은 추천에서 빠진다', () {
       final photos = [
         meta('a', t0),
