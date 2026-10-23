@@ -25,6 +25,10 @@ class AccuracyScreen extends ConsumerWidget {
     final locale = Localizations.localeOf(context).toString();
     final records = ref.watch(pickRecordsProvider).value;
     final stats = records == null ? null : PickStats.of(records);
+    final dayRecords = records?.where((r) => r.kind == 'day').toList();
+    final dayStats = dayRecords == null || dayRecords.isEmpty
+        ? null
+        : PickStats.of(dayRecords);
     // 종류별 (그날의 묶음만 유료, 시니어 리뷰 2026-10-23 S-4)
     final byKind = <(String, PickStats)>[
       for (final (kind, name) in [
@@ -69,14 +73,16 @@ class AccuracyScreen extends ConsumerWidget {
                   else if (stats.sends == 0)
                     Text(l.accEmpty, style: muted)
                   else ...[
-                    Text(l.accRate, style: muted),
+                    // 결제 기준은 그날의 묶음만 (2026-10-23 Sophie P3-A). 전체는 참고 줄
+                    Text(l.accRateDay, style: muted),
                     Text(
-                      pct(stats.acceptRate),
+                      pct(dayStats?.acceptRate),
                       style: const TextStyle(
                         fontSize: MehhText.display,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
+                    Text(l.accRateAll(pct(stats.acceptRate)), style: row),
                     const SizedBox(height: 12),
                     Text(l.accSends(stats.sends), style: row),
                     Text(

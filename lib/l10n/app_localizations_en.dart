@@ -510,7 +510,7 @@ class L10nEn extends L10n {
 
   @override
   String get accNote =>
-      'These records stay on this phone. Above 80% accepted, the picks are trustworthy.';
+      'These records stay on this phone. Above 80% for day sets, it\'s worth turning on payments.';
 
   @override
   String cortexSendCount(int count) {
@@ -748,5 +748,13 @@ class L10nEn extends L10n {
     final String countString = countNumberFormat.format(count);
 
     return 'Free right now: see $countString exact duplicates ›';
+  }
+
+  @override
+  String get accRateDay => 'Day-set picks you accepted (the paid part)';
+
+  @override
+  String accRateAll(String rate) {
+    return 'All kinds together $rate (for reference)';
   }
 }

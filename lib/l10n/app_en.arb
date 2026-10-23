@@ -115,7 +115,7 @@
   "accBest": "Best shots you kept",
   "accByTag": "By reason",
   "accTagLine": "{count}/{total}",
-  "accNote": "These records stay on this phone. Above 80% accepted, the picks are trustworthy.",
+  "accNote": "These records stay on this phone. Above 80% for day sets, it's worth turning on payments.",
   "cortexSendCount": "{count, plural, =1{Send 1 to Cortex} other{Send {count} to Cortex}}",
   "cortexThenTrash": "Cortex analyzes sent screenshots with AI · once saved, Mehh moves them to trash",
   "cortexSentTrashed": "{count, plural, =1{Sent 1 to Cortex and moved it to trash · restore it within 30 days, or empty the trash to free up space} other{Sent {count} to Cortex and moved them to trash · restore them within 30 days, or empty the trash to free up space}}",
@@ -151,5 +151,7 @@
   "freeRefilled": "{count, plural, =1{Your free set for this month is back} other{Your {count} free sets for this month are back}}",
   "lockedSet": "Picks open with a free set or Pro",
   "freeTodoShots": "Free right now: see {count} screenshot picks ›",
-  "freeTodoDuplicates": "Free right now: see {count} exact duplicates ›"
+  "freeTodoDuplicates": "Free right now: see {count} exact duplicates ›",
+  "accRateDay": "Day-set picks you accepted (the paid part)",
+  "accRateAll": "All kinds together {rate} (for reference)"
 }

@@ -790,7 +790,7 @@ abstract class L10n {
   /// No description provided for @accNote.
   ///
   /// In ko, this message translates to:
-  /// **'이 기록은 이 폰에만 있어요. 받아들인 비율이 80%를 넘으면 추천을 믿을 만해요.'**
+  /// **'이 기록은 이 폰에만 있어요. 그날의 묶음 비율이 80%를 넘으면 결제를 켤 만해요.'**
   String get accNote;
 
   /// No description provided for @cortexSendCount.
@@ -1008,6 +1008,18 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'지금 무료로: 똑같은 사진 {count}장 보기 ›'**
   String freeTodoDuplicates(int count);
+
+  /// No description provided for @accRateDay.
+  ///
+  /// In ko, this message translates to:
+  /// **'그날의 묶음 추천을 받아들인 비율 (결제 기준)'**
+  String get accRateDay;
+
+  /// No description provided for @accRateAll.
+  ///
+  /// In ko, this message translates to:
+  /// **'모든 종류 합계 {rate} (참고)'**
+  String accRateAll(String rate);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

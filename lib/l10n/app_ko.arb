@@ -302,7 +302,7 @@
       }
     }
   },
-  "accNote": "이 기록은 이 폰에만 있어요. 받아들인 비율이 80%를 넘으면 추천을 믿을 만해요.",
+  "accNote": "이 기록은 이 폰에만 있어요. 그날의 묶음 비율이 80%를 넘으면 결제를 켤 만해요.",
   "cortexSendCount": "{count}장 Cortex로 보내기",
   "@cortexSendCount": {
     "placeholders": {
@@ -451,6 +451,15 @@
       "count": {
         "type": "int",
         "format": "decimalPattern"
+      }
+    }
+  },
+  "accRateDay": "그날의 묶음 추천을 받아들인 비율 (결제 기준)",
+  "accRateAll": "모든 종류 합계 {rate} (참고)",
+  "@accRateAll": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
       }
     }
   }

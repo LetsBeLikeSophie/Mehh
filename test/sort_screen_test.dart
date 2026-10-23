@@ -383,6 +383,8 @@ void main() {
       ),
     ]);
     await pump(tester, const AccuracyScreen(), store: store);
+    expect(find.text('50%'), findsOneWidget); // 큰 숫자는 그날의 묶음만 (1/2)
+    expect(find.textContaining('모든 종류 합계 67%'), findsOneWidget);
     expect(find.textContaining('그날의 묶음  1/2장'), findsOneWidget);
     expect(find.textContaining('캡처  1/1장'), findsOneWidget);
   });
