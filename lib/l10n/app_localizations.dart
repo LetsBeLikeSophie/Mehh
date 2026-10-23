@@ -793,18 +793,6 @@ abstract class L10n {
   /// **'이 기록은 이 폰에만 있어요. 그날의 묶음 비율이 80%를 넘으면 결제를 켤 만해요.'**
   String get accNote;
 
-  /// No description provided for @cortexSendCount.
-  ///
-  /// In ko, this message translates to:
-  /// **'{count}장 Cortex로 보내기'**
-  String cortexSendCount(int count);
-
-  /// No description provided for @cortexThenTrash.
-  ///
-  /// In ko, this message translates to:
-  /// **'보낸 캡처는 Cortex가 AI로 분석해요 · 저장되면 Mehh에서 휴지통으로 보내요'**
-  String get cortexThenTrash;
-
   /// No description provided for @cortexSentTrashed.
   ///
   /// In ko, this message translates to:
@@ -823,35 +811,11 @@ abstract class L10n {
   /// **'추천 보기 · {count}장'**
   String showPicks(int count);
 
-  /// No description provided for @freeLeftNote.
-  ///
-  /// In ko, this message translates to:
-  /// **'이번 달 무료 묶음이 {count}개 남았어요'**
-  String freeLeftNote(int count);
-
-  /// No description provided for @cortexSend.
-  ///
-  /// In ko, this message translates to:
-  /// **'Cortex로 보내기'**
-  String get cortexSend;
-
   /// No description provided for @keepBarSemantics.
   ///
   /// In ko, this message translates to:
   /// **'킵. 사진을 아래로 내려도 돼요'**
   String get keepBarSemantics;
-
-  /// No description provided for @picksCostNote.
-  ///
-  /// In ko, this message translates to:
-  /// **'누르면 이번 달 무료 묶음 1개를 써요 · {count}개 남음'**
-  String picksCostNote(int count);
-
-  /// No description provided for @picksNoFreeNote.
-  ///
-  /// In ko, this message translates to:
-  /// **'이번 달 무료 묶음을 다 썼어요 · {date}에 {count}개가 다시 생겨요'**
-  String picksNoFreeNote(String date, int count);
 
   /// No description provided for @lookingAtPhotos.
   ///
@@ -888,12 +852,6 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'무료 묶음 {count}개 남음'**
   String freeSetsLeft(int count);
-
-  /// No description provided for @earlierMarked.
-  ///
-  /// In ko, this message translates to:
-  /// **'X 친 사진 {count}장 보러 가기 ›'**
-  String earlierMarked(int count);
 
   /// No description provided for @unsentDot.
   ///
@@ -967,35 +925,17 @@ abstract class L10n {
   /// **'그날의 묶음'**
   String get kindDay;
 
-  /// No description provided for @picksFreeKind.
-  ///
-  /// In ko, this message translates to:
-  /// **'무료예요 · 무료 묶음을 쓰지 않아요'**
-  String get picksFreeKind;
-
   /// No description provided for @proFreeKinds.
   ///
   /// In ko, this message translates to:
   /// **'캡처·낱장 사진·똑같은 사진 추천은 Pro 없이도 늘 무료예요.'**
   String get proFreeKinds;
 
-  /// No description provided for @picksAlreadyOpen.
-  ///
-  /// In ko, this message translates to:
-  /// **'이미 연 묶음이에요 · 무료 묶음을 더 쓰지 않아요'**
-  String get picksAlreadyOpen;
-
   /// No description provided for @freeRefilled.
   ///
   /// In ko, this message translates to:
   /// **'이번 달 무료 묶음 {count}개가 다시 생겼어요'**
   String freeRefilled(int count);
-
-  /// No description provided for @lockedSet.
-  ///
-  /// In ko, this message translates to:
-  /// **'무료 묶음이나 Pro로 추천을 볼 수 있는 묶음'**
-  String get lockedSet;
 
   /// No description provided for @freeTodoShots.
   ///
@@ -1044,6 +984,30 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'{count}장은 Cortex에 저장돼서 휴지통으로 보냈어요 · Cortex가 저장하지 않은 {kept}장은 X 그대로예요'**
   String cortexSentSomeTrashed(int count, int kept);
+
+  /// No description provided for @useFreeSetTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'무료 묶음을 쓸까요?'**
+  String get useFreeSetTitle;
+
+  /// No description provided for @useFreeSetBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 묶음의 비슷한 컷·흔들림 추천 {count}장을 보려면 이번 달 무료 묶음 1개를 써요. 지금 {left}개 남았어요. 한 번 연 묶음은 계속 열려 있어요.'**
+  String useFreeSetBody(int count, int left);
+
+  /// No description provided for @useFreeSetYes.
+  ///
+  /// In ko, this message translates to:
+  /// **'무료 묶음 쓰기'**
+  String get useFreeSetYes;
+
+  /// No description provided for @toCortex.
+  ///
+  /// In ko, this message translates to:
+  /// **'Cortex로'**
+  String get toCortex;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

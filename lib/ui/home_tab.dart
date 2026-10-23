@@ -669,19 +669,6 @@ class _GroupTile extends ConsumerWidget {
                   ],
                 ),
               ),
-              // 무료 묶음·Pro로 열어야 추천을 볼 수 있는 묶음은 작은 자물쇠 (Pro면 없음, Sophie H2-A)
-              if (ref.watch(lockedProvider(group)))
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(end: 6),
-                  child: Semantics(
-                    label: l.lockedSet,
-                    child: const Icon(
-                      Icons.lock_outline,
-                      size: 15,
-                      color: MehhColors.icon,
-                    ),
-                  ),
-                ),
               // X를 쳐 두고 아직 안 보낸 묶음은 줄 끝 작은 점 (2026-10-22 Sophie R4-A)
               if (unsent)
                 Semantics(

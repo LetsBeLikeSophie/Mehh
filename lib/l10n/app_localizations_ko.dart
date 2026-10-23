@@ -442,19 +442,6 @@ class L10nKo extends L10n {
   String get accNote => '이 기록은 이 폰에만 있어요. 그날의 묶음 비율이 80%를 넘으면 결제를 켤 만해요.';
 
   @override
-  String cortexSendCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    return '$countString장 Cortex로 보내기';
-  }
-
-  @override
-  String get cortexThenTrash =>
-      '보낸 캡처는 Cortex가 AI로 분석해요 · 저장되면 Mehh에서 휴지통으로 보내요';
-
-  @override
   String cortexSentTrashed(int count) {
     final intl.NumberFormat countNumberFormat =
         intl.NumberFormat.decimalPattern(localeName);
@@ -477,25 +464,7 @@ class L10nKo extends L10n {
   }
 
   @override
-  String freeLeftNote(int count) {
-    return '이번 달 무료 묶음이 $count개 남았어요';
-  }
-
-  @override
-  String get cortexSend => 'Cortex로 보내기';
-
-  @override
   String get keepBarSemantics => '킵. 사진을 아래로 내려도 돼요';
-
-  @override
-  String picksCostNote(int count) {
-    return '누르면 이번 달 무료 묶음 1개를 써요 · $count개 남음';
-  }
-
-  @override
-  String picksNoFreeNote(String date, int count) {
-    return '이번 달 무료 묶음을 다 썼어요 · $date에 $count개가 다시 생겨요';
-  }
 
   @override
   String get lookingAtPhotos => '사진을\n살펴보고 있어요';
@@ -517,15 +486,6 @@ class L10nKo extends L10n {
   @override
   String freeSetsLeft(int count) {
     return '무료 묶음 $count개 남음';
-  }
-
-  @override
-  String earlierMarked(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    return 'X 친 사진 $countString장 보러 가기 ›';
   }
 
   @override
@@ -576,21 +536,12 @@ class L10nKo extends L10n {
   String get kindDay => '그날의 묶음';
 
   @override
-  String get picksFreeKind => '무료예요 · 무료 묶음을 쓰지 않아요';
-
-  @override
   String get proFreeKinds => '캡처·낱장 사진·똑같은 사진 추천은 Pro 없이도 늘 무료예요.';
-
-  @override
-  String get picksAlreadyOpen => '이미 연 묶음이에요 · 무료 묶음을 더 쓰지 않아요';
 
   @override
   String freeRefilled(int count) {
     return '이번 달 무료 묶음 $count개가 다시 생겼어요';
   }
-
-  @override
-  String get lockedSet => '무료 묶음이나 Pro로 추천을 볼 수 있는 묶음';
 
   @override
   String freeTodoShots(int count) {
@@ -631,4 +582,22 @@ class L10nKo extends L10n {
   String cortexSentSomeTrashed(int count, int kept) {
     return '$count장은 Cortex에 저장돼서 휴지통으로 보냈어요 · Cortex가 저장하지 않은 $kept장은 X 그대로예요';
   }
+
+  @override
+  String get useFreeSetTitle => '무료 묶음을 쓸까요?';
+
+  @override
+  String useFreeSetBody(int count, int left) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '이 묶음의 비슷한 컷·흔들림 추천 $countString장을 보려면 이번 달 무료 묶음 1개를 써요. 지금 $left개 남았어요. 한 번 연 묶음은 계속 열려 있어요.';
+  }
+
+  @override
+  String get useFreeSetYes => '무료 묶음 쓰기';
+
+  @override
+  String get toCortex => 'Cortex로';
 }

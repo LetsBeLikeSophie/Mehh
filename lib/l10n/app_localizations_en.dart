@@ -513,25 +513,6 @@ class L10nEn extends L10n {
       'These records stay on this phone. Above 80% for day sets, it\'s worth turning on payments.';
 
   @override
-  String cortexSendCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Send $countString to Cortex',
-      one: 'Send 1 to Cortex',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get cortexThenTrash =>
-      'Cortex analyzes sent screenshots with AI · once saved, Mehh moves them to trash';
-
-  @override
   String cortexSentTrashed(int count) {
     final intl.NumberFormat countNumberFormat =
         intl.NumberFormat.decimalPattern(localeName);
@@ -561,38 +542,7 @@ class L10nEn extends L10n {
   }
 
   @override
-  String freeLeftNote(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count free sets left this month',
-      one: '1 free set left this month',
-      zero: 'No free sets left this month',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get cortexSend => 'Send to Cortex';
-
-  @override
   String get keepBarSemantics => 'Keep. You can also swipe the photo down';
-
-  @override
-  String picksCostNote(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Uses 1 of this month\'s free sets · $count left',
-      one: 'Uses 1 of this month\'s free sets · 1 left',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String picksNoFreeNote(String date, int count) {
-    return 'No free sets left this month · $count more on $date';
-  }
 
   @override
   String get lookingAtPhotos => 'Looking through\nyour photos';
@@ -626,21 +576,6 @@ class L10nEn extends L10n {
       locale: localeName,
       other: '$count free sets left',
       one: '1 free set left',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String earlierMarked(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'See the $countString marked photos ›',
-      one: 'See the 1 marked photo ›',
     );
     return '$_temp0';
   }
@@ -708,15 +643,8 @@ class L10nEn extends L10n {
   String get kindDay => 'Day sets';
 
   @override
-  String get picksFreeKind => 'Free · doesn\'t use your free sets';
-
-  @override
   String get proFreeKinds =>
       'Picks for screenshots, single shots and exact duplicates are always free, no Pro needed.';
-
-  @override
-  String get picksAlreadyOpen =>
-      'Already opened · doesn\'t use another free set';
 
   @override
   String freeRefilled(int count) {
@@ -728,9 +656,6 @@ class L10nEn extends L10n {
     );
     return '$_temp0';
   }
-
-  @override
-  String get lockedSet => 'Picks open with a free set or Pro';
 
   @override
   String freeTodoShots(int count) {
@@ -774,4 +699,30 @@ class L10nEn extends L10n {
   String cortexSentSomeTrashed(int count, int kept) {
     return 'Moved $count saved in Cortex to trash · $kept Cortex didn\'t save are still marked';
   }
+
+  @override
+  String get useFreeSetTitle => 'Use a free set?';
+
+  @override
+  String useFreeSetBody(int count, int left) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Seeing $countString picks (similar or blurry shots) in this set uses 1 free set this month. $left left. Once opened, a set stays open.',
+      one:
+          'Seeing 1 pick (similar or blurry shots) in this set uses 1 free set this month. $left left. Once opened, a set stays open.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get useFreeSetYes => 'Use a free set';
+
+  @override
+  String get toCortex => 'To Cortex';
 }

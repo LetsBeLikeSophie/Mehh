@@ -1,11 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/handoff.dart';
-import '../data/pro.dart';
 import '../l10n/l10n.dart';
 import '../logic/format.dart';
 import '../logic/pick_stats.dart';
@@ -49,12 +47,6 @@ class _SortScreenState extends ConsumerState<SortScreen>
   /// 나중에 X를 꺼서 킵하면 추천에서 빠지므로, 누른 순간의 목록을 기억한다)
   final _picked = <String>{};
 
-  final _scroll = ScrollController();
-  final _gridKey = GlobalKey();
-
-  /// 화면을 열 때 이미 X였던 사진 수 (지난번에 쳐 둔 X를 알려 주려고, UX 리뷰 2026-10-22)
-  int? _markedAtOpen;
-
   /// 화면에 보였던 이유 표시 (킵해서 사라진 표시도 기록에 남기려고)
   final _seenTags = <String, String>{};
 
@@ -73,7 +65,6 @@ class _SortScreenState extends ConsumerState<SortScreen>
   @override
   void dispose() {
     _savedSub?.cancel();
-    _scroll.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -192,6 +183,19 @@ class _SortScreenState extends ConsumerState<SortScreen>
       final photoIds = [for (final p in g.photos) p.id];
       final now = DateTime.now();
       final freeBefore = (await ref.read(proProvider.future)).freeLeft(now);
+      // 무료 묶음을 쓰기 전에 한 번 묻는다 (2026-10-23 Sophie: 버튼 아래 설명 대신)
+      if (!proNow && src.locked > 0 && freeBefore > 0) {
+        if (!mounted) return;
+        final l = context.l;
+        final ok = await askMehh(
+          context,
+          title: l.useFreeSetTitle,
+          body: l.useFreeSetBody(src.locked, freeBefore),
+          no: l.cancel,
+          yes: l.useFreeSetYes,
+        );
+        if (!ok) return;
+      }
       if (!await pro.unlock(g.id, photoIds: photoIds)) {
         if (!mounted) return;
         await showProSheet(context);
@@ -199,12 +203,6 @@ class _SortScreenState extends ConsumerState<SortScreen>
         // 결제 대기·취소면 그대로 끝
         if (!(ref.read(proProvider).value?.pro ?? false)) return;
         await pro.unlock(g.id, photoIds: photoIds); // Pro로 본 묶음 기억
-      } else {
-        // 무료 묶음을 실제로 쓴 경우에만 남은 개수를 알린다
-        final s = await ref.read(proProvider.future);
-        if (!s.pro && s.freeLeft(now) < freeBefore && mounted) {
-          showNote(context, context.l.freeLeftNote(s.freeLeft(now)));
-        }
       }
     }
     // 화면에 보이던 추천을 그대로 X로. 잠겨 있던 묶음만 방금 연 추천을 다시 계산해서 받는다
@@ -218,23 +216,6 @@ class _SortScreenState extends ConsumerState<SortScreen>
         if (stateOf(decisions, id) != DecisionState.trashed) id,
     ], DecisionState.toTrash);
     if (mounted) setState(() => _picked.addAll(ids));
-  }
-
-  /// 첫 X 사진이 보이게 스크롤 (4열 그리드에서 그 줄의 위치를 계산)
-  void _scrollToFirstMarked(List<String> order, List<String> marked) {
-    final ro = _gridKey.currentContext?.findRenderObject();
-    if (ro is! RenderSliver || marked.isEmpty || !_scroll.hasClients) return;
-    final c = ro.constraints;
-    final tile = (c.crossAxisExtent - 40 - 3 * 4) / 4;
-    final row = order.indexOf(marked.first) ~/ 4;
-    _scroll.animateTo(
-      (c.precedingScrollExtent + row * (tile + 4)).clamp(
-        0.0,
-        _scroll.position.maxScrollExtent,
-      ),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOutCubic,
-    );
   }
 
   void _open(String id) => Navigator.of(context).push(
@@ -365,17 +346,6 @@ class _SortScreenState extends ConsumerState<SortScreen>
         if (isMarked(id, decisions, src)) id,
     ];
     final allSelected = order.isNotEmpty && marked.length == order.length;
-    // "지난번 X"는 사용자가 직접 정한 X만 센다 (처음부터 X인 것은 빼고)
-    final chosen = [
-      for (final id in order)
-        if (stateOf(decisions, id) == DecisionState.toTrash) id,
-    ];
-    if (_markedAtOpen == null && ref.read(decisionsProvider).hasValue) {
-      _markedAtOpen = chosen.length;
-    }
-    final earlier = (_markedAtOpen ?? 0) > 0 && chosen.isNotEmpty;
-    final freeLeft =
-        ref.watch(proProvider).value?.freeLeft(DateTime.now()) ?? 0;
     // 앱이 고른 추천 장수 (잠긴 묶음은 열기 전 장수)
     final picks = src.locked > 0 ? src.locked : src.suggested.length;
     final sections = widget.kind == SortKind.duplicates
@@ -426,10 +396,14 @@ class _SortScreenState extends ConsumerState<SortScreen>
     }
 
     final g = widget.group;
-    final count = l.photos(order.length);
-    final countLine = widget.kind == SortKind.day && g != null
-        ? l.countAndRange(count, groupTimeRange(g, l))
-        : count;
+    final range = widget.kind == SortKind.day && g != null
+        ? groupTimeRange(g, l)
+        : null;
+    final subLine = src.analyzing
+        ? (range == null
+              ? l.analyzingShort
+              : l.countAndRange(range, l.analyzingShort))
+        : range;
 
     return Scaffold(
       body: SafeArea(
@@ -437,7 +411,6 @@ class _SortScreenState extends ConsumerState<SortScreen>
           children: [
             Expanded(
               child: CustomScrollView(
-                controller: _scroll,
                 slivers: [
                   SliverPadding(
                     padding: const EdgeInsets.fromLTRB(8, 4, 12, 8),
@@ -449,60 +422,63 @@ class _SortScreenState extends ConsumerState<SortScreen>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                sortTitle(widget.kind, g, widget.place, l),
+                              // 제목 뒤에 장수 (2026-10-23 Sophie: 장수가 따로 한 줄을 차지하지 않게)
+                              Text.rich(
+                                TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: sortTitle(
+                                        widget.kind,
+                                        g,
+                                        widget.place,
+                                        l,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: '  ${l.photos(order.length)}',
+                                      style: const TextStyle(
+                                        fontSize: MehhText.bodySmall,
+                                        fontWeight: FontWeight.w500,
+                                        color: MehhColors.textMuted,
+                                        letterSpacing: 0,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                                 style: const TextStyle(
                                   fontSize: MehhText.title,
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: -0.4,
                                 ),
                               ),
-                              const SizedBox(height: 2),
-                              Text(
-                                src.analyzing
-                                    ? l.countAndRange(
-                                        countLine,
-                                        l.analyzingShort,
-                                      )
-                                    : countLine,
-                                style: const TextStyle(
-                                  fontSize: MehhText.bodySmall,
-                                  color: MehhColors.textMuted,
+                              if (subLine != null) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  subLine,
+                                  style: const TextStyle(
+                                    fontSize: MehhText.bodySmall,
+                                    color: MehhColors.textMuted,
+                                  ),
                                 ),
-                              ),
+                              ],
                               const SizedBox(height: 12),
                               Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // 자리가 모자라면 줄을 바꾼다 (글자가 잘리지 않게, 큰 글씨 설정 포함)
-                                  Expanded(
-                                    child: Wrap(
-                                      spacing: 6,
-                                      runSpacing: 6,
-                                      children: [
-                                        if (picks > 0)
-                                          _PillButton(
-                                            label: l.showPicks(picks),
-                                            filled: true,
-                                            onTap: _busy
-                                                ? null
-                                                : () => _showPicks(src),
-                                          ),
-                                        if (cortex)
-                                          _PillButton(
-                                            label: marked.isEmpty
-                                                ? l.cortexSend
-                                                : l.cortexSendCount(
-                                                    marked.length,
-                                                  ),
-                                            icon: Icons.north_east,
-                                            onTap: _busy || marked.isEmpty
-                                                ? null
-                                                : () => _sendCortex(marked),
-                                          ),
-                                      ],
+                                  if (picks > 0)
+                                    Flexible(
+                                      child: _PillButton(
+                                        label: l.showPicks(picks),
+                                        // 잠긴 묶음은 버튼에 자물쇠: 누르면 무료 묶음을 쓸지 묻는다
+                                        icon: src.locked > 0
+                                            ? Icons.lock_outline
+                                            : null,
+                                        filled: true,
+                                        onTap: _busy
+                                            ? null
+                                            : () => _showPicks(src),
+                                      ),
                                     ),
-                                  ),
+                                  const Spacer(),
                                   TextButton(
                                     onPressed: order.isEmpty
                                         ? null
@@ -519,77 +495,6 @@ class _SortScreenState extends ConsumerState<SortScreen>
                                   ),
                                 ],
                               ),
-                              // 무료 묶음을 쓰는 버튼은 누르기 전에 무엇이 쓰이는지 보여 준다
-                              if (src.locked > 0)
-                                Text(
-                                  freeLeft > 0
-                                      ? l.picksCostNote(freeLeft)
-                                      : l.picksNoFreeNote(
-                                          formatDate(
-                                            nextFreeReset(DateTime.now()),
-                                            l.localeName,
-                                          ),
-                                          freeGroupsPerMonth,
-                                        ),
-                                  style: const TextStyle(
-                                    fontSize: MehhText.caption,
-                                    color: MehhColors.textMuted,
-                                  ),
-                                ),
-                              // 이미 연 그날의 묶음: 다시 눌러도 무료 묶음을 더 쓰지 않는다 (UX-38)
-                              if (picks > 0 &&
-                                  widget.kind == SortKind.day &&
-                                  src.locked == 0 &&
-                                  !(ref.watch(proProvider).value?.pro ?? false))
-                                Text(
-                                  l.picksAlreadyOpen,
-                                  style: const TextStyle(
-                                    fontSize: MehhText.caption,
-                                    color: MehhColors.textMuted,
-                                  ),
-                                ),
-                              // 무료 종류(낱장·캡처·똑같은 사진)의 [추천 보기]는 무료 묶음을 쓰지 않는다고 알린다
-                              // (UX 리뷰 2026-10-23, Pro면 숨김)
-                              if (picks > 0 &&
-                                  widget.kind != SortKind.day &&
-                                  !(ref.watch(proProvider).value?.pro ?? false))
-                                Text(
-                                  l.picksFreeKind,
-                                  style: const TextStyle(
-                                    fontSize: MehhText.caption,
-                                    color: MehhColors.textMuted,
-                                  ),
-                                ),
-                              // Cortex 버튼이 보이면 고르기 전에도: 보낸 캡처가 어디로 가는지 (UX 리뷰 2026-10-22)
-                              // 지난번에 쳐 둔 X는 화면 밖에 있을 수 있다: 한 줄로 알리고 누르면 그 자리로
-                              if (earlier)
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () =>
-                                      _scrollToFirstMarked(order, chosen),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 4,
-                                    ),
-                                    child: Text(
-                                      l.earlierMarked(chosen.length),
-                                      style: const TextStyle(
-                                        fontSize: MehhText.caption,
-                                        fontWeight: FontWeight.w600,
-                                        color: MehhColors.text,
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              if (cortex)
-                                Text(
-                                  l.cortexThenTrash,
-                                  style: const TextStyle(
-                                    fontSize: MehhText.caption,
-                                    color: MehhColors.textMuted,
-                                  ),
-                                ),
                               const SizedBox(height: 8),
                             ],
                           ),
@@ -600,7 +505,6 @@ class _SortScreenState extends ConsumerState<SortScreen>
                   // 똑같은 사진은 묶음마다 새 줄에서 시작해 어떤 사진끼리 같은지 보이게
                   for (final (i, section) in sections.indexed)
                     SliverPadding(
-                      key: i == 0 ? _gridKey : null,
                       padding: EdgeInsets.fromLTRB(
                         20,
                         0,
@@ -623,22 +527,39 @@ class _SortScreenState extends ConsumerState<SortScreen>
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-              child: SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: _busy || marked.isEmpty
-                      ? null
-                      : () => _send(marked, src, order),
-                  child: Text(
-                    marked.isEmpty
-                        ? l.nothingMarked
-                        : l.trashCount(marked.length),
-                    style: const TextStyle(
-                      fontSize: MehhText.body,
-                      fontWeight: FontWeight.w500,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: _busy || marked.isEmpty
+                          ? null
+                          : () => _send(marked, src, order),
+                      child: Text(
+                        marked.isEmpty
+                            ? l.nothingMarked
+                            : l.trashCount(marked.length),
+                        style: const TextStyle(
+                          fontSize: MehhText.body,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  // 고른 캡처가 있으면 [휴지통으로] 옆에 작은 Cortex 버튼 (공유하기처럼, 2026-10-23 Sophie)
+                  if (cortex && marked.isNotEmpty) ...[
+                    const SizedBox(width: 8),
+                    OutlinedButton.icon(
+                      onPressed: _busy ? null : () => _sendCortex(marked),
+                      icon: const Icon(Icons.north_east, size: 16),
+                      label: Text(l.toCortex),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: MehhColors.text,
+                        minimumSize: const Size(44, 48),
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
           ],

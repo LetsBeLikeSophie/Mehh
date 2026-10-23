@@ -303,16 +303,6 @@
     }
   },
   "accNote": "이 기록은 이 폰에만 있어요. 그날의 묶음 비율이 80%를 넘으면 결제를 켤 만해요.",
-  "cortexSendCount": "{count}장 Cortex로 보내기",
-  "@cortexSendCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "format": "decimalPattern"
-      }
-    }
-  },
-  "cortexThenTrash": "보낸 캡처는 Cortex가 AI로 분석해요 · 저장되면 Mehh에서 휴지통으로 보내요",
   "cortexSentTrashed": "{count}장을 Cortex로 보내고 휴지통으로 보냈어요 · 30일 안에 되살릴 수 있고, 휴지통을 비우면 공간이 생겨요",
   "@cortexSentTrashed": {
     "placeholders": {
@@ -332,35 +322,7 @@
       }
     }
   },
-  "freeLeftNote": "이번 달 무료 묶음이 {count}개 남았어요",
-  "@freeLeftNote": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "cortexSend": "Cortex로 보내기",
   "keepBarSemantics": "킵. 사진을 아래로 내려도 돼요",
-  "picksCostNote": "누르면 이번 달 무료 묶음 1개를 써요 · {count}개 남음",
-  "@picksCostNote": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "picksNoFreeNote": "이번 달 무료 묶음을 다 썼어요 · {date}에 {count}개가 다시 생겨요",
-  "@picksNoFreeNote": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "lookingAtPhotos": "사진을\n살펴보고 있어요",
   "duplicatesPending": "똑같은 사진은 다 살펴본 뒤 알려 드려요 · 무료",
   "nothingMarked": "X를 친 사진이 없어요",
@@ -378,15 +340,6 @@
     "placeholders": {
       "count": {
         "type": "int"
-      }
-    }
-  },
-  "earlierMarked": "X 친 사진 {count}장 보러 가기 ›",
-  "@earlierMarked": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "format": "decimalPattern"
       }
     }
   },
@@ -416,9 +369,7 @@
   },
   "accByKind": "종류별 (결제 기준은 그날의 묶음)",
   "kindDay": "그날의 묶음",
-  "picksFreeKind": "무료예요 · 무료 묶음을 쓰지 않아요",
   "proFreeKinds": "캡처·낱장 사진·똑같은 사진 추천은 Pro 없이도 늘 무료예요.",
-  "picksAlreadyOpen": "이미 연 묶음이에요 · 무료 묶음을 더 쓰지 않아요",
   "freeRefilled": "이번 달 무료 묶음 {count}개가 다시 생겼어요",
   "@freeRefilled": {
     "placeholders": {
@@ -435,7 +386,6 @@
       }
     }
   },
-  "lockedSet": "무료 묶음이나 Pro로 추천을 볼 수 있는 묶음",
   "freeTodoShots": "지금 무료로: 캡처 추천 {count}장 보기 ›",
   "freeTodoDuplicates": "지금 무료로: 똑같은 사진 {count}장 보기 ›",
   "@freeTodoShots": {
@@ -473,6 +423,21 @@
         "type": "int"
       },
       "kept": {
+        "type": "int"
+      }
+    }
+  },
+  "useFreeSetTitle": "무료 묶음을 쓸까요?",
+  "useFreeSetBody": "이 묶음의 비슷한 컷·흔들림 추천 {count}장을 보려면 이번 달 무료 묶음 1개를 써요. 지금 {left}개 남았어요. 한 번 연 묶음은 계속 열려 있어요.",
+  "useFreeSetYes": "무료 묶음 쓰기",
+  "toCortex": "Cortex로",
+  "@useFreeSetBody": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "left": {
         "type": "int"
       }
     }
