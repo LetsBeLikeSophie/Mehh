@@ -563,4 +563,10 @@ class L10nKo extends L10n {
   String cortexPartial(int count) {
     return 'Cortex가 $count장만 저장했다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요';
   }
+
+  @override
+  String get accByKind => '종류별 (결제 기준은 그날의 묶음)';
+
+  @override
+  String get kindDay => '그날의 묶음';
 }

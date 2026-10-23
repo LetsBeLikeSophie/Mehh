@@ -954,6 +954,18 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'Cortex가 {count}장만 저장했다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요'**
   String cortexPartial(int count);
+
+  /// No description provided for @accByKind.
+  ///
+  /// In ko, this message translates to:
+  /// **'종류별 (결제 기준은 그날의 묶음)'**
+  String get accByKind;
+
+  /// No description provided for @kindDay.
+  ///
+  /// In ko, this message translates to:
+  /// **'그날의 묶음'**
+  String get kindDay;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

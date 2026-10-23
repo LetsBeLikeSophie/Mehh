@@ -688,4 +688,10 @@ class L10nEn extends L10n {
     );
     return '$_temp0';
   }
+
+  @override
+  String get accByKind => 'By kind (day sets are the paid part)';
+
+  @override
+  String get kindDay => 'Day sets';
 }

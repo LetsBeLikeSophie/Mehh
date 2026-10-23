@@ -5,14 +5,15 @@ import '../l10n/l10n.dart';
 import '../logic/format.dart';
 import '../logic/pick_stats.dart';
 import '../logic/recommend.dart';
+import '../models/pick.dart';
 import '../providers.dart';
 import '../theme.dart';
 import 'sort_source.dart';
 import 'widgets.dart';
 
 /// 숨은 화면: 추천 정확도 (SPEC 6-8). 설정의 버전 글자를 7번 누르면 열린다.
-final pickStatsProvider = FutureProvider.autoDispose<PickStats>(
-  (ref) async => PickStats.of(await ref.read(storeProvider).loadPicks()),
+final pickRecordsProvider = FutureProvider.autoDispose<List<PickRecord>>(
+  (ref) => ref.read(storeProvider).loadPicks(),
 );
 
 class AccuracyScreen extends ConsumerWidget {
@@ -22,7 +23,20 @@ class AccuracyScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l;
     final locale = Localizations.localeOf(context).toString();
-    final stats = ref.watch(pickStatsProvider).value;
+    final records = ref.watch(pickRecordsProvider).value;
+    final stats = records == null ? null : PickStats.of(records);
+    // 종류별 (그날의 묶음만 유료, 시니어 리뷰 2026-10-23 S-4)
+    final byKind = <(String, PickStats)>[
+      for (final (kind, name) in [
+        ('day', l.kindDay),
+        ('singles', l.singles),
+        ('screenshots', l.screenshots),
+        ('duplicates', l.duplicatesTitle),
+      ])
+        if (records?.where((r) => r.kind == kind).toList() case final rs?
+            when rs.isNotEmpty)
+          (name, PickStats.of(rs)),
+    ];
     String pct(double? v) => v == null ? '–' : formatPercent(v, locale);
     const muted = TextStyle(
       fontSize: MehhText.caption,
@@ -86,6 +100,14 @@ class AccuracyScreen extends ConsumerWidget {
                               },
                           ].join(', '),
                         ),
+                        style: row,
+                      ),
+                    const SizedBox(height: 20),
+                    Text(l.accByKind, style: muted),
+                    for (final (name, k) in byKind)
+                      Text(
+                        '$name  ${l.accTagLine(k.accepted, k.suggested)} · '
+                        '${pct(k.acceptRate)}',
                         style: row,
                       ),
                     const SizedBox(height: 20),

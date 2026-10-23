@@ -17,9 +17,11 @@ import 'package:mehh/models/features.dart';
 import 'package:mehh/models/day_group.dart';
 import 'package:mehh/models/decision.dart';
 import 'package:mehh/models/photo_meta.dart';
+import 'package:mehh/models/pick.dart';
 import 'package:mehh/providers.dart';
 import 'package:mehh/ui/focus_screen.dart';
 import 'package:mehh/ui/home_tab.dart';
+import 'package:mehh/ui/accuracy_screen.dart';
 import 'package:mehh/ui/settings_screen.dart';
 import 'package:mehh/ui/sort_screen.dart';
 import 'package:mehh/ui/widgets.dart';
@@ -314,6 +316,37 @@ void main() {
     expect(stats.byTag.containsKey('blurry'), isFalse);
     expect(mutedReasons(stats), isEmpty);
     await flush(tester);
+  });
+
+  testWidgets('숨은 정확도 화면: 종류별 받아들인 비율', (tester) async {
+    final store = MemoryStore();
+    final at = DateTime(2026, 10, 22);
+    await store.addPicks([
+      PickRecord(
+        at: at,
+        kind: 'day',
+        tag: 'burst',
+        suggested: true,
+        sent: true,
+      ),
+      PickRecord(
+        at: at,
+        kind: 'day',
+        tag: 'burst',
+        suggested: true,
+        sent: false,
+      ),
+      PickRecord(
+        at: at,
+        kind: 'screenshots',
+        tag: 'oldShot',
+        suggested: true,
+        sent: true,
+      ),
+    ]);
+    await pump(tester, const AccuracyScreen(), store: store);
+    expect(find.textContaining('그날의 묶음  1/2장'), findsOneWidget);
+    expect(find.textContaining('캡처  1/1장'), findsOneWidget);
   });
 
   testWidgets('그리드: X를 켜면 휴지통 버튼, 보내면 그 사진만 빠진다', (tester) async {
