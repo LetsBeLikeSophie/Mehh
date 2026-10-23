@@ -529,7 +529,7 @@ class L10nEn extends L10n {
 
   @override
   String get cortexThenTrash =>
-      'Cortex sorts sent screenshots with AI · Mehh then moves them to trash';
+      'Cortex analyzes sent screenshots with AI · once saved, Mehh moves them to trash';
 
   @override
   String cortexSentTrashed(int count) {
@@ -541,8 +541,8 @@ class L10nEn extends L10n {
       count,
       locale: localeName,
       other:
-          'Sent $countString to Cortex and moved them to trash · restore within 30 days',
-      one: 'Sent 1 to Cortex and moved it to trash · restore within 30 days',
+          'Sent $countString to Cortex and moved them to trash · restore them within 30 days, or empty the trash to free up space',
+      one: 'Sent 1 to Cortex and moved it to trash · restore it within 30 days, or empty the trash to free up space',
     );
     return '$_temp0';
   }

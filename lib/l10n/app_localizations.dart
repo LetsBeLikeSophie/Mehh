@@ -802,13 +802,13 @@ abstract class L10n {
   /// No description provided for @cortexThenTrash.
   ///
   /// In ko, this message translates to:
-  /// **'보낸 캡처는 Cortex가 AI로 정리해요 · 보낸 뒤 Mehh에서는 휴지통으로 옮겨요'**
+  /// **'보낸 캡처는 Cortex가 AI로 분석해요 · 저장되면 Mehh에서 휴지통으로 보내요'**
   String get cortexThenTrash;
 
   /// No description provided for @cortexSentTrashed.
   ///
   /// In ko, this message translates to:
-  /// **'{count}장을 Cortex로 보내고 휴지통으로 옮겼어요 · 30일 안에 되살릴 수 있어요'**
+  /// **'{count}장을 Cortex로 보내고 휴지통으로 보냈어요 · 30일 안에 되살릴 수 있고, 휴지통을 비우면 공간이 생겨요'**
   String cortexSentTrashed(int count);
 
   /// No description provided for @cortexMultiUnsupported.
@@ -910,7 +910,7 @@ abstract class L10n {
   /// No description provided for @cortexNotSaved.
   ///
   /// In ko, this message translates to:
-  /// **'Cortex에 저장됐다는 신호가 없어서 휴지통으로 옮기지 않았어요 · X는 그대로예요'**
+  /// **'Cortex에 저장됐다는 신호가 없어서 휴지통으로 보내지 않았어요 · X는 그대로예요'**
   String get cortexNotSaved;
 
   /// No description provided for @tagOldShot.

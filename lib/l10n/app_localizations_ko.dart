@@ -452,7 +452,7 @@ class L10nKo extends L10n {
 
   @override
   String get cortexThenTrash =>
-      '보낸 캡처는 Cortex가 AI로 정리해요 · 보낸 뒤 Mehh에서는 휴지통으로 옮겨요';
+      '보낸 캡처는 Cortex가 AI로 분석해요 · 저장되면 Mehh에서 휴지통으로 보내요';
 
   @override
   String cortexSentTrashed(int count) {
@@ -460,7 +460,7 @@ class L10nKo extends L10n {
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return '$countString장을 Cortex로 보내고 휴지통으로 옮겼어요 · 30일 안에 되살릴 수 있어요';
+    return '$countString장을 Cortex로 보내고 휴지통으로 보냈어요 · 30일 안에 되살릴 수 있고, 휴지통을 비우면 공간이 생겨요';
   }
 
   @override
@@ -537,7 +537,7 @@ class L10nKo extends L10n {
 
   @override
   String get cortexNotSaved =>
-      'Cortex에 저장됐다는 신호가 없어서 휴지통으로 옮기지 않았어요 · X는 그대로예요';
+      'Cortex에 저장됐다는 신호가 없어서 휴지통으로 보내지 않았어요 · X는 그대로예요';
 
   @override
   String get tagOldShot => '오래됨';

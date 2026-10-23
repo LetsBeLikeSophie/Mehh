@@ -855,7 +855,7 @@ void main() {
     );
     expect(find.text('Cortex로 보내기'), findsOneWidget); // 고르기 전엔 흐리게
     expect(
-      find.textContaining('Cortex가 AI로 정리해요'),
+      find.textContaining('Cortex가 AI로 분석해요'),
       findsOneWidget,
     ); // 고르기 전에도 보인다
     await tester.tap(find.byType(XToggle).at(0));
@@ -873,7 +873,7 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
     await tester.pumpAndSettle();
     expect(find.textContaining('4장'), findsOneWidget);
-    expect(find.textContaining('신호가 없어서 휴지통으로 옮기지 않았어요'), findsOneWidget);
+    expect(find.textContaining('신호가 없어서 휴지통으로 보내지 않았어요'), findsOneWidget);
     await tester.pump(const Duration(seconds: 6)); // 알림이 사라지게
     await tester.pumpAndSettle();
 
