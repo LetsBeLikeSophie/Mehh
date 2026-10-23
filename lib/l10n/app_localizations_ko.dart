@@ -625,4 +625,9 @@ class L10nKo extends L10n {
 
   @override
   String get cortexAskYes => '보내기';
+
+  @override
+  String noFreeLead(String date, int count) {
+    return '이번 달 무료 묶음을 다 썼어요 · $date에 $count개가 다시 생겨요';
+  }
 }

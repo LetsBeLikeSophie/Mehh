@@ -762,4 +762,9 @@ class L10nEn extends L10n {
 
   @override
   String get cortexAskYes => 'Send';
+
+  @override
+  String noFreeLead(String date, int count) {
+    return 'No free sets left this month · $count more on $date';
+  }
 }

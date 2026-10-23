@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/handoff.dart';
+import '../data/pro.dart';
 import '../l10n/l10n.dart';
 import '../logic/format.dart';
 import '../logic/pick_stats.dart';
@@ -211,7 +212,16 @@ class _SortScreenState extends ConsumerState<SortScreen>
       }
       if (!await pro.unlock(g.id, photoIds: photoIds)) {
         if (!mounted) return;
-        await showProSheet(context);
+        // 무료를 다 써서 여는 거면 판매 안내 앞에 이유 한 줄 (UX 리뷰 2026-10-23 UX-45)
+        await showProSheet(
+          context,
+          lead: freeBefore == 0
+              ? context.l.noFreeLead(
+                  formatDate(nextFreeReset(now), context.l.localeName),
+                  freeGroupsPerMonth,
+                )
+              : null,
+        );
         // 시트에서 Pro를 샀으면 다시 누르지 않아도 이어서 추천을 X로 (UX 리뷰 2026-10-22).
         // 결제 대기·취소면 그대로 끝
         if (!(ref.read(proProvider).value?.pro ?? false)) return;

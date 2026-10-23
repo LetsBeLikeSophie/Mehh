@@ -781,6 +781,10 @@ void main() {
     await tester.tap(find.text('추천 보기 · 2장'));
     await tester.pumpAndSettle();
     expect(find.text('Mehh Pro'), findsOneWidget);
+    expect(
+      find.textContaining('이번 달 무료 묶음을 다 썼어요'),
+      findsOneWidget,
+    ); // 왜 Pro 안내인지
     await tester.tap(find.text('평생 이용권'));
     await tester.pumpAndSettle();
     expect(find.text('Mehh Pro'), findsNothing); // 사면 시트가 닫힌다
