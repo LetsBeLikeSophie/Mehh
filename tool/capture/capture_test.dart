@@ -12,6 +12,7 @@ import 'package:mehh/data/demo.dart';
 import 'package:mehh/data/photo_library.dart';
 import 'package:mehh/data/pro.dart';
 import 'package:mehh/data/store.dart';
+import 'package:mehh/models/decision.dart';
 import 'package:mehh/l10n/l10n.dart';
 import 'package:mehh/models/day_group.dart';
 import 'package:mehh/models/photo_meta.dart';
@@ -116,6 +117,18 @@ void main() {
   testWidgets('01 홈', (tester) async {
     await start(tester);
     await shot(tester, '01_home');
+  });
+
+  testWidgets('01b 홈 비운 양 막대', (tester) async {
+    final store = MemoryStore()
+      ..freed[monthKey(DateTime.now())] = 34 * 1024 * 1024;
+    final c = await start(tester, store: store);
+    final ids = [
+      for (final p in c.read(libraryProvider).value!.photos.take(12)) p.id,
+    ];
+    await c.read(decisionsProvider.notifier).set(ids, DecisionState.toTrash);
+    await tester.pumpAndSettle();
+    await shot(tester, '01b_home_bar');
   });
 
   testWidgets('02 그날의 묶음 (잠김, 누르기 전)', (tester) async {

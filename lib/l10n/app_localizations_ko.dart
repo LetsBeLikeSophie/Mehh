@@ -250,12 +250,12 @@ class L10nKo extends L10n {
   String get trashFailed => '휴지통으로 보내지 못했어요. 사진은 그대로예요.';
 
   @override
-  String trashed(int count) {
+  String trashed(int count, String size) {
     final intl.NumberFormat countNumberFormat =
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return '$countString장을 휴지통으로 보냈어요 · 30일 안에 되살릴 수 있고, 휴지통을 비우면 공간이 생겨요';
+    return '✓ $countString장 · $size 휴지통으로 보냈어요 · 30일 안에 되살릴 수 있고, 휴지통을 비우면 그만큼 공간이 생겨요';
   }
 
   @override
@@ -442,12 +442,12 @@ class L10nKo extends L10n {
   String get accNote => '이 기록은 이 폰에만 있어요. 그날의 묶음 비율이 80%를 넘으면 결제를 켤 만해요.';
 
   @override
-  String cortexSentTrashed(int count) {
+  String cortexSentTrashed(int count, String size) {
     final intl.NumberFormat countNumberFormat =
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return '$countString장을 Cortex로 보내고 휴지통으로 보냈어요 · 정리는 Cortex가 이어서 해요 · 30일 안에 되살릴 수 있어요';
+    return '✓ $countString장 · $size Cortex로 보내고 휴지통으로 보냈어요 · 정리는 Cortex가 이어서 해요 · 30일 안에 되살릴 수 있어요';
   }
 
   @override
@@ -629,4 +629,12 @@ class L10nKo extends L10n {
 
   @override
   String get cortexSentBadge => 'Cortex로 보냄';
+
+  @override
+  String markedLeft(Object size) {
+    return 'X 쳐 둔 $size가 남았어요';
+  }
+
+  @override
+  String get markedAllSent => '쳐 둔 X를 다 보냈어요';
 }

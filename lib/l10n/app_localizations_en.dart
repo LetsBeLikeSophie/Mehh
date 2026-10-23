@@ -283,7 +283,7 @@ class L10nEn extends L10n {
       'Couldn\'t move to trash. Your photos are unchanged.';
 
   @override
-  String trashed(int count) {
+  String trashed(int count, String size) {
     final intl.NumberFormat countNumberFormat =
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
@@ -292,8 +292,9 @@ class L10nEn extends L10n {
       count,
       locale: localeName,
       other:
-          'Moved $countString photos to trash · restore them within 30 days, or empty the trash to free up space',
-      one: 'Moved 1 photo to trash · restore it within 30 days, or empty the trash to free up space',
+          '✓ $countString photos · $size moved to trash · restore them within 30 days, or empty the trash to free up that space',
+      one:
+          '✓ 1 photo · $size moved to trash · restore it within 30 days, or empty the trash to free up that space',
     );
     return '$_temp0';
   }
@@ -513,7 +514,7 @@ class L10nEn extends L10n {
       'These records stay on this phone. Above 80% for day sets, it\'s worth turning on payments.';
 
   @override
-  String cortexSentTrashed(int count) {
+  String cortexSentTrashed(int count, String size) {
     final intl.NumberFormat countNumberFormat =
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
@@ -522,8 +523,9 @@ class L10nEn extends L10n {
       count,
       locale: localeName,
       other:
-          'Sent $countString to Cortex and moved them to trash · Cortex takes it from here · restore within 30 days',
-      one: 'Sent 1 to Cortex and moved it to trash · Cortex takes it from here · restore within 30 days',
+          '✓ $countString · $size sent to Cortex and moved to trash · Cortex takes it from here · restore within 30 days',
+      one:
+          '✓ 1 · $size sent to Cortex and moved to trash · Cortex takes it from here · restore within 30 days',
     );
     return '$_temp0';
   }
@@ -766,4 +768,12 @@ class L10nEn extends L10n {
 
   @override
   String get cortexSentBadge => 'Sent to Cortex';
+
+  @override
+  String markedLeft(Object size) {
+    return '$size marked with X still to go';
+  }
+
+  @override
+  String get markedAllSent => 'Everything you marked is sent';
 }

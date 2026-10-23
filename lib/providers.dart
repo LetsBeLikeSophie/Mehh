@@ -525,21 +525,35 @@ final freedThisMonthProvider = FutureProvider<int>(
   (ref) => ref.read(storeProvider).freedBytes(monthKey(DateTime.now())),
 );
 
+/// 쳐 둔 X(아직 휴지통으로 안 보냄)의 용량. 홈 막대의 "남은 정리 거리" (2026-10-23 Sophie)
+final markedBytesProvider = FutureProvider<int>((ref) async {
+  final decisions = ref.watch(decisionsProvider).value ?? const {};
+  final photos = ref.watch(libraryProvider.select((s) => s.value?.photos));
+  if (photos == null) return 0;
+  final ids = [
+    for (final p in photos)
+      if (stateOf(decisions, p.id) == DecisionState.toTrash) p.id,
+  ];
+  if (ids.isEmpty) return 0;
+  final sizes = await ref.read(photoLibraryProvider).fileSizes(ids);
+  return sizes.values.fold<int>(0, (a, b) => a + b);
+});
+
 // ───────────────────────── 정리 동작
 
 class Cleaner {
   Cleaner(this.ref);
   final Ref ref;
 
-  /// 휴지통으로 보내고 결정·용량을 기록한다. 반환: 실제로 옮긴 장수.
+  /// 휴지통으로 보내고 결정·용량을 기록한다. 반환: 실제로 옮긴 장수와 그 용량.
   /// 화면에서는 [sendToTrash](ui/trash_flow.dart)를 쓴다 (실패 안내).
-  Future<int> trash(Iterable<String> ids) async {
+  Future<({int count, int bytes})> trash(Iterable<String> ids) async {
     final list = ids.toSet().toList();
-    if (list.isEmpty) return 0;
+    if (list.isEmpty) return (count: 0, bytes: 0);
     final lib = ref.read(photoLibraryProvider);
     final sizes = await lib.fileSizes(list);
     final done = await lib.trash(list);
-    if (done.isEmpty) return 0;
+    if (done.isEmpty) return (count: 0, bytes: 0);
     await ref.read(decisionsProvider.notifier).set(done, DecisionState.trashed);
     final bytes = done.fold<int>(0, (n, id) => n + (sizes[id] ?? 0));
     await ref
@@ -547,7 +561,7 @@ class Cleaner {
         .addFreedBytes(monthKey(DateTime.now()), bytes);
     ref.invalidate(freedThisMonthProvider);
     ref.read(libraryProvider.notifier).removePhotos(done.toSet());
-    return done.length;
+    return (count: done.length, bytes: bytes);
   }
 }
 

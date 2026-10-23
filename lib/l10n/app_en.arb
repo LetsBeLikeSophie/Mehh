@@ -64,7 +64,7 @@
   "trashCount": "Move {count} to trash",
   "countAndRange": "{count} · {range}",
   "trashFailed": "Couldn't move to trash. Your photos are unchanged.",
-  "trashed": "{count, plural, =1{Moved 1 photo to trash · restore it within 30 days, or empty the trash to free up space} other{Moved {count} photos to trash · restore them within 30 days, or empty the trash to free up space}}",
+  "trashed": "{count, plural, =1{✓ 1 photo · {size} moved to trash · restore it within 30 days, or empty the trash to free up that space} other{✓ {count} photos · {size} moved to trash · restore them within 30 days, or empty the trash to free up that space}}",
   "clearTitle": "Clear all records?",
   "clearBody": "This clears photo analysis, keep/remove records, and trashed-size history.\nYour photos aren't deleted.",
   "clearConfirm": "Clear",
@@ -116,7 +116,7 @@
   "accByTag": "By reason",
   "accTagLine": "{count}/{total}",
   "accNote": "These records stay on this phone. Above 80% for day sets, it's worth turning on payments.",
-  "cortexSentTrashed": "{count, plural, =1{Sent 1 to Cortex and moved it to trash · Cortex takes it from here · restore within 30 days} other{Sent {count} to Cortex and moved them to trash · Cortex takes it from here · restore within 30 days}}",
+  "cortexSentTrashed": "{count, plural, =1{✓ 1 · {size} sent to Cortex and moved to trash · Cortex takes it from here · restore within 30 days} other{✓ {count} · {size} sent to Cortex and moved to trash · Cortex takes it from here · restore within 30 days}}",
   "cortexMultiUnsupported": "Cortex can't take several at once yet. Please update Cortex.",
   "showPicks": "Show picks · {count}",
   "keepBarSemantics": "Keep. You can also swipe the photo down",
@@ -156,5 +156,7 @@
   "cortexAskYes": "Send & delete",
   "noFreeLead": "No free sets left this month · {count} more on {date}",
   "cortexSavedTrashing": "{count, plural, =1{✓ Cortex got 1 · moving it to trash} other{✓ Cortex got {count} · moving them to trash}}",
-  "cortexSentBadge": "Sent to Cortex"
+  "cortexSentBadge": "Sent to Cortex",
+  "markedLeft": "{size} marked with X still to go",
+  "markedAllSent": "Everything you marked is sent"
 }

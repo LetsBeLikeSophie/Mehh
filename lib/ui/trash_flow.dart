@@ -12,14 +12,17 @@ Future<int> sendToTrash(
   BuildContext context,
   WidgetRef ref,
   Iterable<String> ids, {
-  String Function(int n)? doneNote,
+  String Function(int n, String size)? doneNote,
   bool quiet = false,
 }) async {
   final list = ids.toSet().toList();
   if (list.isEmpty) return 0;
   int n;
+  String size;
   try {
-    n = await ref.read(cleanerProvider).trash(list);
+    final r = await ref.read(cleanerProvider).trash(list);
+    n = r.count;
+    size = formatBytes(r.bytes);
   } catch (_) {
     if (context.mounted) {
       showNote(context, context.l.trashFailed);
@@ -27,7 +30,8 @@ Future<int> sendToTrash(
     return 0;
   }
   if (n > 0 && !quiet && context.mounted) {
-    showNote(context, doneNote?.call(n) ?? context.l.trashed(n));
+    // 몇 장, 몇 MB를 보냈는지 (2026-10-23 Sophie: 홈의 "이번 달 N MB"가 뜻이 있게)
+    showNote(context, doneNote?.call(n, size) ?? context.l.trashed(n, size));
   }
   return n;
 }

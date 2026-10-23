@@ -484,8 +484,8 @@ abstract class L10n {
   /// No description provided for @trashed.
   ///
   /// In ko, this message translates to:
-  /// **'{count}장을 휴지통으로 보냈어요 · 30일 안에 되살릴 수 있고, 휴지통을 비우면 공간이 생겨요'**
-  String trashed(int count);
+  /// **'✓ {count}장 · {size} 휴지통으로 보냈어요 · 30일 안에 되살릴 수 있고, 휴지통을 비우면 그만큼 공간이 생겨요'**
+  String trashed(int count, String size);
 
   /// No description provided for @clearTitle.
   ///
@@ -796,8 +796,8 @@ abstract class L10n {
   /// No description provided for @cortexSentTrashed.
   ///
   /// In ko, this message translates to:
-  /// **'{count}장을 Cortex로 보내고 휴지통으로 보냈어요 · 정리는 Cortex가 이어서 해요 · 30일 안에 되살릴 수 있어요'**
-  String cortexSentTrashed(int count);
+  /// **'✓ {count}장 · {size} Cortex로 보내고 휴지통으로 보냈어요 · 정리는 Cortex가 이어서 해요 · 30일 안에 되살릴 수 있어요'**
+  String cortexSentTrashed(int count, String size);
 
   /// No description provided for @cortexMultiUnsupported.
   ///
@@ -1038,6 +1038,18 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'Cortex로 보냄'**
   String get cortexSentBadge;
+
+  /// No description provided for @markedLeft.
+  ///
+  /// In ko, this message translates to:
+  /// **'X 쳐 둔 {size}가 남았어요'**
+  String markedLeft(Object size);
+
+  /// No description provided for @markedAllSent.
+  ///
+  /// In ko, this message translates to:
+  /// **'쳐 둔 X를 다 보냈어요'**
+  String get markedAllSent;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

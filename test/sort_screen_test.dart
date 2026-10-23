@@ -97,6 +97,21 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('홈: 이번 달 보낸 용량과 쳐 둔 X 용량 막대', (tester) async {
+    final store = MemoryStore()
+      ..freed[monthKey(DateTime.now())] = 5 * 1024 * 1024;
+    await pump(tester, const Scaffold(body: HomeTab()), store: store);
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(find.text('쳐 둔 X를 다 보냈어요'), findsOneWidget);
+    await flush(tester);
+  });
+
+  testWidgets('홈: 보낸 것도 X도 없으면 막대가 없다', (tester) async {
+    await pump(tester, const Scaffold(body: HomeTab()));
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+    await flush(tester);
+  });
+
   testWidgets('설정: 맨 위 Mehh Pro 줄을 누르면 Pro 안내(구매 복원)가 열린다', (tester) async {
     await pump(tester, const SettingsScreen());
     expect(find.text('무료 묶음 3개 남음'), findsOneWidget);
@@ -750,7 +765,8 @@ void main() {
     final picks = await container.read(storeProvider).loadPicks();
     // 무료가 아직 남았으니 Pro 안내는 뜨지 않고, 휴지통 알림이 그대로 보인다 (F1-B)
     expect(find.text('Mehh Pro'), findsNothing);
-    expect(find.textContaining('휴지통을 비우면 공간이 생겨요'), findsOneWidget);
+    expect(find.textContaining('휴지통을 비우면 그만큼 공간이 생겨요'), findsOneWidget);
+    expect(find.textContaining(RegExp(r'✓ [0-9]+장 · [0-9.]+(KB|MB|GB|B) 휴지통으로')), findsOneWidget);
     final stats = PickStats.of(picks);
     expect(stats.suggested, 2);
     expect(stats.accepted, 1);

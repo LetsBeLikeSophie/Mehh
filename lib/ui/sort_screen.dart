@@ -172,8 +172,8 @@ class _SortScreenState extends ConsumerState<SortScreen>
       context,
       ref,
       ids,
-      doneNote: (n) => kept == 0
-          ? context.l.cortexSentTrashed(n)
+      doneNote: (n, size) => kept == 0
+          ? context.l.cortexSentTrashed(n, size)
           : context.l.cortexSentSomeTrashed(n, kept),
     );
     if (mounted) setState(() => _busy = false);

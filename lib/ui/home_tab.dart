@@ -3,6 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../config/app_config.dart';
 import '../data/pro.dart';
 import '../l10n/l10n.dart';
 import '../logic/format.dart';
@@ -216,6 +217,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                     ),
                     const SizedBox(height: 6),
                     const _Subtitle(),
+                    const _FreedBar(),
                     if (limited) ...[
                       const SizedBox(height: 20),
                       _LimitedBanner(
@@ -473,6 +475,51 @@ class _Subtitle extends ConsumerWidget {
       style: const TextStyle(
         fontSize: MehhText.bodySmall,
         color: MehhColors.textMuted,
+      ),
+    );
+  }
+}
+
+/// 이번 달 보낸 용량 vs 쳐 둔 X 용량 막대. 보낼 때마다 검은 부분이 차오른다 (2026-10-23 Sophie)
+class _FreedBar extends ConsumerWidget {
+  const _FreedBar();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final freed = ref.watch(freedThisMonthProvider).value ?? 0;
+    final marked = ref.watch(markedBytesProvider).value ?? 0;
+    if (freed + marked == 0) return const SizedBox.shrink();
+    final l = context.l;
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TweenAnimationBuilder<double>(
+            tween: Tween(end: freed / (freed + marked)),
+            duration: freedBarAnimation,
+            curve: Curves.easeOutCubic,
+            builder: (context, v, _) => ClipRRect(
+              borderRadius: BorderRadius.circular(MehhRadius.strip),
+              child: LinearProgressIndicator(
+                value: v,
+                minHeight: 8,
+                color: MehhColors.black,
+                backgroundColor: MehhColors.border,
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            marked > 0
+                ? l.markedLeft(formatBytes(marked))
+                : l.markedAllSent,
+            style: const TextStyle(
+              fontSize: MehhText.caption,
+              color: MehhColors.textMuted,
+            ),
+          ),
+        ],
       ),
     );
   }
