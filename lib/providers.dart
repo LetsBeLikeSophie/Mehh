@@ -627,7 +627,8 @@ final groupStatusProvider = Provider.autoDispose.family<GroupStatus, DayGroup>((
   final touched = g.photos.any(
     (p) => stateOf(decisions, p.id) != DecisionState.undecided,
   );
-  // 캡처는 앱이 추천하지 않는다 (정리 화면 SortSource와 같은 기준): X가 있을 때만 할 일
+  // 캡처 추천(C4)은 무료이고 [추천 보기]로 받는다. 홈의 "정리할 묶음 N개"에 캡처를 셀지는 아직 정하지 않아서
+  // 상태는 X가 있을 때만 할 일로 둔다 (줄 아래 글자는 캡처 추천 장수를 보여 준다)
   if (g.kind == DayGroupKind.screenshots) {
     if (pile) return GroupStatus.needsWork;
     return touched ? GroupStatus.done : GroupStatus.nothing;

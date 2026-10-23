@@ -452,7 +452,7 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('캡처: [추천 보기]는 없고, 홈 상태는 X가 있을 때만 할 일', (tester) async {
+  testWidgets('캡처: 추천이 없으면 [추천 보기]도 없고, 홈 상태는 X가 있을 때만 할 일', (tester) async {
     final shots = DayGroup(
       id: 'shots',
       kind: DayGroupKind.screenshots,

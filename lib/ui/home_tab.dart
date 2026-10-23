@@ -6,6 +6,7 @@ import 'package:photo_manager/photo_manager.dart';
 import '../data/pro.dart';
 import '../l10n/l10n.dart';
 import '../logic/format.dart';
+import '../logic/recommend.dart';
 import '../models/day_group.dart';
 import '../models/decision.dart';
 import '../providers.dart';
@@ -571,9 +572,17 @@ class _GroupTile extends ConsumerWidget {
     final status = ref.watch(groupStatusProvider(group));
     final done = status == GroupStatus.done;
     final plan = ref.watch(groupPlanProvider(group));
-    // 앱이 고른 추천 장수만 (직접 X는 세지 않는다)
-    final suggested = plan.trash.length;
     final decisions = ref.watch(decisionsProvider).value ?? const {};
+    // 앱이 고른 추천 장수만 (직접 X는 세지 않는다). 캡처는 캡처 추천으로 센다 (시니어 리뷰 2026-10-23 S-3)
+    final shots = group.kind == DayGroupKind.screenshots;
+    final suggested = shots
+        ? planScreenshots(
+            group.photos,
+            ref.watch(analysisProvider.select((a) => a.features)),
+            decisions,
+            now: DateTime.now(),
+          ).length
+        : plan.trash.length;
     final unsent = group.photos.any(
       (p) => stateOf(decisions, p.id) == DecisionState.toTrash,
     );
@@ -588,8 +597,10 @@ class _GroupTile extends ConsumerWidget {
       case GroupStatus.done:
         meta.write(' · ${l.allSeen}');
       case GroupStatus.nothing:
-        if (group.kind == DayGroupKind.screenshots) {
-          meta.write(' · ${l.pickScreenshots}');
+        if (shots) {
+          meta.write(
+            ' · ${suggested > 0 ? l.suggestedCount(suggested) : l.pickScreenshots}',
+          );
         }
     }
 
