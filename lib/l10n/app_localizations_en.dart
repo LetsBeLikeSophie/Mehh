@@ -514,23 +514,6 @@ class L10nEn extends L10n {
       'These records stay on this phone. Above 80% for day sets, it\'s worth turning on payments.';
 
   @override
-  String cortexSentTrashed(int count, String size) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          '✓ $countString · $size sent to Cortex and moved to trash · Cortex takes it from here · restore within 30 days',
-      one:
-          '✓ 1 · $size sent to Cortex and moved to trash · Cortex takes it from here · restore within 30 days',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get cortexMultiUnsupported =>
       'Cortex can\'t take several at once yet. Please update Cortex.';
 
@@ -698,11 +681,6 @@ class L10nEn extends L10n {
       'You often keep accidental shots, so we\'ll stop suggesting them for now · we\'ll try again in 30 days';
 
   @override
-  String cortexSentSomeTrashed(int count, int kept) {
-    return 'Moved $count Cortex got to trash · $kept it didn\'t get are still marked';
-  }
-
-  @override
   String get useFreeSetTitle => 'Use a free set?';
 
   @override
@@ -737,33 +715,18 @@ class L10nEn extends L10n {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Send $countString screenshots to Cortex and delete them?',
-      one: 'Send 1 screenshot to Cortex and delete it?',
+      other: 'Send $countString to Cortex?',
+      one: 'Send 1 to Cortex?',
     );
     return '$_temp0';
   }
 
   @override
-  String get cortexAskYes => 'Send & delete';
+  String get cortexAskYes => 'Send';
 
   @override
   String noFreeLead(String date, int count) {
     return 'No free sets left this month · $count more on $date';
-  }
-
-  @override
-  String cortexSavedTrashing(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '✓ Cortex got $countString · moving them to trash',
-      one: '✓ Cortex got 1 · moving it to trash',
-    );
-    return '$_temp0';
   }
 
   @override
@@ -776,4 +739,93 @@ class L10nEn extends L10n {
 
   @override
   String get markedAllSent => 'Everything you marked is sent';
+
+  @override
+  String cortexGotTitle(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '✓ Moved $countString to Cortex',
+      one: '✓ Moved 1 to Cortex',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cortexGotBody =>
+      'Cortex analyzes them in the background. You can close the app.\nMove these photos to trash?';
+
+  @override
+  String cortexGotKept(int kept) {
+    final intl.NumberFormat keptNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String keptString = keptNumberFormat.format(kept);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      kept,
+      locale: localeName,
+      other: '$keptString Cortex didn\'t get stay as is.',
+      one: '1 Cortex didn\'t get stays as is.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cortexGotBadge => 'In Cortex';
+
+  @override
+  String get later => 'Later';
+
+  @override
+  String focusFinishTitle(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Move $countString to trash and finish?',
+      one: 'Move 1 to trash and finish?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String focusFinishBody(int total, int count) {
+    final intl.NumberFormat totalNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String totalString = totalNumberFormat.format(total);
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'You marked $countString of $totalString with X.',
+      one: 'You marked 1 of $totalString with X.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get focusFinishNone => 'Nothing is marked with X. Finish?';
+
+  @override
+  String get focusKeepLooking => 'Keep looking';
+
+  @override
+  String get focusFinishYes => 'Finish';
+
+  @override
+  String get focusHint => 'Press and hold to finish';
+
+  @override
+  String get focusFinishSemantics => 'Finish sorting';
 }

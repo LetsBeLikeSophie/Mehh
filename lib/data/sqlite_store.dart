@@ -19,14 +19,16 @@ const _picksTable = '''
 
 const _seenTable = 'CREATE TABLE seen (id TEXT PRIMARY KEY)';
 const _cortexSentTable =
-    'CREATE TABLE cortex_sent (id TEXT PRIMARY KEY, at INTEGER)';
+    'CREATE TABLE cortex_sent (id TEXT PRIMARY KEY, at INTEGER, got INTEGER DEFAULT 0)';
+const _countersTable =
+    'CREATE TABLE counters (key TEXT PRIMARY KEY, n INTEGER)';
 
 class SqliteStore implements Store {
   Database? _db;
 
   Future<Database> get _database async => _db ??= await openDatabase(
     'mehh.db',
-    version: 6,
+    version: 7,
     onUpgrade: (db, from, _) async {
       // 분석 결과는 캐시라서 버리고 다시 계산한다
       if (from < 3) {
@@ -35,7 +37,14 @@ class SqliteStore implements Store {
       }
       if (from < 4) await db.execute(_picksTable);
       if (from < 5) await db.execute(_seenTable);
-      if (from < 6) await db.execute(_cortexSentTable);
+      if (from < 6) {
+        await db.execute(_cortexSentTable);
+      } else if (from < 7) {
+        await db.execute(
+          'ALTER TABLE cortex_sent ADD COLUMN got INTEGER DEFAULT 0',
+        );
+      }
+      if (from < 7) await db.execute(_countersTable);
     },
     onCreate: (db, _) async {
       await db.execute(_featuresTable);
@@ -53,6 +62,7 @@ class SqliteStore implements Store {
       await db.execute(_picksTable);
       await db.execute(_seenTable);
       await db.execute(_cortexSentTable);
+      await db.execute(_countersTable);
     },
   );
 
@@ -225,13 +235,17 @@ class SqliteStore implements Store {
   };
 
   @override
-  Future<void> addCortexSent(Iterable<String> photoIds) async {
+  Future<void> addCortexSent(
+    Iterable<String> photoIds, {
+    bool got = false,
+  }) async {
     final batch = (await _database).batch();
     final at = DateTime.now().millisecondsSinceEpoch;
     for (final id in photoIds) {
       batch.insert('cortex_sent', {
         'id': id,
         'at': at,
+        'got': got ? 1 : 0,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
     }
     await batch.commit(noResult: true);
@@ -247,10 +261,30 @@ class SqliteStore implements Store {
   }
 
   @override
-  Future<Set<String>> loadCortexSent() async => {
+  Future<Map<String, bool>> loadCortexSent() async => {
     for (final r in await (await _database).query('cortex_sent'))
-      r['id'] as String,
+      r['id'] as String: r['got'] == 1,
   };
+
+  @override
+  Future<int> counter(String key) async {
+    final rows = await (await _database).query(
+      'counters',
+      where: 'key = ?',
+      whereArgs: [key],
+    );
+    return rows.isEmpty ? 0 : rows.first['n'] as int;
+  }
+
+  @override
+  Future<void> bumpCounter(String key) async {
+    final db = await _database;
+    await db.rawInsert(
+      'INSERT INTO counters (key, n) VALUES (?, 1) '
+      'ON CONFLICT(key) DO UPDATE SET n = n + 1',
+      [key],
+    );
+  }
 
   @override
   Future<void> clearAll() async {
@@ -265,6 +299,7 @@ class SqliteStore implements Store {
         'picks',
         'seen',
         'cortex_sent',
+        'counters',
       ]) {
         await tx.delete(t);
       }

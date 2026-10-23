@@ -793,12 +793,6 @@ abstract class L10n {
   /// **'이 기록은 이 폰에만 있어요. 그날의 묶음 비율이 80%를 넘으면 결제를 켤 만해요.'**
   String get accNote;
 
-  /// No description provided for @cortexSentTrashed.
-  ///
-  /// In ko, this message translates to:
-  /// **'✓ {count}장 · {size} Cortex로 보내고 휴지통으로 보냈어요 · 정리는 Cortex가 이어서 해요 · 30일 안에 되살릴 수 있어요'**
-  String cortexSentTrashed(int count, String size);
-
   /// No description provided for @cortexMultiUnsupported.
   ///
   /// In ko, this message translates to:
@@ -979,12 +973,6 @@ abstract class L10n {
   /// **'실수로 찍힌 사진은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요'**
   String get mutedJunk;
 
-  /// No description provided for @cortexSentSomeTrashed.
-  ///
-  /// In ko, this message translates to:
-  /// **'Cortex가 받은 {count}장은 휴지통으로 보냈어요 · 받지 못한 {kept}장은 X 그대로예요'**
-  String cortexSentSomeTrashed(int count, int kept);
-
   /// No description provided for @useFreeSetTitle.
   ///
   /// In ko, this message translates to:
@@ -1012,13 +1000,13 @@ abstract class L10n {
   /// No description provided for @cortexAskTitle.
   ///
   /// In ko, this message translates to:
-  /// **'캡처 {count}장을 Cortex로\n보내고 지울까요?'**
+  /// **'{count}장을 Cortex로 보낼까요?'**
   String cortexAskTitle(int count);
 
   /// No description provided for @cortexAskYes.
   ///
   /// In ko, this message translates to:
-  /// **'보내고 지우기'**
+  /// **'보내기'**
   String get cortexAskYes;
 
   /// No description provided for @noFreeLead.
@@ -1026,12 +1014,6 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'이번 달 무료 묶음을 다 썼어요 · {date}에 {count}개가 다시 생겨요'**
   String noFreeLead(String date, int count);
-
-  /// No description provided for @cortexSavedTrashing.
-  ///
-  /// In ko, this message translates to:
-  /// **'✓ Cortex가 {count}장 받았어요 · 휴지통으로 보내요'**
-  String cortexSavedTrashing(int count);
 
   /// No description provided for @cortexSentBadge.
   ///
@@ -1050,6 +1032,78 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'쳐 둔 X를 다 보냈어요'**
   String get markedAllSent;
+
+  /// No description provided for @cortexGotTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'✓ Cortex로 {count}장 옮겼어요'**
+  String cortexGotTitle(int count);
+
+  /// No description provided for @cortexGotBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'분석은 Cortex가 뒤에서 해요. 앱을 닫아도 돼요.\n이 사진을 휴지통으로 지울까요?'**
+  String get cortexGotBody;
+
+  /// No description provided for @cortexGotKept.
+  ///
+  /// In ko, this message translates to:
+  /// **'Cortex가 받지 못한 {kept}장은 그대로 둬요.'**
+  String cortexGotKept(int kept);
+
+  /// No description provided for @cortexGotBadge.
+  ///
+  /// In ko, this message translates to:
+  /// **'Cortex에 있음'**
+  String get cortexGotBadge;
+
+  /// No description provided for @later.
+  ///
+  /// In ko, this message translates to:
+  /// **'나중에'**
+  String get later;
+
+  /// No description provided for @focusFinishTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}장을 휴지통으로 보내고 끝낼까요?'**
+  String focusFinishTitle(int count);
+
+  /// No description provided for @focusFinishBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'{total}장 중 {count}장에 X를 쳤어요.'**
+  String focusFinishBody(int total, int count);
+
+  /// No description provided for @focusFinishNone.
+  ///
+  /// In ko, this message translates to:
+  /// **'X 친 사진이 없어요. 끝낼까요?'**
+  String get focusFinishNone;
+
+  /// No description provided for @focusKeepLooking.
+  ///
+  /// In ko, this message translates to:
+  /// **'계속 보기'**
+  String get focusKeepLooking;
+
+  /// No description provided for @focusFinishYes.
+  ///
+  /// In ko, this message translates to:
+  /// **'끝내기'**
+  String get focusFinishYes;
+
+  /// No description provided for @focusHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'길게 누르면 정리를 끝낼 수 있어요'**
+  String get focusHint;
+
+  /// No description provided for @focusFinishSemantics.
+  ///
+  /// In ko, this message translates to:
+  /// **'정리 끝내기'**
+  String get focusFinishSemantics;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

@@ -306,18 +306,6 @@
     }
   },
   "accNote": "이 기록은 이 폰에만 있어요. 그날의 묶음 비율이 80%를 넘으면 결제를 켤 만해요.",
-  "cortexSentTrashed": "✓ {count}장 · {size} Cortex로 보내고 휴지통으로 보냈어요 · 정리는 Cortex가 이어서 해요 · 30일 안에 되살릴 수 있어요",
-  "@cortexSentTrashed": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "format": "decimalPattern"
-      },
-      "size": {
-        "type": "String"
-      }
-    }
-  },
   "cortexMultiUnsupported": "Cortex가 아직 여러 장 받기를 못 해요. Cortex를 업데이트해 주세요.",
   "showPicks": "추천 보기 · {count}장",
   "@showPicks": {
@@ -422,17 +410,6 @@
   "mutedBurst": "비슷한 연속 컷은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요",
   "mutedBlurry": "흔들린 사진은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요",
   "mutedJunk": "실수로 찍힌 사진은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요",
-  "cortexSentSomeTrashed": "Cortex가 받은 {count}장은 휴지통으로 보냈어요 · 받지 못한 {kept}장은 X 그대로예요",
-  "@cortexSentSomeTrashed": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "kept": {
-        "type": "int"
-      }
-    }
-  },
   "useFreeSetTitle": "무료 묶음을 쓸까요?",
   "useFreeSetBody": "이 묶음의 비슷한 컷·흔들림 추천 {count}장을 보려면 이번 달 무료 묶음 1개를 써요. 지금 {left}개 남았어요. 한 번 연 묶음은 계속 열려 있어요.",
   "useFreeSetYes": "무료 묶음 쓰기",
@@ -448,8 +425,8 @@
       }
     }
   },
-  "cortexAskTitle": "캡처 {count}장을 Cortex로\n보내고 지울까요?",
-  "cortexAskYes": "보내고 지우기",
+  "cortexAskTitle": "{count}장을 Cortex로 보낼까요?",
+  "cortexAskYes": "보내기",
   "@cortexAskTitle": {
     "placeholders": {
       "count": {
@@ -469,9 +446,22 @@
       }
     }
   },
-  "cortexSavedTrashing": "✓ Cortex가 {count}장 받았어요 · 휴지통으로 보내요",
   "cortexSentBadge": "Cortex로 보냄",
-  "@cortexSavedTrashing": {
+  "markedLeft": "X 쳐 둔 {size}가 남았어요",
+  "markedAllSent": "쳐 둔 X를 다 보냈어요",
+  "cortexGotTitle": "✓ Cortex로 {count}장 옮겼어요",
+  "cortexGotBody": "분석은 Cortex가 뒤에서 해요. 앱을 닫아도 돼요.\n이 사진을 휴지통으로 지울까요?",
+  "cortexGotKept": "Cortex가 받지 못한 {kept}장은 그대로 둬요.",
+  "cortexGotBadge": "Cortex에 있음",
+  "later": "나중에",
+  "focusFinishTitle": "{count}장을 휴지통으로 보내고 끝낼까요?",
+  "focusFinishBody": "{total}장 중 {count}장에 X를 쳤어요.",
+  "focusFinishNone": "X 친 사진이 없어요. 끝낼까요?",
+  "focusKeepLooking": "계속 보기",
+  "focusFinishYes": "끝내기",
+  "focusHint": "길게 누르면 정리를 끝낼 수 있어요",
+  "focusFinishSemantics": "정리 끝내기",
+  "@cortexGotTitle": {
     "placeholders": {
       "count": {
         "type": "int",
@@ -479,6 +469,32 @@
       }
     }
   },
-  "markedLeft": "X 쳐 둔 {size}가 남았어요",
-  "markedAllSent": "쳐 둔 X를 다 보냈어요"
+  "@cortexGotKept": {
+    "placeholders": {
+      "kept": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "@focusFinishTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "@focusFinishBody": {
+    "placeholders": {
+      "total": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  }
 }

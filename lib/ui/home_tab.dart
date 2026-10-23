@@ -511,9 +511,7 @@ class _FreedBar extends ConsumerWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            marked > 0
-                ? l.markedLeft(formatBytes(marked))
-                : l.markedAllSent,
+            marked > 0 ? l.markedLeft(formatBytes(marked)) : l.markedAllSent,
             style: const TextStyle(
               fontSize: MehhText.caption,
               color: MehhColors.textMuted,

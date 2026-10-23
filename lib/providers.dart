@@ -561,6 +561,7 @@ class Cleaner {
         .addFreedBytes(monthKey(DateTime.now()), bytes);
     ref.invalidate(freedThisMonthProvider);
     ref.read(libraryProvider.notifier).removePhotos(done.toSet());
+    await ref.read(cortexSentProvider.notifier).remove(done);
     return (count: done.length, bytes: bytes);
   }
 }
@@ -666,28 +667,29 @@ final seenProvider = AsyncNotifierProvider<SeenNotifier, Set<String>>(
   SeenNotifier.new,
 );
 
-/// Cortex로 보냈는데 받았다는 신호가 아직 없는 사진 ([Store.addCortexSent])
-class CortexSentNotifier extends AsyncNotifier<Set<String>> {
+/// Cortex로 보낸 사진 → Cortex가 받았는지 ([Store.addCortexSent])
+class CortexSentNotifier extends AsyncNotifier<Map<String, bool>> {
   @override
-  Future<Set<String>> build() => ref.read(storeProvider).loadCortexSent();
+  Future<Map<String, bool>> build() => ref.read(storeProvider).loadCortexSent();
 
-  Future<void> add(Iterable<String> photoIds) async {
+  Future<void> add(Iterable<String> photoIds, {bool got = false}) async {
     final ids = photoIds.toList();
     if (ids.isEmpty) return;
-    await ref.read(storeProvider).addCortexSent(ids);
-    state = AsyncData({...state.value ?? {}, ...ids});
+    await ref.read(storeProvider).addCortexSent(ids, got: got);
+    state = AsyncData({...state.value ?? {}, for (final id in ids) id: got});
   }
 
   Future<void> remove(Iterable<String> photoIds) async {
-    final ids = photoIds.toList();
+    final now = state.value ?? const {};
+    final ids = photoIds.where(now.containsKey).toList();
     if (ids.isEmpty) return;
     await ref.read(storeProvider).removeCortexSent(ids);
-    state = AsyncData({...state.value ?? {}}..removeAll(ids));
+    state = AsyncData({...now}..removeWhere((k, _) => ids.contains(k)));
   }
 }
 
 final cortexSentProvider =
-    AsyncNotifierProvider<CortexSentNotifier, Set<String>>(
+    AsyncNotifierProvider<CortexSentNotifier, Map<String, bool>>(
       CortexSentNotifier.new,
     );
 

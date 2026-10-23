@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../config/app_config.dart';
 import '../data/handoff.dart';
 import '../data/pro.dart';
 import '../l10n/l10n.dart';
@@ -86,8 +85,8 @@ class _SortScreenState extends ConsumerState<SortScreen>
     });
   }
 
-  /// Cortex가 "받았어요"(파일을 자기 쪽에 복사함) 신호를 보내면 그 사진을 휴지통으로.
-  /// 분석·저장은 그 뒤 Cortex가 혼자 한다 (2026-10-23 Sophie: 보내면 끝)
+  /// Cortex가 "받았어요"(파일을 자기 쪽에 복사함) 신호를 보내면, 옮겼다고 알리고
+  /// 휴지통으로 지울지 묻는다. 분석은 그 뒤 Cortex가 혼자 한다 (2026-10-24 Sophie)
   void _onCortexSaved(CortexSaved saved) {
     if (!mounted) return;
     final ids = _sentToCortex;
@@ -96,42 +95,55 @@ class _SortScreenState extends ConsumerState<SortScreen>
       final waiting = ref.read(cortexSentProvider).value ?? const {};
       final done = [
         for (final id in saved.ids ?? const <String>{})
-          if (waiting.contains(id)) id,
+          if (waiting[id] == false) id,
       ];
-      if (done.isEmpty) return;
-      ref.read(cortexSentProvider.notifier).remove(done);
-      _trashAfterCortex(done);
+      if (done.isNotEmpty) _askTrashAfterCortex(done);
       return;
     }
     _sentToCortex = null;
-    // 받은 사진 목록이 오면 그 사진만 휴지통으로, 나머지는 X 그대로 (C1-B)
+    // 받은 사진 목록이 오면 그 사진만, 나머지는 X 그대로 (C1-B)
     if (saved.ids case final savedIds?) {
       final done = [
         for (final id in ids)
           if (savedIds.contains(id)) id,
       ];
       if (done.isEmpty) {
-        setState(() => _busy = false);
         showNote(context, context.l.cortexPartial(0));
         return;
       }
-      ref.read(cortexSentProvider.notifier).remove(done);
-      _trashAfterCortex(done, kept: ids.length - done.length);
+      _askTrashAfterCortex(done, kept: ids.length - done.length);
       return;
     }
-    // 장수만 오면(예전 Cortex) 보낸 장수만큼 받았을 때만 휴지통으로 (S-2)
+    // 장수만 오면(예전 Cortex) 보낸 장수만큼 받았을 때만 (S-2)
     if (saved.count < ids.length) {
-      setState(() => _busy = false);
       showNote(context, context.l.cortexPartial(saved.count));
       return;
     }
-    ref.read(cortexSentProvider.notifier).remove(ids);
-    _trashAfterCortex(ids);
+    _askTrashAfterCortex(ids);
   }
 
-  /// 여러 장을 한 번에 Cortex로 보낸다. Cortex가 받으면 휴지통으로, 분석은 Cortex가 나중에.
+  /// "✓ Cortex로 N장 옮겼어요 · 분석은 뒤에서 · 휴지통으로 지울까요?" → 안드로이드 휴지통 확인 창
+  /// [나중에]면 X는 그대로, 사진에 "Cortex에 있음" 표시가 남는다
+  Future<void> _askTrashAfterCortex(List<String> ids, {int kept = 0}) async {
+    await ref.read(cortexSentProvider.notifier).add(ids, got: true);
+    if (!mounted) return;
+    final l = context.l;
+    final ok = await askMehh(
+      context,
+      title: l.cortexGotTitle(ids.length),
+      body: kept > 0
+          ? '${l.cortexGotBody}\n${l.cortexGotKept(kept)}'
+          : l.cortexGotBody,
+      no: l.later,
+      yes: l.toTrash,
+    );
+    if (!ok || !mounted) return;
+    await sendToTrash(context, ref, ids);
+  }
+
+  /// 여러 장을 한 번에 Cortex로 보낸다. Cortex가 받으면 지울지 묻고, 분석은 Cortex가 뒤에서.
   Future<void> _sendCortex(List<String> ids) async {
-    // 매번 한 줄로 묻는다: "보내고 지울까요?" (UX-43, 2026-10-23 Sophie: 설명 없이 한 번에, 매번)
+    // 매번 한 줄로 묻는다: "N장을 Cortex로 보낼까요?" (UX-43, 2026-10-24 Sophie: 지우기는 받은 뒤에 묻는다)
     final l = context.l;
     final ok = await askMehh(
       context,
@@ -145,7 +157,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
     if (!mounted) return;
     switch (r) {
       case SendResult.ok:
-        // Cortex가 받았다고 알려 오면 휴지통으로 (안 알려 오면 그대로 둔다)
+        // Cortex가 받았다고 알려 오면 지울지 묻는다 (안 알려 오면 그대로 둔다)
         _savedSub ??= ref
             .read(handoffProvider)
             .cortexSaved
@@ -161,22 +173,6 @@ class _SortScreenState extends ConsumerState<SortScreen>
         setState(() => _busy = false);
         showNote(context, l.cortexFailed);
     }
-  }
-
-  Future<void> _trashAfterCortex(List<String> ids, {int kept = 0}) async {
-    // 휴지통 확인 창(안드로이드)이 뜨기 전에 Cortex가 받았다고 먼저 알린다 (2026-10-23 Sophie)
-    showNote(context, context.l.cortexSavedTrashing(ids.length));
-    await Future<void>.delayed(cortexSavedPause);
-    if (!mounted) return;
-    await sendToTrash(
-      context,
-      ref,
-      ids,
-      doneNote: (n, size) => kept == 0
-          ? context.l.cortexSentTrashed(n, size)
-          : context.l.cortexSentSomeTrashed(n, kept),
-    );
-    if (mounted) setState(() => _busy = false);
   }
 
   Future<void> _toggle(String id, bool marked) => ref
@@ -260,16 +256,25 @@ class _SortScreenState extends ConsumerState<SortScreen>
     if (mounted) setState(() => _picked.addAll(ids));
   }
 
-  void _open(String id) => Navigator.of(context).push(
-    MaterialPageRoute(
-      builder: (_) => FocusScreen(
-        kind: widget.kind,
-        group: widget.group,
-        place: widget.place,
-        initialId: id,
+  /// 크게 보기. 거기서 길게 눌러 "휴지통으로 보내고 끝내기"를 고르면 돌아와서 바로 보낸다
+  Future<void> _open(String id) async {
+    final send = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => FocusScreen(
+          kind: widget.kind,
+          group: widget.group,
+          place: widget.place,
+          initialId: id,
+        ),
       ),
-    ),
-  );
+    );
+    if (send != true || !mounted) return;
+    await WidgetsBinding.instance.endOfFrame;
+    if (mounted) _sendMarked?.call();
+  }
+
+  /// 지금 X인 사진을 [N장 휴지통으로]처럼 보낸다 (마지막 build 기준)
+  VoidCallback? _sendMarked;
 
   Future<void> _send(
     List<String> ids,
@@ -374,9 +379,8 @@ class _SortScreenState extends ConsumerState<SortScreen>
       _seenTags[e.key] = e.value.name;
     }
     _preMarkedSeen.addAll(src.preMarked);
-    final cortex =
-        widget.kind == SortKind.screenshots &&
-        (ref.watch(cortexInstalledProvider).value ?? false);
+    // Cortex로 보내기는 모든 종류에서 같은 자리 (2026-10-24 Sophie)
+    final cortex = ref.watch(cortexInstalledProvider).value ?? false;
     final decisions = ref.watch(decisionsProvider).value ?? const {};
     final entities = ref.read(photoLibraryProvider).entities;
     final order = [
@@ -400,7 +404,8 @@ class _SortScreenState extends ConsumerState<SortScreen>
           ].where((u) => u.isNotEmpty).toList()
         : [order];
 
-    final cortexSent = ref.watch(cortexSentProvider).value ?? const {};
+    final cortexSent =
+        ref.watch(cortexSentProvider).value ?? const <String, bool>{};
 
     Widget tile(String id) {
       final out = marked.contains(id);
@@ -433,12 +438,15 @@ class _SortScreenState extends ConsumerState<SortScreen>
                   bottom: 4,
                   child: MehhBadge(tagText(tag, l), inverted: out),
                 ),
-              // 보냈는데 받았다는 신호가 없는 사진: 어디서 멈췄는지 보이게
-              if (cortexSent.contains(id))
+              // Cortex로 보낸 사진: 받았는지까지 보이게 (어디서 멈췄는지 알 수 있게)
+              if (cortexSent[id] case final got?)
                 Positioned(
                   left: 4,
                   top: 4,
-                  child: MehhBadge(l.cortexSentBadge, inverted: out),
+                  child: MehhBadge(
+                    got ? l.cortexGotBadge : l.cortexSentBadge,
+                    inverted: out,
+                  ),
                 ),
             ],
           ),
@@ -455,6 +463,8 @@ class _SortScreenState extends ConsumerState<SortScreen>
               ? l.analyzingShort
               : l.countAndRange(range, l.analyzingShort))
         : range;
+
+    _sendMarked = marked.isEmpty ? null : () => _send(marked, src, order);
 
     return Scaffold(
       body: SafeArea(

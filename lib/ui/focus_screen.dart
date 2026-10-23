@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../config/app_config.dart';
+import '../data/store.dart';
 import '../l10n/l10n.dart';
 import '../models/day_group.dart';
 import '../models/decision.dart';
@@ -47,6 +51,61 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
   double _zoom = 1;
 
   _Motion _motion = _Motion.next;
+
+  // ───────────────────────── 길게 눌러 끝내기 (2026-10-24 Sophie: 버튼 대신)
+
+  Timer? _idle;
+  bool _hint = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _restartIdle();
+  }
+
+  @override
+  void dispose() {
+    _idle?.cancel();
+    super.dispose();
+  }
+
+  /// 가만히 있으면 "길게 누르면 정리를 끝낼 수 있어요" (하루 [focusHintsPerDay]번까지)
+  void _restartIdle() {
+    _idle?.cancel();
+    if (_hint) setState(() => _hint = false);
+    _idle = Timer(focusIdleHint, () async {
+      final store = ref.read(storeProvider);
+      final key = 'focusHint-${dayKey(DateTime.now())}';
+      if (await store.counter(key) >= focusHintsPerDay || !mounted) return;
+      await store.bumpCounter(key);
+      if (!mounted) return;
+      setState(() => _hint = true);
+      _idle = Timer(focusHintShown, () {
+        if (mounted) setState(() => _hint = false);
+      });
+    });
+  }
+
+  /// 길게 누르면: X 친 사진이 있으면 "N장을 휴지통으로 보내고 끝낼까요?",
+  /// 없으면 "끝낼까요?". 보내기로 하면 정리 화면으로 돌아가 바로 보낸다
+  Future<void> _finish(int total, int marked) async {
+    _idle?.cancel();
+    setState(() => _hint = false);
+    final l = context.l;
+    final ok = await askMehh(
+      context,
+      title: marked > 0 ? l.focusFinishTitle(marked) : l.focusFinishNone,
+      body: marked > 0 ? l.focusFinishBody(total, marked) : null,
+      no: l.focusKeepLooking,
+      yes: marked > 0 ? l.toTrash : l.focusFinishYes,
+    );
+    if (!mounted) return;
+    if (ok) {
+      Navigator.of(context).pop(marked > 0);
+    } else {
+      _restartIdle();
+    }
+  }
 
   void _go(List<String> ids, int step, _Motion motion) {
     if (ids.isEmpty) return;
@@ -156,6 +215,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     final (inFrom, outTo) = _slide;
     final kept = state == DecisionState.keep;
     final label = _dragLabel(l);
+    final markedCount = ids.where((id) => isMarked(id, decisions, src)).length;
 
     final card = KeyedSubtree(
       key: ValueKey(current),
@@ -191,7 +251,15 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                 ),
               ),
               if (label != null)
-                Center(child: _Chip(label, dark: true, big: true)),
+                Center(child: _Chip(label, dark: true, big: true))
+              else
+                Center(
+                  child: AnimatedOpacity(
+                    opacity: _hint ? 1 : 0,
+                    duration: const Duration(milliseconds: 250),
+                    child: _Chip(l.focusHint, dark: true, big: true),
+                  ),
+                ),
             ],
           ),
         ),
@@ -199,102 +267,114 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     );
 
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
-          child: Column(
-            children: [
-              // 위치는 아래 사진 줄이 보여 주므로 "3 / 214" 숫자는 두지 않는다.
-              // 되돌리기 버튼도 두지 않는다: 반대로 밀면 된다 (2026-10-22)
-              const MehhBackButton(),
-              const SizedBox(height: 4),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: _ActionBar(
-                  // 위로 끌수록 채워진다 (90px에서 꽉 참)
-                  fill: (-_drag.dy / 90).clamp(0.0, 1.0),
-                  icon: Icons.delete_outline,
-                  label: l.pile,
-                  semantics: l.trashBarSemantics,
-                  onTap: () => _up(ids),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: Padding(
+      // 손대면 "가만히 있음" 시간을 처음부터
+      body: Listener(
+        onPointerDown: (_) => _restartIdle(),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
+            child: Column(
+              children: [
+                // 위치는 아래 사진 줄이 보여 주므로 "3 / 214" 숫자는 두지 않는다.
+                // 되돌리기 버튼도 두지 않는다: 반대로 밀면 된다 (2026-10-22)
+                const MehhBackButton(),
+                const SizedBox(height: 4),
+                Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Semantics(
-                    label: l.photoSemantics,
-                    customSemanticsActions: {
-                      CustomSemanticsAction(label: l.pile): () => _up(ids),
-                      CustomSemanticsAction(label: l.keep): () => _down(ids),
-                      CustomSemanticsAction(label: l.nextPhoto): () =>
-                          _go(ids, 1, _Motion.next),
-                      CustomSemanticsAction(label: l.prevPhoto): () =>
-                          _go(ids, -1, _Motion.prev),
-                    },
-                    child: GestureDetector(
-                      onScaleStart: _onScaleStart,
-                      onScaleUpdate: _onScaleUpdate,
-                      onScaleEnd: (_) => _onScaleEnd(ids),
-                      onTap: () => openPhoto(context, current),
-                      child: ClipRect(
-                        child: AnimatedSwitcher(
-                          duration: Duration(milliseconds: _dragging ? 0 : 220),
-                          switchInCurve: Curves.easeOutCubic,
-                          switchOutCurve: Curves.easeInCubic,
-                          layoutBuilder: (cur, prev) => Stack(
-                            fit: StackFit.expand,
-                            children: [...prev, ?cur],
+                  child: _ActionBar(
+                    // 위로 끌수록 채워진다 (90px에서 꽉 참)
+                    fill: (-_drag.dy / 90).clamp(0.0, 1.0),
+                    icon: Icons.delete_outline,
+                    label: l.pile,
+                    semantics: l.trashBarSemantics,
+                    onTap: () => _up(ids),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Semantics(
+                      label: l.photoSemantics,
+                      customSemanticsActions: {
+                        CustomSemanticsAction(label: l.pile): () => _up(ids),
+                        CustomSemanticsAction(label: l.keep): () => _down(ids),
+                        CustomSemanticsAction(label: l.nextPhoto): () =>
+                            _go(ids, 1, _Motion.next),
+                        CustomSemanticsAction(label: l.prevPhoto): () =>
+                            _go(ids, -1, _Motion.prev),
+                        CustomSemanticsAction(
+                          label: l.focusFinishSemantics,
+                        ): () =>
+                            _finish(ids.length, markedCount),
+                      },
+                      child: GestureDetector(
+                        onScaleStart: _onScaleStart,
+                        onScaleUpdate: _onScaleUpdate,
+                        onScaleEnd: (_) => _onScaleEnd(ids),
+                        onTap: () => openPhoto(context, current),
+                        // 길게 누르기 = 언제나 "정리 끝내기"
+                        onLongPress: () => _finish(ids.length, markedCount),
+                        child: ClipRect(
+                          child: AnimatedSwitcher(
+                            duration: Duration(
+                              milliseconds: _dragging ? 0 : 220,
+                            ),
+                            switchInCurve: Curves.easeOutCubic,
+                            switchOutCurve: Curves.easeInCubic,
+                            layoutBuilder: (cur, prev) => Stack(
+                              fit: StackFit.expand,
+                              children: [...prev, ?cur],
+                            ),
+                            transitionBuilder: (child, anim) {
+                              final incoming = child.key == ValueKey(current);
+                              return SlideTransition(
+                                position: Tween(
+                                  begin: incoming ? inFrom : outTo,
+                                  end: Offset.zero,
+                                ).animate(anim),
+                                child: FadeTransition(
+                                  opacity: anim,
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: card,
                           ),
-                          transitionBuilder: (child, anim) {
-                            final incoming = child.key == ValueKey(current);
-                            return SlideTransition(
-                              position: Tween(
-                                begin: incoming ? inFrom : outTo,
-                                end: Offset.zero,
-                              ).animate(anim),
-                              child: FadeTransition(
-                                opacity: anim,
-                                child: child,
-                              ),
-                            );
-                          },
-                          child: card,
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: _ActionBar(
-                  // 아래로 끌수록 채워진다 (위쪽 정리 줄과 같은 모양)
-                  fill: (_drag.dy / 90).clamp(0.0, 1.0),
-                  icon: Icons.check,
-                  label: l.keep,
-                  semantics: l.keepBarSemantics,
-                  onTap: () => _down(ids),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: _ActionBar(
+                    // 아래로 끌수록 채워진다 (위쪽 정리 줄과 같은 모양)
+                    fill: (_drag.dy / 90).clamp(0.0, 1.0),
+                    icon: Icons.check,
+                    label: l.keep,
+                    semantics: l.keepBarSemantics,
+                    onTap: () => _down(ids),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              _LoopStrip(
-                ids: ids,
-                current: current,
-                entities: entities,
-                stateOf: (id) => isMarked(id, decisions, src)
-                    ? DecisionState.toTrash
-                    : stateOf(decisions, id),
-                onTap: (id) => setState(() {
-                  _motion = ids.indexOf(id) < index
-                      ? _Motion.prev
-                      : _Motion.next;
-                  _currentId = id;
-                }),
-              ),
-            ],
+                const SizedBox(height: 12),
+                _LoopStrip(
+                  ids: ids,
+                  current: current,
+                  entities: entities,
+                  stateOf: (id) => isMarked(id, decisions, src)
+                      ? DecisionState.toTrash
+                      : stateOf(decisions, id),
+                  onTap: (id) => setState(() {
+                    _motion = ids.indexOf(id) < index
+                        ? _Motion.prev
+                        : _Motion.next;
+                    _currentId = id;
+                  }),
+                ),
+              ],
+            ),
           ),
         ),
       ),

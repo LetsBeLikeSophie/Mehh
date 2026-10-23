@@ -28,10 +28,15 @@ abstract class Store {
   Future<void> addSeen(Iterable<String> photoIds);
   Future<Set<String>> loadSeen();
 
-  /// Cortex로 보냈는데 아직 "받았어요" 신호가 없는 사진. 그리드에 "Cortex로 보냄" 표시 (2026-10-23 Sophie)
-  Future<void> addCortexSent(Iterable<String> photoIds);
+  /// Cortex로 보낸 사진 → Cortex가 받았는지(got). 그리드에 "Cortex로 보냄"/"Cortex에 있음" 표시.
+  /// 휴지통으로 가면 지운다 (2026-10-23·24 Sophie)
+  Future<void> addCortexSent(Iterable<String> photoIds, {bool got = false});
   Future<void> removeCortexSent(Iterable<String> photoIds);
-  Future<Set<String>> loadCortexSent();
+  Future<Map<String, bool>> loadCortexSent();
+
+  /// 작은 횟수 기록 (예: 오늘 "길게 눌러 끝내기" 안내를 몇 번 보였나)
+  Future<int> counter(String key);
+  Future<void> bumpCounter(String key);
 
   /// 이 폰에 남긴 모든 기록을 지운다 (분석 결과, 결정, 열람, 비운 용량).
   Future<void> clearAll();
@@ -39,6 +44,9 @@ abstract class Store {
 
 String monthKey(DateTime d) =>
     '${d.year}-${d.month.toString().padLeft(2, '0')}';
+
+String dayKey(DateTime d) =>
+    '${monthKey(d)}-${d.day.toString().padLeft(2, '0')}';
 
 /// 웹 미리보기·테스트용. 앱을 끄면 사라진다.
 class MemoryStore implements Store {
@@ -49,18 +57,35 @@ class MemoryStore implements Store {
   final freed = <String, int>{};
   final picks = <PickRecord>[];
   final seen = <String>{};
-  final cortexSent = <String>{};
+  final cortexSent = <String, bool>{};
+  final counters = <String, int>{};
 
   @override
-  Future<void> addCortexSent(Iterable<String> photoIds) async =>
-      cortexSent.addAll(photoIds);
+  Future<void> addCortexSent(
+    Iterable<String> photoIds, {
+    bool got = false,
+  }) async {
+    for (final id in photoIds) {
+      cortexSent[id] = got;
+    }
+  }
 
   @override
-  Future<void> removeCortexSent(Iterable<String> photoIds) async =>
-      cortexSent.removeAll(photoIds);
+  Future<void> removeCortexSent(Iterable<String> photoIds) async {
+    for (final id in photoIds) {
+      cortexSent.remove(id);
+    }
+  }
 
   @override
-  Future<Set<String>> loadCortexSent() async => {...cortexSent};
+  Future<Map<String, bool>> loadCortexSent() async => {...cortexSent};
+
+  @override
+  Future<int> counter(String key) async => counters[key] ?? 0;
+
+  @override
+  Future<void> bumpCounter(String key) async =>
+      counters[key] = (counters[key] ?? 0) + 1;
 
   @override
   Future<void> addSeen(Iterable<String> photoIds) async =>
@@ -116,6 +141,7 @@ class MemoryStore implements Store {
   @override
   Future<void> clearAll() async {
     cortexSent.clear();
+    counters.clear();
     features.clear();
     decisions.clear();
     log.clear();

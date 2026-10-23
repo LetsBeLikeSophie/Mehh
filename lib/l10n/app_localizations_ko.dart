@@ -442,15 +442,6 @@ class L10nKo extends L10n {
   String get accNote => '이 기록은 이 폰에만 있어요. 그날의 묶음 비율이 80%를 넘으면 결제를 켤 만해요.';
 
   @override
-  String cortexSentTrashed(int count, String size) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    return '✓ $countString장 · $size Cortex로 보내고 휴지통으로 보냈어요 · 정리는 Cortex가 이어서 해요 · 30일 안에 되살릴 수 있어요';
-  }
-
-  @override
   String get cortexMultiUnsupported =>
       'Cortex가 아직 여러 장 받기를 못 해요. Cortex를 업데이트해 주세요.';
 
@@ -579,11 +570,6 @@ class L10nKo extends L10n {
   String get mutedJunk => '실수로 찍힌 사진은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요';
 
   @override
-  String cortexSentSomeTrashed(int count, int kept) {
-    return 'Cortex가 받은 $count장은 휴지통으로 보냈어요 · 받지 못한 $kept장은 X 그대로예요';
-  }
-
-  @override
   String get useFreeSetTitle => '무료 묶음을 쓸까요?';
 
   @override
@@ -607,24 +593,15 @@ class L10nKo extends L10n {
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return '캡처 $countString장을 Cortex로\n보내고 지울까요?';
+    return '$countString장을 Cortex로 보낼까요?';
   }
 
   @override
-  String get cortexAskYes => '보내고 지우기';
+  String get cortexAskYes => '보내기';
 
   @override
   String noFreeLead(String date, int count) {
     return '이번 달 무료 묶음을 다 썼어요 · $date에 $count개가 다시 생겨요';
-  }
-
-  @override
-  String cortexSavedTrashing(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    return '✓ Cortex가 $countString장 받았어요 · 휴지통으로 보내요';
   }
 
   @override
@@ -637,4 +614,69 @@ class L10nKo extends L10n {
 
   @override
   String get markedAllSent => '쳐 둔 X를 다 보냈어요';
+
+  @override
+  String cortexGotTitle(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '✓ Cortex로 $countString장 옮겼어요';
+  }
+
+  @override
+  String get cortexGotBody =>
+      '분석은 Cortex가 뒤에서 해요. 앱을 닫아도 돼요.\n이 사진을 휴지통으로 지울까요?';
+
+  @override
+  String cortexGotKept(int kept) {
+    final intl.NumberFormat keptNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String keptString = keptNumberFormat.format(kept);
+
+    return 'Cortex가 받지 못한 $keptString장은 그대로 둬요.';
+  }
+
+  @override
+  String get cortexGotBadge => 'Cortex에 있음';
+
+  @override
+  String get later => '나중에';
+
+  @override
+  String focusFinishTitle(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString장을 휴지통으로 보내고 끝낼까요?';
+  }
+
+  @override
+  String focusFinishBody(int total, int count) {
+    final intl.NumberFormat totalNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String totalString = totalNumberFormat.format(total);
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$totalString장 중 $countString장에 X를 쳤어요.';
+  }
+
+  @override
+  String get focusFinishNone => 'X 친 사진이 없어요. 끝낼까요?';
+
+  @override
+  String get focusKeepLooking => '계속 보기';
+
+  @override
+  String get focusFinishYes => '끝내기';
+
+  @override
+  String get focusHint => '길게 누르면 정리를 끝낼 수 있어요';
+
+  @override
+  String get focusFinishSemantics => '정리 끝내기';
 }
