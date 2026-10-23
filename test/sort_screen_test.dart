@@ -350,6 +350,33 @@ void main() {
     expect(find.textContaining('캡처  1/1장'), findsOneWidget);
   });
 
+  testWidgets('캡처: X 하나를 켰다 꺼서 킵해도 추천이 남아 있으면 홈은 "다 봤어요"가 아니다', (tester) async {
+    final shots = DayGroup(
+      id: 'shots',
+      kind: DayGroupKind.screenshots,
+      photos: [
+        for (var i = 0; i < 3; i++)
+          PhotoMeta(
+            id: 's$i',
+            takenAt: DateTime(2026, 1, 1 + i),
+            width: 100,
+            height: 200,
+            isScreenshot: true,
+          ),
+      ],
+    );
+    await pump(tester, SortScreen(kind: SortKind.screenshots, group: shots));
+    await tester.tap(find.byType(XToggle).first); // X
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(XToggle).first); // 끄기 = 킵
+    await tester.pumpAndSettle();
+    final c = ProviderScope.containerOf(
+      tester.element(find.byType(SortScreen)),
+    );
+    expect(c.read(groupStatusProvider(shots)), GroupStatus.nothing);
+    await flush(tester);
+  });
+
   testWidgets('그리드: X를 켜면 휴지통 버튼, 보내면 그 사진만 빠진다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     expect(find.text('X를 친 사진이 없어요'), findsWidgets);

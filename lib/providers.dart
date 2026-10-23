@@ -631,6 +631,14 @@ final groupStatusProvider = Provider.autoDispose.family<GroupStatus, DayGroup>((
   // 상태는 X가 있을 때만 할 일로 둔다 (줄 아래 글자는 캡처 추천 장수를 보여 준다)
   if (g.kind == DayGroupKind.screenshots) {
     if (pile) return GroupStatus.needsWork;
+    // 캡처 추천이 남아 있으면 "다 봤어요"가 아니다 (UX 리뷰 2026-10-23). 큰 숫자에는 세지 않는다
+    final picks = planScreenshots(
+      g.photos,
+      ref.watch(analysisProvider.select((a) => a.features)),
+      decisions,
+      now: DateTime.now(),
+    );
+    if (picks.isNotEmpty) return GroupStatus.nothing;
     return touched ? GroupStatus.done : GroupStatus.nothing;
   }
   final plan = ref.watch(groupPlanProvider(g));
