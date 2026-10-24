@@ -139,7 +139,12 @@ class _SortScreenState extends ConsumerState<SortScreen>
       yes: l.toTrash,
     );
     if (!ok || !mounted) return;
-    await sendToTrash(context, ref, ids);
+    final src = _src;
+    if (src == null) {
+      await sendToTrash(context, ref, ids);
+    } else {
+      await _trashAndAfter(ids, src, _order);
+    }
   }
 
   /// 여러 장을 한 번에 Cortex로 보낸다. Cortex가 받으면 지울지 묻고, 분석은 Cortex가 뒤에서.
@@ -277,12 +282,26 @@ class _SortScreenState extends ConsumerState<SortScreen>
   /// 지금 X인 사진을 [N장 휴지통으로]처럼 보낸다 (마지막 build 기준)
   VoidCallback? _sendMarked;
 
+  /// 마지막 build의 추천·화면 순서 (Cortex 신호가 나중에 와도 보낸 뒤 할 일을 하려고)
+  SortSource? _src;
+  List<String> _order = const [];
+
   Future<void> _send(
     List<String> ids,
     SortSource src,
     List<String> shown,
   ) async {
     if (!await _confirmSceneLoss(ids, src) || !mounted) return;
+    await _trashAndAfter(ids, src, shown);
+  }
+
+  /// 휴지통으로 보내고 그 뒤 할 일: 정확도 기록, 잠긴 묶음 "다 봤어요"(R3), Pro 안내.
+  /// [N장 휴지통으로]와 Cortex 길이 같이 쓴다 (시니어 리뷰 2026-10-24 S-2)
+  Future<void> _trashAndAfter(
+    List<String> ids,
+    SortSource src,
+    List<String> shown,
+  ) async {
     setState(() => _busy = true);
     // 정리를 끝낸 순간에 Pro 안내 (Pro가 아니면 하루 한 번까지). 안내 시트가 아래 알림을 덮으니
     // 그때는 알림 대신 시트 첫 줄에 "30일 안에 되살릴 수 있어요"까지 넣는다 (UX 리뷰 2026-10-22)
@@ -466,6 +485,8 @@ class _SortScreenState extends ConsumerState<SortScreen>
         : range;
 
     _sendMarked = marked.isEmpty ? null : () => _send(marked, src, order);
+    _src = src;
+    _order = order;
 
     return Scaffold(
       body: SafeArea(

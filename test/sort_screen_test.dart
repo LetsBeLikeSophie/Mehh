@@ -1285,6 +1285,38 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('Cortex: 그날의 묶음에서 Cortex로 보내고 [휴지통으로]여도 정확도 기록이 남는다 (S-2)', (
+    tester,
+  ) async {
+    final day = DayGroup(
+      id: 'day-p0',
+      kind: DayGroupKind.day,
+      photos: burstPhotos,
+    );
+    final handoff = _FakeHandoff();
+    final store = MemoryStore();
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.day, group: day),
+      store: store,
+      extra: [
+        realPlan(paid),
+        cortexInstalledProvider.overrideWith((ref) async => true),
+        handoffProvider.overrideWithValue(handoff),
+      ],
+    );
+    await openLocked(tester, '추천 보기 · 2장');
+    await sendCortex(tester);
+    handoff.saved.add(CortexSaved(handoff.sent.length, null));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('휴지통으로'));
+    await tester.pumpAndSettle();
+    final picks = await store.loadPicks();
+    expect(picks.where((p) => p.kind == 'day'), isNotEmpty);
+    expect(picks.where((p) => p.sent), isNotEmpty);
+    await flush(tester);
+  });
+
   testWidgets('Cortex: 캡처가 아닌 낱장 사진에서도 [휴지통으로] 옆에 [Cortex로]', (
     tester,
   ) async {
