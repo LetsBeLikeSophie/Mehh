@@ -170,7 +170,7 @@ class GalleryButton extends ConsumerWidget {
     final l = context.l;
     return MehhHeader.icon(
       tooltip: l.openGallery,
-      icon: Icons.photo_library_outlined,
+      asset: 'assets/gallery.png',
       onPressed: () async {
         final ok = await ref.read(deviceProvider).openGallery();
         if (!ok && context.mounted) showNote(context, l.noGallery);
@@ -191,7 +191,7 @@ class MehhTopActions extends StatelessWidget {
       const GalleryButton(),
       MehhHeader.icon(
         tooltip: context.l.settings,
-        icon: Icons.settings_outlined,
+        asset: 'assets/settings.png',
         onPressed: () => Navigator.of(context)
             .push(MaterialPageRoute(builder: (_) => const SettingsScreen())),
       ),
@@ -224,15 +224,22 @@ abstract final class MehhHeader {
   );
 
   /// 맨 위 줄 아이콘 버튼: 서로 가깝게 (2026-10-24 Sophie: 아이콘 사이가 너무 멀다)
+  /// [asset]: Sophie가 그린 손그림 아이콘 (코인과 같은 결, 2026-10-24)
   static Widget icon({
     required String tooltip,
-    required IconData icon,
+    required String asset,
     required VoidCallback onPressed,
   }) => IconButton(
     tooltip: tooltip,
     onPressed: onPressed,
     visualDensity: VisualDensity.compact,
-    icon: Icon(icon, size: 22, color: MehhColors.icon),
+    icon: Image.asset(
+      asset,
+      width: 22,
+      height: 22,
+      filterQuality: FilterQuality.medium,
+      excludeFromSemantics: true,
+    ),
   );
 
   /// 제목 칸: 최소 [title] 높이, 내용은 아래(막대 쪽)에 붙인다. 큰 글씨면 늘어난다
