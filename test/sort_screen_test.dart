@@ -97,18 +97,18 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('홈: 이번 달 보낸 용량과 쳐 둔 X 용량 막대', (tester) async {
+  testWidgets('홈: 용량 막대 — 사진·비울 수 있음·이번 달 휴지통으로 (색마다 한 줄 설명)', (
+    tester,
+  ) async {
     final store = MemoryStore()
       ..freed[monthKey(DateTime.now())] = 5 * 1024 * 1024;
     await pump(tester, const Scaffold(body: HomeTab()), store: store);
-    expect(find.byType(LinearProgressIndicator), findsOneWidget);
-    expect(find.text('이번 달 휴지통으로 5MB 보냈어요'), findsOneWidget); // 막대 바로 아래
     await flush(tester);
-  });
-
-  testWidgets('홈: 보낸 것도 X도 없으면 막대가 없다', (tester) async {
-    await pump(tester, const Scaffold(body: HomeTab()));
-    expect(find.byType(LinearProgressIndicator), findsNothing);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('freedBar')), findsOneWidget);
+    expect(find.textContaining('사진 '), findsWidgets);
+    expect(find.text('이번 달 휴지통으로 5MB'), findsOneWidget);
+    expect(find.byTooltip('휴지통'), findsOneWidget); // 오른쪽 위 갤러리 휴지통
     await flush(tester);
   });
 

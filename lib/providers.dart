@@ -4,6 +4,7 @@ import 'package:photo_manager/photo_manager.dart';
 
 import 'data/billing.dart';
 import 'data/demo.dart';
+import 'data/device.dart';
 import 'data/handoff.dart';
 import 'data/photo_library.dart';
 import 'data/pro.dart';
@@ -525,22 +526,62 @@ final freedThisMonthProvider = FutureProvider<int>(
   (ref) => ref.read(storeProvider).freedBytes(monthKey(DateTime.now())),
 );
 
-/// 쳐 둔 X(아직 휴지통으로 안 보냄)의 용량. 홈 막대의 "남은 정리 거리" (2026-10-23 Sophie)
-final markedBytesProvider = FutureProvider<int>((ref) async {
-  final decisions = ref.watch(decisionsProvider).value ?? const {};
+final deviceProvider = Provider((ref) => Device());
+
+/// 사진 전체 용량 (막대의 검정+진한 회색). 사진이 바뀌면 다시 센다.
+/// 기기에 물어보고, 모르면(웹·테스트) 사진마다 크기를 더한다
+final photoBytesProvider = FutureProvider<int>((ref) async {
   final photos = ref.watch(libraryProvider.select((s) => s.value?.photos));
   if (photos == null) return 0;
-  final ids = [
-    for (final p in photos)
-      if (stateOf(decisions, p.id) == DecisionState.toTrash) p.id,
-  ];
-  if (ids.isEmpty) return 0;
-  final sizes = await ref.read(photoLibraryProvider).fileSizes(ids);
+  final n = await ref.read(deviceProvider).photoBytes();
+  if (n != null) return n;
+  final sizes = await ref.read(photoLibraryProvider).fileSizes([
+    for (final p in photos) p.id,
+  ]);
   return sizes.values.fold<int>(0, (a, b) => a + b);
 });
 
-/// 사진 몇 장의 용량 합. 키는 정렬한 id를 쉼표로 이은 것 (정리 화면의 "처음부터 X"용)
-final idsBytesProvider = FutureProvider.family<int, String>((ref, key) async {
+/// 비울 수 있는 사진: 선택한 것(X) + 앱 추천(그날의 묶음·낱장·캡처·똑같은 사진).
+/// 막대의 진한 회색 (2026-10-24 Sophie)
+final cleanableIdsProvider = Provider.autoDispose<Set<String>>((ref) {
+  final lib = ref.watch(libraryProvider).value;
+  if (lib == null) return const {};
+  final decisions = ref.watch(decisionsProvider).value ?? const {};
+  final features = ref.watch(analysisProvider.select((a) => a.features));
+  final out = <String>{
+    for (final p in lib.photos)
+      if (stateOf(decisions, p.id) == DecisionState.toTrash) p.id,
+  };
+  for (final g in lib.groups) {
+    if (g.kind == DayGroupKind.screenshots) {
+      out.addAll(
+        planScreenshots(
+          g.photos,
+          features,
+          decisions,
+          now: DateTime.now(),
+        ).keys,
+      );
+    } else {
+      out.addAll(ref.watch(groupPlanProvider(g)).trash.keys);
+    }
+  }
+  for (final set in ref.watch(duplicatesProvider).value ?? const []) {
+    for (final p in set.remove) {
+      final st = stateOf(decisions, p.id);
+      if (st == DecisionState.undecided || st == DecisionState.toTrash) {
+        out.add(p.id);
+      }
+    }
+  }
+  return out;
+});
+
+/// 사진 몇 장의 용량 합. 키는 정렬한 id를 쉼표로 이은 것
+final idsBytesProvider = FutureProvider.autoDispose.family<int, String>((
+  ref,
+  key,
+) async {
   if (key.isEmpty) return 0;
   final sizes = await ref.read(photoLibraryProvider).fileSizes(key.split(','));
   return sizes.values.fold<int>(0, (a, b) => a + b);

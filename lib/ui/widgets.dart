@@ -53,14 +53,16 @@ class PhotoThumb extends StatelessWidget {
 
 /// 홈 헤더 로고: 염소만. 손글씨 mehh...는 크게 보이는 온보딩에서만 쓴다.
 class MehhLogo extends StatelessWidget {
-  const MehhLogo({super.key});
+  const MehhLogo({super.key, this.height = 38});
+
+  final double height;
 
   @override
   Widget build(BuildContext context) {
     return Image.asset(
       'assets/mehh-goat.png',
-      width: 34,
-      height: 38,
+      width: height * 34 / 38,
+      height: height,
       semanticLabel: 'Mehh',
     );
   }

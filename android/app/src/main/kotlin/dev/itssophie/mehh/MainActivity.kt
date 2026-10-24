@@ -1,6 +1,7 @@
 package dev.itssophie.mehh
 
 import android.content.ClipData
+import android.content.ComponentName
 import android.content.ContentUris
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -36,6 +37,62 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+        // 기기 정보: 사진 전체 용량, 갤러리 휴지통 열기 (2026-10-24 Sophie)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "mehh/device")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "photoBytes" -> result.success(photoBytes())
+                    "openTrash" -> result.success(openTrash())
+                    else -> result.notImplemented()
+                }
+            }
+    }
+
+    /// 사진첩 사진 전체 용량(바이트). 휴지통에 있는 것은 빠진다(안드로이드 11+ 기본 조회).
+    private fun photoBytes(): Long {
+        var total = 0L
+        contentResolver.query(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            arrayOf(MediaStore.MediaColumns.SIZE),
+            null, null, null,
+        )?.use { c ->
+            val col = c.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE)
+            while (c.moveToNext()) total += c.getLong(col)
+        }
+        return total
+    }
+
+    /// 갤러리 앱의 휴지통을 연다. 안드로이드 공통 방법이 없어 차례로 시도한다.
+    /// 반환: "trash"(휴지통 화면), "gallery"(갤러리 앱만), "none"
+    private fun openTrash(): String {
+        // 1) 삼성 갤러리: 휴지통 화면(이름에 Trash가 든 공개 화면)을 찾아 연다
+        val samsung = "com.sec.android.gallery3d"
+        try {
+            @Suppress("DEPRECATION")
+            val info = packageManager.getPackageInfo(samsung, PackageManager.GET_ACTIVITIES)
+            val trash = info.activities?.firstOrNull { it.exported && it.name.contains("Trash", ignoreCase = true) }
+            if (trash != null) {
+                val ok = start(Intent().setComponent(ComponentName(samsung, trash.name)))
+                if (ok) return "trash"
+            }
+            packageManager.getLaunchIntentForPackage(samsung)?.let { if (start(it)) return "gallery" }
+        } catch (e: PackageManager.NameNotFoundException) {
+        }
+        // 2) Google 포토: 휴지통 주소
+        val photos = Intent(Intent.ACTION_VIEW, Uri.parse("https://photos.google.com/trash"))
+            .setPackage("com.google.android.apps.photos")
+        if (photos.resolveActivity(packageManager) != null && start(photos)) return "trash"
+        // 3) 아무 갤러리 앱
+        val gallery = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_GALLERY)
+        if (start(gallery)) return "gallery"
+        return "none"
+    }
+
+    private fun start(intent: Intent): Boolean = try {
+        startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        true
+    } catch (e: Exception) {
+        false
     }
 
     /// Cortex가 저장을 마치면 mehh://cortex-saved?count=N 으로 Mehh를 다시 연다 (2026-10-22 Sophie C2-A)

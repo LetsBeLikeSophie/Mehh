@@ -822,7 +822,26 @@ class L10nEn extends L10n {
   String get focusFinishSemantics => 'Finish sorting';
 
   @override
-  String selectedSize(Object size) {
-    return '$size selected';
+  String barPhotos(Object size) {
+    return 'Photos $size';
   }
+
+  @override
+  String barCleanable(Object size) {
+    return '$size of it can go';
+  }
+
+  @override
+  String barSent(Object size) {
+    return 'Sent to trash this month $size';
+  }
+
+  @override
+  String get openTrash => 'Trash';
+
+  @override
+  String get trashOpenedGallery => 'Opened your gallery · Trash is in its menu';
+
+  @override
+  String get trashNoGallery => 'Couldn\'t find a gallery app to open the trash';
 }

@@ -150,13 +150,17 @@ class PhotoLibrary {
     }
   }
 
-  /// 파일 크기 (바이트). 실패하면 0.
+  /// 파일 크기 (바이트). 실패하면 0. 한 번 읽은 크기는 기억한다 (막대가 자주 다시 묻는다)
   Future<Map<String, int>> fileSizes(Iterable<String> ids) async {
     final out = <String, int>{};
     await Future.wait(
       ids.map((id) async {
+        if (_sizes[id] case final n?) {
+          out[id] = n;
+          return;
+        }
         try {
-          out[id] = await entities[id]?.fileSize ?? 0;
+          out[id] = _sizes[id] = await entities[id]?.fileSize ?? 0;
         } catch (_) {
           out[id] = 0;
         }
@@ -164,6 +168,8 @@ class PhotoLibrary {
     );
     return out;
   }
+
+  final _sizes = <String, int>{};
 
   /// 휴대폰 휴지통으로 보낸다. 여러 장을 한 번의 확인 창으로.
   /// 안드로이드는 11 이상만 지원해서(minSdk 30) 항상 휴지통이 있다.

@@ -168,55 +168,55 @@ class _HomeTabState extends ConsumerState<HomeTab> {
               // 로고·Pro·설정 줄은 연도 레일과 상관없이 오른쪽 끝에 붙인다
               // (아이콘 버튼 자체 여백이 있어서 8만 둔다)
               SliverPadding(
-                padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 8, 0),
+                padding: const EdgeInsetsDirectional.fromSTEB(20, 8, 12, 0),
                 sliver: SliverToBoxAdapter(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const MehhLogo(),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const ProChip(),
-                          IconButton(
-                            tooltip: l.settings,
-                            onPressed: () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const SettingsScreen(),
-                              ),
-                            ),
-                            icon: const Icon(
-                              Icons.settings_outlined,
-                              size: 22,
-                              color: MehhColors.icon,
-                            ),
+                  // 염소는 크게 (2026-10-24 Sophie: 큰 글씨 위에 존재감 있게)
+                  child: MehhHeader.top(
+                    leading: const MehhLogo(height: 56),
+                    trailing: [
+                      const ProChip(),
+                      IconButton(
+                        tooltip: l.settings,
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const SettingsScreen(),
                           ),
-                        ],
+                        ),
+                        icon: const Icon(
+                          Icons.settings_outlined,
+                          size: 22,
+                          color: MehhColors.icon,
+                        ),
                       ),
+                      // 맨 오른쪽 휴지통은 정리 화면과 같은 자리
+                      const GalleryTrashButton(),
                     ],
                   ),
                 ),
               ),
               SliverPadding(
-                padding: EdgeInsets.fromLTRB(20, 24, right, 0),
+                padding: EdgeInsets.fromLTRB(20, 0, right, 0),
                 sliver: SliverList.list(
                   children: [
-                    Text(
-                      left > 0
-                          ? l.groupsLeft(left)
-                          // 분석이 끝나기 전에는 "없어요"라고 하지 않는다 (UX 리뷰 2026-10-22)
-                          : ref.watch(analysisProvider.select((a) => a.done))
-                          ? l.noGroupsLeft
-                          : l.lookingAtPhotos,
-                      style: const TextStyle(
-                        fontSize: MehhText.display,
-                        fontWeight: FontWeight.w700,
-                        height: 1.3,
-                        letterSpacing: -0.5,
+                    // 제목 칸은 정리 화면과 같은 높이: 막대가 같은 자리에 온다
+                    MehhHeader.titleBox([
+                      Text(
+                        left > 0
+                            ? l.groupsLeft(left)
+                            // 분석이 끝나기 전에는 "없어요"라고 하지 않는다 (UX 리뷰 2026-10-22)
+                            : ref.watch(analysisProvider.select((a) => a.done))
+                            ? l.noGroupsLeft
+                            : l.lookingAtPhotos,
+                        style: const TextStyle(
+                          fontSize: MehhText.display,
+                          fontWeight: FontWeight.w700,
+                          height: 1.3,
+                          letterSpacing: -0.5,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    const _Subtitle(),
+                      const SizedBox(height: 6),
+                      const _Subtitle(),
+                    ]),
                     const FreedBar(),
                     if (limited) ...[
                       const SizedBox(height: 20),

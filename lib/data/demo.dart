@@ -269,7 +269,9 @@ class DemoPhotoLibrary extends PhotoLibrary {
 
   @override
   Future<Map<String, int>> fileSizes(Iterable<String> ids) async => {
-    for (final id in ids) id: _demo.sizes[id] ?? 0,
+    // 정해 둔 크기가 없으면 사진마다 1~4MB (용량 막대가 보이게)
+    for (final id in ids)
+      id: _demo.sizes[id] ?? 1024 * 1024 + (id.hashCode % (3 * 1024 * 1024)),
   };
 
   @override

@@ -673,7 +673,26 @@ class L10nKo extends L10n {
   String get focusFinishSemantics => '정리 끝내기';
 
   @override
-  String selectedSize(Object size) {
-    return '선택 $size';
+  String barPhotos(Object size) {
+    return '사진 $size';
   }
+
+  @override
+  String barCleanable(Object size) {
+    return '그중 비울 수 있음 $size';
+  }
+
+  @override
+  String barSent(Object size) {
+    return '이번 달 휴지통으로 $size';
+  }
+
+  @override
+  String get openTrash => '휴지통';
+
+  @override
+  String get trashOpenedGallery => '갤러리를 열었어요 · 휴지통은 갤러리 메뉴에 있어요';
+
+  @override
+  String get trashNoGallery => '휴지통을 열 갤러리 앱을 찾지 못했어요';
 }

@@ -109,7 +109,10 @@ class _SortScreenState extends ConsumerState<SortScreen>
       }
       final fromLast = last != null && done.every(last.contains);
       if (fromLast) _sentToCortex = null;
-      _askTrashAfterCortex(done, kept: fromLast ? last.length - done.length : 0);
+      _askTrashAfterCortex(
+        done,
+        kept: fromLast ? last.length - done.length : 0,
+      );
       return;
     }
     // 장수만 오면(예전 Cortex) 마지막으로 보낸 묶음과 견줘, 다 받았을 때만 묻는다 (S-2)
@@ -502,55 +505,61 @@ class _SortScreenState extends ConsumerState<SortScreen>
               child: CustomScrollView(
                 slivers: [
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(8, 4, 12, 8),
+                    padding: const EdgeInsets.fromLTRB(8, 8, 12, 8),
                     sliver: SliverList.list(
                       children: [
-                        const MehhBackButton(),
+                        // 맨 위 줄·제목 칸은 홈과 같은 높이: 막대가 같은 자리에 온다 (2026-10-24 Sophie)
+                        MehhHeader.top(
+                          leading: const MehhBackButton(),
+                          trailing: const [GalleryTrashButton()],
+                        ),
                         Padding(
-                          padding: const EdgeInsetsDirectional.only(start: 12),
+                          padding: const EdgeInsetsDirectional.only(start: 12, end: 8),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // 제목 뒤에 장수 (2026-10-23 Sophie: 장수가 따로 한 줄을 차지하지 않게)
-                              Text.rich(
-                                TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: sortTitle(
-                                        widget.kind,
-                                        g,
-                                        widget.place,
-                                        l,
+                              MehhHeader.titleBox([
+                                // 제목 뒤에 장수 (2026-10-23 Sophie: 장수가 따로 한 줄을 차지하지 않게)
+                                Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: sortTitle(
+                                          widget.kind,
+                                          g,
+                                          widget.place,
+                                          l,
+                                        ),
                                       ),
-                                    ),
-                                    TextSpan(
-                                      text: '  ${l.photos(order.length)}',
-                                      style: const TextStyle(
-                                        fontSize: MehhText.bodySmall,
-                                        fontWeight: FontWeight.w500,
-                                        color: MehhColors.textMuted,
-                                        letterSpacing: 0,
+                                      TextSpan(
+                                        text: '  ${l.photos(order.length)}',
+                                        style: const TextStyle(
+                                          fontSize: MehhText.bodySmall,
+                                          fontWeight: FontWeight.w500,
+                                          color: MehhColors.textMuted,
+                                          letterSpacing: 0,
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                style: const TextStyle(
-                                  fontSize: MehhText.title,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: -0.4,
-                                ),
-                              ),
-                              if (subLine != null) ...[
-                                const SizedBox(height: 2),
-                                Text(
-                                  subLine,
+                                    ],
+                                  ),
                                   style: const TextStyle(
-                                    fontSize: MehhText.bodySmall,
-                                    color: MehhColors.textMuted,
+                                    fontSize: MehhText.title,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: -0.4,
                                   ),
                                 ),
-                              ],
-                              // 홈과 같은 막대: 선택하면 회색이, 보내면 검정이 바로 늘어난다
+                                if (subLine != null) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    subLine,
+                                    style: const TextStyle(
+                                      fontSize: MehhText.bodySmall,
+                                      color: MehhColors.textMuted,
+                                    ),
+                                  ),
+                                ],
+                              ]),
+                              // 홈과 같은 막대: 선택하면 진한 회색이, 보내면 연한 회색이 바로 늘어난다
                               FreedBar(
                                 extra: [
                                   for (final id in marked)
