@@ -484,7 +484,7 @@ class L10nKo extends L10n {
 
   @override
   String get privacyCortex =>
-      'Cortex로 직접 보낸 캡처는 Cortex에서 AI로 분석해요. 내가 고른 캡처만, 보낼 때만 넘어가요.';
+      'Cortex로 직접 보낸 사진·캡처는 Cortex에서 AI로 분석해요. 내가 고른 사진·캡처만, 보낼 때만 넘어가요.';
 
   @override
   String cortexNotSaved(int count) {

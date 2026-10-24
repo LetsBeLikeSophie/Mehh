@@ -262,13 +262,16 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('설정: Cortex가 있으면 개인정보 안내에 Cortex AI 줄', (tester) async {
+  testWidgets('설정: Cortex가 있으면 개인정보 안내에 Cortex AI 줄 (사진·캡처)', (tester) async {
     await pump(
       tester,
       const SettingsScreen(),
       extra: [cortexInstalledProvider.overrideWith((ref) async => true)],
     );
     expect(find.textContaining('Cortex에서 AI로 분석해요'), findsOneWidget);
+    // 1.10.0부터 모든 사진을 보낼 수 있다: "캡처만"이라고 하지 않는다 (시니어 리뷰 2026-10-24 S-1)
+    expect(find.textContaining('고른 캡처만'), findsNothing);
+    expect(find.textContaining('사진·캡처만'), findsOneWidget);
   });
 
   testWidgets('캡처: [추천 보기 · N장]을 누르면 N장 모두 X (오래된 캡처)', (tester) async {

@@ -126,7 +126,7 @@
   "proUsing": "You have Pro",
   "freeSetsLeft": "{count, plural, =1{1 free set left} other{{count} free sets left}}",
   "unsentDot": "Selected, not moved to trash yet",
-  "privacyCortex": "Screenshots you send to Cortex are analyzed by Cortex's AI. Only the ones you pick, only when you send them.",
+  "privacyCortex": "Photos and screenshots you send to Cortex are analyzed by Cortex's AI. Only the ones you pick, only when you send them.",
   "cortexNotSaved": "{count, plural, =1{Cortex didn't confirm it got it, so nothing was moved to trash · your mark is kept. If you see it in Cortex, tap Move 1 to trash.} other{Cortex didn't confirm it got them, so nothing was moved to trash · your marks are kept. If you see them in Cortex, tap Move {count} to trash.}}",
   "tagOldShot": "Old",
   "tagRepeatShot": "Repeat",

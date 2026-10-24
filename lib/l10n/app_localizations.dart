@@ -856,7 +856,7 @@ abstract class L10n {
   /// No description provided for @privacyCortex.
   ///
   /// In ko, this message translates to:
-  /// **'Cortex로 직접 보낸 캡처는 Cortex에서 AI로 분석해요. 내가 고른 캡처만, 보낼 때만 넘어가요.'**
+  /// **'Cortex로 직접 보낸 사진·캡처는 Cortex에서 AI로 분석해요. 내가 고른 사진·캡처만, 보낼 때만 넘어가요.'**
   String get privacyCortex;
 
   /// No description provided for @cortexNotSaved.

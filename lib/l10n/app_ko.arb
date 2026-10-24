@@ -338,7 +338,7 @@
     }
   },
   "unsentDot": "선택해 두고 아직 휴지통으로 안 보냈어요",
-  "privacyCortex": "Cortex로 직접 보낸 캡처는 Cortex에서 AI로 분석해요. 내가 고른 캡처만, 보낼 때만 넘어가요.",
+  "privacyCortex": "Cortex로 직접 보낸 사진·캡처는 Cortex에서 AI로 분석해요. 내가 고른 사진·캡처만, 보낼 때만 넘어가요.",
   "cortexNotSaved": "Cortex가 받았다는 신호가 없어서 휴지통으로 보내지 않았어요 · X는 그대로예요. Cortex에서 받은 걸 확인했다면 [{count}장 휴지통으로]를 누르면 돼요.",
   "tagOldShot": "오래됨",
   "tagRepeatShot": "연달아 찍음",
