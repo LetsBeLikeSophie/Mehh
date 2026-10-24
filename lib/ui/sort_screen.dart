@@ -161,6 +161,8 @@ class _SortScreenState extends ConsumerState<SortScreen>
     final ok = await askMehh(
       context,
       title: l.cortexAskTitle(ids.length),
+      // 사진이 AI 앱으로 간다는 것만 한 줄 (2026-10-24 Sophie)
+      body: l.cortexAskNote,
       no: l.cancel,
       yes: l.cortexAskYes,
     );

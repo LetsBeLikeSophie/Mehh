@@ -1212,6 +1212,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'{count}개 · {size}'**
   String videosMeta(int count, String size);
+
+  /// No description provided for @cortexAskNote.
+  ///
+  /// In ko, this message translates to:
+  /// **'Cortex에서 AI로 분석해요'**
+  String get cortexAskNote;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

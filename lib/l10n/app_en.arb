@@ -185,5 +185,6 @@
   "clearAllSub": "Clears analysis and records · your photos stay",
   "coinWord": "coin",
   "bigVideos": "Big videos",
-  "videosMeta": "{count, plural, =1{1 video · {size}} other{{count} videos · {size}}}"
+  "videosMeta": "{count, plural, =1{1 video · {size}} other{{count} videos · {size}}}",
+  "cortexAskNote": "Cortex analyzes them with AI"
 }

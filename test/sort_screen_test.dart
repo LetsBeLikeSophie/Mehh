@@ -202,6 +202,7 @@ void main() {
     await tester.tap(find.text('Cortex로'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Cortex로 보낼까요?'), findsOneWidget);
+    expect(find.text('Cortex에서 AI로 분석해요'), findsOneWidget);
     await tester.tap(find.text('보내기'));
     await tester.pumpAndSettle();
   }

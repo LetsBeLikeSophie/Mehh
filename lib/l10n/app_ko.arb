@@ -501,5 +501,6 @@
         "type": "String"
       }
     }
-  }
+  },
+  "cortexAskNote": "Cortex에서 AI로 분석해요"
 }

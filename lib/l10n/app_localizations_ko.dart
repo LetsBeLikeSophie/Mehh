@@ -724,4 +724,7 @@ class L10nKo extends L10n {
   String videosMeta(int count, String size) {
     return '$count개 · $size';
   }
+
+  @override
+  String get cortexAskNote => 'Cortex에서 AI로 분석해요';
 }
