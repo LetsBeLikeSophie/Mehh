@@ -97,9 +97,7 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('홈: 용량 막대 — 사진·정리 가능·휴지통 (색마다 한 줄 설명)', (
-    tester,
-  ) async {
+  testWidgets('홈: 용량 막대 — 사진·정리 가능·휴지통 (색마다 한 줄 설명)', (tester) async {
     final store = MemoryStore()
       ..freed[monthKey(DateTime.now())] = 5 * 1024 * 1024;
     await pump(tester, const Scaffold(body: HomeTab()), store: store);
@@ -165,6 +163,16 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('Cortex로 보낼까요?'), findsOneWidget);
     await tester.tap(find.text('보내기'));
+    await tester.pumpAndSettle();
+  }
+
+  // 크게 보기에서 길게 눌러 동그라미가 다 찰 때까지
+  Future<void> holdToFinish(WidgetTester tester) async {
+    final g = await tester.startGesture(tester.getCenter(card()));
+    for (var i = 0; i < 4; i++) {
+      await tester.pump(const Duration(milliseconds: 400));
+    }
+    await g.up();
     await tester.pumpAndSettle();
   }
 
@@ -606,7 +614,7 @@ void main() {
     await tester.drag(card(), const Offset(0, -200));
     await tester.pumpAndSettle();
 
-    await tester.longPress(card());
+    await holdToFinish(tester);
     await tester.pumpAndSettle();
     expect(find.text('2장을 휴지통으로 보내고 끝낼까요?'), findsOneWidget);
     expect(find.text('4장 중 2장을 선택했어요.'), findsOneWidget);
@@ -614,13 +622,30 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(FocusScreen), findsOneWidget);
 
-    await tester.longPress(card());
+    await holdToFinish(tester);
     await tester.pumpAndSettle();
     await tester.tap(find.text('휴지통으로'));
     await tester.pumpAndSettle();
     expect(find.byType(FocusScreen), findsNothing);
     expect(find.textContaining('  2장'), findsOneWidget); // 남은 사진
-    expect(find.textContaining(RegExp(r'✓ 2장 · .+ 휴지통으로 보냈어요')), findsOneWidget);
+    expect(
+      find.textContaining(RegExp(r'✓ 2장 · .+ 휴지통으로 보냈어요')),
+      findsOneWidget,
+    );
+    await flush(tester);
+  });
+
+  testWidgets('크게 보기: 동그라미가 다 차기 전에 손을 떼면 아무 일도 없다', (tester) async {
+    await pump(tester, SortScreen(kind: SortKind.singles, group: group));
+    await tester.tap(find.byType(PhotoThumb).first);
+    await tester.pumpAndSettle();
+    final g = await tester.startGesture(tester.getCenter(card()));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.byType(CircularProgressIndicator), findsOneWidget); // 차오르는 중
+    await g.up();
+    await tester.pumpAndSettle();
+    expect(find.textContaining('끝낼까요?'), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
     await flush(tester);
   });
 
@@ -628,7 +653,7 @@ void main() {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     await tester.tap(find.byType(PhotoThumb).first);
     await tester.pumpAndSettle();
-    await tester.longPress(card());
+    await holdToFinish(tester);
     await tester.pumpAndSettle();
     expect(find.text('정리할 사진이 없어요. 끝낼까요?'), findsOneWidget);
     await tester.tap(find.text('끝내기'));
@@ -638,9 +663,7 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('크게 보기: 가만히 있으면 "길게 누르면 정리를 끝낼 수 있어요" (하루 3번까지)', (
-    tester,
-  ) async {
+  testWidgets('크게 보기: 가만히 있으면 "길게 누르면 정리를 끝낼 수 있어요" (하루 3번까지)', (tester) async {
     final store = MemoryStore();
     await pump(
       tester,
@@ -843,7 +866,10 @@ void main() {
     // 무료가 아직 남았으니 Pro 안내는 뜨지 않고, 휴지통 알림이 그대로 보인다 (F1-B)
     expect(find.text('Mehh Pro'), findsNothing);
     expect(find.textContaining('휴지통을 비우면 그만큼 공간이 생겨요'), findsOneWidget);
-    expect(find.textContaining(RegExp(r'✓ [0-9]+장 · [0-9.]+(KB|MB|GB|B) 휴지통으로')), findsOneWidget);
+    expect(
+      find.textContaining(RegExp(r'✓ [0-9]+장 · [0-9.]+(KB|MB|GB|B) 휴지통으로')),
+      findsOneWidget,
+    );
     final stats = PickStats.of(picks);
     expect(stats.suggested, 2);
     expect(stats.accepted, 1);
@@ -1259,7 +1285,10 @@ void main() {
     await tester.tap(find.text('휴지통으로'));
     await tester.pumpAndSettle();
     expect(find.textContaining('  2장'), findsOneWidget);
-    expect(find.textContaining(RegExp(r'✓ 2장 · .+ 휴지통으로 보냈어요')), findsOneWidget);
+    expect(
+      find.textContaining(RegExp(r'✓ 2장 · .+ 휴지통으로 보냈어요')),
+      findsOneWidget,
+    );
     expect(find.text('Cortex에 있음'), findsNothing);
     expect(find.text('Cortex로 보냄'), findsNothing);
     await tester.pump(const Duration(seconds: 9));
@@ -1369,9 +1398,7 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('Cortex: 캡처가 아닌 낱장 사진에서도 [휴지통으로] 옆에 [Cortex로]', (
-    tester,
-  ) async {
+  testWidgets('Cortex: 캡처가 아닌 낱장 사진에서도 [휴지통으로] 옆에 [Cortex로]', (tester) async {
     await pump(
       tester,
       SortScreen(kind: SortKind.singles, group: group),

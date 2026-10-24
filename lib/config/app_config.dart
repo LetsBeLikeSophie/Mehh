@@ -1,5 +1,5 @@
 /// 앱 버전 (pubspec.yaml version과 같이 고친다). 설정 화면과 문의 메일 제목에 쓴다.
-const appVersion = '1.11.2';
+const appVersion = '1.11.3';
 
 /// 설정 > 문의하기 받는 주소. 비어 있으면 문의하기 줄을 숨긴다.
 /// 최근 앱에서 다시 열었을 때, 마지막으로 사진을 불러온 지 이만큼 지났으면 새로 불러온다
@@ -11,6 +11,9 @@ const freedBarAnimation = Duration(milliseconds: 700);
 
 /// 크게 보기에서 이만큼 가만히 있으면 "길게 누르면 정리를 끝낼 수 있어요"
 const focusIdleHint = Duration(seconds: 5);
+
+/// 크게 보기에서 이만큼 누르고 있으면 동그라미가 다 차서 "끝낼까요?"
+const focusHoldToFinish = Duration(milliseconds: 900);
 
 /// 그 안내는 하루에 이만큼까지
 const focusHintsPerDay = 3;

@@ -41,7 +41,8 @@ class FocusScreen extends ConsumerStatefulWidget {
 /// 사진이 들어오고 나가는 방향
 enum _Motion { next, prev, up, down }
 
-class _FocusScreenState extends ConsumerState<FocusScreen> {
+class _FocusScreenState extends ConsumerState<FocusScreen>
+    with SingleTickerProviderStateMixin {
   late String _currentId = widget.initialId;
 
   Offset _drag = Offset.zero;
@@ -67,7 +68,36 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
   @override
   void dispose() {
     _idle?.cancel();
+    _hold.dispose();
     super.dispose();
+  }
+
+  // 길게 누르는 동안 손가락 자리에 동그라미가 차오른다. 다 차면 끝내기 (2026-10-24 Sophie)
+  late final _hold =
+      AnimationController(vsync: this, duration: focusHoldToFinish)
+        ..addStatusListener((s) {
+          if (s == AnimationStatus.completed) _holdDone();
+        });
+  Offset? _holdAt;
+  VoidCallback? _holdAction;
+
+  void _holdStart(Offset at, VoidCallback onDone) {
+    _holdAction = onDone;
+    setState(() => _holdAt = at);
+    _hold.forward(from: 0);
+  }
+
+  /// 다 차기 전에 손을 떼거나 밀기 시작하면 아무 일도 없다
+  void _holdStop() {
+    _hold.reset();
+    _holdAction = null;
+    if (_holdAt != null && mounted) setState(() => _holdAt = null);
+  }
+
+  void _holdDone() {
+    final a = _holdAction;
+    _holdStop();
+    a?.call();
   }
 
   /// 가만히 있으면 "길게 누르면 정리를 끝낼 수 있어요" (하루 [focusHintsPerDay]번까지)
@@ -317,34 +347,60 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                         onScaleUpdate: _onScaleUpdate,
                         onScaleEnd: (_) => _onScaleEnd(ids),
                         onTap: () => openPhoto(context, current),
-                        // 길게 누르기 = 언제나 "정리 끝내기"
-                        onLongPress: () => _finish(ids.length, markedCount),
-                        child: ClipRect(
-                          child: AnimatedSwitcher(
-                            duration: Duration(
-                              milliseconds: _dragging ? 0 : 220,
-                            ),
-                            switchInCurve: Curves.easeOutCubic,
-                            switchOutCurve: Curves.easeInCubic,
-                            layoutBuilder: (cur, prev) => Stack(
-                              fit: StackFit.expand,
-                              children: [...prev, ?cur],
-                            ),
-                            transitionBuilder: (child, anim) {
-                              final incoming = child.key == ValueKey(current);
-                              return SlideTransition(
-                                position: Tween(
-                                  begin: incoming ? inFrom : outTo,
-                                  end: Offset.zero,
-                                ).animate(anim),
-                                child: FadeTransition(
-                                  opacity: anim,
-                                  child: child,
+                        // 길게 누르기 = 언제나 "정리 끝내기": 동그라미가 다 차면 묻는다
+                        onLongPressDown: (d) => _holdStart(
+                          d.localPosition,
+                          () => _finish(ids.length, markedCount),
+                        ),
+                        onLongPressCancel: _holdStop,
+                        onLongPressUp: _holdStop,
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            ClipRect(
+                              child: AnimatedSwitcher(
+                                duration: Duration(
+                                  milliseconds: _dragging ? 0 : 220,
                                 ),
-                              );
-                            },
-                            child: card,
-                          ),
+                                switchInCurve: Curves.easeOutCubic,
+                                switchOutCurve: Curves.easeInCubic,
+                                layoutBuilder: (cur, prev) => Stack(
+                                  fit: StackFit.expand,
+                                  children: [...prev, ?cur],
+                                ),
+                                transitionBuilder: (child, anim) {
+                                  final incoming =
+                                      child.key == ValueKey(current);
+                                  return SlideTransition(
+                                    position: Tween(
+                                      begin: incoming ? inFrom : outTo,
+                                      end: Offset.zero,
+                                    ).animate(anim),
+                                    child: FadeTransition(
+                                      opacity: anim,
+                                      child: child,
+                                    ),
+                                  );
+                                },
+                                child: card,
+                              ),
+                            ),
+                            if (_holdAt case final at?)
+                              Positioned(
+                                left: at.dx - 36,
+                                top: at.dy - 36,
+                                child: IgnorePointer(
+                                  child: AnimatedBuilder(
+                                    animation: _hold,
+                                    // 잠깐 누른 것(누르기·밀기)에는 보이지 않게 조금 뒤부터
+                                    builder: (_, _) => Opacity(
+                                      opacity: _hold.value > 0.15 ? 1 : 0,
+                                      child: _HoldRing(_hold.value),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     ),
@@ -384,6 +440,29 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
       ),
     );
   }
+}
+
+/// 길게 누르기 동그라미 (흰 원 위에 검정이 시계 방향으로 찬다)
+class _HoldRing extends StatelessWidget {
+  const _HoldRing(this.value);
+  final double value;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 72,
+    height: 72,
+    padding: const EdgeInsets.all(10),
+    decoration: const BoxDecoration(
+      color: MehhColors.white,
+      shape: BoxShape.circle,
+    ),
+    child: CircularProgressIndicator(
+      value: value,
+      strokeWidth: 4,
+      color: MehhColors.black,
+      backgroundColor: MehhColors.border,
+    ),
+  );
 }
 
 /// 아래 한 줄 사진 줄. 화면보다 많으면 끝에서 처음으로 이어지며 돈다 (무한 반복),
