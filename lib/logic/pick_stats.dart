@@ -44,6 +44,7 @@ Set<TrashReason> mutedReasons(
     ('burst', TrashReason.burst),
     ('blurry', TrashReason.blurry),
     ('junk', TrashReason.junk),
+    ('eyesClosed', TrashReason.eyesClosed),
   ])
     if (s.byTag[tag] case (final accepted, final total)
         when total >= config.learnMinSamples &&

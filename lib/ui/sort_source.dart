@@ -17,6 +17,7 @@ enum PhotoTag {
   best,
   burst,
   blurry,
+  eyesClosed,
   junk,
   original,
   duplicate,
@@ -78,6 +79,7 @@ String tagText(PhotoTag t, L10n l) => switch (t) {
   PhotoTag.best => l.tagBest,
   PhotoTag.burst => l.tagBurst,
   PhotoTag.blurry => l.tagBlurry,
+  PhotoTag.eyesClosed => l.tagEyesClosed,
   PhotoTag.junk => l.tagJunk,
   PhotoTag.original => l.tagOriginal,
   PhotoTag.duplicate => l.tagDuplicate,
@@ -102,6 +104,7 @@ String noteText(PhotoTag t, List<BestReason> reasons, L10n l) => switch (t) {
           ),
   PhotoTag.burst => l.noteBurst,
   PhotoTag.blurry => l.noteBlurry,
+  PhotoTag.eyesClosed => l.noteEyesClosed,
   PhotoTag.junk => l.noteJunk,
   PhotoTag.original => l.noteKeeper,
   PhotoTag.duplicate => l.tagDuplicate,
@@ -215,6 +218,7 @@ SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
           TrashReason.burst => PhotoTag.burst,
           TrashReason.blurry => PhotoTag.blurry,
           TrashReason.junk => PhotoTag.junk,
+          TrashReason.eyesClosed => PhotoTag.eyesClosed,
         };
       });
       // 그날의 묶음 추천은 매달 무료 묶음 또는 Pro로 연다. 낱장 사진·캡처·중복은 무료.

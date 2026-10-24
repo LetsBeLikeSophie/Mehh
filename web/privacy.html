@@ -28,6 +28,7 @@
   <ul>
     <li>앱은 사진을 날짜·장소로 묶고 비슷하거나 똑같은 사진을 찾기 위해 사진첩 전체에 접근합니다.</li>
     <li>사진 분석(흐림·밝기·그림 해시 등)은 모두 휴대폰 안에서 합니다. 사진이나 분석 값을 운영자나 다른 서버로 보내지 않고, 클라우드 AI를 쓰지 않습니다.</li>
+    <li>눈 감은 컷 찾기: 비슷한 연속 컷에서 눈 감은 사진을 고르려고, 휴대폰 안의 얼굴 감지(Google ML Kit, 기기 안에서만 동작)로 얼굴이 있는지와 눈을 떴는지만 봅니다. 사람을 알아보지 않고, 얼굴 모양 같은 정보는 저장하거나 밖으로 보내지 않습니다. 사진마다 "눈 감음" 여부 하나만 휴대폰 안에 남습니다.</li>
     <li>얼굴을 알아보거나 사람별로 묶지 않습니다.</li>
   </ul>
 
@@ -75,6 +76,7 @@
   <ul>
     <li>The app reads your whole photo library to group photos by date and place and to find similar or identical photos.</li>
     <li>All analysis (blur, brightness, image hashes, etc.) happens on your phone. Photos and analysis values are never sent to the developer or any other server, and no cloud AI is used.</li>
+    <li>Closed-eye check: to pick out shots with closed eyes among similar shots, on-device face detection (Google ML Kit, runs only on your phone) checks whether there is a face and whether the eyes are open. It does not recognize people, and no face data is stored or sent anywhere. Only a yes/no "eyes closed" flag per photo stays on your phone.</li>
     <li>The app does not recognize faces or group photos by person.</li>
   </ul>
 

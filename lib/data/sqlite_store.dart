@@ -20,6 +20,7 @@ const _picksTable = '''
 const _seenTable = 'CREATE TABLE seen (id TEXT PRIMARY KEY)';
 const _cortexSentTable =
     'CREATE TABLE cortex_sent (id TEXT PRIMARY KEY, at INTEGER, got INTEGER DEFAULT 0)';
+const _facesTable = 'CREATE TABLE faces (id TEXT PRIMARY KEY, closed INTEGER)';
 const _countersTable =
     'CREATE TABLE counters (key TEXT PRIMARY KEY, n INTEGER)';
 
@@ -28,7 +29,7 @@ class SqliteStore implements Store {
 
   Future<Database> get _database async => _db ??= await openDatabase(
     'mehh.db',
-    version: 7,
+    version: 8,
     onUpgrade: (db, from, _) async {
       // 분석 결과는 캐시라서 버리고 다시 계산한다
       if (from < 3) {
@@ -45,6 +46,7 @@ class SqliteStore implements Store {
         );
       }
       if (from < 7) await db.execute(_countersTable);
+      if (from < 8) await db.execute(_facesTable);
     },
     onCreate: (db, _) async {
       await db.execute(_featuresTable);
@@ -63,6 +65,7 @@ class SqliteStore implements Store {
       await db.execute(_seenTable);
       await db.execute(_cortexSentTable);
       await db.execute(_countersTable);
+      await db.execute(_facesTable);
     },
   );
 
@@ -267,6 +270,24 @@ class SqliteStore implements Store {
   };
 
   @override
+  Future<Map<String, bool>> loadFaces() async => {
+    for (final r in await (await _database).query('faces'))
+      r['id'] as String: r['closed'] == 1,
+  };
+
+  @override
+  Future<void> saveFaces(Map<String, bool> eyesClosed) async {
+    final batch = (await _database).batch();
+    eyesClosed.forEach((id, closed) {
+      batch.insert('faces', {
+        'id': id,
+        'closed': closed ? 1 : 0,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+    });
+    await batch.commit(noResult: true);
+  }
+
+  @override
   Future<int> counter(String key) async {
     final rows = await (await _database).query(
       'counters',
@@ -300,6 +321,7 @@ class SqliteStore implements Store {
         'seen',
         'cortex_sent',
         'counters',
+        'faces',
       ]) {
         await tx.delete(t);
       }

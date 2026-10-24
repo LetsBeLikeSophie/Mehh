@@ -683,4 +683,14 @@ class L10nKo extends L10n {
 
   @override
   String get barRecommendedLabel => '추천 정리 ';
+
+  @override
+  String get tagEyesClosed => '눈 감음';
+
+  @override
+  String get noteEyesClosed => '눈 감은 컷 · 같은 순간 눈 뜬 컷이 있어요';
+
+  @override
+  String get mutedEyesClosed =>
+      '눈 감은 컷은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요';
 }

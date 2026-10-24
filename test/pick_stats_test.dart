@@ -61,6 +61,20 @@ void main() {
     expect(mutedReasons(PickStats.of(records)), {TrashReason.blurry});
   });
 
+  test('눈 감음 추천도 정확도 기록·취향 학습에 들어간다 (자주 남기면 끈다)', () {
+    final records = [
+      for (var i = 0; i < 20; i++)
+        PickRecord(
+          at: DateTime(2026, 10, 20),
+          kind: 'day',
+          tag: 'eyesClosed',
+          suggested: true,
+          sent: i < 5,
+        ),
+    ];
+    expect(mutedReasons(PickStats.of(records)), {TrashReason.eyesClosed});
+  });
+
   test('취향 학습은 최근 30일 기록만 본다 (꺼진 이유도 30일 뒤엔 다시 추천)', () {
     PickRecord r(DateTime at, bool sent) => PickRecord(
       at: at,

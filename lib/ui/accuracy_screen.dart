@@ -108,6 +108,7 @@ class AccuracyScreen extends ConsumerWidget {
                                 TrashReason.burst => l.tagBurst,
                                 TrashReason.blurry => l.tagBlurry,
                                 TrashReason.junk => l.tagJunk,
+                                TrashReason.eyesClosed => l.tagEyesClosed,
                               },
                           ].join(', '),
                         ),

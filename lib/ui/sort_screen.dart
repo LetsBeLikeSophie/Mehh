@@ -469,6 +469,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
               TrashReason.burst => l.mutedBurst,
               TrashReason.blurry => l.mutedBlurry,
               TrashReason.junk => l.mutedJunk,
+              TrashReason.eyesClosed => l.mutedEyesClosed,
             },
         ].join('\n'),
       );

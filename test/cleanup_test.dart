@@ -123,6 +123,23 @@ void main() {
   });
 
   group('연속 컷과 추천', () {
+    test('눈 감은 컷: 같은 순간 눈 뜬 컷이 있으면 "눈 감음"으로 추천, 베스트는 눈 뜬 컷에서 (폰 안 ML Kit)', () {
+      final photos = [
+        meta('a', t0),
+        meta('b', t0.add(const Duration(seconds: 20))),
+      ];
+      final f = {
+        'a': feat('a', sharp: 900), // 더 선명하지만 눈 감음
+        'b': feat('b', sharp: 300, lo: 0x0F0F0F00),
+      };
+      final plan = planGroup(photos, f, {}, eyesClosed: {'a'});
+      expect(plan.trash, {'a': TrashReason.eyesClosed});
+      expect({...plan.best, ...plan.kept}, {'b'});
+      // 모두 눈 감았으면 눈 감음으로는 추천하지 않는다 (남길 컷이 없다)
+      final all = planGroup(photos, f, {}, eyesClosed: {'a', 'b'});
+      expect(all.trash.values, isNot(contains(TrashReason.eyesClosed)));
+    });
+
     test('품질 차이가 애매하면 베스트라고 부르지 않고 가장 나중 컷을 남긴다 (2026-10-24 Sophie)', () {
       final photos = [
         meta('a', t0),

@@ -8,7 +8,7 @@ import '../models/photo_meta.dart';
 /// 정리 추천 이유.
 /// [junk]: 까맣거나 주머니·렌즈 가림처럼 실수로 찍힌 사진 (한 장뿐이어도 추천)
 /// [blurry]·[burst]: 같은 순간을 더 잘 담은 사진이 있을 때만 추천
-enum TrashReason { burst, blurry, junk }
+enum TrashReason { burst, blurry, junk, eyesClosed }
 
 /// 묶음 하나의 추천 정리 결과.
 class GroupPlan {
@@ -50,6 +50,7 @@ GroupPlan planGroup(
   Map<String, Decision> decisions, {
   CleanupConfig config = const CleanupConfig(),
   Set<TrashReason> muted = const {},
+  Set<String> eyesClosed = const {},
 }) {
   final bursts = findBursts(photos, features, config: config);
   final best = <String>{};
@@ -74,7 +75,12 @@ GroupPlan planGroup(
 
   for (final b in bursts) {
     String? bestId;
-    final alive = b.where((p) => !gone(p)).toList();
+    final allAlive = b.where((p) => !gone(p)).toList();
+    // 같은 순간에 눈 뜬 컷이 있으면 눈 감은 컷은 남길 후보에서 뺀다 (폰 안 ML Kit, 2026-10-24)
+    final eyesOpen = allAlive.where((p) => !eyesClosed.contains(p.id)).toList();
+    final hasOpenEyes =
+        eyesOpen.isNotEmpty && eyesOpen.length < allAlive.length;
+    final alive = hasOpenEyes ? eyesOpen : allAlive;
     if (b.length > 1 && alive.isNotEmpty) {
       final ranked = [
         ...alive,
@@ -99,6 +105,8 @@ GroupPlan planGroup(
       final f = features[p.id];
       if (f != null && isJunk(f, config)) {
         trash[p.id] = TrashReason.junk;
+      } else if (hasOpenEyes && eyesClosed.contains(p.id)) {
+        trash[p.id] = TrashReason.eyesClosed;
       } else if (bestId == null) {
         // 그 순간의 유일한 사진은 흔들렸어도 건드리지 않는다
         continue;

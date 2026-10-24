@@ -91,6 +91,8 @@ class _HomeTabState extends ConsumerState<HomeTab> {
   @override
   Widget build(BuildContext context) {
     final l = context.l;
+    // 분석이 끝나면 연속 컷의 눈 감음을 폰 안에서 본다 (홈이 떠 있는 동안)
+    ref.watch(faceScanProvider);
     ref.listen(yearlyEndedProvider, (_, ended) {
       if (!ended) return;
       ref.read(yearlyEndedProvider.notifier).clear();

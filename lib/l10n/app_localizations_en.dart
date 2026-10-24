@@ -824,4 +824,15 @@ class L10nEn extends L10n {
 
   @override
   String get barRecommendedLabel => 'Suggested ';
+
+  @override
+  String get tagEyesClosed => 'Eyes closed';
+
+  @override
+  String get noteEyesClosed =>
+      'Eyes closed · another shot of the same moment has them open';
+
+  @override
+  String get mutedEyesClosed =>
+      'You often keep eyes-closed shots, so we\'ll skip them for now · we\'ll try again in 30 days';
 }

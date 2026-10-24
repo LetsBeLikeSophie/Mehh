@@ -34,6 +34,10 @@ abstract class Store {
   Future<void> removeCortexSent(Iterable<String> photoIds);
   Future<Map<String, bool>> loadCortexSent();
 
+  /// 눈 감은 컷 확인 결과 (폰 안 ML Kit, id → 눈 감음). 얼굴 정보는 남기지 않는다
+  Future<Map<String, bool>> loadFaces();
+  Future<void> saveFaces(Map<String, bool> eyesClosed);
+
   /// 작은 횟수 기록 (예: 오늘 "길게 눌러 끝내기" 안내를 몇 번 보였나)
   Future<int> counter(String key);
   Future<void> bumpCounter(String key);
@@ -59,6 +63,14 @@ class MemoryStore implements Store {
   final seen = <String>{};
   final cortexSent = <String, bool>{};
   final counters = <String, int>{};
+  final faces = <String, bool>{};
+
+  @override
+  Future<Map<String, bool>> loadFaces() async => {...faces};
+
+  @override
+  Future<void> saveFaces(Map<String, bool> eyesClosed) async =>
+      faces.addAll(eyesClosed);
 
   @override
   Future<void> addCortexSent(
@@ -142,6 +154,7 @@ class MemoryStore implements Store {
   Future<void> clearAll() async {
     cortexSent.clear();
     counters.clear();
+    faces.clear();
     features.clear();
     decisions.clear();
     log.clear();

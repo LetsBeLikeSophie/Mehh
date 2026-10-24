@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -5,6 +7,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'data/billing.dart';
 import 'data/demo.dart';
 import 'data/device.dart';
+import 'data/face_check.dart';
 import 'data/handoff.dart';
 import 'data/photo_library.dart';
 import 'data/pro.dart';
@@ -711,7 +714,85 @@ final groupPlanProvider = Provider.autoDispose.family<GroupPlan, DayGroup>((
   final features = ref.watch(analysisProvider.select((s) => s.features));
   final decisions = ref.watch(decisionsProvider).value ?? const {};
   final muted = ref.watch(mutedReasonsProvider).value ?? const {};
-  return planGroup(g.photos, features, decisions, muted: muted);
+  final eyes = ref.watch(eyesClosedProvider).value ?? const {};
+  return planGroup(
+    g.photos,
+    features,
+    decisions,
+    muted: muted,
+    eyesClosed: {
+      for (final e in eyes.entries)
+        if (e.value) e.key,
+    },
+  );
+});
+
+// ───────────────────────── 눈 감은 컷 (폰 안 AI)
+
+final faceCheckerProvider = Provider<FaceChecker>((ref) {
+  if (isDemo || !(Platform.isAndroid || Platform.isIOS)) return NoFaceChecker();
+  final c = MlKitFaceChecker(ref.read(photoLibraryProvider).entities);
+  ref.onDispose(c.close);
+  return c;
+});
+
+/// 사진 id → 눈 감은 얼굴이 있다 (폰 안 ML Kit 결과, 기기 안 `faces` 표). 얼굴 정보는 남기지 않는다
+class EyesClosedNotifier extends AsyncNotifier<Map<String, bool>> {
+  @override
+  Future<Map<String, bool>> build() => ref.read(storeProvider).loadFaces();
+
+  bool _running = false;
+
+  /// 아직 안 본 사진만 차례로 본다 (몇 장씩 저장하며 화면에 반영)
+  Future<void> scan(List<String> ids) async {
+    if (_running) return;
+    _running = true;
+    try {
+      final have = await future;
+      final todo = [
+        for (final id in ids)
+          if (!have.containsKey(id)) id,
+      ];
+      for (var i = 0; i < todo.length; i += 12) {
+        if (!ref.mounted) return;
+        final part = todo.sublist(i, (i + 12).clamp(0, todo.length));
+        final found = await ref.read(faceCheckerProvider).eyesClosed(part);
+        // 못 본 사진도 다시 안 보게 "눈 감음 아님"으로 남긴다
+        final result = {for (final id in part) id: found[id] ?? false};
+        await ref.read(storeProvider).saveFaces(result);
+        if (!ref.mounted) return;
+        state = AsyncData({...state.value ?? {}, ...result});
+      }
+    } finally {
+      _running = false;
+    }
+  }
+}
+
+final eyesClosedProvider =
+    AsyncNotifierProvider<EyesClosedNotifier, Map<String, bool>>(
+      EyesClosedNotifier.new,
+    );
+
+/// 사진 분석이 끝나면 연속 컷(2장 이상)에 든 사진만 눈 감음을 본다. 최근 묶음부터.
+/// 홈이 지켜보는 동안 돈다
+final faceScanProvider = Provider<void>((ref) {
+  final done = ref.watch(analysisProvider.select((a) => a.done));
+  final groups = ref.watch(libraryProvider.select((s) => s.value?.groups));
+  if (!done ||
+      groups == null ||
+      ref.read(faceCheckerProvider) is NoFaceChecker) {
+    return;
+  }
+  final features = ref.read(analysisProvider).features;
+  final ids = <String>[
+    for (final g in groups.reversed)
+      if (g.kind != DayGroupKind.screenshots)
+        for (final b in findBursts(g.photos, features))
+          if (b.length > 1)
+            for (final p in b) p.id,
+  ];
+  Future.microtask(() => ref.read(eyesClosedProvider.notifier).scan(ids));
 });
 
 /// 묶음 상태 (홈 목록·"정리할 묶음 N개")

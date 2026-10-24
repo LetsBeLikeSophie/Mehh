@@ -1122,6 +1122,24 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'추천 정리 '**
   String get barRecommendedLabel;
+
+  /// No description provided for @tagEyesClosed.
+  ///
+  /// In ko, this message translates to:
+  /// **'눈 감음'**
+  String get tagEyesClosed;
+
+  /// No description provided for @noteEyesClosed.
+  ///
+  /// In ko, this message translates to:
+  /// **'눈 감은 컷 · 같은 순간 눈 뜬 컷이 있어요'**
+  String get noteEyesClosed;
+
+  /// No description provided for @mutedEyesClosed.
+  ///
+  /// In ko, this message translates to:
+  /// **'눈 감은 컷은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요'**
+  String get mutedEyesClosed;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {
