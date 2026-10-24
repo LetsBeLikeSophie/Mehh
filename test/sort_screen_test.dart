@@ -60,6 +60,7 @@ void main() {
           photoLibraryProvider.overrideWithValue(
             DemoPhotoLibrary() as PhotoLibrary,
           ),
+          closedTestFreeProvider.overrideWithValue(false),
           storeProvider.overrideWithValue(store ?? MemoryStore()),
           proVaultProvider.overrideWithValue(vault ?? MemoryProVault()),
           billingProvider.overrideWithValue(
@@ -122,6 +123,7 @@ void main() {
       );
     final c = ProviderContainer(
       overrides: [
+        closedTestFreeProvider.overrideWithValue(false),
         photoLibraryProvider.overrideWithValue(lib as PhotoLibrary),
         storeProvider.overrideWithValue(store),
       ],
@@ -1101,11 +1103,27 @@ void main() {
     await flush(tester);
   });
 
+  test('비공개 테스트 동안(closedTestFree)은 그날의 묶음이 코인 없이 열려 있고 Pro 안내도 없다', () async {
+    final c = ProviderContainer(
+      overrides: [
+        proVaultProvider.overrideWithValue(MemoryProVault()),
+        billingProvider.overrideWithValue(DemoBilling(korean: true)),
+        storeProvider.overrideWithValue(MemoryStore()),
+      ],
+    );
+    addTearDown(c.dispose);
+    final day = DayGroup(id: 'd', kind: DayGroupKind.day, photos: burstPhotos);
+    await c.read(proProvider.future);
+    expect(c.read(unlockedProvider(day)), isTrue);
+    expect(await c.read(proProvider.notifier).canNudge(), isFalse);
+  });
+
   test('무료 묶음은 매달 3개, 다음 달에 다시 채워지고, Pro면 모두 열림', () async {
     final vault = MemoryProVault();
     final billing = DemoBilling(korean: true);
     final c = ProviderContainer(
       overrides: [
+        closedTestFreeProvider.overrideWithValue(false),
         proVaultProvider.overrideWithValue(vault),
         billingProvider.overrideWithValue(billing),
       ],
@@ -1138,6 +1156,7 @@ void main() {
   test('무료로 연 묶음은 다시 묶여 id가 바뀌어도 열려 있다 (첫 사진을 빼거나 둘로 나뉘어도)', () async {
     final c = ProviderContainer(
       overrides: [
+        closedTestFreeProvider.overrideWithValue(false),
         proVaultProvider.overrideWithValue(MemoryProVault()),
         billingProvider.overrideWithValue(DemoBilling(korean: true)),
       ],
@@ -1219,6 +1238,7 @@ void main() {
     final billing = DemoBilling(korean: true)..owned.add(Plan.yearly);
     final c = ProviderContainer(
       overrides: [
+        closedTestFreeProvider.overrideWithValue(false),
         proVaultProvider.overrideWithValue(
           MemoryProVault(const ProState(yearly: true)),
         ),
@@ -1243,6 +1263,7 @@ void main() {
   test('1년 이용권이 끝나면 한 번 알린다 (평생권이 있으면 알리지 않는다)', () async {
     final c = ProviderContainer(
       overrides: [
+        closedTestFreeProvider.overrideWithValue(false),
         proVaultProvider.overrideWithValue(
           MemoryProVault(const ProState(yearly: true)),
         ),
@@ -1260,6 +1281,7 @@ void main() {
     final lib = _CountingLibrary();
     final c = ProviderContainer(
       overrides: [
+        closedTestFreeProvider.overrideWithValue(false),
         photoLibraryProvider.overrideWithValue(lib),
         storeProvider.overrideWithValue(MemoryStore()),
       ],
@@ -1282,6 +1304,7 @@ void main() {
     final billing = DemoBilling(korean: true)..owned.add(Plan.lifetime);
     final c = ProviderContainer(
       overrides: [
+        closedTestFreeProvider.overrideWithValue(false),
         proVaultProvider.overrideWithValue(MemoryProVault()),
         billingProvider.overrideWithValue(billing),
       ],
@@ -1297,6 +1320,7 @@ void main() {
   test('달이 바뀌어 무료 묶음이 다시 생기면 신호 한 번 (같은 달에 다시 확인하면 없음)', () async {
     final c = ProviderContainer(
       overrides: [
+        closedTestFreeProvider.overrideWithValue(false),
         proVaultProvider.overrideWithValue(
           MemoryProVault(const ProState(freeMonth: '2026-10', freeUsed: 3)),
         ),
@@ -1319,6 +1343,7 @@ void main() {
     final vault = MemoryProVault(const ProState(lifetime: true, yearly: true));
     final c = ProviderContainer(
       overrides: [
+        closedTestFreeProvider.overrideWithValue(false),
         proVaultProvider.overrideWithValue(vault),
         billingProvider.overrideWithValue(DemoBilling(korean: true)),
       ],

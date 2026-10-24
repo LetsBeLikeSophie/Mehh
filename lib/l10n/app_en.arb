@@ -173,5 +173,6 @@
   "barRecommendedLabel": "Suggested ",
   "tagEyesClosed": "Eyes closed",
   "noteEyesClosed": "Eyes closed · another shot of the same moment has them open",
-  "mutedEyesClosed": "You often keep eyes-closed shots, so we'll skip them for now · we'll try again in 30 days"
+  "mutedEyesClosed": "You often keep eyes-closed shots, so we'll skip them for now · we'll try again in 30 days",
+  "testFreeChip": "Free in testing"
 }

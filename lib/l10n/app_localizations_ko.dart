@@ -693,4 +693,7 @@ class L10nKo extends L10n {
   @override
   String get mutedEyesClosed =>
       '눈 감은 컷은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요';
+
+  @override
+  String get testFreeChip => '테스트 무료';
 }

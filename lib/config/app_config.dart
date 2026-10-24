@@ -1,5 +1,8 @@
 /// 앱 버전 (pubspec.yaml version과 같이 고친다). 설정 화면과 문의 메일 제목에 쓴다.
-const appVersion = '1.15.0';
+const appVersion = '1.15.1';
+
+/// 비공개 테스트 동안 그날의 묶음을 코인 없이 모두 연다 (2026-10-24 Sophie). 결제를 켜고 정식 출시할 때 false
+const closedTestFree = true;
 
 /// 설정 > 문의하기 받는 주소. 비어 있으면 문의하기 줄을 숨긴다.
 /// 최근 앱에서 다시 열었을 때, 마지막으로 사진을 불러온 지 이만큼 지났으면 새로 불러온다

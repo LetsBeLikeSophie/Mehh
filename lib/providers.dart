@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import 'config/app_config.dart';
 import 'data/billing.dart';
 import 'data/demo.dart';
 import 'data/device.dart';
@@ -164,6 +165,7 @@ class ProNotifier extends AsyncNotifier<ProState> {
 
   /// [takeNudge]를 쓰지 않고 오늘 안내를 띄울 수 있는지만 본다
   Future<bool> canNudge({DateTime? now}) async {
+    if (ref.read(closedTestFreeProvider)) return false; // 테스트 동안은 Pro 안내 없음
     final s = await future;
     final at = now ?? DateTime.now();
     // 무료 묶음을 다 쓴 뒤에만 (무료가 남은 사람에게는 띄우지 않는다, 2026-10-22 Sophie F1-B)
@@ -210,13 +212,17 @@ final proProvider = AsyncNotifierProvider<ProNotifier, ProState>(
 );
 
 /// 이 묶음의 앱 추천이 열려 있는가 (불러오는 중엔 닫힌 것으로)
+/// 비공개 테스트 중 무료 ([closedTestFree]). 테스트에서는 덮어 써서 코인 흐름을 본다
+final closedTestFreeProvider = Provider<bool>((ref) => closedTestFree);
+
 final unlockedProvider = Provider.family<bool, DayGroup>(
   (ref, g) =>
-      ref
-          .watch(proProvider)
-          .value
-          ?.isOpen(g.id, photoIds: g.photos.map((p) => p.id)) ??
-      false,
+      ref.watch(closedTestFreeProvider) ||
+      (ref
+              .watch(proProvider)
+              .value
+              ?.isOpen(g.id, photoIds: g.photos.map((p) => p.id)) ??
+          false),
 );
 
 // ───────────────────────── 권한

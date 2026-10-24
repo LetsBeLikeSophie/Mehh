@@ -835,4 +835,7 @@ class L10nEn extends L10n {
   @override
   String get mutedEyesClosed =>
       'You often keep eyes-closed shots, so we\'ll skip them for now · we\'ll try again in 30 days';
+
+  @override
+  String get testFreeChip => 'Free in testing';
 }

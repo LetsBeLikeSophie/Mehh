@@ -61,6 +61,7 @@ void main() {
           photoLibraryProvider.overrideWithValue(
             DemoPhotoLibrary() as PhotoLibrary,
           ),
+          closedTestFreeProvider.overrideWithValue(false),
           storeProvider.overrideWithValue(store ?? MemoryStore()),
           proVaultProvider.overrideWithValue(MemoryProVault(pro)),
           billingProvider.overrideWithValue(DemoBilling(korean: true)),

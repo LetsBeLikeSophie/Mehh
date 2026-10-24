@@ -292,6 +292,20 @@ class ProChip extends ConsumerWidget {
     final s = ref.watch(proProvider).value;
     if (s == null) return const SizedBox.shrink();
     final l = context.l;
+    // 비공개 테스트 동안은 코인 대신 "테스트 무료"
+    if (ref.watch(closedTestFreeProvider)) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        child: Text(
+          l.testFreeChip,
+          style: const TextStyle(
+            fontSize: MehhText.caption,
+            fontWeight: FontWeight.w600,
+            color: MehhColors.textMuted,
+          ),
+        ),
+      );
+    }
     return TextButton(
       onPressed: () => showProSheet(context),
       style: TextButton.styleFrom(
