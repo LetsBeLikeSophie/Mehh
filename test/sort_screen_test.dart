@@ -635,6 +635,30 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('그리드: 빈 곳을 길게 눌러 동그라미가 차면 "선택 N장 보내고 끝낼까요?" → 보낸다', (
+    tester,
+  ) async {
+    await pump(tester, SortScreen(kind: SortKind.singles, group: group));
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.pumpAndSettle();
+    // 제목 옆 빈 곳을 길게
+    final g = await tester.startGesture(
+      tester.getTopRight(find.byType(SortScreen)) + const Offset(-60, 140),
+    );
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    for (var i = 0; i < 3; i++) {
+      await tester.pump(const Duration(milliseconds: 400));
+    }
+    await g.up();
+    await tester.pumpAndSettle();
+    expect(find.text('1장을 휴지통으로 보내고 끝낼까요?'), findsOneWidget);
+    await tester.tap(find.text('휴지통으로'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('  3장'), findsOneWidget);
+    await flush(tester);
+  });
+
   testWidgets('크게 보기: 동그라미가 다 차기 전에 손을 떼면 아무 일도 없다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     await tester.tap(find.byType(PhotoThumb).first);
