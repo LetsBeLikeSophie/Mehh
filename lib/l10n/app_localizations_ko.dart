@@ -681,4 +681,13 @@ class L10nKo extends L10n {
 
   @override
   String get picksDot => '추천 정리가 남았어요';
+
+  @override
+  String picksOn(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '추천 $countString장';
+  }
 }

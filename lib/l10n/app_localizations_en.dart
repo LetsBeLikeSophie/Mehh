@@ -822,4 +822,13 @@ class L10nEn extends L10n {
 
   @override
   String get picksDot => 'Suggested cleanup left';
+
+  @override
+  String picksOn(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString picks on';
+  }
 }

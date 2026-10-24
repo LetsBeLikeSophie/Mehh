@@ -483,5 +483,14 @@
       }
     }
   },
-  "picksDot": "추천 정리가 남았어요"
+  "picksDot": "추천 정리가 남았어요",
+  "picksOn": "추천 {count}장",
+  "@picksOn": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  }
 }

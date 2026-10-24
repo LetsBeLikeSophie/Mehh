@@ -946,10 +946,18 @@ void main() {
     expect(find.text('2장 휴지통으로'), findsNothing);
     await openLocked(tester, '추천 보기 · 2장');
     expect(find.text('2장 휴지통으로'), findsOneWidget);
-    // X를 쳐도 추천은 그대로: 이유 표시와 [추천 보기]가 남는다
+    // 추천이 켜진 상태: 이유 표시와 ✓ [추천 2장]
     expect(find.text('흔들림'), findsOneWidget);
     expect(find.text('비슷한 컷'), findsOneWidget);
+    expect(find.text('추천 2장'), findsOneWidget);
+    // 다시 누르면 추천 X만 풀리고(끄기), 또 누르면 다시 켜진다 (2026-10-24 Sophie)
+    await tester.tap(find.text('추천 2장'));
+    await tester.pumpAndSettle();
+    expect(find.text('2장 휴지통으로'), findsNothing);
     expect(find.text('추천 보기 · 2장'), findsOneWidget);
+    await tester.tap(find.text('추천 보기 · 2장'));
+    await tester.pumpAndSettle();
+    expect(find.text('2장 휴지통으로'), findsOneWidget);
     final container = ProviderScope.containerOf(
       tester.element(find.byType(SortScreen)),
     );

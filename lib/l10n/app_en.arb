@@ -170,5 +170,6 @@
   "barSelected": "Selected {size}",
   "barRecommended": "Suggested {size}",
   "coinCount": "{count, plural, =1{1 coin} other{{count} coins}}",
-  "picksDot": "Suggested cleanup left"
+  "picksDot": "Suggested cleanup left",
+  "picksOn": "{count} picks on"
 }

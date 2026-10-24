@@ -208,6 +208,15 @@ class _SortScreenState extends ConsumerState<SortScreen>
 
   /// [추천 보기]: 앱이 고른 사진에 X를 친다. 그날의 묶음은 이번 달 무료 묶음이나 Pro로 열고,
   /// 다 썼으면 Pro 안내. 다시 누르면 추천대로 다시 X.
+  /// 켜 둔 추천 끄기: 추천으로 들어간 X만 표시 없음으로 (직접 선택한 다른 사진은 그대로).
+  /// 실수 사진처럼 처음부터 X인 것은 표시 없음이어도 X로 보인다
+  Future<void> _hidePicks(SortSource src) async {
+    await ref.read(decisionsProvider.notifier).restore({
+      for (final id in src.suggested) id: null,
+    });
+    if (mounted) setState(() => _picked.removeAll(src.suggested));
+  }
+
   Future<void> _showPicks(SortSource src) async {
     final g = widget.group;
     final pro = ref.read(proProvider.notifier);
@@ -442,6 +451,13 @@ class _SortScreenState extends ConsumerState<SortScreen>
         if (isMarked(id, decisions, src)) id,
     ];
     final allSelected = order.isNotEmpty && marked.length == order.length;
+    // [추천 보기]는 켜고 끄는 버튼 (2026-10-24 Sophie). 켠 상태 = 이 화면에서 [추천 보기]를 눌렀고
+    // 추천이 모두 X. 끈 상태 = 처음 상태(실수 사진처럼 처음부터 X인 것만 X)
+    final markedSet = marked.toSet();
+    final picksOn =
+        src.locked == 0 &&
+        src.suggested.any(_picked.contains) &&
+        src.suggested.every(markedSet.contains);
     // 앱이 고른 추천 장수 (잠긴 묶음은 열기 전 장수)
     // [추천 보기 · N장]의 N = 누르면 X가 되는 장수 (잠긴 추천 + 이미 X로 보이는 실수 사진).
     // 66장이라 해 놓고 78장이 X가 되던 것 (2026-10-24 Sophie 버그)
@@ -609,15 +625,22 @@ class _SortScreenState extends ConsumerState<SortScreen>
                                   children: [
                                     if (picks > 0)
                                       Flexible(
+                                        // 켠 상태는 ✓와 테두리로 보인다(X처럼 켜고 끄는 표시). 끄면 추천 X만 풀린다
                                         child: _PillButton(
-                                          label: l.showPicks(picks),
-                                          // 잠긴 묶음은 버튼에 자물쇠: 누르면 무료 묶음을 쓸지 묻는다
+                                          label: picksOn
+                                              ? l.picksOn(picks)
+                                              : l.showPicks(picks),
+                                          // 잠긴 묶음은 버튼에 자물쇠: 누르면 코인을 쓸지 묻는다
                                           icon: src.locked > 0
                                               ? Icons.lock_outline
+                                              : picksOn
+                                              ? Icons.check
                                               : null,
-                                          filled: true,
+                                          filled: !picksOn,
                                           onTap: _busy
                                               ? null
+                                              : picksOn
+                                              ? () => _hidePicks(src)
                                               : () => _showPicks(src),
                                         ),
                                       ),

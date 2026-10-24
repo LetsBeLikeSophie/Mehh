@@ -1122,6 +1122,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'추천 정리가 남았어요'**
   String get picksDot;
+
+  /// No description provided for @picksOn.
+  ///
+  /// In ko, this message translates to:
+  /// **'추천 {count}장'**
+  String picksOn(int count);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {
