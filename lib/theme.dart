@@ -11,6 +11,9 @@ abstract final class MehhColors {
   static const border = Color(0xFFE9E9E7);
   static const icon = Color(0xFFACABA9);
 
+  /// 포인트 색: 용량 막대의 "정리 가능·선택" 칸에만 쓴다 (2026-10-24 Sophie B 코랄)
+  static const accent = Color(0xFFD85A30);
+
   /// 검정 카드 위 보조 글자
   static const onBlackMuted = Color(0xFFB4B4B0);
   static const white = Color(0xFFFFFFFF);

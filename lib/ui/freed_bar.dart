@@ -11,7 +11,7 @@ import 'widgets.dart';
 
 /// 용량 막대 (2026-10-24 Sophie). 막대 전체 = 사진 전체 용량 + 이번 달 휴지통으로 보낸 용량.
 /// - 검정: 사진이 지금 차지한 용량 (비울 수 있는 것 빼고)
-/// - 진한 회색: 비울 수 있는 용량 (선택한 것 + 앱 추천)
+/// - 코랄(포인트 색): 비울 수 있는 용량 (홈: 선택한 것 + 앱 추천, 묶음 안: 선택한 것만)
 /// - 연한 회색: 이번 달 휴지통으로 보낸 용량. 지울수록 늘어난다
 /// 아래 한 줄이 색마다 무엇인지 알려 준다. 홈과 정리 화면의 같은 높이에 둔다([MehhHeader]).
 class FreedBar extends ConsumerWidget {
@@ -63,7 +63,7 @@ class FreedBar extends ConsumerWidget {
                       _Part(
                         right: wFreed,
                         width: wCan,
-                        color: MehhColors.textMuted,
+                        color: MehhColors.accent,
                       ),
                       _Part(right: 0, width: wFreed, color: MehhColors.border),
                     ],
@@ -80,7 +80,7 @@ class FreedBar extends ConsumerWidget {
               _Legend(MehhColors.black, l.barPhotos(formatBytes(photos))),
               if (can > 0)
                 _Legend(
-                  MehhColors.textMuted,
+                  MehhColors.accent,
                   selectedOnly
                       ? l.barSelected(formatBytes(can))
                       : l.barCleanable(formatBytes(can)),
