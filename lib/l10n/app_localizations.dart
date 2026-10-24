@@ -256,7 +256,7 @@ abstract class L10n {
   /// No description provided for @suggestedCount.
   ///
   /// In ko, this message translates to:
-  /// **'정리 추천 {count}장'**
+  /// **'추천 정리 {count}장'**
   String suggestedCount(int count);
 
   /// No description provided for @analyzingShort.
@@ -628,7 +628,7 @@ abstract class L10n {
   /// No description provided for @proBody.
   ///
   /// In ko, this message translates to:
-  /// **'모든 묶음의 정리 추천을 바로 봐요.'**
+  /// **'모든 묶음의 추천 정리를 바로 봐요.'**
   String get proBody;
 
   /// No description provided for @proFree.
@@ -1099,12 +1099,6 @@ abstract class L10n {
   /// **'사진 {size}'**
   String barPhotos(Object size);
 
-  /// No description provided for @barCleanable.
-  ///
-  /// In ko, this message translates to:
-  /// **'정리 가능 {size}'**
-  String barCleanable(Object size);
-
   /// No description provided for @barSent.
   ///
   /// In ko, this message translates to:
@@ -1128,6 +1122,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'선택 {size}'**
   String barSelected(Object size);
+
+  /// No description provided for @barRecommended.
+  ///
+  /// In ko, this message translates to:
+  /// **'추천 정리 {size}'**
+  String barRecommended(Object size);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

@@ -9,32 +9,42 @@ import 'pro_sheet.dart';
 import 'settings_screen.dart';
 import 'widgets.dart';
 
-/// 용량 막대 (2026-10-24 Sophie). 막대 전체 = 사진 전체 용량 + 이번 달 휴지통으로 보낸 용량.
-/// - 검정: 사진이 지금 차지한 용량 (비울 수 있는 것 빼고)
-/// - 코랄(포인트 색): 비울 수 있는 용량 (홈: 선택한 것 + 앱 추천, 묶음 안: 선택한 것만)
-/// - 연한 회색: 이번 달 휴지통으로 보낸 용량. 지울수록 늘어난다
-/// 아래 한 줄이 색마다 무엇인지 알려 준다. 홈과 정리 화면의 같은 높이에 둔다([MehhHeader]).
+/// 용량 막대 (2026-10-24 Sophie). 홈과 정리 화면이 같은 막대·같은 뜻을 쓴다.
+/// 막대 전체 = 사진 전체 용량 + 이번 달 휴지통으로 보낸 용량. 왼쪽부터
+/// - 검정: 사진 (남는 것)
+/// - 연한 코랄: 추천 정리 (앱이 추천했는데 아직 선택 안 한 것)
+/// - 코랄: 선택 (내가 선택한 것) — 추천을 선택하면 연한 코랄에서 코랄로 옮겨 간다
+/// - 회색: 휴지통 (이번 달 보낸 것)
+/// 아래 한 줄은 글자 색이 칸 색과 같고, 길면 줄을 바꾸지 않고 글자를 줄인다.
 class FreedBar extends ConsumerWidget {
-  const FreedBar({super.key, this.extra = const [], this.selectedOnly = false});
+  const FreedBar({super.key, this.extra = const []});
 
-  /// 앱 추천·선택 말고도 지금 화면에서 X로 보이는 사진 (정리 화면의 "처음부터 X")
+  /// 선택으로 저장되지 않았지만 지금 화면에서 X로 보이는 사진 (정리 화면의 "처음부터 X")
   final List<String> extra;
-
-  /// 묶음 안에서는 진한 회색이 선택한 것만 따라간다 (2026-10-24 Sophie)
-  final bool selectedOnly;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final photos = ref.watch(photoBytesProvider).value ?? 0;
     final freed = ref.watch(freedThisMonthProvider).value ?? 0;
-    final base = selectedOnly
-        ? ref.watch(selectedIdsProvider)
-        : ref.watch(cleanableIdsProvider);
-    final ids = {...base, ...extra}.toList()..sort();
-    final cleanable = ref.watch(idsBytesProvider(ids.join(','))).value ?? 0;
+    final selectedIds = {...ref.watch(selectedIdsProvider), ...extra};
+    final pickIds = ref
+        .watch(cleanableIdsProvider)
+        .where((id) => !selectedIds.contains(id));
+    final selected =
+        ref
+            .watch(idsBytesProvider((selectedIds.toList()..sort()).join(',')))
+            .value ??
+        0;
+    final picks =
+        ref
+            .watch(idsBytesProvider((pickIds.toList()..sort()).join(',')))
+            .value ??
+        0;
     if (photos == 0) return const SizedBox.shrink();
-    final can = cleanable.clamp(0, photos);
+    final sel = selected.clamp(0, photos);
+    final rec = picks.clamp(0, photos - sel);
     final l = context.l;
+    const small = TextStyle(fontSize: MehhText.label);
     return Padding(
       key: const ValueKey('freedBar'),
       padding: const EdgeInsets.only(top: 12),
@@ -52,41 +62,76 @@ class FreedBar extends ConsumerWidget {
                   double w(int part) => part == 0
                       ? 0
                       : (c.maxWidth * part / total).clamp(3.0, c.maxWidth);
-                  final wCan = w(can);
                   final wFreed = w(freed);
-                  // 검정 바탕 위에 오른쪽부터 연한 회색(보낸 것), 그 왼쪽에 진한 회색(비울 수 있는 것)
+                  final wSel = w(sel);
+                  final wRec = w(rec);
+                  // 검정 바탕 위에 오른쪽부터 휴지통 · 선택 · 추천 정리
                   return Stack(
                     children: [
                       const Positioned.fill(
                         child: ColoredBox(color: MehhColors.black),
                       ),
                       _Part(
+                        right: wFreed + wSel,
+                        width: wRec,
+                        color: MehhColors.accentSoft,
+                      ),
+                      _Part(
                         right: wFreed,
-                        width: wCan,
+                        width: wSel,
                         color: MehhColors.accent,
                       ),
-                      _Part(right: 0, width: wFreed, color: MehhColors.border),
+                      _Part(right: 0, width: wFreed, color: MehhColors.icon),
                     ],
                   );
                 },
               ),
             ),
           ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 12,
-            runSpacing: 4,
+          const SizedBox(height: 6),
+          Row(
             children: [
-              _Legend(MehhColors.black, l.barPhotos(formatBytes(photos))),
-              if (can > 0)
-                _Legend(
-                  MehhColors.accent,
-                  selectedOnly
-                      ? l.barSelected(formatBytes(can))
-                      : l.barCleanable(formatBytes(can)),
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text.rich(
+                    TextSpan(
+                      style: small,
+                      children: [
+                        TextSpan(
+                          text: l.barPhotos(formatBytes(photos)),
+                          style: const TextStyle(color: MehhColors.black),
+                        ),
+                        if (rec > 0) ...[
+                          const TextSpan(text: '  ·  '),
+                          TextSpan(
+                            text: l.barRecommended(formatBytes(rec)),
+                            style: const TextStyle(
+                              color: MehhColors.accentSoftText,
+                            ),
+                          ),
+                        ],
+                        if (sel > 0) ...[
+                          const TextSpan(text: '  ·  '),
+                          TextSpan(
+                            text: l.barSelected(formatBytes(sel)),
+                            style: const TextStyle(color: MehhColors.accent),
+                          ),
+                        ],
+                      ],
+                    ),
+                    maxLines: 1,
+                  ),
                 ),
-              if (freed > 0)
-                _Legend(MehhColors.border, l.barSent(formatBytes(freed))),
+              ),
+              if (freed > 0) ...[
+                const SizedBox(width: 8),
+                Text(
+                  l.barSent(formatBytes(freed)),
+                  style: small.copyWith(color: MehhColors.textMuted),
+                ),
+              ],
             ],
           ),
         ],
@@ -110,32 +155,6 @@ class _Part extends StatelessWidget {
     right: right,
     width: width,
     child: ColoredBox(color: color),
-  );
-}
-
-class _Legend extends StatelessWidget {
-  const _Legend(this.color, this.text);
-  final Color color;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Container(
-        width: 8,
-        height: 8,
-        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-      ),
-      const SizedBox(width: 4),
-      Text(
-        text,
-        style: const TextStyle(
-          fontSize: MehhText.caption,
-          color: MehhColors.textMuted,
-        ),
-      ),
-    ],
   );
 }
 

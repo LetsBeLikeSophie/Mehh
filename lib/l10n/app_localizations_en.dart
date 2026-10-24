@@ -827,11 +827,6 @@ class L10nEn extends L10n {
   }
 
   @override
-  String barCleanable(Object size) {
-    return 'Can clean $size';
-  }
-
-  @override
   String barSent(Object size) {
     return 'Trash $size';
   }
@@ -845,5 +840,10 @@ class L10nEn extends L10n {
   @override
   String barSelected(Object size) {
     return 'Selected $size';
+  }
+
+  @override
+  String barRecommended(Object size) {
+    return 'Suggested $size';
   }
 }

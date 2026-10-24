@@ -167,9 +167,9 @@
   "focusHint": "Press and hold to finish",
   "focusFinishSemantics": "Finish sorting",
   "barPhotos": "Photos {size}",
-  "barCleanable": "Can clean {size}",
   "barSent": "Trash {size}",
   "openGallery": "Gallery",
   "noGallery": "Couldn't find a gallery app",
-  "barSelected": "Selected {size}"
+  "barSelected": "Selected {size}",
+  "barRecommended": "Suggested {size}"
 }

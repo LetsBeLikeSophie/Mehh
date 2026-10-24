@@ -11,8 +11,14 @@ abstract final class MehhColors {
   static const border = Color(0xFFE9E9E7);
   static const icon = Color(0xFFACABA9);
 
-  /// 포인트 색: 용량 막대의 "정리 가능·선택" 칸에만 쓴다 (2026-10-24 Sophie B 코랄)
+  /// 포인트 색(코랄) = "선택": 용량 막대의 선택 칸, 홈 묶음의 "선택해 두고 안 보냄" 점 (2026-10-24 Sophie)
   static const accent = Color(0xFFD85A30);
+
+  /// 연한 코랄 = "추천 정리": 선택하면 진한 코랄(accent)로 바뀐다 (2026-10-24 Sophie 1안)
+  static const accentSoft = Color(0xFFF5C4B3);
+
+  /// 연한 코랄 칸을 설명하는 글자 (흰 바탕에서 읽히는 진하기)
+  static const accentSoftText = Color(0xFFC46A47);
 
   /// 검정 카드 위 보조 글자
   static const onBlackMuted = Color(0xFFB4B4B0);

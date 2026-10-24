@@ -123,7 +123,7 @@ class L10nKo extends L10n {
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return '정리 추천 $countString장';
+    return '추천 정리 $countString장';
   }
 
   @override
@@ -337,7 +337,7 @@ class L10nKo extends L10n {
   String get proTitle => 'Mehh Pro';
 
   @override
-  String get proBody => '모든 묶음의 정리 추천을 바로 봐요.';
+  String get proBody => '모든 묶음의 추천 정리를 바로 봐요.';
 
   @override
   String proFree(int limit, int count, String date) {
@@ -678,11 +678,6 @@ class L10nKo extends L10n {
   }
 
   @override
-  String barCleanable(Object size) {
-    return '정리 가능 $size';
-  }
-
-  @override
   String barSent(Object size) {
     return '휴지통 $size';
   }
@@ -696,5 +691,10 @@ class L10nKo extends L10n {
   @override
   String barSelected(Object size) {
     return '선택 $size';
+  }
+
+  @override
+  String barRecommended(Object size) {
+    return '추천 정리 $size';
   }
 }

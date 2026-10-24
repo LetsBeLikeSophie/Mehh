@@ -658,7 +658,7 @@ class _GroupTile extends ConsumerWidget {
                   ],
                 ),
               ),
-              // X를 쳐 두고 아직 안 보낸 묶음은 줄 끝 작은 점 (2026-10-22 Sophie R4-A)
+              // 선택해 두고 아직 안 보낸 묶음은 줄 끝 작은 코랄 점 = 막대의 "선택" 색 (R4-A, 2026-10-24)
               if (unsent)
                 Semantics(
                   label: l.unsentDot,
@@ -667,7 +667,7 @@ class _GroupTile extends ConsumerWidget {
                     height: 8,
                     margin: const EdgeInsetsDirectional.only(end: 6),
                     decoration: const BoxDecoration(
-                      color: MehhColors.black,
+                      color: MehhColors.accent,
                       shape: BoxShape.circle,
                     ),
                   ),

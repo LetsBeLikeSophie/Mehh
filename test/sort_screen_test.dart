@@ -98,7 +98,7 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('홈: 용량 막대 — 사진·정리 가능·휴지통 (색마다 한 줄 설명)', (tester) async {
+  testWidgets('홈: 용량 막대 — 사진·추천 정리·선택·휴지통 (글자 색 = 칸 색, 한 줄)', (tester) async {
     final store = MemoryStore()
       ..freed[monthKey(DateTime.now())] = 5 * 1024 * 1024;
     await pump(tester, const Scaffold(body: HomeTab()), store: store);

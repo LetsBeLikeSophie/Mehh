@@ -596,9 +596,8 @@ class _SortScreenState extends ConsumerState<SortScreen>
                                       ),
                                     ],
                                   ]),
-                                  // 홈과 같은 막대. 묶음 안에서는 진한 회색 = 선택한 것만, 보내면 연한 회색이 늘어난다
+                                  // 홈과 같은 막대·같은 뜻: 선택하면 추천 정리(연한 코랄)가 선택(코랄)으로, 보내면 휴지통으로
                                   FreedBar(
-                                    selectedOnly: true,
                                     extra: [
                                       for (final id in marked)
                                         if (stateOf(decisions, id) !=
