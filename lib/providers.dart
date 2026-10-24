@@ -280,7 +280,22 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
     _metas = await lib.loadAll();
     _loadedAt = DateTime.now();
     Future.microtask(_fillLocations);
+    Future.microtask(_reviveRestored);
     return _state();
+  }
+
+  /// 갤러리 휴지통에서 되살린 사진: 사진첩에 다시 있는데 앱은 "휴지통으로 보냄"으로 기억하고 있으면
+  /// 정리 화면에서 숨겨져 바깥 장수와 안 장수가 달라진다. 표시 없음으로 되돌린다 (2026-10-24 Sophie 버그)
+  Future<void> _reviveRestored() async {
+    final decisions = await ref.read(decisionsProvider.future);
+    if (!ref.mounted) return;
+    final back = <String, Decision?>{
+      for (final m in _metas)
+        if (decisions[m.id]?.state == DecisionState.trashed) m.id: null,
+    };
+    if (back.isNotEmpty) {
+      await ref.read(decisionsProvider.notifier).restore(back);
+    }
   }
 
   LibraryState _state() =>
@@ -329,6 +344,7 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
     _metas = metas;
     state = AsyncData(_state());
     Future.microtask(_fillLocations);
+    Future.microtask(_reviveRestored);
   }
 }
 

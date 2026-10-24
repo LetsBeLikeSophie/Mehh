@@ -20,6 +20,7 @@ import 'package:mehh/models/photo_meta.dart';
 import 'package:mehh/models/pick.dart';
 import 'package:mehh/providers.dart';
 import 'package:mehh/ui/focus_screen.dart';
+import 'package:mehh/ui/hold_to_finish.dart';
 import 'package:mehh/ui/home_tab.dart';
 import 'package:mehh/ui/accuracy_screen.dart';
 import 'package:mehh/ui/settings_screen.dart';
@@ -108,6 +109,32 @@ void main() {
     expect(find.text('휴지통 5MB'), findsOneWidget);
     expect(find.byTooltip('갤러리'), findsOneWidget); // 오른쪽 위 갤러리 열기
     await flush(tester);
+  });
+
+  test('갤러리 휴지통에서 되살린 사진은 "휴지통으로 보냄" 기억을 지운다 (바깥·안 장수가 같게)', () async {
+    final lib = DemoPhotoLibrary();
+    final first = (await lib.loadAll()).first.id;
+    final store = MemoryStore()
+      ..decisions[first] = Decision(
+        photoId: first,
+        state: DecisionState.trashed,
+        at: DateTime(2026, 10, 1),
+      );
+    final c = ProviderContainer(
+      overrides: [
+        photoLibraryProvider.overrideWithValue(lib as PhotoLibrary),
+        storeProvider.overrideWithValue(store),
+      ],
+    );
+    addTearDown(c.dispose);
+    await c.read(libraryProvider.future);
+    await Future<void>.delayed(Duration.zero);
+    await c.read(decisionsProvider.future);
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+    expect(
+      stateOf(c.read(decisionsProvider).value!, first),
+      DecisionState.undecided,
+    );
   });
 
   testWidgets('설정: 맨 위 Mehh Pro 줄을 누르면 Pro 안내(구매 복원)가 열린다', (tester) async {
@@ -687,7 +714,9 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('크게 보기: 가만히 있으면 "길게 누르면 정리를 끝낼 수 있어요" (하루 3번까지)', (tester) async {
+  testWidgets('크게 보기: 선택한 게 있을 때 멈추면 "길게 누르면 정리를 끝낼 수 있어요" (5번까지, 한 번 쓰면 그만)', (
+    tester,
+  ) async {
     final store = MemoryStore();
     await pump(
       tester,
@@ -699,18 +728,34 @@ void main() {
       matching: find.byType(AnimatedOpacity),
     );
     double opacity() => tester.widget<AnimatedOpacity>(hint()).opacity;
+    // 선택한 게 없으면 멈춰도 안 뜬다
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pump();
     expect(opacity(), 0);
-    await tester.pump(const Duration(seconds: 6));
+    // 하나 선택하고 멈추면 뜬다
+    await tester.drag(card(), const Offset(0, -200));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 4));
     await tester.pump();
     expect(opacity(), 1);
     await tester.pump(const Duration(seconds: 4)); // 잠깐 뒤 사라진다
     expect(opacity(), 0);
 
-    // 오늘 이미 3번 보였으면 더 안 뜬다
-    store.counters['focusHint-${dayKey(DateTime.now())}'] = 3;
-    await tester.drag(card(), const Offset(-200, 0)); // 손대면 처음부터
+    // 통틀어 5번 보였으면 더 안 뜬다
+    store.counters[finishHintKey] = 5;
+    await tester.drag(card(), const Offset(-200, 0));
     await tester.pumpAndSettle();
-    await tester.pump(const Duration(seconds: 6));
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pump();
+    expect(opacity(), 0);
+
+    // 길게 누르기를 한 번 쓰면 그 뒤로 안 뜬다
+    store.counters[finishHintKey] = 0;
+    await holdToFinish(tester);
+    expect(store.counters[finishUsedKey], 1);
+    await tester.tap(find.text('계속 보기'));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 4));
     await tester.pump();
     expect(opacity(), 0);
     await flush(tester);
