@@ -616,7 +616,7 @@ abstract class L10n {
   /// No description provided for @freeChip.
   ///
   /// In ko, this message translates to:
-  /// **'무료 묶음 {count}개'**
+  /// **'코인 {count}개'**
   String freeChip(int count);
 
   /// No description provided for @proTitle.
@@ -634,7 +634,7 @@ abstract class L10n {
   /// No description provided for @proFree.
   ///
   /// In ko, this message translates to:
-  /// **'무료로는 그날의 묶음 추천을 매달 {limit}개까지 볼 수 있어요. 이번 달 {count}개 남았고, {date}에 다시 {limit}개가 돼요.'**
+  /// **'그날의 묶음 추천은 코인 1개로 하나씩 열어요. 매달 코인 {limit}개가 생겨요. 이번 달 {count}개 남았고, {date}에 다시 {limit}개가 돼요.'**
   String proFree(int limit, int count, String date);
 
   /// No description provided for @proActive.
@@ -832,7 +832,7 @@ abstract class L10n {
   /// No description provided for @yearlyEnded.
   ///
   /// In ko, this message translates to:
-  /// **'1년 이용권이 끝났어요 · 추천을 본 묶음은 그대로 열려 있고, 새 묶음은 이번 달 무료 묶음 {count}개로 볼 수 있어요'**
+  /// **'1년 이용권이 끝났어요 · 추천을 본 묶음은 그대로 열려 있고, 새 묶음은 이번 달 코인 {count}개로 열 수 있어요'**
   String yearlyEnded(int count);
 
   /// No description provided for @proUsing.
@@ -844,7 +844,7 @@ abstract class L10n {
   /// No description provided for @freeSetsLeft.
   ///
   /// In ko, this message translates to:
-  /// **'무료 묶음 {count}개 남음'**
+  /// **'코인 {count}개 남음'**
   String freeSetsLeft(int count);
 
   /// No description provided for @unsentDot.
@@ -928,7 +928,7 @@ abstract class L10n {
   /// No description provided for @freeRefilled.
   ///
   /// In ko, this message translates to:
-  /// **'이번 달 무료 묶음 {count}개가 다시 생겼어요'**
+  /// **'이번 달 코인 {count}개가 다시 생겼어요'**
   String freeRefilled(int count);
 
   /// No description provided for @freeTodoShots.
@@ -976,19 +976,19 @@ abstract class L10n {
   /// No description provided for @useFreeSetTitle.
   ///
   /// In ko, this message translates to:
-  /// **'무료 묶음을 쓸까요?'**
+  /// **'1개로 열까요?'**
   String get useFreeSetTitle;
 
   /// No description provided for @useFreeSetBody.
   ///
   /// In ko, this message translates to:
-  /// **'추천 {count}장을 보려면 무료 묶음 1개를 써요.\n{left}개 남음 · 한 번 열면 계속 열려 있어요.'**
-  String useFreeSetBody(int count, int left);
+  /// **'추천 {count}장을 볼 수 있어요.\n한 번 열면 계속 열려 있어요.'**
+  String useFreeSetBody(int count);
 
   /// No description provided for @useFreeSetYes.
   ///
   /// In ko, this message translates to:
-  /// **'무료 묶음 쓰기'**
+  /// **'열기'**
   String get useFreeSetYes;
 
   /// No description provided for @toCortex.
@@ -1012,7 +1012,7 @@ abstract class L10n {
   /// No description provided for @noFreeLead.
   ///
   /// In ko, this message translates to:
-  /// **'이번 달 무료 묶음을 다 썼어요 · {date}에 {count}개가 다시 생겨요'**
+  /// **'이번 달 코인을 다 썼어요 · {date}에 {count}개가 다시 생겨요'**
   String noFreeLead(String date, int count);
 
   /// No description provided for @cortexSentBadge.
@@ -1128,6 +1128,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'추천 정리 {size}'**
   String barRecommended(Object size);
+
+  /// No description provided for @coinCount.
+  ///
+  /// In ko, this message translates to:
+  /// **'코인 {count}개'**
+  String coinCount(int count);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

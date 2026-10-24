@@ -199,7 +199,7 @@
   "billingUnavailable": "지금은 스토어에 연결할 수 없어요",
   "billingDemo": "미리보기라 실제로 결제되지 않아요",
   "proChip": "Pro",
-  "freeChip": "무료 묶음 {count}개",
+  "freeChip": "코인 {count}개",
   "@freeChip": {
     "placeholders": {
       "count": {
@@ -210,7 +210,7 @@
   },
   "proTitle": "Mehh Pro",
   "proBody": "모든 묶음의 추천 정리를 바로 봐요.",
-  "proFree": "무료로는 그날의 묶음 추천을 매달 {limit}개까지 볼 수 있어요. 이번 달 {count}개 남았고, {date}에 다시 {limit}개가 돼요.",
+  "proFree": "그날의 묶음 추천은 코인 1개로 하나씩 열어요. 매달 코인 {limit}개가 생겨요. 이번 달 {count}개 남았고, {date}에 다시 {limit}개가 돼요.",
   "@proFree": {
     "placeholders": {
       "limit": {
@@ -320,7 +320,7 @@
   "lookingAtPhotos": "사진을\n살펴보고 있어요",
   "duplicatesPending": "똑같은 사진은 다 살펴본 뒤 알려 드려요 · 무료",
   "nothingMarked": "정리할 사진이 없어요",
-  "yearlyEnded": "1년 이용권이 끝났어요 · 추천을 본 묶음은 그대로 열려 있고, 새 묶음은 이번 달 무료 묶음 {count}개로 볼 수 있어요",
+  "yearlyEnded": "1년 이용권이 끝났어요 · 추천을 본 묶음은 그대로 열려 있고, 새 묶음은 이번 달 코인 {count}개로 열 수 있어요",
   "@yearlyEnded": {
     "placeholders": {
       "count": {
@@ -329,7 +329,7 @@
     }
   },
   "proUsing": "Pro를 쓰고 있어요",
-  "freeSetsLeft": "무료 묶음 {count}개 남음",
+  "freeSetsLeft": "코인 {count}개 남음",
   "@freeSetsLeft": {
     "placeholders": {
       "count": {
@@ -364,7 +364,7 @@
   "accByKind": "종류별 (결제 기준은 그날의 묶음)",
   "kindDay": "그날의 묶음",
   "proFreeKinds": "캡처·낱장 사진·똑같은 사진 추천은 Pro 없이도 늘 무료예요.",
-  "freeRefilled": "이번 달 무료 묶음 {count}개가 다시 생겼어요",
+  "freeRefilled": "이번 달 코인 {count}개가 다시 생겼어요",
   "@freeRefilled": {
     "placeholders": {
       "count": {
@@ -410,18 +410,15 @@
   "mutedBurst": "비슷한 연속 컷은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요",
   "mutedBlurry": "흔들린 사진은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요",
   "mutedJunk": "실수로 찍힌 사진은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요",
-  "useFreeSetTitle": "무료 묶음을 쓸까요?",
-  "useFreeSetBody": "추천 {count}장을 보려면 무료 묶음 1개를 써요.\n{left}개 남음 · 한 번 열면 계속 열려 있어요.",
-  "useFreeSetYes": "무료 묶음 쓰기",
+  "useFreeSetTitle": "1개로 열까요?",
+  "useFreeSetBody": "추천 {count}장을 볼 수 있어요.\n한 번 열면 계속 열려 있어요.",
+  "useFreeSetYes": "열기",
   "toCortex": "Cortex로",
   "@useFreeSetBody": {
     "placeholders": {
       "count": {
         "type": "int",
         "format": "decimalPattern"
-      },
-      "left": {
-        "type": "int"
       }
     }
   },
@@ -435,7 +432,7 @@
       }
     }
   },
-  "noFreeLead": "이번 달 무료 묶음을 다 썼어요 · {date}에 {count}개가 다시 생겨요",
+  "noFreeLead": "이번 달 코인을 다 썼어요 · {date}에 {count}개가 다시 생겨요",
   "@noFreeLead": {
     "placeholders": {
       "date": {
@@ -500,5 +497,13 @@
   "openGallery": "갤러리",
   "noGallery": "갤러리 앱을 찾지 못했어요",
   "barSelected": "선택 {size}",
-  "barRecommended": "추천 정리 {size}"
+  "barRecommended": "추천 정리 {size}",
+  "coinCount": "코인 {count}개",
+  "@coinCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -330,7 +330,7 @@ class L10nKo extends L10n {
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return '무료 묶음 $countString개';
+    return '코인 $countString개';
   }
 
   @override
@@ -341,7 +341,7 @@ class L10nKo extends L10n {
 
   @override
   String proFree(int limit, int count, String date) {
-    return '무료로는 그날의 묶음 추천을 매달 $limit개까지 볼 수 있어요. 이번 달 $count개 남았고, $date에 다시 $limit개가 돼요.';
+    return '그날의 묶음 추천은 코인 1개로 하나씩 열어요. 매달 코인 $limit개가 생겨요. 이번 달 $count개 남았고, $date에 다시 $limit개가 돼요.';
   }
 
   @override
@@ -468,7 +468,7 @@ class L10nKo extends L10n {
 
   @override
   String yearlyEnded(int count) {
-    return '1년 이용권이 끝났어요 · 추천을 본 묶음은 그대로 열려 있고, 새 묶음은 이번 달 무료 묶음 $count개로 볼 수 있어요';
+    return '1년 이용권이 끝났어요 · 추천을 본 묶음은 그대로 열려 있고, 새 묶음은 이번 달 코인 $count개로 열 수 있어요';
   }
 
   @override
@@ -476,7 +476,7 @@ class L10nKo extends L10n {
 
   @override
   String freeSetsLeft(int count) {
-    return '무료 묶음 $count개 남음';
+    return '코인 $count개 남음';
   }
 
   @override
@@ -531,7 +531,7 @@ class L10nKo extends L10n {
 
   @override
   String freeRefilled(int count) {
-    return '이번 달 무료 묶음 $count개가 다시 생겼어요';
+    return '이번 달 코인 $count개가 다시 생겼어요';
   }
 
   @override
@@ -570,19 +570,19 @@ class L10nKo extends L10n {
   String get mutedJunk => '실수로 찍힌 사진은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요';
 
   @override
-  String get useFreeSetTitle => '무료 묶음을 쓸까요?';
+  String get useFreeSetTitle => '1개로 열까요?';
 
   @override
-  String useFreeSetBody(int count, int left) {
+  String useFreeSetBody(int count) {
     final intl.NumberFormat countNumberFormat =
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return '추천 $countString장을 보려면 무료 묶음 1개를 써요.\n$left개 남음 · 한 번 열면 계속 열려 있어요.';
+    return '추천 $countString장을 볼 수 있어요.\n한 번 열면 계속 열려 있어요.';
   }
 
   @override
-  String get useFreeSetYes => '무료 묶음 쓰기';
+  String get useFreeSetYes => '열기';
 
   @override
   String get toCortex => 'Cortex로';
@@ -601,7 +601,7 @@ class L10nKo extends L10n {
 
   @override
   String noFreeLead(String date, int count) {
-    return '이번 달 무료 묶음을 다 썼어요 · $date에 $count개가 다시 생겨요';
+    return '이번 달 코인을 다 썼어요 · $date에 $count개가 다시 생겨요';
   }
 
   @override
@@ -696,5 +696,10 @@ class L10nKo extends L10n {
   @override
   String barRecommended(Object size) {
     return '추천 정리 $size';
+  }
+
+  @override
+  String coinCount(int count) {
+    return '코인 $count개';
   }
 }

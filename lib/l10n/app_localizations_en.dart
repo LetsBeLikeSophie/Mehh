@@ -378,8 +378,8 @@ class L10nEn extends L10n {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$countString free sets',
-      one: '1 free set',
+      other: '$countString coins',
+      one: '1 coin',
     );
     return '$_temp0';
   }
@@ -392,7 +392,7 @@ class L10nEn extends L10n {
 
   @override
   String proFree(int limit, int count, String date) {
-    return 'Free: picks for $limit day sets each month. $count left this month, back to $limit on $date.';
+    return 'Day-set picks open with 1 coin each. You get $limit coins every month. $count left this month, back to $limit on $date.';
   }
 
   @override
@@ -545,8 +545,8 @@ class L10nEn extends L10n {
       count,
       locale: localeName,
       other:
-          'Your 1-year plan ended · sets whose picks you saw stay open; new sets use your $count free sets this month',
-      one: 'Your 1-year plan ended · sets whose picks you saw stay open; new sets use your 1 free set this month',
+          'Your 1-year plan ended · sets whose picks you saw stay open; new sets open with your $count coins this month',
+      one: 'Your 1-year plan ended · sets whose picks you saw stay open; new sets open with your 1 coin this month',
     );
     return '$_temp0';
   }
@@ -559,8 +559,8 @@ class L10nEn extends L10n {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count free sets left',
-      one: '1 free set left',
+      other: '$count coins left',
+      one: '1 coin left',
     );
     return '$_temp0';
   }
@@ -636,8 +636,8 @@ class L10nEn extends L10n {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Your $count free sets for this month are back',
-      one: 'Your free set for this month is back',
+      other: 'Your $count coins for this month are back',
+      one: 'Your coin for this month is back',
     );
     return '$_temp0';
   }
@@ -681,10 +681,10 @@ class L10nEn extends L10n {
       'You often keep accidental shots, so we\'ll stop suggesting them for now · we\'ll try again in 30 days';
 
   @override
-  String get useFreeSetTitle => 'Use a free set?';
+  String get useFreeSetTitle => 'Open with 1?';
 
   @override
-  String useFreeSetBody(int count, int left) {
+  String useFreeSetBody(int count) {
     final intl.NumberFormat countNumberFormat =
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
@@ -692,16 +692,14 @@ class L10nEn extends L10n {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other:
-          'Seeing $countString picks uses 1 free set.\n$left left · once opened, it stays open.',
-      one:
-          'Seeing 1 pick uses 1 free set.\n$left left · once opened, it stays open.',
+      other: 'See $countString picks. Once opened, it stays open.',
+      one: 'See 1 pick. Once opened, it stays open.',
     );
     return '$_temp0';
   }
 
   @override
-  String get useFreeSetYes => 'Use a free set';
+  String get useFreeSetYes => 'Open';
 
   @override
   String get toCortex => 'To Cortex';
@@ -726,7 +724,7 @@ class L10nEn extends L10n {
 
   @override
   String noFreeLead(String date, int count) {
-    return 'No free sets left this month · $count more on $date';
+    return 'No coins left this month · $count more on $date';
   }
 
   @override
@@ -845,5 +843,16 @@ class L10nEn extends L10n {
   @override
   String barRecommended(Object size) {
     return 'Suggested $size';
+  }
+
+  @override
+  String coinCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count coins',
+      one: '1 coin',
+    );
+    return '$_temp0';
   }
 }

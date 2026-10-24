@@ -213,6 +213,8 @@ Future<bool> askMehh(
   String? body,
   required String no,
   required String yes,
+  Widget? titleLeading,
+  Widget? titleTrailing,
 }) async =>
     await showDialog<bool>(
       context: context,
@@ -221,12 +223,23 @@ Future<bool> askMehh(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(MehhRadius.card),
         ),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontSize: MehhText.heading,
-            fontWeight: FontWeight.w700,
-          ),
+        title: Row(
+          children: [
+            if (titleLeading != null) ...[
+              titleLeading,
+              const SizedBox(width: 6),
+            ],
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: MehhText.heading,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            ?titleTrailing,
+          ],
         ),
         content: body == null
             ? null
@@ -255,3 +268,110 @@ Future<bool> askMehh(
       ),
     ) ==
     true;
+
+/// 코인: 뿔 달린 m 동전 (2026-10-24 Sophie). 그날의 묶음 추천을 하나 여는 데 1개, 매달 몇 개 생긴다.
+class CoinIcon extends StatelessWidget {
+  const CoinIcon({super.key, this.size = 16, this.color = MehhColors.black});
+
+  final double size;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: size,
+    height: size,
+    child: CustomPaint(
+      painter: _CoinPainter(color),
+      child: Align(
+        alignment: const Alignment(0, 0.42),
+        child: Text(
+          'm',
+          textScaler: TextScaler.noScaling,
+          style: TextStyle(
+            fontSize: size * 0.4,
+            height: 1,
+            fontWeight: FontWeight.w800,
+            fontStyle: FontStyle.italic,
+            color: color,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+class _CoinPainter extends CustomPainter {
+  _CoinPainter(this.color);
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final u = size.width / 32;
+    final stroke = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.2 * u
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    // 뿔 두 개 (동전 위 양쪽)
+    for (final dir in [-1.0, 1.0]) {
+      final x = 16 * u;
+      final horn = Path()
+        ..moveTo(x + dir * 6.8 * u, 12.4 * u)
+        ..cubicTo(
+          x + dir * 9.4 * u,
+          9.6 * u,
+          x + dir * 10.4 * u,
+          6.4 * u,
+          x + dir * 9.4 * u,
+          3.2 * u,
+        )
+        ..cubicTo(
+          x + dir * 7.8 * u,
+          6.2 * u,
+          x + dir * 5.8 * u,
+          8.2 * u,
+          x + dir * 3.6 * u,
+          9.4 * u,
+        );
+      canvas.drawPath(horn, stroke..strokeWidth = 2 * u);
+    }
+    canvas.drawCircle(
+      Offset(16 * u, 19 * u),
+      10 * u,
+      stroke..strokeWidth = 2.2 * u,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_CoinPainter old) => old.color != color;
+}
+
+/// 코인 아이콘 + 개수 ("[코인] 3")
+class CoinCount extends StatelessWidget {
+  const CoinCount(this.count, {super.key, this.size = 16});
+
+  final int count;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: context.l.coinCount(count),
+    excludeSemantics: true,
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CoinIcon(size: size),
+        const SizedBox(width: 4),
+        Text(
+          '$count',
+          style: const TextStyle(
+            fontSize: MehhText.caption,
+            fontWeight: FontWeight.w600,
+            color: MehhColors.black,
+          ),
+        ),
+      ],
+    ),
+  );
+}

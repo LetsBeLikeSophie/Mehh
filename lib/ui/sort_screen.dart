@@ -228,7 +228,11 @@ class _SortScreenState extends ConsumerState<SortScreen>
         final ok = await askMehh(
           context,
           title: l.useFreeSetTitle,
-          body: l.useFreeSetBody(src.locked, freeBefore),
+          body: l.useFreeSetBody(src.locked),
+          // 남은 코인은 제목 옆에 아이콘으로 (2026-10-24 Sophie)
+          // 무엇을 쓰는지 코인 그림으로 바로 (2026-10-24 Sophie)
+          titleLeading: const CoinIcon(size: 26),
+          titleTrailing: CoinCount(freeBefore, size: 18),
           no: l.cancel,
           yes: l.useFreeSetYes,
         );

@@ -139,7 +139,7 @@ void main() {
 
   testWidgets('설정: 맨 위 Mehh Pro 줄을 누르면 Pro 안내(구매 복원)가 열린다', (tester) async {
     await pump(tester, const SettingsScreen());
-    expect(find.text('무료 묶음 3개 남음'), findsOneWidget);
+    expect(find.text('코인 3개 남음'), findsOneWidget);
     await tester.tap(find.text('Mehh Pro'));
     await tester.pumpAndSettle();
     expect(find.text('구매 복원'), findsOneWidget);
@@ -203,12 +203,12 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  // 잠긴 [추천 보기]는 "무료 묶음을 쓸까요?"를 묻는다: 누르고 [무료 묶음 쓰기]까지
+  // 잠긴 [추천 보기]는 "[코인] 1개로 열까요?"를 묻는다: 누르고 [열기]까지
   Future<void> openLocked(WidgetTester tester, String label) async {
     await tester.tap(find.text(label));
     await tester.pumpAndSettle();
-    expect(find.text('무료 묶음을 쓸까요?'), findsOneWidget);
-    await tester.tap(find.text('무료 묶음 쓰기'));
+    expect(find.text('1개로 열까요?'), findsOneWidget);
+    await tester.tap(find.text('열기'));
     await tester.pumpAndSettle();
   }
 
@@ -911,7 +911,7 @@ void main() {
     // 잠긴 묶음: 누르면 무료 묶음을 쓸지 먼저 묻는다 (설명 줄 대신)
     await tester.tap(find.text('추천 보기 · 2장'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('3개 남음 ·'), findsOneWidget);
+    expect(find.bySemanticsLabel('코인 3개'), findsWidgets); // 남은 코인은 제목 옆 아이콘
     await tester.tap(find.text('취소')); // 취소하면 아무것도 안 쓴다
     await tester.pumpAndSettle();
     expect(find.text('2장 휴지통으로'), findsNothing);
@@ -970,7 +970,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Mehh Pro'), findsOneWidget);
     expect(
-      find.textContaining('이번 달 무료 묶음을 다 썼어요'),
+      find.textContaining('이번 달 코인을 다 썼어요'),
       findsOneWidget,
     ); // 왜 Pro 안내인지
     await tester.tap(find.text('평생 이용권'));
@@ -1139,7 +1139,7 @@ void main() {
     );
     await tester.tap(find.text('추천 보기 · 1장'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('무료 묶음이'), findsNothing); // Pro는 무료를 안 쓴다
+    expect(find.textContaining('코인'), findsNothing); // Pro는 무료를 안 쓴다
     final c = ProviderScope.containerOf(
       tester.element(find.byType(SortScreen)),
     );
