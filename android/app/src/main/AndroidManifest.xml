@@ -56,7 +56,7 @@
     <queries>
         <!-- 캡처를 Cortex로 보내기: 설치돼 있는지 확인 (lib/data/handoff.dart) -->
         <package android:name="dev.itssophie.cortex" />
-        <!-- 오른쪽 위 휴지통: 갤러리 앱의 휴지통 열기 (MainActivity.openTrash) -->
+        <!-- 오른쪽 위 갤러리 아이콘: 갤러리 앱 열기 (MainActivity.openGallery) -->
         <package android:name="com.sec.android.gallery3d" />
         <package android:name="com.google.android.apps.photos" />
         <intent>

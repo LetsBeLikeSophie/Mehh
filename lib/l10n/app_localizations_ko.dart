@@ -679,20 +679,17 @@ class L10nKo extends L10n {
 
   @override
   String barCleanable(Object size) {
-    return '그중 비울 수 있음 $size';
+    return '정리 가능 $size';
   }
 
   @override
   String barSent(Object size) {
-    return '이번 달 휴지통으로 $size';
+    return '휴지통 $size';
   }
 
   @override
-  String get openTrash => '휴지통';
+  String get openGallery => '갤러리';
 
   @override
-  String get trashOpenedGallery => '갤러리를 열었어요 · 휴지통은 갤러리 메뉴에 있어요';
-
-  @override
-  String get trashNoGallery => '휴지통을 열 갤러리 앱을 찾지 못했어요';
+  String get noGallery => '갤러리 앱을 찾지 못했어요';
 }

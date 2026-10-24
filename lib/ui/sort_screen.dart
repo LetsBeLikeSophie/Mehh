@@ -511,10 +511,13 @@ class _SortScreenState extends ConsumerState<SortScreen>
                         // 맨 위 줄·제목 칸은 홈과 같은 높이: 막대가 같은 자리에 온다 (2026-10-24 Sophie)
                         MehhHeader.top(
                           leading: const MehhBackButton(),
-                          trailing: const [GalleryTrashButton()],
+                          trailing: const [GalleryButton()],
                         ),
                         Padding(
-                          padding: const EdgeInsetsDirectional.only(start: 12, end: 8),
+                          padding: const EdgeInsetsDirectional.only(
+                            start: 12,
+                            end: 8,
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [

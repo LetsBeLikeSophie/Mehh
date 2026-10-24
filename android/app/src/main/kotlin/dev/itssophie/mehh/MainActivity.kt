@@ -1,7 +1,6 @@
 package dev.itssophie.mehh
 
 import android.content.ClipData
-import android.content.ComponentName
 import android.content.ContentUris
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -37,12 +36,12 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
-        // 기기 정보: 사진 전체 용량, 갤러리 휴지통 열기 (2026-10-24 Sophie)
+        // 기기 정보: 사진 전체 용량, 갤러리 열기 (2026-10-24 Sophie)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "mehh/device")
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "photoBytes" -> result.success(photoBytes())
-                    "openTrash" -> result.success(openTrash())
+                    "openGallery" -> result.success(openGallery())
                     else -> result.notImplemented()
                 }
             }
@@ -62,30 +61,18 @@ class MainActivity : FlutterActivity() {
         return total
     }
 
-    /// 갤러리 앱의 휴지통을 연다. 안드로이드 공통 방법이 없어 차례로 시도한다.
-    /// 반환: "trash"(휴지통 화면), "gallery"(갤러리 앱만), "none"
-    private fun openTrash(): String {
-        // 1) 삼성 갤러리: 휴지통 화면(이름에 Trash가 든 공개 화면)을 찾아 연다
-        val samsung = "com.sec.android.gallery3d"
-        try {
-            @Suppress("DEPRECATION")
-            val info = packageManager.getPackageInfo(samsung, PackageManager.GET_ACTIVITIES)
-            val trash = info.activities?.firstOrNull { it.exported && it.name.contains("Trash", ignoreCase = true) }
-            if (trash != null) {
-                val ok = start(Intent().setComponent(ComponentName(samsung, trash.name)))
-                if (ok) return "trash"
-            }
-            packageManager.getLaunchIntentForPackage(samsung)?.let { if (start(it)) return "gallery" }
-        } catch (e: PackageManager.NameNotFoundException) {
+    /// 갤러리 앱을 연다 (휴지통은 바로 열 공통 방법이 없어서 갤러리로, 2026-10-24 Sophie).
+    /// 삼성 갤러리 → 기본 갤러리 앱 → Google 포토 차례
+    private fun openGallery(): Boolean {
+        packageManager.getLaunchIntentForPackage("com.sec.android.gallery3d")?.let {
+            if (start(it)) return true
         }
-        // 2) Google 포토: 휴지통 주소
-        val photos = Intent(Intent.ACTION_VIEW, Uri.parse("https://photos.google.com/trash"))
-            .setPackage("com.google.android.apps.photos")
-        if (photos.resolveActivity(packageManager) != null && start(photos)) return "trash"
-        // 3) 아무 갤러리 앱
         val gallery = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_GALLERY)
-        if (start(gallery)) return "gallery"
-        return "none"
+        if (start(gallery)) return true
+        packageManager.getLaunchIntentForPackage("com.google.android.apps.photos")?.let {
+            if (start(it)) return true
+        }
+        return false
     }
 
     private fun start(intent: Intent): Boolean = try {

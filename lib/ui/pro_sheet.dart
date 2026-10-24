@@ -297,6 +297,8 @@ class ProChip extends ConsumerWidget {
       style: TextButton.styleFrom(
         foregroundColor: MehhColors.text,
         minimumSize: const Size(44, 44),
+        // 옆 아이콘과 가깝게 (2026-10-24 Sophie)
+        padding: const EdgeInsets.symmetric(horizontal: 6),
         // textStyle을 바꾸면 테마 글꼴이 빠지므로 글꼴도 같이 준다
         textStyle: const TextStyle(
           fontFamily: mehhFontFamily,

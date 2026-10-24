@@ -167,9 +167,8 @@
   "focusHint": "Press and hold to finish",
   "focusFinishSemantics": "Finish sorting",
   "barPhotos": "Photos {size}",
-  "barCleanable": "{size} of it can go",
-  "barSent": "Sent to trash this month {size}",
-  "openTrash": "Trash",
-  "trashOpenedGallery": "Opened your gallery · Trash is in its menu",
-  "trashNoGallery": "Couldn't find a gallery app to open the trash"
+  "barCleanable": "Can clean {size}",
+  "barSent": "Trash {size}",
+  "openGallery": "Gallery",
+  "noGallery": "Couldn't find a gallery app"
 }

@@ -828,20 +828,17 @@ class L10nEn extends L10n {
 
   @override
   String barCleanable(Object size) {
-    return '$size of it can go';
+    return 'Can clean $size';
   }
 
   @override
   String barSent(Object size) {
-    return 'Sent to trash this month $size';
+    return 'Trash $size';
   }
 
   @override
-  String get openTrash => 'Trash';
+  String get openGallery => 'Gallery';
 
   @override
-  String get trashOpenedGallery => 'Opened your gallery · Trash is in its menu';
-
-  @override
-  String get trashNoGallery => 'Couldn\'t find a gallery app to open the trash';
+  String get noGallery => 'Couldn\'t find a gallery app';
 }

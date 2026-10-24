@@ -97,7 +97,7 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('홈: 용량 막대 — 사진·비울 수 있음·이번 달 휴지통으로 (색마다 한 줄 설명)', (
+  testWidgets('홈: 용량 막대 — 사진·정리 가능·휴지통 (색마다 한 줄 설명)', (
     tester,
   ) async {
     final store = MemoryStore()
@@ -107,8 +107,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('freedBar')), findsOneWidget);
     expect(find.textContaining('사진 '), findsWidgets);
-    expect(find.text('이번 달 휴지통으로 5MB'), findsOneWidget);
-    expect(find.byTooltip('휴지통'), findsOneWidget); // 오른쪽 위 갤러리 휴지통
+    expect(find.text('휴지통 5MB'), findsOneWidget);
+    expect(find.byTooltip('갤러리'), findsOneWidget); // 오른쪽 위 갤러리 열기
     await flush(tester);
   });
 

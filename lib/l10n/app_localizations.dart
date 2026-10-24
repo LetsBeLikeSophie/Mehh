@@ -1102,32 +1102,26 @@ abstract class L10n {
   /// No description provided for @barCleanable.
   ///
   /// In ko, this message translates to:
-  /// **'그중 비울 수 있음 {size}'**
+  /// **'정리 가능 {size}'**
   String barCleanable(Object size);
 
   /// No description provided for @barSent.
   ///
   /// In ko, this message translates to:
-  /// **'이번 달 휴지통으로 {size}'**
+  /// **'휴지통 {size}'**
   String barSent(Object size);
 
-  /// No description provided for @openTrash.
+  /// No description provided for @openGallery.
   ///
   /// In ko, this message translates to:
-  /// **'휴지통'**
-  String get openTrash;
+  /// **'갤러리'**
+  String get openGallery;
 
-  /// No description provided for @trashOpenedGallery.
+  /// No description provided for @noGallery.
   ///
   /// In ko, this message translates to:
-  /// **'갤러리를 열었어요 · 휴지통은 갤러리 메뉴에 있어요'**
-  String get trashOpenedGallery;
-
-  /// No description provided for @trashNoGallery.
-  ///
-  /// In ko, this message translates to:
-  /// **'휴지통을 열 갤러리 앱을 찾지 못했어요'**
-  String get trashNoGallery;
+  /// **'갤러리 앱을 찾지 못했어요'**
+  String get noGallery;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

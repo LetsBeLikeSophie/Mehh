@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../config/app_config.dart';
-import '../data/device.dart';
 import '../l10n/l10n.dart';
 import '../providers.dart';
 import '../theme.dart';
@@ -127,28 +126,21 @@ class _Legend extends StatelessWidget {
   );
 }
 
-/// 오른쪽 위 휴지통: 갤러리 앱의 휴지통을 연다 (홈·정리 화면 같은 자리)
-class GalleryTrashButton extends ConsumerWidget {
-  const GalleryTrashButton({super.key});
+/// 오른쪽 위 갤러리 아이콘: 갤러리 앱을 연다 (홈·정리 화면 같은 자리).
+/// 휴지통을 바로 열 공통 방법이 없어 갤러리 모양으로 둔다 (2026-10-24 Sophie)
+class GalleryButton extends ConsumerWidget {
+  const GalleryButton({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l;
-    return IconButton(
-      tooltip: l.openTrash,
+    return MehhHeader.icon(
+      tooltip: l.openGallery,
+      icon: Icons.photo_library_outlined,
       onPressed: () async {
-        final r = await ref.read(deviceProvider).openTrash();
-        if (!context.mounted) return;
-        switch (r) {
-          case TrashOpen.trash:
-            break;
-          case TrashOpen.gallery:
-            showNote(context, l.trashOpenedGallery);
-          case TrashOpen.none:
-            showNote(context, l.trashNoGallery);
-        }
+        final ok = await ref.read(deviceProvider).openGallery();
+        if (!ok && context.mounted) showNote(context, l.noGallery);
       },
-      icon: const Icon(Icons.delete_outline, size: 22, color: MehhColors.icon),
     );
   }
 }
@@ -175,6 +167,18 @@ abstract final class MehhHeader {
         Row(mainAxisSize: MainAxisSize.min, children: trailing),
       ],
     ),
+  );
+
+  /// 맨 위 줄 아이콘 버튼: 서로 가깝게 (2026-10-24 Sophie: 아이콘 사이가 너무 멀다)
+  static Widget icon({
+    required String tooltip,
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) => IconButton(
+    tooltip: tooltip,
+    onPressed: onPressed,
+    visualDensity: VisualDensity.compact,
+    icon: Icon(icon, size: 22, color: MehhColors.icon),
   );
 
   /// 제목 칸: 최소 [title] 높이, 내용은 아래(막대 쪽)에 붙인다. 큰 글씨면 늘어난다

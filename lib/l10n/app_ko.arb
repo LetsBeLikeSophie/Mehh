@@ -496,9 +496,8 @@
     }
   },
   "barPhotos": "사진 {size}",
-  "barCleanable": "그중 비울 수 있음 {size}",
-  "barSent": "이번 달 휴지통으로 {size}",
-  "openTrash": "휴지통",
-  "trashOpenedGallery": "갤러리를 열었어요 · 휴지통은 갤러리 메뉴에 있어요",
-  "trashNoGallery": "휴지통을 열 갤러리 앱을 찾지 못했어요"
+  "barCleanable": "정리 가능 {size}",
+  "barSent": "휴지통 {size}",
+  "openGallery": "갤러리",
+  "noGallery": "갤러리 앱을 찾지 못했어요"
 }

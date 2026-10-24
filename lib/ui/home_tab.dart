@@ -175,21 +175,17 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                     leading: const MehhLogo(height: 56),
                     trailing: [
                       const ProChip(),
-                      IconButton(
+                      MehhHeader.icon(
                         tooltip: l.settings,
+                        icon: Icons.settings_outlined,
                         onPressed: () => Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => const SettingsScreen(),
                           ),
                         ),
-                        icon: const Icon(
-                          Icons.settings_outlined,
-                          size: 22,
-                          color: MehhColors.icon,
-                        ),
                       ),
-                      // 맨 오른쪽 휴지통은 정리 화면과 같은 자리
-                      const GalleryTrashButton(),
+                      // 맨 오른쪽 갤러리는 정리 화면과 같은 자리
+                      const GalleryButton(),
                     ],
                   ),
                 ),
