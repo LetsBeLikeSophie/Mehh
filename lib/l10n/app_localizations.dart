@@ -622,13 +622,13 @@ abstract class L10n {
   /// No description provided for @proBody.
   ///
   /// In ko, this message translates to:
-  /// **'모든 묶음의 추천 정리를 바로 봐요.'**
+  /// **'모든 묶음의 추천 정리를 바로 봐요'**
   String get proBody;
 
   /// No description provided for @proFree.
   ///
   /// In ko, this message translates to:
-  /// **'그날의 묶음 추천은 ◉ 1개로 하나씩 열어요. 매달 {limit}개가 생기고, 이번 달 {count}개 남았어요. {date}에 다시 {limit}개가 돼요.'**
+  /// **'Pro 없이: 매달 ◉ {limit}개 · {count}개 남음 · {date} 다시 채움'**
   String proFree(int limit, int count, String date);
 
   /// No description provided for @proActive.
@@ -670,7 +670,7 @@ abstract class L10n {
   /// No description provided for @proNotes.
   ///
   /// In ko, this message translates to:
-  /// **'회원 가입 없이 스토어 계정으로 사요. 폰을 바꾸거나 앱을 다시 깔아도 [구매 복원]으로 다시 쓸 수 있어요. 1년 이용권은 해지하지 않으면 매년 자동으로 결제되고, 스토어의 구독 메뉴에서 언제든 해지할 수 있어요.'**
+  /// **'회원 가입 없음 · 폰을 바꾸면 [구매 복원]\n1년 이용권은 매년 자동 결제 · 스토어에서 언제든 해지'**
   String get proNotes;
 
   /// No description provided for @restorePurchases.
@@ -904,7 +904,7 @@ abstract class L10n {
   /// No description provided for @proFreeKinds.
   ///
   /// In ko, this message translates to:
-  /// **'캡처·낱장 사진·똑같은 사진 추천은 Pro 없이도 늘 무료예요.'**
+  /// **'캡처·낱장·똑같은 사진은 늘 무료'**
   String get proFreeKinds;
 
   /// No description provided for @freeRefilled.

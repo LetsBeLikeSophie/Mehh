@@ -50,6 +50,7 @@ void main() {
     ProVault? vault,
     Store? store,
     Billing? billing,
+    PhotoLibrary? library,
   }) async {
     tester.view.physicalSize = const Size(390 * 3, 844 * 3);
     tester.view.devicePixelRatio = 3;
@@ -58,7 +59,7 @@ void main() {
       ProviderScope(
         overrides: [
           photoLibraryProvider.overrideWithValue(
-            DemoPhotoLibrary() as PhotoLibrary,
+            library ?? DemoPhotoLibrary() as PhotoLibrary,
           ),
           closedTestFreeProvider.overrideWithValue(false),
           storeProvider.overrideWithValue(store ?? MemoryStore()),
@@ -92,7 +93,12 @@ void main() {
   testWidgets('홈: 분석 중에는 "살펴보고 있어요"와 흐린 똑같은 사진 줄 ("없어요"라고 하지 않는다)', (
     tester,
   ) async {
-    await pump(tester, const Scaffold(body: HomeTab()));
+    // 분석이 끝나지 않는 사진첩: 타이밍과 상관없이 늘 "분석 중"을 본다
+    await pump(
+      tester,
+      const Scaffold(body: HomeTab()),
+      library: _NeverAnalyzedLibrary(),
+    );
     expect(find.text('지금은\n정리할 묶음이 없어요'), findsNothing);
     expect(find.text('사진을\n살펴보고 있어요'), findsOneWidget);
     expect(find.text('똑같은 사진은 다 살펴본 뒤 알려 드려요 · 무료'), findsOneWidget);
@@ -1096,7 +1102,10 @@ void main() {
     await tester.tap(find.text('추천 보기 · 2장'));
     await tester.pumpAndSettle();
     expect(find.text('Mehh Pro'), findsOneWidget);
-    expect(find.textContaining('0개 · ', findRichText: true), findsOneWidget); // 왜 Pro 안내인지
+    expect(
+      find.textContaining('0개 · ', findRichText: true),
+      findsOneWidget,
+    ); // 왜 Pro 안내인지
     await tester.tap(find.text('평생 이용권'));
     await tester.pumpAndSettle();
     expect(find.text('Mehh Pro'), findsNothing); // 사면 시트가 닫힌다
@@ -1639,6 +1648,15 @@ class _FakeHandoff extends Handoff {
     sent.addAll(photoIds);
     return SendResult.ok;
   }
+}
+
+class _NeverAnalyzedLibrary extends DemoPhotoLibrary {
+  @override
+  Future<void> analyze(
+    List<PhotoMeta> metas, {
+    required Future<void> Function(List<PhotoFeatures>) onBatch,
+    bool Function()? cancelled,
+  }) => Completer<void>().future;
 }
 
 class _CountingLibrary extends DemoPhotoLibrary {

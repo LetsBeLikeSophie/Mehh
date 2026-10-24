@@ -373,11 +373,11 @@ class L10nEn extends L10n {
   String get proTitle => 'Mehh Pro';
 
   @override
-  String get proBody => 'See the picks for every set, right away.';
+  String get proBody => 'See picks for every set right away';
 
   @override
   String proFree(int limit, int count, String date) {
-    return 'Day-set picks open with ◉ 1 each. You get $limit every month; $count left this month, back to $limit on $date.';
+    return 'Without Pro: ◉ $limit a month · $count left · refills $date';
   }
 
   @override
@@ -400,7 +400,7 @@ class L10nEn extends L10n {
 
   @override
   String get proNotes =>
-      'No sign-up — you buy with your store account. On a new phone or after reinstalling, tap Restore purchases. The 1-year plan renews automatically each year until you cancel it in your store\'s subscriptions.';
+      'No sign-up · new phone? tap Restore purchases\nThe 1-year plan renews yearly · cancel anytime in the store';
 
   @override
   String get restorePurchases => 'Restore purchases';
@@ -600,7 +600,7 @@ class L10nEn extends L10n {
 
   @override
   String get proFreeKinds =>
-      'Picks for screenshots, single shots and exact duplicates are always free, no Pro needed.';
+      'Screenshots, singles and duplicates are always free';
 
   @override
   String freeRefilled(int count) {

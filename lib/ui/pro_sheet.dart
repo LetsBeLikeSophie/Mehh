@@ -135,17 +135,35 @@ class _ProSheetState extends ConsumerState<_ProSheet> {
             if (pro.pro)
               Text(l.proActive, style: muted)
             else ...[
-              Text(l.proBody, style: muted),
-              CoinText(
-                l.proFree(
-                  freeGroupsPerMonth,
-                  pro.freeLeft(DateTime.now()),
-                  formatDate(nextFreeReset(DateTime.now()), l.localeName),
+              // 긴 문장 대신 아이콘 + 짧은 줄 (2026-10-24 Sophie)
+              _ProLine(
+                const Icon(Icons.check, size: 18, color: MehhColors.text),
+                Text(l.proBody, style: muted),
+              ),
+              _ProLine(
+                const Icon(
+                  Icons.event_repeat_outlined,
+                  size: 18,
+                  color: MehhColors.icon,
                 ),
-                style: muted,
+                CoinText(
+                  l.proFree(
+                    freeGroupsPerMonth,
+                    pro.freeLeft(DateTime.now()),
+                    formatDate(nextFreeReset(DateTime.now()), l.localeName),
+                  ),
+                  style: muted,
+                ),
               ),
               // 무료 종류 추천은 Pro 없이도 늘 무료 (UX-37)
-              Text(l.proFreeKinds, style: muted),
+              _ProLine(
+                const Icon(
+                  Icons.photo_library_outlined,
+                  size: 18,
+                  color: MehhColors.icon,
+                ),
+                Text(l.proFreeKinds, style: muted),
+              ),
               // 무료를 다 썼으면 지금 무료로 할 수 있는 일을 하나 보여 준다 (Sophie P1-A)
               if (pro.freeLeft(DateTime.now()) == 0) const _FreeTodo(),
               const SizedBox(height: 16),
@@ -199,6 +217,26 @@ class _ProSheetState extends ConsumerState<_ProSheet> {
       ),
     );
   }
+}
+
+/// 아이콘 + 짧은 한 줄
+class _ProLine extends StatelessWidget {
+  const _ProLine(this.icon, this.text);
+  final Widget icon;
+  final Widget text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(width: 22, child: icon),
+        const SizedBox(width: 8),
+        Expanded(child: text),
+      ],
+    ),
+  );
 }
 
 class _OfferRow extends StatelessWidget {
