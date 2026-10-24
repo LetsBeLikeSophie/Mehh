@@ -325,15 +325,6 @@ class L10nKo extends L10n {
   String get proChip => 'Pro';
 
   @override
-  String freeChip(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    return '코인 $countString개';
-  }
-
-  @override
   String get proTitle => 'Mehh Pro';
 
   @override
@@ -341,7 +332,7 @@ class L10nKo extends L10n {
 
   @override
   String proFree(int limit, int count, String date) {
-    return '그날의 묶음 추천은 코인 1개로 하나씩 열어요. 매달 코인 $limit개가 생겨요. 이번 달 $count개 남았고, $date에 다시 $limit개가 돼요.';
+    return '그날의 묶음 추천은 ◉ 1개로 하나씩 열어요. 매달 $limit개가 생기고, 이번 달 $count개 남았어요. $date에 다시 $limit개가 돼요.';
   }
 
   @override
@@ -468,16 +459,11 @@ class L10nKo extends L10n {
 
   @override
   String yearlyEnded(int count) {
-    return '1년 이용권이 끝났어요 · 추천을 본 묶음은 그대로 열려 있고, 새 묶음은 이번 달 코인 $count개로 열 수 있어요';
+    return '1년 이용권이 끝났어요 · 추천을 본 묶음은 그대로 열려 있고, 새 묶음은 이번 달 ◉ $count개로 열 수 있어요';
   }
 
   @override
   String get proUsing => 'Pro를 쓰고 있어요';
-
-  @override
-  String freeSetsLeft(int count) {
-    return '코인 $count개 남음';
-  }
 
   @override
   String get privacyCortex =>
@@ -528,7 +514,7 @@ class L10nKo extends L10n {
 
   @override
   String freeRefilled(int count) {
-    return '이번 달 코인 $count개가 다시 생겼어요';
+    return '이번 달 ◉ $count개가 다시 생겼어요';
   }
 
   @override
@@ -598,7 +584,7 @@ class L10nKo extends L10n {
 
   @override
   String noFreeLead(String date, int count) {
-    return '이번 달 코인을 다 썼어요 · $date에 $count개가 다시 생겨요';
+    return '이번 달 ◉ 0개 · $date에 $count개가 다시 생겨요';
   }
 
   @override
@@ -696,4 +682,38 @@ class L10nKo extends L10n {
 
   @override
   String get testFreeChip => '테스트 무료';
+
+  @override
+  String get renameTitle => '묶음 이름';
+
+  @override
+  String get renameReset => '원래 이름으로';
+
+  @override
+  String get save => '저장';
+
+  @override
+  String get privacyShortLocal => '사진과 정리 기록은 이 폰에만 저장돼요';
+
+  @override
+  String get privacyShortPlace => '장소 이름은 위치 좌표만 폰의 위치 서비스로 찾아요';
+
+  @override
+  String get privacyShortFaces => '눈 감은 컷은 폰 안에서만 확인해요';
+
+  @override
+  String get privacyShortTrash => '휴지통 사진은 30일 안에 되살릴 수 있어요';
+
+  @override
+  String get privacyShortCortex =>
+      'Cortex에는 내가 고른 사진·캡처만, 보낼 때만 가요 (Cortex에서 AI로 분석해요)';
+
+  @override
+  String get helpTitle => '도움';
+
+  @override
+  String get clearAllSub => '분석 결과와 정리 기록을 지워요 · 사진은 그대로';
+
+  @override
+  String get coinWord => '코인';
 }

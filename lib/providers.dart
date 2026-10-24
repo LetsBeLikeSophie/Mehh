@@ -733,6 +733,31 @@ final groupPlanProvider = Provider.autoDispose.family<GroupPlan, DayGroup>((
   );
 });
 
+/// 사용자가 바꾼 묶음 이름 (2026-10-24 Sophie). 기본 이름은 따로 계산하므로 언제든 되돌릴 수 있다
+class GroupNamesNotifier extends AsyncNotifier<Map<String, String>> {
+  @override
+  Future<Map<String, String>> build() => ref.read(storeProvider).loadNames();
+
+  /// [name]이 비었거나 null이면 기본 이름으로 되돌린다
+  Future<void> rename(String groupId, String? name) async {
+    final v = name?.trim();
+    final keep = v == null || v.isEmpty ? null : v;
+    await ref.read(storeProvider).saveName(groupId, keep);
+    final next = {...state.value ?? {}};
+    if (keep == null) {
+      next.remove(groupId);
+    } else {
+      next[groupId] = keep;
+    }
+    state = AsyncData(next);
+  }
+}
+
+final groupNamesProvider =
+    AsyncNotifierProvider<GroupNamesNotifier, Map<String, String>>(
+      GroupNamesNotifier.new,
+    );
+
 // ───────────────────────── 눈 감은 컷 (폰 안 AI)
 
 final faceCheckerProvider = Provider<FaceChecker>((ref) {

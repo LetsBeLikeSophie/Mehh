@@ -114,7 +114,7 @@ class _ProSheetState extends ConsumerState<_ProSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (widget.lead case final lead?) ...[
-              Text(
+              CoinText(
                 lead,
                 style: const TextStyle(
                   fontSize: MehhText.body,
@@ -136,7 +136,7 @@ class _ProSheetState extends ConsumerState<_ProSheet> {
               Text(l.proActive, style: muted)
             else ...[
               Text(l.proBody, style: muted),
-              Text(
+              CoinText(
                 l.proFree(
                   freeGroupsPerMonth,
                   pro.freeLeft(DateTime.now()),

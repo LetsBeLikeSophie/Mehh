@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../config/app_config.dart';
 import '../data/handoff.dart';
 import '../data/pro.dart';
 import '../l10n/l10n.dart';
@@ -234,7 +236,18 @@ class _SortScreenState extends ConsumerState<SortScreen>
     return null;
   }
 
+  /// 가장자리에서 시작한 끌기: 사진 선택 대신 뒤로 가기 (2026-10-24 Sophie: 캡처 묶음에서 스와이프로
+  /// 뒤로 안 갔다 — 사진이 화면을 꽉 채워 끌어 선택이 먼저 잡혔다)
+  Offset? _edgeFrom;
+  double _edgeDx = 0;
+
   void _paintStart(Offset global) {
+    final width = MediaQuery.sizeOf(context).width;
+    if (global.dx < backEdge || global.dx > width - backEdge) {
+      _edgeFrom = global;
+      _edgeDx = 0;
+      return;
+    }
     final id = _photoAt(global);
     if (id == null) return;
     _painted.clear();
@@ -243,6 +256,10 @@ class _SortScreenState extends ConsumerState<SortScreen>
   }
 
   void _paintMove(Offset global) {
+    if (_edgeFrom case final from?) {
+      _edgeDx = global.dx - from.dx;
+      return;
+    }
     if (_paintTo == null) return;
     final id = _photoAt(global);
     if (id == null || id == _paintLast) return;
@@ -269,10 +286,30 @@ class _SortScreenState extends ConsumerState<SortScreen>
     ], _paintTo! ? DecisionState.toTrash : DecisionState.keep);
   }
 
-  void _paintEnd() {
+  void _paintEnd(double? velocity) {
+    // 가장자리에서 안쪽으로 충분히(또는 빠르게) 밀었으면 뒤로
+    if (_edgeFrom != null &&
+        (_edgeDx.abs() > backSwipeDistance || (velocity ?? 0).abs() > 600)) {
+      _edgeFrom = null;
+      Navigator.of(context).maybePop();
+      return;
+    }
+    _edgeFrom = null;
     _paintTo = null;
     _paintLast = null;
     _painted.clear();
+  }
+
+  Future<void> _rename(DayGroup g) async {
+    final original = sortTitle(widget.kind, g, widget.place, context.l);
+    final v = await askGroupName(
+      context,
+      current: ref.read(groupNamesProvider).value?[g.id] ?? original,
+      original: original,
+    );
+    if (v != null) {
+      await ref.read(groupNamesProvider.notifier).rename(g.id, v);
+    }
   }
 
   /// 켜 둔 추천 끄기: 추천으로 들어간 X만 표시 없음으로 (직접 선택한 다른 사진은 그대로).
@@ -632,10 +669,12 @@ class _SortScreenState extends ConsumerState<SortScreen>
                 child: GestureDetector(
                   key: _gridKey,
                   behavior: HitTestBehavior.translucent,
+                  // 손가락을 댄 자리부터 본다: 화면 가장자리에서 시작하면 뒤로 가기
+                  dragStartBehavior: DragStartBehavior.down,
                   onHorizontalDragStart: (d) => _paintStart(d.globalPosition),
                   onHorizontalDragUpdate: (d) => _paintMove(d.globalPosition),
-                  onHorizontalDragEnd: (_) => _paintEnd(),
-                  onHorizontalDragCancel: _paintEnd,
+                  onHorizontalDragEnd: (d) => _paintEnd(d.primaryVelocity),
+                  onHorizontalDragCancel: () => _paintEnd(null),
                   child: CustomScrollView(
                     slivers: [
                       SliverPadding(
@@ -657,32 +696,43 @@ class _SortScreenState extends ConsumerState<SortScreen>
                                 children: [
                                   MehhHeader.titleBox([
                                     // 제목 뒤에 장수 (2026-10-23 Sophie: 장수가 따로 한 줄을 차지하지 않게)
-                                    Text.rich(
-                                      TextSpan(
-                                        children: [
-                                          TextSpan(
-                                            text: sortTitle(
-                                              widget.kind,
-                                              g,
-                                              widget.place,
-                                              l,
+                                    // 제목을 누르면 이름 바꾸기 (그날의 묶음·낱장·캡처)
+                                    GestureDetector(
+                                      onTap: g == null
+                                          ? null
+                                          : () => _rename(g),
+                                      child: Text.rich(
+                                        TextSpan(
+                                          children: [
+                                            TextSpan(
+                                              text:
+                                                  ref
+                                                      .watch(groupNamesProvider)
+                                                      .value?[g?.id] ??
+                                                  sortTitle(
+                                                    widget.kind,
+                                                    g,
+                                                    widget.place,
+                                                    l,
+                                                  ),
                                             ),
-                                          ),
-                                          TextSpan(
-                                            text: '  ${l.photos(order.length)}',
-                                            style: const TextStyle(
-                                              fontSize: MehhText.bodySmall,
-                                              fontWeight: FontWeight.w500,
-                                              color: MehhColors.textMuted,
-                                              letterSpacing: 0,
+                                            TextSpan(
+                                              text:
+                                                  '  ${l.photos(order.length)}',
+                                              style: const TextStyle(
+                                                fontSize: MehhText.bodySmall,
+                                                fontWeight: FontWeight.w500,
+                                                color: MehhColors.textMuted,
+                                                letterSpacing: 0,
+                                              ),
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                      style: const TextStyle(
-                                        fontSize: MehhText.title,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: -0.4,
+                                          ],
+                                        ),
+                                        style: const TextStyle(
+                                          fontSize: MehhText.title,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: -0.4,
+                                        ),
                                       ),
                                     ),
                                     if (subLine != null) ...[

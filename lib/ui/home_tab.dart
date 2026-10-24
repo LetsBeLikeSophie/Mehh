@@ -601,7 +601,20 @@ class _GroupTile extends ConsumerWidget {
         }
     }
 
+    final original = groupTitle(group, l, place: place, withYear: false);
+    final title = ref.watch(groupNamesProvider).value?[group.id] ?? original;
     return InkWell(
+      // 길게 누르면 이름 바꾸기 (2026-10-24 Sophie)
+      onLongPress: () async {
+        final v = await askGroupName(
+          context,
+          current: title,
+          original: original,
+        );
+        if (v != null) {
+          await ref.read(groupNamesProvider.notifier).rename(group.id, v);
+        }
+      },
       onTap: () => Navigator.of(context).push(
         sortRoute(
           switch (group.kind) {
@@ -637,7 +650,7 @@ class _GroupTile extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      groupTitle(group, l, place: place, withYear: false),
+                      title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(

@@ -613,12 +613,6 @@ abstract class L10n {
   /// **'Pro'**
   String get proChip;
 
-  /// No description provided for @freeChip.
-  ///
-  /// In ko, this message translates to:
-  /// **'코인 {count}개'**
-  String freeChip(int count);
-
   /// No description provided for @proTitle.
   ///
   /// In ko, this message translates to:
@@ -634,7 +628,7 @@ abstract class L10n {
   /// No description provided for @proFree.
   ///
   /// In ko, this message translates to:
-  /// **'그날의 묶음 추천은 코인 1개로 하나씩 열어요. 매달 코인 {limit}개가 생겨요. 이번 달 {count}개 남았고, {date}에 다시 {limit}개가 돼요.'**
+  /// **'그날의 묶음 추천은 ◉ 1개로 하나씩 열어요. 매달 {limit}개가 생기고, 이번 달 {count}개 남았어요. {date}에 다시 {limit}개가 돼요.'**
   String proFree(int limit, int count, String date);
 
   /// No description provided for @proActive.
@@ -832,7 +826,7 @@ abstract class L10n {
   /// No description provided for @yearlyEnded.
   ///
   /// In ko, this message translates to:
-  /// **'1년 이용권이 끝났어요 · 추천을 본 묶음은 그대로 열려 있고, 새 묶음은 이번 달 코인 {count}개로 열 수 있어요'**
+  /// **'1년 이용권이 끝났어요 · 추천을 본 묶음은 그대로 열려 있고, 새 묶음은 이번 달 ◉ {count}개로 열 수 있어요'**
   String yearlyEnded(int count);
 
   /// No description provided for @proUsing.
@@ -840,12 +834,6 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'Pro를 쓰고 있어요'**
   String get proUsing;
-
-  /// No description provided for @freeSetsLeft.
-  ///
-  /// In ko, this message translates to:
-  /// **'코인 {count}개 남음'**
-  String freeSetsLeft(int count);
 
   /// No description provided for @privacyCortex.
   ///
@@ -922,7 +910,7 @@ abstract class L10n {
   /// No description provided for @freeRefilled.
   ///
   /// In ko, this message translates to:
-  /// **'이번 달 코인 {count}개가 다시 생겼어요'**
+  /// **'이번 달 ◉ {count}개가 다시 생겼어요'**
   String freeRefilled(int count);
 
   /// No description provided for @freeTodoShots.
@@ -1006,7 +994,7 @@ abstract class L10n {
   /// No description provided for @noFreeLead.
   ///
   /// In ko, this message translates to:
-  /// **'이번 달 코인을 다 썼어요 · {date}에 {count}개가 다시 생겨요'**
+  /// **'이번 달 ◉ 0개 · {date}에 {count}개가 다시 생겨요'**
   String noFreeLead(String date, int count);
 
   /// No description provided for @cortexSentBadge.
@@ -1146,6 +1134,72 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'테스트 무료'**
   String get testFreeChip;
+
+  /// No description provided for @renameTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'묶음 이름'**
+  String get renameTitle;
+
+  /// No description provided for @renameReset.
+  ///
+  /// In ko, this message translates to:
+  /// **'원래 이름으로'**
+  String get renameReset;
+
+  /// No description provided for @save.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장'**
+  String get save;
+
+  /// No description provided for @privacyShortLocal.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진과 정리 기록은 이 폰에만 저장돼요'**
+  String get privacyShortLocal;
+
+  /// No description provided for @privacyShortPlace.
+  ///
+  /// In ko, this message translates to:
+  /// **'장소 이름은 위치 좌표만 폰의 위치 서비스로 찾아요'**
+  String get privacyShortPlace;
+
+  /// No description provided for @privacyShortFaces.
+  ///
+  /// In ko, this message translates to:
+  /// **'눈 감은 컷은 폰 안에서만 확인해요'**
+  String get privacyShortFaces;
+
+  /// No description provided for @privacyShortTrash.
+  ///
+  /// In ko, this message translates to:
+  /// **'휴지통 사진은 30일 안에 되살릴 수 있어요'**
+  String get privacyShortTrash;
+
+  /// No description provided for @privacyShortCortex.
+  ///
+  /// In ko, this message translates to:
+  /// **'Cortex에는 내가 고른 사진·캡처만, 보낼 때만 가요 (Cortex에서 AI로 분석해요)'**
+  String get privacyShortCortex;
+
+  /// No description provided for @helpTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'도움'**
+  String get helpTitle;
+
+  /// No description provided for @clearAllSub.
+  ///
+  /// In ko, this message translates to:
+  /// **'분석 결과와 정리 기록을 지워요 · 사진은 그대로'**
+  String get clearAllSub;
+
+  /// No description provided for @coinWord.
+  ///
+  /// In ko, this message translates to:
+  /// **'코인'**
+  String get coinWord;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

@@ -199,18 +199,9 @@
   "billingUnavailable": "지금은 스토어에 연결할 수 없어요",
   "billingDemo": "미리보기라 실제로 결제되지 않아요",
   "proChip": "Pro",
-  "freeChip": "코인 {count}개",
-  "@freeChip": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "format": "decimalPattern"
-      }
-    }
-  },
   "proTitle": "Mehh Pro",
   "proBody": "모든 묶음의 추천 정리를 바로 봐요.",
-  "proFree": "그날의 묶음 추천은 코인 1개로 하나씩 열어요. 매달 코인 {limit}개가 생겨요. 이번 달 {count}개 남았고, {date}에 다시 {limit}개가 돼요.",
+  "proFree": "그날의 묶음 추천은 ◉ 1개로 하나씩 열어요. 매달 {limit}개가 생기고, 이번 달 {count}개 남았어요. {date}에 다시 {limit}개가 돼요.",
   "@proFree": {
     "placeholders": {
       "limit": {
@@ -320,7 +311,7 @@
   "lookingAtPhotos": "사진을\n살펴보고 있어요",
   "duplicatesPending": "똑같은 사진은 다 살펴본 뒤 알려 드려요 · 무료",
   "nothingMarked": "정리할 사진이 없어요",
-  "yearlyEnded": "1년 이용권이 끝났어요 · 추천을 본 묶음은 그대로 열려 있고, 새 묶음은 이번 달 코인 {count}개로 열 수 있어요",
+  "yearlyEnded": "1년 이용권이 끝났어요 · 추천을 본 묶음은 그대로 열려 있고, 새 묶음은 이번 달 ◉ {count}개로 열 수 있어요",
   "@yearlyEnded": {
     "placeholders": {
       "count": {
@@ -329,14 +320,6 @@
     }
   },
   "proUsing": "Pro를 쓰고 있어요",
-  "freeSetsLeft": "코인 {count}개 남음",
-  "@freeSetsLeft": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "privacyCortex": "Cortex로 직접 보낸 사진·캡처는 Cortex에서 AI로 분석해요. 내가 고른 사진·캡처만, 보낼 때만 넘어가요.",
   "cortexNotSaved": "Cortex가 받았다는 신호가 없어서 휴지통으로 보내지 않았어요 · X는 그대로예요. Cortex에서 받은 걸 확인했다면 [{count}장 휴지통으로]를 누르면 돼요.",
   "tagOldShot": "오래됨",
@@ -363,7 +346,7 @@
   "accByKind": "종류별 (결제 기준은 그날의 묶음)",
   "kindDay": "그날의 묶음",
   "proFreeKinds": "캡처·낱장 사진·똑같은 사진 추천은 Pro 없이도 늘 무료예요.",
-  "freeRefilled": "이번 달 코인 {count}개가 다시 생겼어요",
+  "freeRefilled": "이번 달 ◉ {count}개가 다시 생겼어요",
   "@freeRefilled": {
     "placeholders": {
       "count": {
@@ -431,7 +414,7 @@
       }
     }
   },
-  "noFreeLead": "이번 달 코인을 다 썼어요 · {date}에 {count}개가 다시 생겨요",
+  "noFreeLead": "이번 달 ◉ 0개 · {date}에 {count}개가 다시 생겨요",
   "@noFreeLead": {
     "placeholders": {
       "date": {
@@ -495,5 +478,16 @@
   "tagEyesClosed": "눈 감음",
   "noteEyesClosed": "눈 감은 컷 · 같은 순간 눈 뜬 컷이 있어요",
   "mutedEyesClosed": "눈 감은 컷은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요",
-  "testFreeChip": "테스트 무료"
+  "testFreeChip": "테스트 무료",
+  "renameTitle": "묶음 이름",
+  "renameReset": "원래 이름으로",
+  "save": "저장",
+  "privacyShortLocal": "사진과 정리 기록은 이 폰에만 저장돼요",
+  "privacyShortPlace": "장소 이름은 위치 좌표만 폰의 위치 서비스로 찾아요",
+  "privacyShortFaces": "눈 감은 컷은 폰 안에서만 확인해요",
+  "privacyShortTrash": "휴지통 사진은 30일 안에 되살릴 수 있어요",
+  "privacyShortCortex": "Cortex에는 내가 고른 사진·캡처만, 보낼 때만 가요 (Cortex에서 AI로 분석해요)",
+  "helpTitle": "도움",
+  "clearAllSub": "분석 결과와 정리 기록을 지워요 · 사진은 그대로",
+  "coinWord": "코인"
 }

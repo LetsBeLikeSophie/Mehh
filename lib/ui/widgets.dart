@@ -172,7 +172,9 @@ void showNote(BuildContext context, String text) {
     ..hideCurrentSnackBar()
     ..showSnackBar(
       SnackBar(
-        content: Text(text),
+        content: text.contains(coinMark)
+            ? CoinText(text, style: const TextStyle(color: MehhColors.white))
+            : Text(text),
         behavior: SnackBarBehavior.floating,
         backgroundColor: MehhColors.black,
         // 긴 안내는 읽을 시간을 더 준다 (2~8초)
@@ -313,4 +315,95 @@ class CoinCount extends StatelessWidget {
       ],
     ),
   );
+}
+
+/// 묶음 이름 바꾸기 (2026-10-24 Sophie). 입력 칸 오른쪽 [원래 이름으로]는 기본 이름을 다시 넣는다.
+/// 반환: 새 이름, 기본 이름으로 되돌리면 빈 문자열, 취소면 null
+Future<String?> askGroupName(
+  BuildContext context, {
+  required String current,
+  required String original,
+}) {
+  final c = TextEditingController(text: current);
+  final l = context.l;
+  return showDialog<String>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      backgroundColor: MehhColors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(MehhRadius.card),
+      ),
+      title: Text(
+        l.renameTitle,
+        style: const TextStyle(
+          fontSize: MehhText.heading,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      content: TextField(
+        controller: c,
+        autofocus: true,
+        maxLength: 40,
+        textInputAction: TextInputAction.done,
+        onSubmitted: (v) => Navigator.of(ctx).pop(v == original ? '' : v),
+        decoration: InputDecoration(
+          counterText: '',
+          suffixIcon: IconButton(
+            tooltip: l.renameReset,
+            icon: const Icon(Icons.restart_alt, color: MehhColors.icon),
+            onPressed: () => c.text = original,
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(ctx).pop(),
+          style: TextButton.styleFrom(foregroundColor: MehhColors.textMuted),
+          child: Text(l.cancel),
+        ),
+        TextButton(
+          onPressed: () =>
+              Navigator.of(ctx).pop(c.text == original ? '' : c.text),
+          style: TextButton.styleFrom(foregroundColor: MehhColors.black),
+          child: Text(
+            l.save,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// 문구 속 코인 자리 표시. 화면에는 글자 "코인" 대신 코인 그림이 들어간다 (2026-10-24 Sophie)
+const coinMark = '◉';
+
+/// [text]의 [coinMark]를 코인 그림으로 바꿔 보여 준다
+class CoinText extends StatelessWidget {
+  const CoinText(this.text, {super.key, this.style});
+
+  final String text;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    final size = (style?.fontSize ?? MehhText.body) * 1.25;
+    final parts = text.split(coinMark);
+    return Text.rich(
+      TextSpan(
+        children: [
+          for (var i = 0; i < parts.length; i++) ...[
+            if (i > 0)
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: CoinIcon(size: size),
+              ),
+            TextSpan(text: parts[i]),
+          ],
+        ],
+      ),
+      style: style,
+      semanticsLabel: text.replaceAll(coinMark, context.l.coinWord),
+    );
+  }
 }

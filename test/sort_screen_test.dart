@@ -141,7 +141,12 @@ void main() {
 
   testWidgets('설정: 맨 위 Mehh Pro 줄을 누르면 Pro 안내(구매 복원)가 열린다', (tester) async {
     await pump(tester, const SettingsScreen());
-    expect(find.text('코인 3개 남음'), findsOneWidget);
+    // 코인은 글자 대신 그림 + 개수
+    expect(
+      find.descendant(of: find.byType(CoinCount), matching: find.text('3')),
+      findsOneWidget,
+    );
+    expect(find.text('개인정보처리방침'), findsOneWidget);
     await tester.tap(find.text('Mehh Pro'));
     await tester.pumpAndSettle();
     expect(find.text('구매 복원'), findsOneWidget);
@@ -306,9 +311,9 @@ void main() {
       extra: [cortexInstalledProvider.overrideWith((ref) async => true)],
     );
     expect(find.textContaining('Cortex에서 AI로 분석해요'), findsOneWidget);
+    expect(find.textContaining('고른 사진·캡처만'), findsOneWidget);
     // 1.10.0부터 모든 사진을 보낼 수 있다: "캡처만"이라고 하지 않는다 (시니어 리뷰 2026-10-24 S-1)
     expect(find.textContaining('고른 캡처만'), findsNothing);
-    expect(find.textContaining('사진·캡처만'), findsOneWidget);
   });
 
   testWidgets('캡처: [추천 보기 · N장]을 누르면 N장 모두 X (오래된 캡처)', (tester) async {
@@ -703,6 +708,59 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('묶음 이름: 제목을 누르면 바꾸고, [원래 이름으로]로 되돌린다', (tester) async {
+    await pump(tester, SortScreen(kind: SortKind.singles, group: group));
+    final title = find.textContaining('낱장 사진');
+    expect(title, findsWidgets);
+    await tester.tap(title.first);
+    await tester.pumpAndSettle();
+    expect(find.text('묶음 이름'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), '여행 사진');
+    await tester.tap(find.text('저장'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('여행 사진'), findsOneWidget);
+    // 되돌리기
+    await tester.tap(find.textContaining('여행 사진'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('원래 이름으로'));
+    await tester.pump();
+    await tester.tap(find.text('저장'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('여행 사진'), findsNothing);
+    expect(find.textContaining('낱장 사진'), findsWidgets);
+    await flush(tester);
+  });
+
+  testWidgets('그리드: 화면 왼쪽 끝에서 안쪽으로 밀면 뒤로 간다 (사진 선택 대신)', (tester) async {
+    await pump(
+      tester,
+      Builder(
+        builder: (context) => Scaffold(
+          body: Center(
+            child: TextButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) =>
+                      SortScreen(kind: SortKind.singles, group: group),
+                ),
+              ),
+              child: const Text('열기'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('열기'));
+    await tester.pumpAndSettle();
+    expect(find.byType(SortScreen), findsOneWidget);
+    final y = tester.getCenter(find.byType(PhotoThumb).first).dy;
+    await tester.dragFrom(Offset(4, y), const Offset(150, 0));
+    await tester.pumpAndSettle();
+    expect(find.byType(SortScreen), findsNothing);
+    expect(find.text('정리할 사진이 없어요'), findsNothing);
+    await flush(tester);
+  });
+
   testWidgets('그리드: 사진 위에서 옆으로 끌면 지나간 사진이 한꺼번에 선택되고, 다시 끌면 풀린다', (
     tester,
   ) async {
@@ -1038,7 +1096,7 @@ void main() {
     await tester.tap(find.text('추천 보기 · 2장'));
     await tester.pumpAndSettle();
     expect(find.text('Mehh Pro'), findsOneWidget);
-    expect(find.textContaining('이번 달 코인을 다 썼어요'), findsOneWidget); // 왜 Pro 안내인지
+    expect(find.textContaining('0개 · ', findRichText: true), findsOneWidget); // 왜 Pro 안내인지
     await tester.tap(find.text('평생 이용권'));
     await tester.pumpAndSettle();
     expect(find.text('Mehh Pro'), findsNothing); // 사면 시트가 닫힌다

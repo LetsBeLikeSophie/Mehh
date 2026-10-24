@@ -370,21 +370,6 @@ class L10nEn extends L10n {
   String get proChip => 'Pro';
 
   @override
-  String freeChip(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$countString coins',
-      one: '1 coin',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get proTitle => 'Mehh Pro';
 
   @override
@@ -392,7 +377,7 @@ class L10nEn extends L10n {
 
   @override
   String proFree(int limit, int count, String date) {
-    return 'Day-set picks open with 1 coin each. You get $limit coins every month. $count left this month, back to $limit on $date.';
+    return 'Day-set picks open with ◉ 1 each. You get $limit every month; $count left this month, back to $limit on $date.';
   }
 
   @override
@@ -545,25 +530,14 @@ class L10nEn extends L10n {
       count,
       locale: localeName,
       other:
-          'Your 1-year plan ended · sets whose picks you saw stay open; new sets open with your $count coins this month',
-      one: 'Your 1-year plan ended · sets whose picks you saw stay open; new sets open with your 1 coin this month',
+          'Your 1-year plan ended · sets whose picks you saw stay open; new sets open with your ◉ $count this month',
+      one: 'Your 1-year plan ended · sets whose picks you saw stay open; new sets open with your ◉ 1 this month',
     );
     return '$_temp0';
   }
 
   @override
   String get proUsing => 'You have Pro';
-
-  @override
-  String freeSetsLeft(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count coins left',
-      one: '1 coin left',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get privacyCortex =>
@@ -633,8 +607,8 @@ class L10nEn extends L10n {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Your $count coins for this month are back',
-      one: 'Your coin for this month is back',
+      other: 'Your ◉ $count for this month are back',
+      one: 'Your ◉ 1 for this month is back',
     );
     return '$_temp0';
   }
@@ -721,7 +695,7 @@ class L10nEn extends L10n {
 
   @override
   String noFreeLead(String date, int count) {
-    return 'No coins left this month · $count more on $date';
+    return '◉ 0 left this month · $count more on $date';
   }
 
   @override
@@ -838,4 +812,39 @@ class L10nEn extends L10n {
 
   @override
   String get testFreeChip => 'Free in testing';
+
+  @override
+  String get renameTitle => 'Set name';
+
+  @override
+  String get renameReset => 'Original name';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get privacyShortLocal => 'Photos and records stay on this phone';
+
+  @override
+  String get privacyShortPlace =>
+      'Place names use only the location, via your phone\'s location service';
+
+  @override
+  String get privacyShortFaces => 'Closed-eye checks happen on your phone only';
+
+  @override
+  String get privacyShortTrash => 'Trashed photos can be restored for 30 days';
+
+  @override
+  String get privacyShortCortex =>
+      'Only the photos you pick go to Cortex, only when you send (Cortex analyzes them with AI)';
+
+  @override
+  String get helpTitle => 'Help';
+
+  @override
+  String get clearAllSub => 'Clears analysis and records · your photos stay';
+
+  @override
+  String get coinWord => 'coin';
 }

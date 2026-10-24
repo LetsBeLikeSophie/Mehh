@@ -1,5 +1,5 @@
 /// 앱 버전 (pubspec.yaml version과 같이 고친다). 설정 화면과 문의 메일 제목에 쓴다.
-const appVersion = '1.15.1';
+const appVersion = '1.16.0';
 
 /// 비공개 테스트 동안 그날의 묶음을 코인 없이 모두 연다 (2026-10-24 Sophie). 결제를 켜고 정식 출시할 때 false
 const closedTestFree = true;
@@ -8,6 +8,12 @@ const closedTestFree = true;
 /// 최근 앱에서 다시 열었을 때, 마지막으로 사진을 불러온 지 이만큼 지났으면 새로 불러온다
 /// (그 사이 찍은 사진·새 묶음이 보이게, UX 리뷰 2026-10-22)
 const reloadLibraryAfter = Duration(minutes: 10);
+
+/// 정리 화면에서 이 폭(화면 왼쪽·오른쪽 끝) 안에서 시작한 옆 끌기는 사진 선택 대신 뒤로 가기
+const backEdge = 28.0;
+
+/// 그 끌기가 이만큼 안쪽으로 오면 뒤로 간다
+const backSwipeDistance = 60.0;
 
 /// 홈 막대가 차오르는 시간
 const freedBarAnimation = Duration(milliseconds: 700);

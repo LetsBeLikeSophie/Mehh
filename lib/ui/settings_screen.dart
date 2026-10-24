@@ -71,58 +71,49 @@ class SettingsScreen extends ConsumerWidget {
                   const SizedBox(height: 20),
                   // 구매 복원은 여기서도 찾을 수 있게 (UX 리뷰 2026-10-22). 새 화면 없이 Pro 안내를 연다
                   const _ProRow(),
-                  const SizedBox(height: 12),
-                  _Section(
-                    title: context.l.privacyTitle,
-                    lines: [
-                      context.l.privacyLocal,
-                      context.l.privacyGeocode,
-                      context.l.privacyTrash,
-                      if (ref.watch(cortexInstalledProvider).value ?? false)
-                        context.l.privacyCortex,
-                    ],
+                  const SizedBox(height: 28),
+                  // 긴 문장 대신 아이콘 + 짧은 줄 (2026-10-24 Sophie: 개발 화면처럼 보이지 않게)
+                  _Heading(context.l.privacyTitle),
+                  _Line(Icons.smartphone_outlined, context.l.privacyShortLocal),
+                  _Line(Icons.place_outlined, context.l.privacyShortPlace),
+                  _Line(Icons.face_outlined, context.l.privacyShortFaces),
+                  _Line(Icons.delete_outline, context.l.privacyShortTrash),
+                  if (ref.watch(cortexInstalledProvider).value ?? false)
+                    _Line(Icons.north_east, context.l.privacyShortCortex),
+                  const SizedBox(height: 28),
+                  _Heading(context.l.helpTitle),
+                  if (supportEmail.isNotEmpty)
+                    _Tap(
+                      icon: Icons.mail_outline,
+                      label: context.l.contact,
+                      sub: supportEmail,
+                      onTap: () => _contact(context),
+                    ),
+                  _Tap(
+                    icon: Icons.restart_alt,
+                    label: context.l.clearAll,
+                    sub: context.l.clearAllSub,
+                    onTap: () => _confirmClear(context, ref),
                   ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton(
-                      onPressed: () => _confirmClear(context, ref),
-                      child: Text(context.l.clearAll),
+                  const SizedBox(height: 28),
+                  // 링크는 밑줄로 (2026-10-24 Sophie: 누를 수 있는지 보이게)
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => launchUrl(
+                      Uri.parse(privacyPolicyUrl),
+                      mode: LaunchMode.externalApplication,
                     ),
-                  ),
-                  if (supportEmail.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: () => _contact(context),
-                        child: Text(context.l.contact),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Text(
+                        context.l.privacyPolicy,
+                        style: const TextStyle(
+                          fontSize: MehhText.caption,
+                          color: MehhColors.text,
+                          decoration: TextDecoration.underline,
+                          decorationColor: MehhColors.textMuted,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      context.l.contactNote(supportEmail),
-                      style: const TextStyle(
-                        fontSize: MehhText.caption,
-                        color: MehhColors.textMuted,
-                        height: 1.5,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 24),
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: TextButton(
-                      onPressed: () => launchUrl(
-                        Uri.parse(privacyPolicyUrl),
-                        mode: LaunchMode.externalApplication,
-                      ),
-                      style: TextButton.styleFrom(
-                        foregroundColor: MehhColors.textMuted,
-                        padding: EdgeInsets.zero,
-                        minimumSize: const Size(44, 44),
-                      ),
-                      child: Text(context.l.privacyPolicy),
                     ),
                   ),
                   // 버전 글자를 7번 누르면 추천 정확도 (숨은 화면, SPEC 6-8)
@@ -137,46 +128,102 @@ class SettingsScreen extends ConsumerWidget {
   }
 }
 
-class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.lines});
-
-  final String title;
-  final List<String> lines;
+class _Heading extends StatelessWidget {
+  const _Heading(this.text);
+  final String text;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: MehhColors.surface,
-        borderRadius: BorderRadius.circular(MehhRadius.card),
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Text(
+      text,
+      style: const TextStyle(
+        fontSize: MehhText.bodySmall,
+        fontWeight: FontWeight.w600,
+        color: MehhColors.text,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
+    ),
+  );
+}
+
+/// 아이콘 + 짧은 한 줄
+class _Line extends StatelessWidget {
+  const _Line(this.icon, this.text);
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 6),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: MehhColors.icon),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            text,
             style: const TextStyle(
-              fontSize: MehhText.body,
-              fontWeight: FontWeight.w600,
+              fontSize: MehhText.caption,
+              color: MehhColors.textMuted,
+              height: 1.45,
             ),
           ),
-          for (final l in lines) ...[
-            const SizedBox(height: 8),
-            Text(
-              l,
-              style: const TextStyle(
-                fontSize: MehhText.caption,
-                color: MehhColors.textMuted,
-                height: 1.55,
-              ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// 누르는 줄 (아이콘 · 이름 · 작은 설명 · >)
+class _Tap extends StatelessWidget {
+  const _Tap({
+    required this.icon,
+    required this.label,
+    required this.sub,
+    required this.onTap,
+  });
+  final IconData icon;
+  final String label;
+  final String sub;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(MehhRadius.button),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: MehhColors.text),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: MehhText.body,
+                    color: MehhColors.text,
+                  ),
+                ),
+                Text(
+                  sub,
+                  style: const TextStyle(
+                    fontSize: MehhText.label,
+                    color: MehhColors.textMuted,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
+          const Icon(Icons.chevron_right, color: MehhColors.icon),
         ],
       ),
-    );
-  }
+    ),
+  );
 }
 
 class _VersionTap extends StatefulWidget {
@@ -218,11 +265,7 @@ class _ProRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l;
     final s = ref.watch(proProvider).value;
-    final status = s == null
-        ? ''
-        : s.pro
-        ? l.proUsing
-        : l.freeSetsLeft(s.freeLeft(DateTime.now()));
+    final testFree = ref.watch(closedTestFreeProvider);
     return Material(
       color: MehhColors.surface,
       borderRadius: BorderRadius.circular(MehhRadius.card),
@@ -241,13 +284,17 @@ class _ProRow extends ConsumerWidget {
                 ),
               ),
               const Spacer(),
-              Text(
-                status,
-                style: const TextStyle(
-                  fontSize: MehhText.caption,
-                  color: MehhColors.textMuted,
-                ),
-              ),
+              // 코인은 글자 대신 그림 + 남은 개수 (2026-10-24 Sophie)
+              if (s != null)
+                s.pro || testFree
+                    ? Text(
+                        s.pro ? l.proUsing : l.testFreeChip,
+                        style: const TextStyle(
+                          fontSize: MehhText.caption,
+                          color: MehhColors.textMuted,
+                        ),
+                      )
+                    : CoinCount(s.freeLeft(DateTime.now()), size: 20),
               const Icon(Icons.chevron_right, color: MehhColors.icon),
             ],
           ),

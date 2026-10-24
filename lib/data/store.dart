@@ -38,6 +38,10 @@ abstract class Store {
   Future<Map<String, bool>> loadFaces();
   Future<void> saveFaces(Map<String, bool> eyesClosed);
 
+  /// 사용자가 바꾼 묶음 이름 (묶음 id → 이름). 없으면 기본 이름
+  Future<Map<String, String>> loadNames();
+  Future<void> saveName(String groupId, String? name);
+
   /// 작은 횟수 기록 (예: 오늘 "길게 눌러 끝내기" 안내를 몇 번 보였나)
   Future<int> counter(String key);
   Future<void> bumpCounter(String key);
@@ -64,6 +68,19 @@ class MemoryStore implements Store {
   final cortexSent = <String, bool>{};
   final counters = <String, int>{};
   final faces = <String, bool>{};
+  final names = <String, String>{};
+
+  @override
+  Future<Map<String, String>> loadNames() async => {...names};
+
+  @override
+  Future<void> saveName(String groupId, String? name) async {
+    if (name == null) {
+      names.remove(groupId);
+    } else {
+      names[groupId] = name;
+    }
+  }
 
   @override
   Future<Map<String, bool>> loadFaces() async => {...faces};
@@ -155,6 +172,7 @@ class MemoryStore implements Store {
     cortexSent.clear();
     counters.clear();
     faces.clear();
+    names.clear();
     features.clear();
     decisions.clear();
     log.clear();

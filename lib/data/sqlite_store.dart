@@ -20,6 +20,7 @@ const _picksTable = '''
 const _seenTable = 'CREATE TABLE seen (id TEXT PRIMARY KEY)';
 const _cortexSentTable =
     'CREATE TABLE cortex_sent (id TEXT PRIMARY KEY, at INTEGER, got INTEGER DEFAULT 0)';
+const _namesTable = 'CREATE TABLE names (id TEXT PRIMARY KEY, name TEXT)';
 const _facesTable = 'CREATE TABLE faces (id TEXT PRIMARY KEY, closed INTEGER)';
 const _countersTable =
     'CREATE TABLE counters (key TEXT PRIMARY KEY, n INTEGER)';
@@ -29,7 +30,7 @@ class SqliteStore implements Store {
 
   Future<Database> get _database async => _db ??= await openDatabase(
     'mehh.db',
-    version: 8,
+    version: 9,
     onUpgrade: (db, from, _) async {
       // 분석 결과는 캐시라서 버리고 다시 계산한다
       if (from < 3) {
@@ -47,6 +48,7 @@ class SqliteStore implements Store {
       }
       if (from < 7) await db.execute(_countersTable);
       if (from < 8) await db.execute(_facesTable);
+      if (from < 9) await db.execute(_namesTable);
     },
     onCreate: (db, _) async {
       await db.execute(_featuresTable);
@@ -66,6 +68,7 @@ class SqliteStore implements Store {
       await db.execute(_cortexSentTable);
       await db.execute(_countersTable);
       await db.execute(_facesTable);
+      await db.execute(_namesTable);
     },
   );
 
@@ -270,6 +273,25 @@ class SqliteStore implements Store {
   };
 
   @override
+  Future<Map<String, String>> loadNames() async => {
+    for (final r in await (await _database).query('names'))
+      r['id'] as String: r['name'] as String,
+  };
+
+  @override
+  Future<void> saveName(String groupId, String? name) async {
+    final db = await _database;
+    if (name == null) {
+      await db.delete('names', where: 'id = ?', whereArgs: [groupId]);
+    } else {
+      await db.insert('names', {
+        'id': groupId,
+        'name': name,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+    }
+  }
+
+  @override
   Future<Map<String, bool>> loadFaces() async => {
     for (final r in await (await _database).query('faces'))
       r['id'] as String: r['closed'] == 1,
@@ -322,6 +344,7 @@ class SqliteStore implements Store {
         'cortex_sent',
         'counters',
         'faces',
+        'names',
       ]) {
         await tx.delete(t);
       }
