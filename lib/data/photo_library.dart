@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../logic/image_analysis.dart';
+import '../logic/screen_detect.dart';
 import '../models/features.dart';
 import '../models/photo_meta.dart';
 import 'json_cache.dart';
@@ -201,8 +202,11 @@ class PhotoLibrary {
       // PHAssetMediaSubtypePhotoScreenshot
       return e.subtype & 4 != 0;
     }
-    final path = (e.relativePath ?? '').toLowerCase();
-    final title = (e.title ?? '').toLowerCase();
-    return path.contains('screenshot') || title.startsWith('screenshot');
+    return looksLikeScreen(
+      path: e.relativePath ?? '',
+      title: e.title ?? '',
+      width: e.width,
+      height: e.height,
+    );
   }
 }

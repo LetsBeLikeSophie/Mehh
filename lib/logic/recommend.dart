@@ -16,6 +16,7 @@ class GroupPlan {
     required this.bursts,
     required this.best,
     required this.trash,
+    this.kept = const {},
     required this.analyzed,
   });
 
@@ -24,6 +25,10 @@ class GroupPlan {
 
   /// 연속 컷마다 베스트 1장 (2장 이상인 연속 컷만)
   final Set<String> best;
+
+  /// 연속 컷에서 남기지만 "베스트"라고 부르지 않는 사진: 품질 차이가 애매해서 가장 나중 컷을 남긴다
+  /// (2026-10-24 Sophie: 애매하면 베스트를 붙이지 않는다)
+  final Set<String> kept;
 
   /// 정리 추천 사진과 이유
   final Map<String, TrashReason> trash;
@@ -48,6 +53,7 @@ GroupPlan planGroup(
 }) {
   final bursts = findBursts(photos, features, config: config);
   final best = <String>{};
+  final kept = <String>{};
   final trash = <String, TrashReason>{};
 
   // 추천 후보: 킵·휴지통이 아닌 사진. [추천 보기]로 X(toTrash)가 된 사진도 계속 추천으로 센다
@@ -70,12 +76,23 @@ GroupPlan planGroup(
     String? bestId;
     final alive = b.where((p) => !gone(p)).toList();
     if (b.length > 1 && alive.isNotEmpty) {
-      bestId = alive
-          .reduce(
-            (x, y) => score(features[x.id]) >= score(features[y.id]) ? x : y,
-          )
-          .id;
-      best.add(bestId);
+      final ranked = [
+        ...alive,
+      ]..sort((x, y) => score(features[y.id]).compareTo(score(features[x.id])));
+      final clear =
+          ranked.length == 1 ||
+          score(features[ranked[0].id]) - score(features[ranked[1].id]) >=
+              config.bestMargin;
+      if (clear) {
+        bestId = ranked.first.id;
+        best.add(bestId);
+      } else {
+        // 차이가 애매하면 가장 나중 컷을 남기고 "베스트"라고 하지 않는다
+        bestId = alive
+            .reduce((x, y) => x.takenAt.isAfter(y.takenAt) ? x : y)
+            .id;
+        kept.add(bestId);
+      }
     }
     for (final p in b) {
       if (p.id == bestId || !open(p)) continue;
@@ -97,6 +114,7 @@ GroupPlan planGroup(
   return GroupPlan(
     bursts: bursts,
     best: best,
+    kept: kept,
     trash: trash,
     analyzed: photos.where((p) => features.containsKey(p.id)).length,
   );
@@ -241,13 +259,15 @@ double score(PhotoFeatures? f) {
 /// 베스트로 고른 이유 (화면 문구는 UI에서 언어별로)
 enum BestReason { sharp, exposure }
 
+/// 눈에 띄는 차이만 이유로 쓴다: 다른 컷보다 확실히 선명할 때 "선명", 다른 컷 중에 너무 어둡거나
+/// 밝은 게 있을 때만 "노출" (2026-10-24 Sophie: 다 비슷한데 "초점 선명"이라 하면 믿을 수 없다)
 List<BestReason> bestReasons(PhotoFeatures? f, List<PhotoFeatures?> others) {
   if (f == null) return const [];
-  final sharper = others.whereType<PhotoFeatures>().every(
-    (o) => o.id == f.id || f.sharpness >= o.sharpness,
-  );
+  final rest = others.whereType<PhotoFeatures>().where((o) => o.id != f.id);
+  final sharper = rest.every((o) => f.sharpness >= o.sharpness * 1.3);
+  bool badExposure(PhotoFeatures o) => o.brightness < 50 || o.brightness > 215;
   return [
-    if (sharper) BestReason.sharp,
-    if (f.brightness >= 50 && f.brightness <= 215) BestReason.exposure,
+    if (sharper && rest.isNotEmpty) BestReason.sharp,
+    if (!badExposure(f) && rest.any(badExposure)) BestReason.exposure,
   ];
 }

@@ -5,6 +5,7 @@ import 'package:image/image.dart' as img;
 import 'package:mehh/logic/duplicates.dart';
 import 'package:mehh/logic/image_analysis.dart';
 import 'package:mehh/logic/recommend.dart';
+import 'package:mehh/logic/screen_detect.dart';
 import 'package:mehh/models/decision.dart';
 import 'package:mehh/models/features.dart';
 import 'package:mehh/models/photo_meta.dart';
@@ -122,6 +123,47 @@ void main() {
   });
 
   group('연속 컷과 추천', () {
+    test('품질 차이가 애매하면 베스트라고 부르지 않고 가장 나중 컷을 남긴다 (2026-10-24 Sophie)', () {
+      final photos = [
+        meta('a', t0),
+        meta('b', t0.add(const Duration(seconds: 20))),
+        meta('c', t0.add(const Duration(seconds: 40))),
+      ];
+      final f = {
+        'a': feat('a', sharp: 500),
+        'b': feat('b', sharp: 520, lo: 0x0F0F0F00),
+        'c': feat('c', sharp: 510),
+      };
+      final plan = planGroup(photos, f, {});
+      expect(plan.best, isEmpty);
+      expect(plan.kept, {'c'});
+      expect(plan.trash, {'a': TrashReason.burst, 'b': TrashReason.burst});
+    });
+
+    test('베스트 이유는 눈에 띄는 차이만: 비슷하게 선명하면 "선명"이 아니다', () {
+      expect(
+        bestReasons(feat('a', sharp: 520), [
+          feat('a', sharp: 520),
+          feat('b', sharp: 500),
+        ]),
+        isEmpty,
+      );
+      expect(
+        bestReasons(feat('a', sharp: 900), [
+          feat('a', sharp: 900),
+          feat('b', sharp: 300),
+        ]),
+        [BestReason.sharp],
+      );
+      expect(
+        bestReasons(feat('a', bright: 120), [
+          feat('a', bright: 120),
+          feat('b', bright: 20),
+        ]),
+        [BestReason.exposure],
+      );
+    });
+
     test('60초 안 + 비슷하면 연속 컷, 가장 선명한 사진이 베스트', () {
       final photos = [
         meta('a', t0),
@@ -397,6 +439,78 @@ void main() {
     test('까만 사진은 밝기가 낮다', () {
       final black = img.Image(width: 64, height: 64);
       expect(analyzeImage('k', jpg(black))!.brightness, lessThan(5));
+    });
+  });
+
+  group('캡처 알아보기 (2026-10-24 Sophie: 택시 캡처가 사진으로 섞였다)', () {
+    test('폴더·이름에 캡처 표시가 있으면 캡처', () {
+      expect(
+        looksLikeScreen(
+          path: 'Pictures/Screenshots/',
+          title: 'a.jpg',
+          width: 1080,
+          height: 2340,
+        ),
+        isTrue,
+      );
+      expect(
+        looksLikeScreen(
+          path: 'DCIM/스크린샷/',
+          title: 'a.jpg',
+          width: 800,
+          height: 600,
+        ),
+        isTrue,
+      );
+      expect(
+        looksLikeScreen(
+          path: 'Pictures/Smart select/',
+          title: 'a.png',
+          width: 500,
+          height: 400,
+        ),
+        isTrue,
+      );
+    });
+    test('휴대폰 화면처럼 길쭉하면 캡처 (카톡으로 받은 화면 등)', () {
+      expect(
+        looksLikeScreen(
+          path: 'Pictures/KakaoTalk/',
+          title: 'x.jpg',
+          width: 1080,
+          height: 2400,
+        ),
+        isTrue,
+      );
+    });
+    test('카메라 사진(4:3, 16:9)과 파노라마는 캡처가 아니다', () {
+      expect(
+        looksLikeScreen(
+          path: 'DCIM/Camera/',
+          title: 'x.jpg',
+          width: 4000,
+          height: 3000,
+        ),
+        isFalse,
+      );
+      expect(
+        looksLikeScreen(
+          path: 'DCIM/Camera/',
+          title: 'x.jpg',
+          width: 1080,
+          height: 1920,
+        ),
+        isFalse,
+      );
+      expect(
+        looksLikeScreen(
+          path: 'DCIM/Camera/',
+          title: 'x.jpg',
+          width: 9000,
+          height: 2000,
+        ),
+        isFalse,
+      );
     });
   });
 }

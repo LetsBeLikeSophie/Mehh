@@ -10,6 +10,7 @@ class CleanupConfig {
     this.pocketBrightness = 40,
     this.pocketContrast = 12,
     this.textScreenshot = 0.2,
+    this.bestMargin = 0.3,
     this.oldScreenshot = const Duration(days: 90),
     this.learnMinSamples = 20,
     this.learnMinAcceptRate = 0.5,
@@ -29,6 +30,10 @@ class CleanupConfig {
   /// 이보다 오래된 캡처는 정리 추천 (2026-10-22 Sophie C4-A). 연달아 찍은 비슷한 캡처는
   /// [burstMaxGap]·[burstMaxHamming] 기준으로 묶어 마지막 한 장만 남긴다.
   final Duration oldScreenshot;
+
+  /// 연속 컷에서 1등과 2등의 점수([score]) 차이가 이 이상일 때만 "베스트"라고 부른다.
+  /// 0.3 ≈ 약 35% 더 선명. 애매하면 가장 나중 컷을 이름 없이 남긴다 (2026-10-24 Sophie)
+  final double bestMargin;
 
   /// 글자 점수가 이 이상이면 "글자 있는 캡처"
   final double textScreenshot;

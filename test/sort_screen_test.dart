@@ -549,7 +549,10 @@ void main() {
       extra: [realPlan(f)],
     );
     expect(find.text('1장 휴지통으로'), findsOneWidget); // 실수 사진만 처음부터 X
-    expect(find.text('추천 보기 · 3장'), findsOneWidget); // 누르면 X가 되는 장수 (잠긴 2 + 실수 1)
+    expect(
+      find.text('추천 보기 · 3장'),
+      findsOneWidget,
+    ); // 누르면 X가 되는 장수 (잠긴 2 + 실수 1)
     expect(find.text('실수'), findsOneWidget);
     expect(find.byIcon(Icons.lock_outline), findsOneWidget); // [추천 보기]에 자물쇠
     await openLocked(tester, '추천 보기 · 3장');
@@ -667,9 +670,7 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('그리드: 길게 눌러 가운데 동그라미가 차면 "N장 휴지통으로" → 보낸다', (
-    tester,
-  ) async {
+  testWidgets('그리드: 길게 눌러 가운데 동그라미가 차면 "N장 휴지통으로" → 보낸다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     await tester.tap(find.byType(XToggle).at(0));
     await tester.pumpAndSettle();
@@ -1035,10 +1036,7 @@ void main() {
     await tester.tap(find.text('추천 보기 · 2장'));
     await tester.pumpAndSettle();
     expect(find.text('Mehh Pro'), findsOneWidget);
-    expect(
-      find.textContaining('이번 달 코인을 다 썼어요'),
-      findsOneWidget,
-    ); // 왜 Pro 안내인지
+    expect(find.textContaining('이번 달 코인을 다 썼어요'), findsOneWidget); // 왜 Pro 안내인지
     await tester.tap(find.text('평생 이용권'));
     await tester.pumpAndSettle();
     expect(find.text('Mehh Pro'), findsNothing); // 사면 시트가 닫힌다
