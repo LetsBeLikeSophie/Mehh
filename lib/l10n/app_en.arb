@@ -167,9 +167,8 @@
   "barSent": "Trash {size}",
   "openGallery": "Gallery",
   "noGallery": "Couldn't find a gallery app",
-  "barSelected": "Selected {size}",
-  "barRecommended": "Suggested {size}",
   "coinCount": "{count, plural, =1{1 coin} other{{count} coins}}",
   "picksDot": "Suggested cleanup left",
-  "picksOn": "{count} picks on"
+  "picksOn": "{count} picks on",
+  "barRecommendedLabel": "Suggested "
 }

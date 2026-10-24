@@ -69,7 +69,8 @@ class _HoldToFinishState extends ConsumerState<HoldToFinish>
   /// 손가락을 댄 자리 (움직이면 null이 되어 이번 누르기는 끝내기로 안 간다)
   Offset? _downAt;
 
-  void _start(LongPressDownDetails d) {
+  /// 길게 누르기로 잡힌 뒤(0.5초)부터 동그라미가 찬다: 그냥 누르는 데는 안 보인다 (2026-10-24 Sophie)
+  void _start(LongPressStartDetails d) {
     final at = d.localPosition;
     _downAt = d.globalPosition;
     setState(() => _at = at);
@@ -126,7 +127,7 @@ class _HoldToFinishState extends ConsumerState<HoldToFinish>
       },
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
-        onLongPressDown: _start,
+        onLongPressStart: _start,
         onLongPressCancel: _stop,
         onLongPressUp: _stop,
         child: Stack(
@@ -165,23 +166,20 @@ class _HoldToFinishState extends ConsumerState<HoldToFinish>
                 child: IgnorePointer(
                   child: AnimatedBuilder(
                     animation: _hold,
-                    // 잠깐 누른 것(누르기·밀기)에는 보이지 않게 조금 뒤부터
-                    builder: (_, _) => Opacity(
-                      opacity: _hold.value > 0.15 ? 1 : 0,
-                      child: Container(
-                        width: 88,
-                        height: 88,
-                        padding: const EdgeInsets.all(12),
-                        decoration: const BoxDecoration(
-                          color: MehhColors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: CircularProgressIndicator(
-                          value: _hold.value,
-                          strokeWidth: 4,
-                          color: MehhColors.black,
-                          backgroundColor: MehhColors.border,
-                        ),
+                    // 길게 누르기로 잡힌 뒤에만 보인다 (그냥 누르기에는 안 뜬다)
+                    builder: (_, _) => Container(
+                      width: 88,
+                      height: 88,
+                      padding: const EdgeInsets.all(12),
+                      decoration: const BoxDecoration(
+                        color: MehhColors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: CircularProgressIndicator(
+                        value: _hold.value,
+                        strokeWidth: 4,
+                        color: MehhColors.black,
+                        backgroundColor: MehhColors.border,
                       ),
                     ),
                   ),

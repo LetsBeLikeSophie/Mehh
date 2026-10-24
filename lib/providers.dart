@@ -486,8 +486,12 @@ class DecisionsNotifier extends AsyncNotifier<Map<String, Decision>> {
     final list = [
       for (final id in ids) Decision(photoId: id, state: s, at: now),
     ];
+    // 저장을 기다리는 사이 다른 결정이 들어올 수 있다(끌어서 여러 장 선택): 지금 상태 위에 더한다
+    state = AsyncData({
+      ...state.value ?? {},
+      for (final d in list) d.photoId: d,
+    });
     await ref.read(storeProvider).saveDecisions(list);
-    state = AsyncData({...cur, for (final d in list) d.photoId: d});
     return before;
   }
 

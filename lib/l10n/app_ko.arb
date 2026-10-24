@@ -473,8 +473,6 @@
   "barSent": "휴지통 {size}",
   "openGallery": "갤러리",
   "noGallery": "갤러리 앱을 찾지 못했어요",
-  "barSelected": "선택 {size}",
-  "barRecommended": "추천 정리 {size}",
   "coinCount": "코인 {count}개",
   "@coinCount": {
     "placeholders": {
@@ -492,5 +490,6 @@
         "format": "decimalPattern"
       }
     }
-  }
+  },
+  "barRecommendedLabel": "추천 정리 "
 }

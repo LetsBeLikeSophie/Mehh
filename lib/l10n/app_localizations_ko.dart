@@ -665,16 +665,6 @@ class L10nKo extends L10n {
   String get noGallery => '갤러리 앱을 찾지 못했어요';
 
   @override
-  String barSelected(Object size) {
-    return '선택 $size';
-  }
-
-  @override
-  String barRecommended(Object size) {
-    return '추천 정리 $size';
-  }
-
-  @override
   String coinCount(int count) {
     return '코인 $count개';
   }
@@ -690,4 +680,7 @@ class L10nKo extends L10n {
 
     return '추천 $countString장';
   }
+
+  @override
+  String get barRecommendedLabel => '추천 정리 ';
 }

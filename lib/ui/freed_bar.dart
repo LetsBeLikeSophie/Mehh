@@ -28,10 +28,12 @@ class FreedBar extends ConsumerWidget {
     final photos = ref.watch(photoBytesProvider).value ?? 0;
     final freed = ref.watch(freedThisMonthProvider).value ?? 0;
     final selectedIds = {...?selected};
+    // 추천 정리 = 앱 추천 + 선택해 둔 것. 선택해도 줄지 않는다(선택은 그 안의 일부, 2026-10-24 Sophie)
     final pickIds = {
       ...ref.watch(cleanableIdsProvider),
       ...ref.watch(selectedIdsProvider),
-    }.where((id) => !selectedIds.contains(id));
+      ...selectedIds,
+    };
     final selectedBytes =
         ref
             .watch(idsBytesProvider((selectedIds.toList()..sort()).join(',')))
@@ -43,8 +45,8 @@ class FreedBar extends ConsumerWidget {
             .value ??
         0;
     if (photos == 0) return const SizedBox.shrink();
-    final sel = selectedBytes.clamp(0, photos);
-    final rec = picks.clamp(0, photos - sel);
+    final rec = picks.clamp(0, photos);
+    final sel = selectedBytes.clamp(0, rec);
     final l = context.l;
     const small = TextStyle(fontSize: MehhText.label);
     return Padding(
@@ -67,14 +69,14 @@ class FreedBar extends ConsumerWidget {
                   final wFreed = w(freed);
                   final wSel = w(sel);
                   final wRec = w(rec);
-                  // 검정 바탕 위에 오른쪽부터 휴지통 · 선택 · 추천 정리
+                  // 검정 바탕 위에 오른쪽부터 휴지통 · 추천 정리(연한 코랄), 선택(코랄)은 추천 정리 안 오른쪽
                   return Stack(
                     children: [
                       const Positioned.fill(
                         child: ColoredBox(color: MehhColors.black),
                       ),
                       _Part(
-                        right: wFreed + wSel,
+                        right: wFreed,
                         width: wRec,
                         color: MehhColors.accentSoft,
                       ),
@@ -107,18 +109,30 @@ class FreedBar extends ConsumerWidget {
                         ),
                         if (rec > 0) ...[
                           const TextSpan(text: '  ·  '),
+                          // 홈: "추천 정리 116MB" / 묶음 안: "추천 정리 65MB / 116MB" (65 = 선택, 코랄)
                           TextSpan(
-                            text: l.barRecommended(formatBytes(rec)),
+                            text: l.barRecommendedLabel,
                             style: const TextStyle(
                               color: MehhColors.accentSoftText,
                             ),
                           ),
-                        ],
-                        if (sel > 0) ...[
-                          const TextSpan(text: '  ·  '),
+                          if (selected != null) ...[
+                            TextSpan(
+                              text: formatBytes(sel),
+                              style: const TextStyle(color: MehhColors.accent),
+                            ),
+                            const TextSpan(
+                              text: ' / ',
+                              style: TextStyle(
+                                color: MehhColors.accentSoftText,
+                              ),
+                            ),
+                          ],
                           TextSpan(
-                            text: l.barSelected(formatBytes(sel)),
-                            style: const TextStyle(color: MehhColors.accent),
+                            text: formatBytes(rec),
+                            style: const TextStyle(
+                              color: MehhColors.accentSoftText,
+                            ),
                           ),
                         ],
                       ],

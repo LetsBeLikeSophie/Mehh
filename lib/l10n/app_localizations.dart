@@ -1099,18 +1099,6 @@ abstract class L10n {
   /// **'갤러리 앱을 찾지 못했어요'**
   String get noGallery;
 
-  /// No description provided for @barSelected.
-  ///
-  /// In ko, this message translates to:
-  /// **'선택 {size}'**
-  String barSelected(Object size);
-
-  /// No description provided for @barRecommended.
-  ///
-  /// In ko, this message translates to:
-  /// **'추천 정리 {size}'**
-  String barRecommended(Object size);
-
   /// No description provided for @coinCount.
   ///
   /// In ko, this message translates to:
@@ -1128,6 +1116,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'추천 {count}장'**
   String picksOn(int count);
+
+  /// No description provided for @barRecommendedLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'추천 정리 '**
+  String get barRecommendedLabel;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

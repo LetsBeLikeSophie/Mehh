@@ -677,7 +677,10 @@ void main() {
     final g = await tester.startGesture(
       tester.getTopRight(find.byType(SortScreen)) + const Offset(-60, 140),
     );
-    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 300));
+    // 그냥 누르는 동안(0.5초 전)에는 동그라미가 안 보인다
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     for (var i = 0; i < 3; i++) {
       await tester.pump(const Duration(milliseconds: 400));
@@ -694,6 +697,32 @@ void main() {
     await tester.tap(find.text('휴지통으로'));
     await tester.pumpAndSettle();
     expect(find.textContaining('  3장'), findsOneWidget);
+    await flush(tester);
+  });
+
+  testWidgets('그리드: 사진 위에서 옆으로 끌면 지나간 사진이 한꺼번에 선택되고, 다시 끌면 풀린다', (
+    tester,
+  ) async {
+    await pump(tester, SortScreen(kind: SortKind.singles, group: group));
+    final from = tester.getCenter(find.byType(PhotoThumb).at(0));
+    final to = tester.getCenter(find.byType(PhotoThumb).at(2));
+    final g = await tester.startGesture(from);
+    await g.moveBy(const Offset(20, 0)); // 옆으로 먼저
+    await tester.pump();
+    await g.moveTo(to);
+    await tester.pump();
+    await g.up();
+    await tester.pumpAndSettle();
+    expect(find.text('3장 휴지통으로'), findsOneWidget);
+    // 선택된 사진에서 시작하면 지나간 사진을 푼다
+    final g2 = await tester.startGesture(from);
+    await g2.moveBy(const Offset(20, 0));
+    await tester.pump();
+    await g2.moveTo(tester.getCenter(find.byType(PhotoThumb).at(1)));
+    await tester.pump();
+    await g2.up();
+    await tester.pumpAndSettle();
+    expect(find.text('1장 휴지통으로'), findsOneWidget);
     await flush(tester);
   });
 
@@ -720,7 +749,7 @@ void main() {
     await tester.tap(find.byType(PhotoThumb).first);
     await tester.pumpAndSettle();
     final g = await tester.startGesture(tester.getCenter(card()));
-    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 700));
     expect(find.byType(CircularProgressIndicator), findsOneWidget); // 차오르는 중
     await g.up();
     await tester.pumpAndSettle();
@@ -946,15 +975,15 @@ void main() {
     expect(find.text('2장 휴지통으로'), findsNothing);
     await openLocked(tester, '추천 보기 · 2장');
     expect(find.text('2장 휴지통으로'), findsOneWidget);
-    // 추천이 켜진 상태: 이유 표시와 ✓ [추천 2장]
+    // 추천이 켜진 상태: 이유 표시, 버튼은 같은 모양에 앞 칸만 체크
     expect(find.text('흔들림'), findsOneWidget);
     expect(find.text('비슷한 컷'), findsOneWidget);
-    expect(find.text('추천 2장'), findsOneWidget);
+    expect(find.byIcon(Icons.check_box), findsOneWidget);
     // 다시 누르면 추천 X만 풀리고(끄기), 또 누르면 다시 켜진다 (2026-10-24 Sophie)
-    await tester.tap(find.text('추천 2장'));
+    await tester.tap(find.text('추천 보기 · 2장'));
     await tester.pumpAndSettle();
     expect(find.text('2장 휴지통으로'), findsNothing);
-    expect(find.text('추천 보기 · 2장'), findsOneWidget);
+    expect(find.byIcon(Icons.check_box_outline_blank), findsOneWidget);
     await tester.tap(find.text('추천 보기 · 2장'));
     await tester.pumpAndSettle();
     expect(find.text('2장 휴지통으로'), findsOneWidget);

@@ -1,5 +1,5 @@
 /// 앱 버전 (pubspec.yaml version과 같이 고친다). 설정 화면과 문의 메일 제목에 쓴다.
-const appVersion = '1.13.7';
+const appVersion = '1.14.0';
 
 /// 설정 > 문의하기 받는 주소. 비어 있으면 문의하기 줄을 숨긴다.
 /// 최근 앱에서 다시 열었을 때, 마지막으로 사진을 불러온 지 이만큼 지났으면 새로 불러온다
@@ -12,8 +12,8 @@ const freedBarAnimation = Duration(milliseconds: 700);
 /// 선택한 사진이 있을 때 이만큼 멈추면 "길게 누르면 정리를 끝낼 수 있어요"
 const focusIdleHint = Duration(seconds: 3);
 
-/// 크게 보기에서 이만큼 누르고 있으면 동그라미가 다 차서 "끝낼까요?"
-const focusHoldToFinish = Duration(milliseconds: 900);
+/// 길게 누르기로 잡힌 뒤(0.5초) 동그라미가 다 차기까지. 합쳐서 약 1.1초 누르면 "끝낼까요?"
+const focusHoldToFinish = Duration(milliseconds: 600);
 
 /// 그 안내는 통틀어 이만큼까지 (길게 누르기를 한 번 쓰면 바로 그만)
 const finishHintsTotal = 5;

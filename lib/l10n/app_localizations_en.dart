@@ -800,16 +800,6 @@ class L10nEn extends L10n {
   String get noGallery => 'Couldn\'t find a gallery app';
 
   @override
-  String barSelected(Object size) {
-    return 'Selected $size';
-  }
-
-  @override
-  String barRecommended(Object size) {
-    return 'Suggested $size';
-  }
-
-  @override
   String coinCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -831,4 +821,7 @@ class L10nEn extends L10n {
 
     return '$countString picks on';
   }
+
+  @override
+  String get barRecommendedLabel => 'Suggested ';
 }
