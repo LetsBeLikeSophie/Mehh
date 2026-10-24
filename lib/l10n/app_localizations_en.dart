@@ -693,9 +693,9 @@ class L10nEn extends L10n {
       count,
       locale: localeName,
       other:
-          'Seeing $countString picks (similar or blurry shots) in this set uses 1 free set this month. $left left. Once opened, a set stays open.',
+          'Seeing $countString picks uses 1 free set ($left left).\nOnce opened, it stays open.',
       one:
-          'Seeing 1 pick (similar or blurry shots) in this set uses 1 free set this month. $left left. Once opened, a set stays open.',
+          'Seeing 1 pick uses 1 free set ($left left).\nOnce opened, it stays open.',
     );
     return '$_temp0';
   }

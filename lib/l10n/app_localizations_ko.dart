@@ -578,7 +578,7 @@ class L10nKo extends L10n {
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return '이 묶음의 비슷한 컷·흔들림 추천 $countString장을 보려면 이번 달 무료 묶음 1개를 써요. 지금 $left개 남았어요. 한 번 연 묶음은 계속 열려 있어요.';
+    return '추천 $countString장을 보려면 무료 묶음 1개를 써요 ($left개 남음).\n한 번 열면 계속 열려 있어요.';
   }
 
   @override
