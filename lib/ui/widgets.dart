@@ -269,51 +269,21 @@ Future<bool> askMehh(
     ) ==
     true;
 
-/// 코인: 동그라미 속 뿔 하나, 줄 없이 (2026-10-24 Sophie 2번). 그날의 묶음 추천을 하나 여는 데 1개, 매달 몇 개 생긴다.
-/// 이름 대신 이 그림으로 부른다 ("[뿔] 1개로 열까요?").
+/// 코인: Sophie가 그린 동그라미 속 뿔 (2026-10-24, assets/coin.png). 그날의 묶음 추천을 하나 여는 데
+/// 1개, 매달 몇 개 생긴다. 이름 대신 이 그림으로 부른다 ("[코인] 1개로 열까요?").
 class CoinIcon extends StatelessWidget {
-  const CoinIcon({super.key, this.size = 16, this.color = MehhColors.black});
+  const CoinIcon({super.key, this.size = 16});
 
   final double size;
-  final Color color;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
+  Widget build(BuildContext context) => Image.asset(
+    'assets/coin.png',
     width: size,
     height: size,
-    child: CustomPaint(painter: _HornPainter(color)),
+    filterQuality: FilterQuality.medium,
+    excludeFromSemantics: true,
   );
-}
-
-class _HornPainter extends CustomPainter {
-  _HornPainter(this.color);
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final u = size.width / 32;
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.6 * u
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-    // 동그라미 속 뿔 하나 (줄 없이, 로고처럼 선만): 동그라미가 "쓰는 것(코인)"임을 알려 준다
-    canvas.drawCircle(
-      Offset(16 * u, 16 * u),
-      13.6 * u,
-      paint..strokeWidth = 2.4 * u,
-    );
-    final horn = Path()
-      ..moveTo(11 * u, 25 * u)
-      ..cubicTo(11 * u, 18 * u, 14.5 * u, 12 * u, 22.5 * u, 8.5 * u)
-      ..cubicTo(19.5 * u, 13 * u, 17.6 * u, 18.5 * u, 17 * u, 25 * u)
-      ..close();
-    canvas.drawPath(horn, paint..strokeWidth = 2.2 * u);
-  }
-
-  @override
-  bool shouldRepaint(_HornPainter old) => old.color != color;
 }
 
 /// 코인 아이콘 + 개수 ("[코인] 3")

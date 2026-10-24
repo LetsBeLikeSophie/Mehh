@@ -2,7 +2,7 @@ name: mehh
 description: "Mehh: 사진 정리, 중복 사진 삭제"
 publish_to: 'none'
 
-version: 1.13.1+46
+version: 1.13.2+47
 
 environment:
   sdk: ^3.13.1
@@ -39,6 +39,7 @@ flutter:
   assets:
     - assets/mehh-goat.png
     - assets/mehh-goat-mehh.png
+    - assets/coin.png
 
   # Mehh Sans KR = IBM Plex Sans KR을 줄인 것 (OFL, fonts/OFL.txt, tool/subset_fonts.py)
   fonts:
