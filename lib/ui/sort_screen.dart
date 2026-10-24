@@ -528,6 +528,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
             Expanded(
               // 길게 누르기 = 정리 끝내기 (크게 보기와 같은 [HoldToFinish])
               child: HoldToFinish(
+                armed: marked.isNotEmpty,
                 onDone: () => _finishHere(marked, src, order),
                 child: CustomScrollView(
                   slivers: [

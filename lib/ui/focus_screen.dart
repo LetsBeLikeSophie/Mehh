@@ -262,6 +262,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                     },
                     // 길게 누르기 = 언제나 "정리 끝내기" (정리 화면 그리드와 같은 [HoldToFinish])
                     child: HoldToFinish(
+                      armed: markedCount > 0,
                       onDone: () => _finish(ids.length, markedCount),
                       child: GestureDetector(
                         onScaleStart: _onScaleStart,

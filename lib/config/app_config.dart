@@ -9,14 +9,14 @@ const reloadLibraryAfter = Duration(minutes: 10);
 /// 홈 막대가 차오르는 시간
 const freedBarAnimation = Duration(milliseconds: 700);
 
-/// 크게 보기에서 이만큼 가만히 있으면 "길게 누르면 정리를 끝낼 수 있어요"
-const focusIdleHint = Duration(seconds: 5);
+/// 선택한 사진이 있을 때 이만큼 멈추면 "길게 누르면 정리를 끝낼 수 있어요"
+const focusIdleHint = Duration(seconds: 3);
 
 /// 크게 보기에서 이만큼 누르고 있으면 동그라미가 다 차서 "끝낼까요?"
 const focusHoldToFinish = Duration(milliseconds: 900);
 
-/// 그 안내는 하루에 이만큼까지
-const focusHintsPerDay = 3;
+/// 그 안내는 통틀어 이만큼까지 (길게 누르기를 한 번 쓰면 바로 그만)
+const finishHintsTotal = 5;
 
 /// 안내가 떠 있는 시간
 const focusHintShown = Duration(seconds: 3);
