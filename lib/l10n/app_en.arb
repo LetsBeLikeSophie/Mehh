@@ -154,7 +154,7 @@
   "cortexAskYes": "Send",
   "noFreeLead": "No free sets left this month · {count} more on {date}",
   "cortexSentBadge": "Sent to Cortex",
-  "cortexGotTitle": "{count, plural, =1{✓ Moved 1 to Cortex} other{✓ Moved {count} to Cortex}}",
+  "cortexGotTitle": "{count, plural, =1{✓ Cortex got 1} other{✓ Cortex got {count}}}",
   "cortexGotBody": "Cortex analyzes them in the background. You can close the app.\nMove these photos to trash?",
   "cortexGotKept": "{kept, plural, =1{1 Cortex didn't get stays as is.} other{{kept} Cortex didn't get stay as is.}}",
   "cortexGotBadge": "In Cortex",

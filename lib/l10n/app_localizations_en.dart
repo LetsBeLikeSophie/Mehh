@@ -741,8 +741,8 @@ class L10nEn extends L10n {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '✓ Moved $countString to Cortex',
-      one: '✓ Moved 1 to Cortex',
+      other: '✓ Cortex got $countString',
+      one: '✓ Cortex got 1',
     );
     return '$_temp0';
   }

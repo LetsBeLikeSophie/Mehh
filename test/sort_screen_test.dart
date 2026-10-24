@@ -1171,7 +1171,7 @@ void main() {
     expect(vault.value.lifetime, isTrue);
   });
 
-  testWidgets('Cortex: [Cortex로] → 받았다는 신호 → "옮겼어요 · 휴지통으로 지울까요?" → 휴지통으로', (
+  testWidgets('Cortex: [Cortex로] → 받았다는 신호 → "받았어요 · 휴지통으로 보낼까요?" → 휴지통으로', (
     tester,
   ) async {
     final shots = DayGroup(
@@ -1232,7 +1232,7 @@ void main() {
     handoff.saved.add(const CortexSaved(1, null));
     await tester.pumpAndSettle();
     expect(find.textContaining('1장만 받았다고'), findsOneWidget);
-    expect(find.textContaining('옮겼어요'), findsNothing);
+    expect(find.textContaining('받았어요'), findsNothing);
     await tester.pump(const Duration(seconds: 6));
     await tester.pumpAndSettle();
 
@@ -1242,7 +1242,7 @@ void main() {
     handoff.sent.clear();
     handoff.saved.add(CortexSaved(1, {first}));
     await tester.pumpAndSettle();
-    expect(find.text('✓ Cortex로 1장 옮겼어요'), findsOneWidget);
+    expect(find.text('✓ Cortex가 1장 받았어요'), findsOneWidget);
     expect(find.textContaining('앱을 닫아도 돼요'), findsOneWidget);
     expect(find.textContaining('받지 못한 1장은 그대로'), findsOneWidget);
     await tester.tap(find.text('나중에'));
@@ -1255,7 +1255,7 @@ void main() {
     await sendCortex(tester);
     handoff.saved.add(const CortexSaved(2, null));
     await tester.pumpAndSettle();
-    expect(find.text('✓ Cortex로 2장 옮겼어요'), findsOneWidget);
+    expect(find.text('✓ Cortex가 2장 받았어요'), findsOneWidget);
     await tester.tap(find.text('휴지통으로'));
     await tester.pumpAndSettle();
     expect(find.textContaining('  2장'), findsOneWidget);

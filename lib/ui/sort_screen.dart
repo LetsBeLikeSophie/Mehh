@@ -87,7 +87,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
   }
 
   /// Cortex가 "받았어요"(파일을 자기 쪽에 복사함) 신호를 보내면, 옮겼다고 알리고
-  /// 휴지통으로 지울지 묻는다. 분석은 그 뒤 Cortex가 혼자 한다 (2026-10-24 Sophie)
+  /// 휴지통으로 보낼지 묻는다. 분석은 그 뒤 Cortex가 혼자 한다 (2026-10-24 Sophie)
   void _onCortexSaved(CortexSaved saved) {
     if (!mounted) return;
     final ids = _sentToCortex;
@@ -123,7 +123,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
     _askTrashAfterCortex(ids);
   }
 
-  /// "✓ Cortex로 N장 옮겼어요 · 분석은 뒤에서 · 휴지통으로 지울까요?" → 안드로이드 휴지통 확인 창
+  /// "✓ Cortex가 N장 받았어요 · 분석은 뒤에서 · 휴지통으로 보낼까요?" → 안드로이드 휴지통 확인 창
   /// [나중에]면 X는 그대로, 사진에 "Cortex에 있음" 표시가 남는다
   Future<void> _askTrashAfterCortex(List<String> ids, {int kept = 0}) async {
     await ref.read(cortexSentProvider.notifier).add(ids, got: true);

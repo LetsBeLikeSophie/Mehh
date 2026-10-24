@@ -1024,13 +1024,13 @@ abstract class L10n {
   /// No description provided for @cortexGotTitle.
   ///
   /// In ko, this message translates to:
-  /// **'✓ Cortex로 {count}장 옮겼어요'**
+  /// **'✓ Cortex가 {count}장 받았어요'**
   String cortexGotTitle(int count);
 
   /// No description provided for @cortexGotBody.
   ///
   /// In ko, this message translates to:
-  /// **'분석은 Cortex가 뒤에서 해요. 앱을 닫아도 돼요.\n이 사진을 휴지통으로 지울까요?'**
+  /// **'분석은 Cortex가 뒤에서 해요. 앱을 닫아도 돼요.\n이 사진을 휴지통으로 보낼까요?'**
   String get cortexGotBody;
 
   /// No description provided for @cortexGotKept.

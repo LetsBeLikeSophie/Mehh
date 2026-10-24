@@ -613,12 +613,12 @@ class L10nKo extends L10n {
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return '✓ Cortex로 $countString장 옮겼어요';
+    return '✓ Cortex가 $countString장 받았어요';
   }
 
   @override
   String get cortexGotBody =>
-      '분석은 Cortex가 뒤에서 해요. 앱을 닫아도 돼요.\n이 사진을 휴지통으로 지울까요?';
+      '분석은 Cortex가 뒤에서 해요. 앱을 닫아도 돼요.\n이 사진을 휴지통으로 보낼까요?';
 
   @override
   String cortexGotKept(int kept) {
