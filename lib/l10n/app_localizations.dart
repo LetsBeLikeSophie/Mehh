@@ -847,12 +847,6 @@ abstract class L10n {
   /// **'코인 {count}개 남음'**
   String freeSetsLeft(int count);
 
-  /// No description provided for @unsentDot.
-  ///
-  /// In ko, this message translates to:
-  /// **'선택해 두고 아직 휴지통으로 안 보냈어요'**
-  String get unsentDot;
-
   /// No description provided for @privacyCortex.
   ///
   /// In ko, this message translates to:
@@ -1051,18 +1045,6 @@ abstract class L10n {
   /// **'나중에'**
   String get later;
 
-  /// No description provided for @focusFinishTitle.
-  ///
-  /// In ko, this message translates to:
-  /// **'{count}장을 휴지통으로 보내고 끝낼까요?'**
-  String focusFinishTitle(int count);
-
-  /// No description provided for @focusFinishBody.
-  ///
-  /// In ko, this message translates to:
-  /// **'{total}장 중 {count}장을 선택했어요.'**
-  String focusFinishBody(int total, int count);
-
   /// No description provided for @focusFinishNone.
   ///
   /// In ko, this message translates to:
@@ -1134,6 +1116,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'코인 {count}개'**
   String coinCount(int count);
+
+  /// No description provided for @picksDot.
+  ///
+  /// In ko, this message translates to:
+  /// **'추천 정리가 남았어요'**
+  String get picksDot;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

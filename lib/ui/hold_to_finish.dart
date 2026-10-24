@@ -9,7 +9,7 @@ import '../providers.dart';
 import '../theme.dart';
 
 /// 길게 누르기 = 언제나 "정리 끝내기" (정리 화면 그리드·크게 보기 공용, 2026-10-24 Sophie).
-/// - 누르는 동안 손가락 자리에 동그라미가 차오르고, 다 차면 [onDone] (지금 선택한 사진 기준으로 묻는다)
+/// - 누르는 동안 가운데에 동그라미가 차오르고(손가락에 가리지 않게), 다 차면 [onDone] (지금 선택한 사진 기준으로 묻는다)
 /// - 다 차기 전에 떼거나 밀면 아무 일도 없다
 /// - 눈에 안 보이는 손동작이라, 선택한 사진이 있을 때 잠깐 멈추면 가운데에 "길게 누르면 정리를 끝낼 수 있어요".
 ///   통틀어 [finishHintsTotal]번까지, 길게 누르기를 한 번 써 보면 더 띄우지 않는다 (2026-10-24 Sophie)
@@ -144,10 +144,9 @@ class _HoldToFinishState extends ConsumerState<HoldToFinish>
                 ),
               ),
             ),
-            if (_at case final at?)
-              Positioned(
-                left: at.dx - 36,
-                top: at.dy - 36,
+            // 손가락에 가리지 않게 누른 자리 대신 가운데에 (2026-10-24 Sophie)
+            if (_at != null)
+              Center(
                 child: IgnorePointer(
                   child: AnimatedBuilder(
                     animation: _hold,
@@ -155,9 +154,9 @@ class _HoldToFinishState extends ConsumerState<HoldToFinish>
                     builder: (_, _) => Opacity(
                       opacity: _hold.value > 0.15 ? 1 : 0,
                       child: Container(
-                        width: 72,
-                        height: 72,
-                        padding: const EdgeInsets.all(10),
+                        width: 88,
+                        height: 88,
+                        padding: const EdgeInsets.all(12),
                         decoration: const BoxDecoration(
                           color: MehhColors.white,
                           shape: BoxShape.circle,

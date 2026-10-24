@@ -566,9 +566,6 @@ class L10nEn extends L10n {
   }
 
   @override
-  String get unsentDot => 'Selected, not moved to trash yet';
-
-  @override
   String get privacyCortex =>
       'Photos and screenshots you send to Cortex are analyzed by Cortex\'s AI. Only the ones you pick, only when you send them.';
 
@@ -772,39 +769,6 @@ class L10nEn extends L10n {
   String get later => 'Later';
 
   @override
-  String focusFinishTitle(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Move $countString to trash and finish?',
-      one: 'Move 1 to trash and finish?',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String focusFinishBody(int total, int count) {
-    final intl.NumberFormat totalNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String totalString = totalNumberFormat.format(total);
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'You selected $countString of $totalString.',
-      one: 'You selected 1 of $totalString.',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get focusFinishNone => 'Nothing to clean up. Finish?';
 
   @override
@@ -855,4 +819,7 @@ class L10nEn extends L10n {
     );
     return '$_temp0';
   }
+
+  @override
+  String get picksDot => 'Suggested cleanup left';
 }

@@ -58,8 +58,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     final l = context.l;
     final ok = await askMehh(
       context,
-      title: marked > 0 ? l.focusFinishTitle(marked) : l.focusFinishNone,
-      body: marked > 0 ? l.focusFinishBody(total, marked) : null,
+      // 제목 = 아래 버튼과 같은 말 "N장 휴지통으로" (2026-10-24 Sophie: 반복되는 말 없이)
+      title: marked > 0 ? l.trashCount(marked) : l.focusFinishNone,
       no: l.focusKeepLooking,
       yes: marked > 0 ? l.toTrash : l.focusFinishYes,
     );

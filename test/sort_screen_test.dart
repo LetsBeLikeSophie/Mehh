@@ -549,10 +549,10 @@ void main() {
       extra: [realPlan(f)],
     );
     expect(find.text('1장 휴지통으로'), findsOneWidget); // 실수 사진만 처음부터 X
-    expect(find.text('추천 보기 · 2장'), findsOneWidget); // 잠긴 추천 장수
+    expect(find.text('추천 보기 · 3장'), findsOneWidget); // 누르면 X가 되는 장수 (잠긴 2 + 실수 1)
     expect(find.text('실수'), findsOneWidget);
     expect(find.byIcon(Icons.lock_outline), findsOneWidget); // [추천 보기]에 자물쇠
-    await openLocked(tester, '추천 보기 · 2장');
+    await openLocked(tester, '추천 보기 · 3장');
     expect(find.text('3장 휴지통으로'), findsOneWidget);
     expect(find.byIcon(Icons.lock_outline), findsNothing); // 열리면 자물쇠가 사라진다
     await flush(tester);
@@ -630,7 +630,7 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('크게 보기: 길게 누르면 "N장을 휴지통으로 보내고 끝낼까요?" → 돌아가서 바로 보낸다', (
+  testWidgets('크게 보기: 길게 누르면 "N장 휴지통으로" [계속 보기]/[휴지통으로] → 돌아가서 바로 보낸다', (
     tester,
   ) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
@@ -643,8 +643,13 @@ void main() {
 
     await holdToFinish(tester);
     await tester.pumpAndSettle();
-    expect(find.text('2장을 휴지통으로 보내고 끝낼까요?'), findsOneWidget);
-    expect(find.text('4장 중 2장을 선택했어요.'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text('2장 휴지통으로'),
+      ),
+      findsOneWidget,
+    ); // 제목 = 버튼과 같은 말
     await tester.tap(find.text('계속 보기')); // 취소하면 그대로
     await tester.pumpAndSettle();
     expect(find.byType(FocusScreen), findsOneWidget);
@@ -662,7 +667,7 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('그리드: 빈 곳을 길게 눌러 동그라미가 차면 "선택 N장 보내고 끝낼까요?" → 보낸다', (
+  testWidgets('그리드: 길게 눌러 가운데 동그라미가 차면 "N장 휴지통으로" → 보낸다', (
     tester,
   ) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
@@ -679,7 +684,13 @@ void main() {
     }
     await g.up();
     await tester.pumpAndSettle();
-    expect(find.text('1장을 휴지통으로 보내고 끝낼까요?'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text('1장 휴지통으로'),
+      ),
+      findsOneWidget,
+    );
     await tester.tap(find.text('휴지통으로'));
     await tester.pumpAndSettle();
     expect(find.textContaining('  3장'), findsOneWidget);

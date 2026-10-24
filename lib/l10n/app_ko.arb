@@ -337,7 +337,6 @@
       }
     }
   },
-  "unsentDot": "선택해 두고 아직 휴지통으로 안 보냈어요",
   "privacyCortex": "Cortex로 직접 보낸 사진·캡처는 Cortex에서 AI로 분석해요. 내가 고른 사진·캡처만, 보낼 때만 넘어가요.",
   "cortexNotSaved": "Cortex가 받았다는 신호가 없어서 휴지통으로 보내지 않았어요 · X는 그대로예요. Cortex에서 받은 걸 확인했다면 [{count}장 휴지통으로]를 누르면 돼요.",
   "tagOldShot": "오래됨",
@@ -449,8 +448,6 @@
   "cortexGotKept": "Cortex가 받지 못한 {kept}장은 그대로 둬요.",
   "cortexGotBadge": "Cortex에 있음",
   "later": "나중에",
-  "focusFinishTitle": "{count}장을 휴지통으로 보내고 끝낼까요?",
-  "focusFinishBody": "{total}장 중 {count}장을 선택했어요.",
   "focusFinishNone": "정리할 사진이 없어요. 끝낼까요?",
   "focusKeepLooking": "계속 보기",
   "focusFinishYes": "끝내기",
@@ -472,26 +469,6 @@
       }
     }
   },
-  "@focusFinishTitle": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "format": "decimalPattern"
-      }
-    }
-  },
-  "@focusFinishBody": {
-    "placeholders": {
-      "total": {
-        "type": "int",
-        "format": "decimalPattern"
-      },
-      "count": {
-        "type": "int",
-        "format": "decimalPattern"
-      }
-    }
-  },
   "barPhotos": "사진 {size}",
   "barSent": "휴지통 {size}",
   "openGallery": "갤러리",
@@ -505,5 +482,6 @@
         "type": "int"
       }
     }
-  }
+  },
+  "picksDot": "추천 정리가 남았어요"
 }

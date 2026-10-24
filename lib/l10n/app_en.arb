@@ -125,7 +125,6 @@
   "yearlyEnded": "{count, plural, =1{Your 1-year plan ended · sets whose picks you saw stay open; new sets open with your 1 coin this month} other{Your 1-year plan ended · sets whose picks you saw stay open; new sets open with your {count} coins this month}}",
   "proUsing": "You have Pro",
   "freeSetsLeft": "{count, plural, =1{1 coin left} other{{count} coins left}}",
-  "unsentDot": "Selected, not moved to trash yet",
   "privacyCortex": "Photos and screenshots you send to Cortex are analyzed by Cortex's AI. Only the ones you pick, only when you send them.",
   "cortexNotSaved": "{count, plural, =1{Cortex didn't confirm it got it, so nothing was moved to trash · your mark is kept. If you see it in Cortex, tap Move 1 to trash.} other{Cortex didn't confirm it got them, so nothing was moved to trash · your marks are kept. If you see them in Cortex, tap Move {count} to trash.}}",
   "tagOldShot": "Old",
@@ -159,8 +158,6 @@
   "cortexGotKept": "{kept, plural, =1{1 Cortex didn't get stays as is.} other{{kept} Cortex didn't get stay as is.}}",
   "cortexGotBadge": "In Cortex",
   "later": "Later",
-  "focusFinishTitle": "{count, plural, =1{Move 1 to trash and finish?} other{Move {count} to trash and finish?}}",
-  "focusFinishBody": "{count, plural, =1{You selected 1 of {total}.} other{You selected {count} of {total}.}}",
   "focusFinishNone": "Nothing to clean up. Finish?",
   "focusKeepLooking": "Keep looking",
   "focusFinishYes": "Finish",
@@ -172,5 +169,6 @@
   "noGallery": "Couldn't find a gallery app",
   "barSelected": "Selected {size}",
   "barRecommended": "Suggested {size}",
-  "coinCount": "{count, plural, =1{1 coin} other{{count} coins}}"
+  "coinCount": "{count, plural, =1{1 coin} other{{count} coins}}",
+  "picksDot": "Suggested cleanup left"
 }

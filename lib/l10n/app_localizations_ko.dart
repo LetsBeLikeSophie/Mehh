@@ -480,9 +480,6 @@ class L10nKo extends L10n {
   }
 
   @override
-  String get unsentDot => '선택해 두고 아직 휴지통으로 안 보냈어요';
-
-  @override
   String get privacyCortex =>
       'Cortex로 직접 보낸 사진·캡처는 Cortex에서 AI로 분석해요. 내가 고른 사진·캡처만, 보낼 때만 넘어가요.';
 
@@ -637,27 +634,6 @@ class L10nKo extends L10n {
   String get later => '나중에';
 
   @override
-  String focusFinishTitle(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    return '$countString장을 휴지통으로 보내고 끝낼까요?';
-  }
-
-  @override
-  String focusFinishBody(int total, int count) {
-    final intl.NumberFormat totalNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String totalString = totalNumberFormat.format(total);
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    return '$totalString장 중 $countString장을 선택했어요.';
-  }
-
-  @override
   String get focusFinishNone => '정리할 사진이 없어요. 끝낼까요?';
 
   @override
@@ -702,4 +678,7 @@ class L10nKo extends L10n {
   String coinCount(int count) {
     return '코인 $count개';
   }
+
+  @override
+  String get picksDot => '추천 정리가 남았어요';
 }

@@ -160,7 +160,7 @@ class _Part extends StatelessWidget {
   );
 }
 
-/// 오른쪽 위 갤러리 아이콘: 갤러리 앱을 연다 (홈·정리 화면 같은 자리).
+/// 오른쪽 위 갤러리 아이콘: 갤러리 앱을 연다 (모든 화면 같은 자리).
 /// 휴지통을 바로 열 공통 방법이 없어 갤러리 모양으로 둔다 (2026-10-24 Sophie)
 class GalleryButton extends ConsumerWidget {
   const GalleryButton({super.key});
@@ -179,7 +179,7 @@ class GalleryButton extends ConsumerWidget {
   }
 }
 
-/// 맨 위 오른쪽: [무료 묶음 N개] · 설정 · 갤러리. 홈·정리·크게 보기 모든 화면 같은 자리 (2026-10-24 Sophie)
+/// 맨 위 오른쪽: [코인 N] · 갤러리 · 설정(맨 오른쪽). 홈·정리·크게 보기 모든 화면 같은 자리 (2026-10-24 Sophie)
 class MehhTopActions extends StatelessWidget {
   const MehhTopActions({super.key});
 
@@ -188,13 +188,13 @@ class MehhTopActions extends StatelessWidget {
     mainAxisSize: MainAxisSize.min,
     children: [
       const ProChip(),
+      const GalleryButton(),
       MehhHeader.icon(
         tooltip: context.l.settings,
         icon: Icons.settings_outlined,
         onPressed: () => Navigator.of(context)
             .push(MaterialPageRoute(builder: (_) => const SettingsScreen())),
       ),
-      const GalleryButton(),
     ],
   );
 }

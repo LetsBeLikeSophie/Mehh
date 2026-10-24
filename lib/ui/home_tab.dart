@@ -8,7 +8,6 @@ import '../l10n/l10n.dart';
 import '../logic/format.dart';
 import '../logic/recommend.dart';
 import '../models/day_group.dart';
-import '../models/decision.dart';
 import '../providers.dart';
 import '../theme.dart';
 import 'freed_bar.dart';
@@ -582,9 +581,6 @@ class _GroupTile extends ConsumerWidget {
             now: DateTime.now(),
           ).length
         : plan.trash.length;
-    final unsent = group.photos.any(
-      (p) => stateOf(decisions, p.id) == DecisionState.toTrash,
-    );
 
     final l = context.l;
     final meta = StringBuffer(l.photos(group.count));
@@ -658,16 +654,16 @@ class _GroupTile extends ConsumerWidget {
                   ],
                 ),
               ),
-              // 선택해 두고 아직 안 보낸 묶음은 줄 끝 작은 코랄 점 = 막대의 "선택" 색 (R4-A, 2026-10-24)
-              if (unsent)
+              // 추천 정리가 남은 묶음은 줄 끝 작은 연한 코랄 점 = 막대의 "추천 정리" 색 (2026-10-24 Sophie)
+              if (suggested > 0 && !done)
                 Semantics(
-                  label: l.unsentDot,
+                  label: l.picksDot,
                   child: Container(
                     width: 8,
                     height: 8,
                     margin: const EdgeInsetsDirectional.only(end: 6),
                     decoration: const BoxDecoration(
-                      color: MehhColors.accent,
+                      color: MehhColors.accentSoft,
                       shape: BoxShape.circle,
                     ),
                   ),
