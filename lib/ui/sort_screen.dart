@@ -14,6 +14,7 @@ import '../logic/pick_stats.dart';
 import '../logic/recommend.dart';
 import '../models/day_group.dart';
 import '../models/decision.dart';
+import '../models/photo_meta.dart';
 import '../providers.dart';
 import '../theme.dart';
 import 'pro_sheet.dart';
@@ -404,6 +405,9 @@ class _SortScreenState extends ConsumerState<SortScreen>
 
   /// 마지막 build의 추천·화면 순서 (Cortex 신호가 나중에 와도 보낸 뒤 할 일을 하려고)
   SortSource? _src;
+
+  /// 큰 동영상 칸의 길이·용량 표시용
+  Map<String, PhotoMeta> _videoMeta = const {};
   List<String> _order = const [];
 
   /// 반환: 실제로 휴지통으로 보냈는지
@@ -612,6 +616,22 @@ class _SortScreenState extends ConsumerState<SortScreen>
                     bottom: 4,
                     child: MehhBadge(tagText(tag, l), inverted: out),
                   ),
+                // 큰 동영상: 길이 · 용량
+                if (_videoMeta[id] case final v?)
+                  Positioned(
+                    left: 4,
+                    bottom: 4,
+                    right: 4,
+                    child: IgnorePointer(
+                      child: Align(
+                        alignment: AlignmentDirectional.bottomStart,
+                        child: MehhBadge(
+                          '${formatDuration(v.durationSec)} · ${formatBytes(v.sizeBytes)}',
+                          inverted: out,
+                        ),
+                      ),
+                    ),
+                  ),
                 // Cortex로 보낸 사진: 받았는지까지 보이게 (어디서 멈췄는지 알 수 있게).
                 // X 버튼 아래에 깔고 누르기를 막지 않는다 (작은 칸에서 X를 덮지 않게)
                 if (cortexSent[id] case final got?)
@@ -654,6 +674,10 @@ class _SortScreenState extends ConsumerState<SortScreen>
     _sendMarked = marked.isEmpty ? null : () => _send(marked, src, order);
     _src = src;
     _order = order;
+    _videoMeta = {
+      for (final p in src.photos)
+        if (p.isVideo) p.id: p,
+    };
 
     return Scaffold(
       body: SafeArea(

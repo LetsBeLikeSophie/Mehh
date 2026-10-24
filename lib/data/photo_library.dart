@@ -11,12 +11,13 @@ import 'json_cache.dart';
 
 const _permissionOption = PermissionRequestOption(
   androidPermission: AndroidPermission(
-    type: RequestType.image,
+    // 큰 동영상 정리를 위해 동영상도 (2026-10-24 Sophie)
+    type: RequestType.common,
     mediaLocation: true,
   ),
 );
 
-/// 기기 사진첩 접근. 영상은 다루지 않는다.
+/// 기기 사진첩 접근. 동영상은 "큰 동영상"에만 쓴다([loadVideos]).
 class PhotoLibrary {
   final _locationCache = JsonCache('locations.json');
 
@@ -36,7 +37,41 @@ class PhotoLibrary {
 
   /// 일부만 허용한 상태에서 사진 선택 화면을 다시 띄운다.
   Future<void> presentLimited() =>
-      PhotoManager.presentLimited(type: RequestType.image);
+      PhotoManager.presentLimited(type: RequestType.common);
+
+  /// 모든 동영상 (크기는 [sizes]에서, 없으면 0). [loadAll] 다음에 부른다(사진 목록을 지우지 않는다)
+  Future<List<PhotoMeta>> loadVideos(Map<String, int> sizes) async {
+    final paths = await PhotoManager.getAssetPathList(
+      type: RequestType.video,
+      onlyAll: true,
+    );
+    if (paths.isEmpty) return [];
+    final all = paths.first;
+    final total = await all.assetCountAsync;
+    final out = <PhotoMeta>[];
+    const page = 500;
+    for (var start = 0; start < total; start += page) {
+      for (final e in await all.getAssetListRange(
+        start: start,
+        end: start + page,
+      )) {
+        entities[e.id] = e;
+        out.add(
+          PhotoMeta(
+            id: e.id,
+            takenAt: e.createDateTime,
+            width: e.width,
+            height: e.height,
+            isVideo: true,
+            durationSec: e.duration,
+            sizeBytes: sizes[e.id] ?? 0,
+            isFavorite: e.isFavorite,
+          ),
+        );
+      }
+    }
+    return out;
+  }
 
   /// 모든 사진의 메타데이터. 위치는 캐시에 있는 것만 채운다.
   Future<List<PhotoMeta>> loadAll() async {

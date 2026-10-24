@@ -183,5 +183,7 @@
   "privacyShortCortex": "Only the photos you pick go to Cortex, only when you send (Cortex analyzes them with AI)",
   "helpTitle": "Help",
   "clearAllSub": "Clears analysis and records · your photos stay",
-  "coinWord": "coin"
+  "coinWord": "coin",
+  "bigVideos": "Big videos",
+  "videosMeta": "{count, plural, =1{1 video · {size}} other{{count} videos · {size}}}"
 }

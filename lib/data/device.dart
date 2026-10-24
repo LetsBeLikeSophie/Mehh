@@ -17,6 +17,17 @@ class Device {
     }
   }
 
+  /// 동영상 id → 파일 크기 (한 번에). 모르면 null
+  Future<Map<String, int>?> videoSizes() async {
+    if (kIsWeb || !Platform.isAndroid) return null;
+    try {
+      final m = await _channel.invokeMethod<Map>('videoSizes');
+      return m?.map((k, v) => MapEntry(k.toString(), (v as num).toInt()));
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// 갤러리 앱 열기 (2026-10-24 Sophie). 열 앱이 없으면 false
   Future<bool> openGallery() async {
     if (kIsWeb || !Platform.isAndroid) return false;

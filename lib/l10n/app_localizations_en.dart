@@ -847,4 +847,18 @@ class L10nEn extends L10n {
 
   @override
   String get coinWord => 'coin';
+
+  @override
+  String get bigVideos => 'Big videos';
+
+  @override
+  String videosMeta(int count, String size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count videos · $size',
+      one: '1 video · $size',
+    );
+    return '$_temp0';
+  }
 }

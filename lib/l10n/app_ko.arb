@@ -489,5 +489,17 @@
   "privacyShortCortex": "Cortex에는 내가 고른 사진·캡처만, 보낼 때만 가요 (Cortex에서 AI로 분석해요)",
   "helpTitle": "도움",
   "clearAllSub": "분석 결과와 정리 기록을 지워요 · 사진은 그대로",
-  "coinWord": "코인"
+  "coinWord": "코인",
+  "bigVideos": "큰 동영상",
+  "videosMeta": "{count}개 · {size}",
+  "@videosMeta": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  }
 }

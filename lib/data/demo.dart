@@ -245,6 +245,9 @@ class DemoPhotoLibrary extends PhotoLibrary {
   Future<List<PhotoMeta>> loadAll() async => [..._demo.photos];
 
   @override
+  Future<List<PhotoMeta>> loadVideos(Map<String, int> sizes) async => const [];
+
+  @override
   Future<Map<String, (double, double)>> fillLocations(
     List<PhotoMeta> metas, {
     void Function(int done, int total)? onProgress,

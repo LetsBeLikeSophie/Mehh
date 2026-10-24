@@ -714,6 +714,35 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('큰 동영상: 50MB 넘는 것만 용량 큰 순, 길이·용량 표시, 선택해서 휴지통으로', (
+    tester,
+  ) async {
+    final t = DateTime(2026, 10, 1);
+    PhotoMeta v(String id, int mb, int sec) => PhotoMeta(
+      id: id,
+      takenAt: t,
+      width: 1920,
+      height: 1080,
+      isVideo: true,
+      durationSec: sec,
+      sizeBytes: mb * 1024 * 1024,
+    );
+    final videos = DayGroup(
+      id: 'videos',
+      kind: DayGroupKind.videos,
+      photos: [v('v1', 900, 125), v('v2', 300, 40)],
+    );
+    await pump(tester, SortScreen(kind: SortKind.videos, group: videos));
+    expect(find.textContaining('큰 동영상', findRichText: true), findsWidgets);
+    expect(find.text('2:05 · 900MB'), findsOneWidget);
+    expect(find.text('0:40 · 300MB'), findsOneWidget);
+    expect(find.text('추천 보기 · 0장'), findsNothing); // 앱이 골라 주지 않는다
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.pumpAndSettle();
+    expect(find.text('1장 휴지통으로'), findsOneWidget);
+    await flush(tester);
+  });
+
   testWidgets('묶음 이름: 제목을 누르면 바꾸고, [원래 이름으로]로 되돌린다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     final title = find.textContaining('낱장 사진');

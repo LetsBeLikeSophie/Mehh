@@ -585,7 +585,15 @@ class _GroupTile extends ConsumerWidget {
         : plan.trash.length;
 
     final l = context.l;
-    final meta = StringBuffer(l.photos(group.count));
+    final videos = group.kind == DayGroupKind.videos;
+    final meta = StringBuffer(
+      videos
+          ? l.videosMeta(
+              group.count,
+              formatBytes(group.photos.fold(0, (n, p) => n + p.sizeBytes)),
+            )
+          : l.photos(group.count),
+    );
     switch (status) {
       case GroupStatus.needsWork:
         if (suggested > 0) meta.write(' · ${l.suggestedCount(suggested)}');
@@ -621,6 +629,7 @@ class _GroupTile extends ConsumerWidget {
             DayGroupKind.day => SortKind.day,
             DayGroupKind.singles => SortKind.singles,
             DayGroupKind.screenshots => SortKind.screenshots,
+            DayGroupKind.videos => SortKind.videos,
           },
           group: group,
           place: place,

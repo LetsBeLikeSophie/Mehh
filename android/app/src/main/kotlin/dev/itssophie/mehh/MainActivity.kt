@@ -41,10 +41,26 @@ class MainActivity : FlutterActivity() {
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "photoBytes" -> result.success(photoBytes())
+                    "videoSizes" -> result.success(videoSizes())
                     "openGallery" -> result.success(openGallery())
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    /// 동영상 id → 파일 크기 (큰 동영상 정리, 한 번의 조회로)
+    private fun videoSizes(): Map<String, Long> {
+        val out = HashMap<String, Long>()
+        contentResolver.query(
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+            arrayOf(MediaStore.MediaColumns._ID, MediaStore.MediaColumns.SIZE),
+            null, null, null,
+        )?.use { c ->
+            val id = c.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
+            val size = c.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE)
+            while (c.moveToNext()) out[c.getLong(id).toString()] = c.getLong(size)
+        }
+        return out
     }
 
     /// 사진첩 사진 전체 용량(바이트). 휴지통에 있는 것은 빠진다(안드로이드 11+ 기본 조회).

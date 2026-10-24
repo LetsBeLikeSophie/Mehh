@@ -11,6 +11,7 @@ class CleanupConfig {
     this.pocketContrast = 12,
     this.textScreenshot = 0.2,
     this.bestMargin = 0.3,
+    this.bigVideoBytes = 50 * 1024 * 1024,
     this.oldScreenshot = const Duration(days: 90),
     this.learnMinSamples = 20,
     this.learnMinAcceptRate = 0.5,
@@ -34,6 +35,9 @@ class CleanupConfig {
   /// 연속 컷에서 1등과 2등의 점수([score]) 차이가 이 이상일 때만 "베스트"라고 부른다.
   /// 0.3 ≈ 약 35% 더 선명. 애매하면 가장 나중 컷을 이름 없이 남긴다 (2026-10-24 Sophie)
   final double bestMargin;
+
+  /// 이 크기 이상인 동영상만 "큰 동영상"에 보인다 (용량 큰 순, 2026-10-24 Sophie)
+  final int bigVideoBytes;
 
   /// 글자 점수가 이 이상이면 "글자 있는 캡처"
   final double textScreenshot;

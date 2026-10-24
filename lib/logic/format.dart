@@ -34,6 +34,7 @@ String groupTitle(
   bool withYear = true,
 }) {
   if (g.kind == DayGroupKind.screenshots) return l.screenshots;
+  if (g.kind == DayGroupKind.videos) return l.bigVideos;
   if (g.kind == DayGroupKind.singles) return l.singles;
   final date = formatDate(g.start, l.localeName, now: now, withYear: withYear);
   return place == null || place.isEmpty ? date : '$date · $place';
@@ -53,4 +54,11 @@ String groupTimeRange(DayGroup g, L10n l, {DateTime? now}) {
   }
   final a = formatTime(s, locale), b = formatTime(e, locale);
   return a == b ? a : '$a – $b';
+}
+
+/// 동영상 길이 "1:23", "1:02:03"
+String formatDuration(int sec) {
+  final h = sec ~/ 3600, m = (sec % 3600) ~/ 60, s = sec % 60;
+  String two(int v) => v.toString().padLeft(2, '0');
+  return h > 0 ? '$h:${two(m)}:${two(s)}' : '$m:${two(s)}';
 }

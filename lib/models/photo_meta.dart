@@ -11,7 +11,17 @@ class PhotoMeta {
     this.modifiedAt = 0,
     this.isFavorite = false,
     this.movedToAlbum = false,
+    this.isVideo = false,
+    this.durationSec = 0,
+    this.sizeBytes = 0,
   });
+
+  /// 동영상 (큰 동영상 정리에만 쓴다, 2026-10-24 Sophie). 그날의 묶음·분석에는 들어가지 않는다
+  final bool isVideo;
+  final int durationSec;
+
+  /// 파일 크기 (동영상만 채운다)
+  final int sizeBytes;
 
   /// 캡처를 캡처 폴더 밖의 다른 앨범으로 옮겼다 (안드로이드). 남긴다는 신호라 추천하지 않는다
   /// (2026-10-23 Sophie L2-B)
@@ -44,6 +54,9 @@ class PhotoMeta {
     modifiedAt: modifiedAt,
     isFavorite: isFavorite,
     movedToAlbum: movedToAlbum,
+    isVideo: isVideo,
+    durationSec: durationSec,
+    sizeBytes: sizeBytes,
   );
 
   double get aspect => height == 0 ? 0 : width / height;

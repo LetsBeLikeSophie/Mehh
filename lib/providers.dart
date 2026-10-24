@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import 'config/app_config.dart';
+import 'config/cleanup_config.dart';
 import 'data/billing.dart';
 import 'data/demo.dart';
 import 'data/device.dart';
@@ -287,6 +288,7 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
   Future<LibraryState> build() async {
     final lib = ref.read(photoLibraryProvider);
     _metas = await lib.loadAll();
+    _videos = await _loadVideos();
     _loadedAt = DateTime.now();
     Future.microtask(_fillLocations);
     Future.microtask(_reviveRestored);
@@ -307,8 +309,56 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
     }
   }
 
-  LibraryState _state() =>
-      LibraryState(photos: _metas, groups: groupPhotos(_metas));
+  List<PhotoMeta> _videos = [];
+
+  Future<List<PhotoMeta>> _loadVideos() async {
+    try {
+      final sizes = await ref.read(deviceProvider).videoSizes() ?? const {};
+      final lib = ref.read(photoLibraryProvider);
+      var videos = await lib.loadVideos(sizes);
+      if (sizes.isEmpty && videos.isNotEmpty) {
+        // 기기에 한 번에 물을 수 없으면 하나씩 (웹·iOS)
+        final s = await lib.fileSizes([for (final v in videos) v.id]);
+        videos = [
+          for (final v in videos)
+            PhotoMeta(
+              id: v.id,
+              takenAt: v.takenAt,
+              width: v.width,
+              height: v.height,
+              isVideo: true,
+              durationSec: v.durationSec,
+              sizeBytes: s[v.id] ?? 0,
+              isFavorite: v.isFavorite,
+            ),
+        ];
+      }
+      return videos;
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// 큰 동영상 (용량 큰 순). ♥ 즐겨찾기는 뺀다
+  List<PhotoMeta> get _bigVideos {
+    final min = const CleanupConfig().bigVideoBytes;
+    return [
+      for (final v in _videos)
+        if (v.sizeBytes >= min && !v.isFavorite) v,
+    ]..sort((a, b) => b.sizeBytes.compareTo(a.sizeBytes));
+  }
+
+  LibraryState _state() {
+    final big = _bigVideos;
+    return LibraryState(
+      photos: _metas,
+      groups: [
+        ...groupPhotos(_metas),
+        if (big.isNotEmpty)
+          DayGroup(id: 'videos', kind: DayGroupKind.videos, photos: big),
+      ],
+    );
+  }
 
   Future<void> _fillLocations() async {
     final lib = ref.read(photoLibraryProvider);
@@ -335,6 +385,7 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
   void removePhotos(Set<String> ids) {
     if (ids.isEmpty) return;
     _metas = _metas.where((m) => !ids.contains(m.id)).toList();
+    _videos = _videos.where((m) => !ids.contains(m.id)).toList();
     state = AsyncData(_state());
   }
 
@@ -352,8 +403,10 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
     }
     _loadedAt = now ?? DateTime.now();
     final metas = await ref.read(photoLibraryProvider).loadAll();
+    final videos = await _loadVideos();
     if (!ref.mounted) return;
     _metas = metas;
+    _videos = videos;
     state = AsyncData(_state());
     Future.microtask(_fillLocations);
     Future.microtask(_reviveRestored);
@@ -585,6 +638,7 @@ final cleanableIdsProvider = Provider.autoDispose<Set<String>>((ref) {
       if (stateOf(decisions, p.id) == DecisionState.toTrash) p.id,
   };
   for (final g in lib.groups) {
+    if (g.kind == DayGroupKind.videos) continue; // 큰 동영상은 앱이 추천하지 않는다
     if (g.kind == DayGroupKind.screenshots) {
       out.addAll(
         planScreenshots(
@@ -818,7 +872,7 @@ final faceScanProvider = Provider<void>((ref) {
   final features = ref.read(analysisProvider).features;
   final ids = <String>[
     for (final g in groups.reversed)
-      if (g.kind != DayGroupKind.screenshots)
+      if (g.kind == DayGroupKind.day || g.kind == DayGroupKind.singles)
         for (final b in findBursts(g.photos, features))
           if (b.length > 1)
             for (final p in b) p.id,
@@ -899,6 +953,10 @@ final groupStatusProvider = Provider.autoDispose.family<GroupStatus, DayGroup>((
   );
   // 캡처 추천(C4)은 무료이고 [추천 보기]로 받는다. 홈의 "정리할 묶음 N개"에 캡처를 셀지는 아직 정하지 않아서
   // 상태는 X가 있을 때만 할 일로 둔다 (줄 아래 글자는 캡처 추천 장수를 보여 준다)
+  // 큰 동영상: 앱 추천이 없다. 선택해 두면 할 일, 아니면 그대로
+  if (g.kind == DayGroupKind.videos) {
+    return pile ? GroupStatus.needsWork : GroupStatus.nothing;
+  }
   if (g.kind == DayGroupKind.screenshots) {
     if (pile) return GroupStatus.needsWork;
     // 캡처 추천이 남아 있으면 "다 봤어요"가 아니다 (UX 리뷰 2026-10-23). 큰 숫자에는 세지 않는다

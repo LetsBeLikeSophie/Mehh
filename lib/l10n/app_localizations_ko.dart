@@ -716,4 +716,12 @@ class L10nKo extends L10n {
 
   @override
   String get coinWord => '코인';
+
+  @override
+  String get bigVideos => '큰 동영상';
+
+  @override
+  String videosMeta(int count, String size) {
+    return '$count개 · $size';
+  }
 }

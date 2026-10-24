@@ -1200,6 +1200,18 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'코인'**
   String get coinWord;
+
+  /// No description provided for @bigVideos.
+  ///
+  /// In ko, this message translates to:
+  /// **'큰 동영상'**
+  String get bigVideos;
+
+  /// No description provided for @videosMeta.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}개 · {size}'**
+  String videosMeta(int count, String size);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

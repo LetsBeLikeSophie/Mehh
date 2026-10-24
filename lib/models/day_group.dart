@@ -1,8 +1,8 @@
 import 'photo_meta.dart';
 
 /// [day]: 그날의 묶음, [singles]: 사진이 적은 날을 모은 "낱장 사진",
-/// [screenshots]: 모든 캡처
-enum DayGroupKind { day, singles, screenshots }
+/// [screenshots]: 모든 캡처, [videos]: 큰 동영상(용량 큰 순)
+enum DayGroupKind { day, singles, screenshots, videos }
 
 /// 그날의 묶음. [photos]는 촬영 시각 오름차순.
 class DayGroup {
