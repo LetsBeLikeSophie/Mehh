@@ -530,143 +530,150 @@ class _SortScreenState extends ConsumerState<SortScreen>
               child: HoldToFinish(
                 armed: marked.isNotEmpty,
                 onDone: () => _finishHere(marked, src, order),
-                child: CustomScrollView(
-                  slivers: [
-                    SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(8, 8, 12, 8),
-                      sliver: SliverList.list(
-                        children: [
-                          // 맨 위 줄·제목 칸은 홈과 같은 높이: 막대가 같은 자리에 온다 (2026-10-24 Sophie)
-                          MehhHeader.top(
-                            leading: const MehhBackButton(),
-                            trailing: const [MehhTopActions()],
-                          ),
-                          Padding(
-                            padding: const EdgeInsetsDirectional.only(
-                              start: 12,
-                              end: 8,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                MehhHeader.titleBox([
-                                  // 제목 뒤에 장수 (2026-10-23 Sophie: 장수가 따로 한 줄을 차지하지 않게)
-                                  Text.rich(
-                                    TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text: sortTitle(
-                                            widget.kind,
-                                            g,
-                                            widget.place,
-                                            l,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: '  ${l.photos(order.length)}',
-                                          style: const TextStyle(
-                                            fontSize: MehhText.bodySmall,
-                                            fontWeight: FontWeight.w500,
-                                            color: MehhColors.textMuted,
-                                            letterSpacing: 0,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    style: const TextStyle(
-                                      fontSize: MehhText.title,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: -0.4,
-                                    ),
-                                  ),
-                                  if (subLine != null) ...[
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      subLine,
-                                      style: const TextStyle(
-                                        fontSize: MehhText.bodySmall,
-                                        color: MehhColors.textMuted,
-                                      ),
-                                    ),
-                                  ],
-                                ]),
-                                // 홈과 같은 막대. 묶음 안에서는 진한 회색 = 선택한 것만, 보내면 연한 회색이 늘어난다
-                                FreedBar(
-                                  selectedOnly: true,
-                                  extra: [
-                                    for (final id in marked)
-                                      if (stateOf(decisions, id) !=
-                                          DecisionState.toTrash)
-                                        id,
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                Row(
-                                  // 버튼은 글자 길이만큼, 자리가 모자랄 때만 줄인다 (가운데 빈칸 없이 양 끝으로)
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    if (picks > 0)
-                                      Flexible(
-                                        child: _PillButton(
-                                          label: l.showPicks(picks),
-                                          // 잠긴 묶음은 버튼에 자물쇠: 누르면 무료 묶음을 쓸지 묻는다
-                                          icon: src.locked > 0
-                                              ? Icons.lock_outline
-                                              : null,
-                                          filled: true,
-                                          onTap: _busy
-                                              ? null
-                                              : () => _showPicks(src),
-                                        ),
-                                      ),
-                                    const SizedBox(width: 8),
-                                    TextButton(
-                                      onPressed: order.isEmpty
-                                          ? null
-                                          : allSelected
-                                          ? () => _clearAll(order, src)
-                                          : () => _selectAll(order),
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: MehhColors.text,
-                                        minimumSize: const Size(44, 44),
-                                      ),
-                                      child: Text(
-                                        allSelected
-                                            ? l.deselectAll
-                                            : l.selectAll,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // 똑같은 사진은 묶음마다 새 줄에서 시작해 어떤 사진끼리 같은지 보이게
-                    for (final (i, section) in sections.indexed)
+                // 아래로 당기면 갤러리와 다시 맞춘다 (2026-10-24 Sophie)
+                child: RefreshIndicator(
+                  color: MehhColors.black,
+                  onRefresh: () => ref.read(libraryProvider.notifier).syncNow(),
+                  child: CustomScrollView(
+                    // 사진이 적어도 당겨서 새로 고침되게
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
                       SliverPadding(
-                        padding: EdgeInsets.fromLTRB(
-                          20,
-                          0,
-                          20,
-                          i == sections.length - 1 ? 16 : 14,
-                        ),
-                        sliver: SliverGrid.builder(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 4,
-                                mainAxisSpacing: 4,
-                                crossAxisSpacing: 4,
+                        padding: const EdgeInsets.fromLTRB(8, 8, 12, 8),
+                        sliver: SliverList.list(
+                          children: [
+                            // 맨 위 줄·제목 칸은 홈과 같은 높이: 막대가 같은 자리에 온다 (2026-10-24 Sophie)
+                            MehhHeader.top(
+                              leading: const MehhBackButton(),
+                              trailing: const [MehhTopActions()],
+                            ),
+                            Padding(
+                              padding: const EdgeInsetsDirectional.only(
+                                start: 12,
+                                end: 8,
                               ),
-                          itemCount: section.length,
-                          itemBuilder: (_, j) => tile(section[j]),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  MehhHeader.titleBox([
+                                    // 제목 뒤에 장수 (2026-10-23 Sophie: 장수가 따로 한 줄을 차지하지 않게)
+                                    Text.rich(
+                                      TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text: sortTitle(
+                                              widget.kind,
+                                              g,
+                                              widget.place,
+                                              l,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: '  ${l.photos(order.length)}',
+                                            style: const TextStyle(
+                                              fontSize: MehhText.bodySmall,
+                                              fontWeight: FontWeight.w500,
+                                              color: MehhColors.textMuted,
+                                              letterSpacing: 0,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      style: const TextStyle(
+                                        fontSize: MehhText.title,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: -0.4,
+                                      ),
+                                    ),
+                                    if (subLine != null) ...[
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        subLine,
+                                        style: const TextStyle(
+                                          fontSize: MehhText.bodySmall,
+                                          color: MehhColors.textMuted,
+                                        ),
+                                      ),
+                                    ],
+                                  ]),
+                                  // 홈과 같은 막대. 묶음 안에서는 진한 회색 = 선택한 것만, 보내면 연한 회색이 늘어난다
+                                  FreedBar(
+                                    selectedOnly: true,
+                                    extra: [
+                                      for (final id in marked)
+                                        if (stateOf(decisions, id) !=
+                                            DecisionState.toTrash)
+                                          id,
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    // 버튼은 글자 길이만큼, 자리가 모자랄 때만 줄인다 (가운데 빈칸 없이 양 끝으로)
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      if (picks > 0)
+                                        Flexible(
+                                          child: _PillButton(
+                                            label: l.showPicks(picks),
+                                            // 잠긴 묶음은 버튼에 자물쇠: 누르면 무료 묶음을 쓸지 묻는다
+                                            icon: src.locked > 0
+                                                ? Icons.lock_outline
+                                                : null,
+                                            filled: true,
+                                            onTap: _busy
+                                                ? null
+                                                : () => _showPicks(src),
+                                          ),
+                                        ),
+                                      const SizedBox(width: 8),
+                                      TextButton(
+                                        onPressed: order.isEmpty
+                                            ? null
+                                            : allSelected
+                                            ? () => _clearAll(order, src)
+                                            : () => _selectAll(order),
+                                        style: TextButton.styleFrom(
+                                          foregroundColor: MehhColors.text,
+                                          minimumSize: const Size(44, 44),
+                                        ),
+                                        child: Text(
+                                          allSelected
+                                              ? l.deselectAll
+                                              : l.selectAll,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                  ],
+                      // 똑같은 사진은 묶음마다 새 줄에서 시작해 어떤 사진끼리 같은지 보이게
+                      for (final (i, section) in sections.indexed)
+                        SliverPadding(
+                          padding: EdgeInsets.fromLTRB(
+                            20,
+                            0,
+                            20,
+                            i == sections.length - 1 ? 16 : 14,
+                          ),
+                          sliver: SliverGrid.builder(
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 4,
+                                  mainAxisSpacing: 4,
+                                  crossAxisSpacing: 4,
+                                ),
+                            itemCount: section.length,
+                            itemBuilder: (_, j) => tile(section[j]),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),

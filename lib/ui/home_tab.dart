@@ -161,6 +161,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
           final bottom = MediaQuery.paddingOf(context).bottom + 48;
 
           final list = CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
             controller: _scroll,
             slivers: [
               // 로고·Pro·설정 줄은 연도 레일과 상관없이 오른쪽 끝에 붙인다
@@ -237,10 +238,16 @@ class _HomeTabState extends ConsumerState<HomeTab> {
               ),
             ],
           );
-          if (!rail) return list;
+          // 아래로 당기면 갤러리와 다시 맞춘다 (2026-10-24 Sophie)
+          final refreshable = RefreshIndicator(
+            color: MehhColors.black,
+            onRefresh: () => ref.read(libraryProvider.notifier).syncNow(),
+            child: list,
+          );
+          if (!rail) return refreshable;
           return Stack(
             children: [
-              list,
+              refreshable,
               Positioned(
                 right: 4,
                 top: 140,

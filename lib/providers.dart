@@ -331,6 +331,9 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
 
   void reload() => ref.invalidateSelf();
 
+  /// 지금 바로 갤러리와 다시 맞춘다 (아래로 당겨 새로 고침)
+  Future<void> syncNow() => refreshIfStale(Duration.zero);
+
   /// 마지막으로 불러온 지 [after]가 지났으면, 지금 목록을 보여 준 채로 뒤에서 새로 불러온다
   /// (로딩 화면으로 깜빡이지 않는다)
   Future<void> refreshIfStale(Duration after, {DateTime? now}) async {
