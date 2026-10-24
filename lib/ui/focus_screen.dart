@@ -12,6 +12,7 @@ import '../models/day_group.dart';
 import '../models/decision.dart';
 import '../providers.dart';
 import '../theme.dart';
+import 'freed_bar.dart';
 import 'photo_viewer.dart';
 import 'sort_source.dart';
 import 'widgets.dart';
@@ -277,7 +278,10 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
               children: [
                 // 위치는 아래 사진 줄이 보여 주므로 "3 / 214" 숫자는 두지 않는다.
                 // 되돌리기 버튼도 두지 않는다: 반대로 밀면 된다 (2026-10-22)
-                const MehhBackButton(),
+                MehhHeader.top(
+                  leading: const MehhBackButton(),
+                  trailing: const [MehhTopActions()],
+                ),
                 const SizedBox(height: 4),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),

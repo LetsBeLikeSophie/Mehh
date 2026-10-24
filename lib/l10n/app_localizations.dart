@@ -1122,6 +1122,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'갤러리 앱을 찾지 못했어요'**
   String get noGallery;
+
+  /// No description provided for @barSelected.
+  ///
+  /// In ko, this message translates to:
+  /// **'선택 {size}'**
+  String barSelected(Object size);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

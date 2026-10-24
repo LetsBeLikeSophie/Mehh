@@ -5,6 +5,8 @@ import '../config/app_config.dart';
 import '../l10n/l10n.dart';
 import '../providers.dart';
 import '../theme.dart';
+import 'pro_sheet.dart';
+import 'settings_screen.dart';
 import 'widgets.dart';
 
 /// 용량 막대 (2026-10-24 Sophie). 막대 전체 = 사진 전체 용량 + 이번 달 휴지통으로 보낸 용량.
@@ -13,16 +15,22 @@ import 'widgets.dart';
 /// - 연한 회색: 이번 달 휴지통으로 보낸 용량. 지울수록 늘어난다
 /// 아래 한 줄이 색마다 무엇인지 알려 준다. 홈과 정리 화면의 같은 높이에 둔다([MehhHeader]).
 class FreedBar extends ConsumerWidget {
-  const FreedBar({super.key, this.extra = const []});
+  const FreedBar({super.key, this.extra = const [], this.selectedOnly = false});
 
   /// 앱 추천·선택 말고도 지금 화면에서 X로 보이는 사진 (정리 화면의 "처음부터 X")
   final List<String> extra;
+
+  /// 묶음 안에서는 진한 회색이 선택한 것만 따라간다 (2026-10-24 Sophie)
+  final bool selectedOnly;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final photos = ref.watch(photoBytesProvider).value ?? 0;
     final freed = ref.watch(freedThisMonthProvider).value ?? 0;
-    final ids = {...ref.watch(cleanableIdsProvider), ...extra}.toList()..sort();
+    final base = selectedOnly
+        ? ref.watch(selectedIdsProvider)
+        : ref.watch(cleanableIdsProvider);
+    final ids = {...base, ...extra}.toList()..sort();
     final cleanable = ref.watch(idsBytesProvider(ids.join(','))).value ?? 0;
     if (photos == 0) return const SizedBox.shrink();
     final can = cleanable.clamp(0, photos);
@@ -71,7 +79,12 @@ class FreedBar extends ConsumerWidget {
             children: [
               _Legend(MehhColors.black, l.barPhotos(formatBytes(photos))),
               if (can > 0)
-                _Legend(MehhColors.textMuted, l.barCleanable(formatBytes(can))),
+                _Legend(
+                  MehhColors.textMuted,
+                  selectedOnly
+                      ? l.barSelected(formatBytes(can))
+                      : l.barCleanable(formatBytes(can)),
+                ),
               if (freed > 0)
                 _Legend(MehhColors.border, l.barSent(formatBytes(freed))),
             ],
@@ -143,6 +156,26 @@ class GalleryButton extends ConsumerWidget {
       },
     );
   }
+}
+
+/// 맨 위 오른쪽: [무료 묶음 N개] · 설정 · 갤러리. 홈·정리·크게 보기 모든 화면 같은 자리 (2026-10-24 Sophie)
+class MehhTopActions extends StatelessWidget {
+  const MehhTopActions({super.key});
+
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      const ProChip(),
+      MehhHeader.icon(
+        tooltip: context.l.settings,
+        icon: Icons.settings_outlined,
+        onPressed: () => Navigator.of(context)
+            .push(MaterialPageRoute(builder: (_) => const SettingsScreen())),
+      ),
+      const GalleryButton(),
+    ],
+  );
 }
 
 /// 맨 위 줄(로고·돌아가기 / 휴지통·설정)과 제목 칸의 높이를 홈과 정리 화면이 같이 써서

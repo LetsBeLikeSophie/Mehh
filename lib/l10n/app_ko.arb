@@ -499,5 +499,6 @@
   "barCleanable": "정리 가능 {size}",
   "barSent": "휴지통 {size}",
   "openGallery": "갤러리",
-  "noGallery": "갤러리 앱을 찾지 못했어요"
+  "noGallery": "갤러리 앱을 찾지 못했어요",
+  "barSelected": "선택 {size}"
 }

@@ -577,6 +577,16 @@ final cleanableIdsProvider = Provider.autoDispose<Set<String>>((ref) {
   return out;
 });
 
+/// 선택한 사진(X, 아직 안 보냄). 묶음 안 막대의 진한 회색
+final selectedIdsProvider = Provider<Set<String>>((ref) {
+  final photos = ref.watch(libraryProvider.select((s) => s.value?.photos));
+  final decisions = ref.watch(decisionsProvider).value ?? const {};
+  return {
+    for (final p in photos ?? const <PhotoMeta>[])
+      if (stateOf(decisions, p.id) == DecisionState.toTrash) p.id,
+  };
+});
+
 /// 사진 몇 장의 용량 합. 키는 정렬한 id를 쉼표로 이은 것
 final idsBytesProvider = FutureProvider.autoDispose.family<int, String>((
   ref,

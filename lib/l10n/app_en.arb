@@ -170,5 +170,6 @@
   "barCleanable": "Can clean {size}",
   "barSent": "Trash {size}",
   "openGallery": "Gallery",
-  "noGallery": "Couldn't find a gallery app"
+  "noGallery": "Couldn't find a gallery app",
+  "barSelected": "Selected {size}"
 }

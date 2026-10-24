@@ -12,8 +12,6 @@ import '../models/decision.dart';
 import '../providers.dart';
 import '../theme.dart';
 import 'freed_bar.dart';
-import 'pro_sheet.dart';
-import 'settings_screen.dart';
 import 'sort_screen.dart';
 import 'widgets.dart';
 
@@ -173,20 +171,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                   // 염소는 크게 (2026-10-24 Sophie: 큰 글씨 위에 존재감 있게)
                   child: MehhHeader.top(
                     leading: const MehhLogo(height: 56),
-                    trailing: [
-                      const ProChip(),
-                      MehhHeader.icon(
-                        tooltip: l.settings,
-                        icon: Icons.settings_outlined,
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const SettingsScreen(),
-                          ),
-                        ),
-                      ),
-                      // 맨 오른쪽 갤러리는 정리 화면과 같은 자리
-                      const GalleryButton(),
-                    ],
+                    trailing: const [MehhTopActions()],
                   ),
                 ),
               ),

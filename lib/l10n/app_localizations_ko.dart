@@ -692,4 +692,9 @@ class L10nKo extends L10n {
 
   @override
   String get noGallery => '갤러리 앱을 찾지 못했어요';
+
+  @override
+  String barSelected(Object size) {
+    return '선택 $size';
+  }
 }
