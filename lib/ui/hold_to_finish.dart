@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -65,7 +66,12 @@ class _HoldToFinishState extends ConsumerState<HoldToFinish>
     super.dispose();
   }
 
-  void _start(Offset at) {
+  /// 손가락을 댄 자리 (움직이면 null이 되어 이번 누르기는 끝내기로 안 간다)
+  Offset? _downAt;
+
+  void _start(LongPressDownDetails d) {
+    final at = d.localPosition;
+    _downAt = d.globalPosition;
     setState(() => _at = at);
     _hold.forward(from: 0);
   }
@@ -109,9 +115,18 @@ class _HoldToFinishState extends ConsumerState<HoldToFinish>
   Widget build(BuildContext context) {
     return Listener(
       onPointerDown: (_) => _restartIdle(),
+      // 같은 자리를 계속 누를 때만 찬다: 손가락이 조금이라도 움직이면(밀기·당기기) 바로 멈춘다
+      // (2026-10-24 Sophie 버그: 아래로 끄는데 끝내기 창이 떴다)
+      onPointerMove: (e) {
+        final from = _downAt;
+        if (from != null && (e.position - from).distance > kTouchSlop) {
+          _downAt = null;
+          _stop();
+        }
+      },
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
-        onLongPressDown: (d) => _start(d.localPosition),
+        onLongPressDown: _start,
         onLongPressCancel: _stop,
         onLongPressUp: _stop,
         child: Stack(

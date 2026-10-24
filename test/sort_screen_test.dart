@@ -697,6 +697,24 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('그리드: 누른 채 손가락을 움직이면(아래로 끌기) 끝내기로 가지 않는다', (tester) async {
+    await pump(tester, SortScreen(kind: SortKind.singles, group: group));
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.pumpAndSettle();
+    final g = await tester.startGesture(
+      tester.getTopRight(find.byType(SortScreen)) + const Offset(-60, 140),
+    );
+    await tester.pump(const Duration(milliseconds: 600)); // 길게 누르기로 잡힌 뒤
+    await g.moveBy(const Offset(0, 40));
+    for (var i = 0; i < 4; i++) {
+      await tester.pump(const Duration(milliseconds: 400));
+    }
+    await g.up();
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsNothing);
+    await flush(tester);
+  });
+
   testWidgets('크게 보기: 동그라미가 다 차기 전에 손을 떼면 아무 일도 없다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     await tester.tap(find.byType(PhotoThumb).first);

@@ -308,7 +308,7 @@ class ProChip extends ConsumerWidget {
       ),
       child: s.pro
           ? Text(l.proChip)
-          : CoinCount(s.freeLeft(DateTime.now()), size: 18),
+          : CoinCount(s.freeLeft(DateTime.now()), size: 22),
     );
   }
 }
