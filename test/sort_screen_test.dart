@@ -1285,6 +1285,58 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('Cortex: 기다리는 동안 또 보내도 먼저 보낸 것의 신호는 그것만 묻는다 (S-3)', (
+    tester,
+  ) async {
+    final shots = DayGroup(
+      id: 'shots',
+      kind: DayGroupKind.screenshots,
+      photos: photos,
+    );
+    final handoff = _FakeHandoff();
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.screenshots, group: shots),
+      extra: [
+        cortexInstalledProvider.overrideWith((ref) async => true),
+        handoffProvider.overrideWithValue(handoff),
+      ],
+    );
+    // 첫 묶음: 1장
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.pumpAndSettle();
+    await sendCortex(tester);
+    final first = [...handoff.sent];
+    handoff.sent.clear();
+    // 둘째 묶음: 다른 2장 (첫 장은 X를 꺼서 빠진다)
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.tap(find.byType(XToggle).at(1));
+    await tester.tap(find.byType(XToggle).at(2));
+    await tester.pumpAndSettle();
+    await sendCortex(tester);
+    final second = [...handoff.sent];
+    expect(second.length, 2);
+    expect(find.text('Cortex로 보냄'), findsNWidgets(3));
+
+    // 첫 묶음의 신호: 그 1장만 묻고, "0장" 알림도 "받지 못한" 줄도 없다
+    handoff.saved.add(CortexSaved(1, first.toSet()));
+    await tester.pumpAndSettle();
+    expect(find.text('✓ Cortex가 1장 받았어요'), findsOneWidget);
+    expect(find.textContaining('받지 못한'), findsNothing);
+    expect(find.textContaining('0장만'), findsNothing);
+    await tester.tap(find.text('나중에'));
+    await tester.pumpAndSettle();
+    // 둘째 묶음의 신호도 그대로 받는다
+    handoff.saved.add(CortexSaved(2, second.toSet()));
+    await tester.pumpAndSettle();
+    expect(find.text('✓ Cortex가 2장 받았어요'), findsOneWidget);
+    await tester.tap(find.text('나중에'));
+    await tester.pumpAndSettle();
+    expect(find.text('Cortex로 보냄'), findsNothing);
+    expect(find.text('Cortex에 있음'), findsNWidgets(3));
+    await flush(tester);
+  });
+
   testWidgets('Cortex: 그날의 묶음에서 Cortex로 보내고 [휴지통으로]여도 정확도 기록이 남는다 (S-2)', (
     tester,
   ) async {

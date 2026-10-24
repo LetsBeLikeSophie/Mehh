@@ -86,41 +86,40 @@ class _SortScreenState extends ConsumerState<SortScreen>
     });
   }
 
-  /// Cortex가 "받았어요"(파일을 자기 쪽에 복사함) 신호를 보내면, 옮겼다고 알리고
+  /// Cortex가 "받았어요"(파일을 자기 쪽에 복사함) 신호를 보내면, 받았다고 알리고
   /// 휴지통으로 보낼지 묻는다. 분석은 그 뒤 Cortex가 혼자 한다 (2026-10-24 Sophie)
   void _onCortexSaved(CortexSaved saved) {
     if (!mounted) return;
-    final ids = _sentToCortex;
-    if (ids == null) {
-      // 늦게 온 신호: "Cortex로 보냄" 표시가 남은 사진 중 받았다고 한 것만
+    final last = _sentToCortex;
+    if (saved.ids case final savedIds?) {
+      // 받은 사진 목록이 오면 기다리는 사진(cortex_sent, 아직 못 받음) 중 받은 것만 묻는다.
+      // 기다리는 동안 또 보내도 묶음이 섞이지 않는다 (시니어 리뷰 2026-10-24 S-3)
       final waiting = ref.read(cortexSentProvider).value ?? const {};
       final done = [
-        for (final id in saved.ids ?? const <String>{})
+        for (final id in savedIds)
           if (waiting[id] == false) id,
       ];
-      if (done.isNotEmpty) _askTrashAfterCortex(done);
-      return;
-    }
-    _sentToCortex = null;
-    // 받은 사진 목록이 오면 그 사진만, 나머지는 X 그대로 (C1-B)
-    if (saved.ids case final savedIds?) {
-      final done = [
-        for (final id in ids)
-          if (savedIds.contains(id)) id,
-      ];
       if (done.isEmpty) {
-        showNote(context, context.l.cortexPartial(0));
+        // 마지막으로 보낸 것을 하나도 못 받았다고 알려 온 경우만 알린다
+        if (last != null && savedIds.isEmpty) {
+          _sentToCortex = null;
+          showNote(context, context.l.cortexPartial(0));
+        }
         return;
       }
-      _askTrashAfterCortex(done, kept: ids.length - done.length);
+      final fromLast = last != null && done.every(last.contains);
+      if (fromLast) _sentToCortex = null;
+      _askTrashAfterCortex(done, kept: fromLast ? last.length - done.length : 0);
       return;
     }
-    // 장수만 오면(예전 Cortex) 보낸 장수만큼 받았을 때만 (S-2)
-    if (saved.count < ids.length) {
+    // 장수만 오면(예전 Cortex) 마지막으로 보낸 묶음과 견줘, 다 받았을 때만 묻는다 (S-2)
+    if (last == null) return;
+    _sentToCortex = null;
+    if (saved.count < last.length) {
       showNote(context, context.l.cortexPartial(saved.count));
       return;
     }
-    _askTrashAfterCortex(ids);
+    _askTrashAfterCortex(last);
   }
 
   /// "✓ Cortex가 N장 받았어요 · 분석은 뒤에서 · 휴지통으로 보낼까요?" → 안드로이드 휴지통 확인 창
@@ -447,27 +446,34 @@ class _SortScreenState extends ConsumerState<SortScreen>
                 opacity: out ? 0.45 : 1,
                 child: PhotoThumb(entity: entities[id]),
               ),
-              Positioned(
-                right: 0,
-                top: 0,
-                child: XToggle(on: out, onTap: () => _toggle(id, out)),
-              ),
               if (tag != null)
                 Positioned(
                   left: 4,
                   bottom: 4,
                   child: MehhBadge(tagText(tag, l), inverted: out),
                 ),
-              // Cortex로 보낸 사진: 받았는지까지 보이게 (어디서 멈췄는지 알 수 있게)
+              // Cortex로 보낸 사진: 받았는지까지 보이게 (어디서 멈췄는지 알 수 있게).
+              // X 버튼 아래에 깔고 누르기를 막지 않는다 (작은 칸에서 X를 덮지 않게)
               if (cortexSent[id] case final got?)
                 Positioned(
                   left: 4,
                   top: 4,
-                  child: MehhBadge(
-                    got ? l.cortexGotBadge : l.cortexSentBadge,
-                    inverted: out,
+                  right: 4,
+                  child: IgnorePointer(
+                    child: Align(
+                      alignment: AlignmentDirectional.topStart,
+                      child: MehhBadge(
+                        got ? l.cortexGotBadge : l.cortexSentBadge,
+                        inverted: out,
+                      ),
+                    ),
                   ),
                 ),
+              Positioned(
+                right: 0,
+                top: 0,
+                child: XToggle(on: out, onTap: () => _toggle(id, out)),
+              ),
             ],
           ),
         ),
