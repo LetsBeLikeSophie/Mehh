@@ -147,7 +147,7 @@
   "mutedBlurry": "You often keep blurry shots, so we'll stop suggesting them for now · we'll try again in 30 days",
   "mutedJunk": "You often keep accidental shots, so we'll stop suggesting them for now · we'll try again in 30 days",
   "useFreeSetTitle": "Use a free set?",
-  "useFreeSetBody": "{count, plural, =1{Seeing 1 pick uses 1 free set ({left} left).\nOnce opened, it stays open.} other{Seeing {count} picks uses 1 free set ({left} left).\nOnce opened, it stays open.}}",
+  "useFreeSetBody": "{count, plural, =1{Seeing 1 pick uses 1 free set.\n{left} left · once opened, it stays open.} other{Seeing {count} picks uses 1 free set.\n{left} left · once opened, it stays open.}}",
   "useFreeSetYes": "Use a free set",
   "toCortex": "To Cortex",
   "cortexAskTitle": "{count, plural, =1{Send 1 to Cortex?} other{Send {count} to Cortex?}}",

@@ -982,7 +982,7 @@ abstract class L10n {
   /// No description provided for @useFreeSetBody.
   ///
   /// In ko, this message translates to:
-  /// **'추천 {count}장을 보려면 무료 묶음 1개를 써요 ({left}개 남음).\n한 번 열면 계속 열려 있어요.'**
+  /// **'추천 {count}장을 보려면 무료 묶음 1개를 써요.\n{left}개 남음 · 한 번 열면 계속 열려 있어요.'**
   String useFreeSetBody(int count, int left);
 
   /// No description provided for @useFreeSetYes.

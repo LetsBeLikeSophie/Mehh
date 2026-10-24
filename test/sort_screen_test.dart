@@ -911,7 +911,7 @@ void main() {
     // 잠긴 묶음: 누르면 무료 묶음을 쓸지 먼저 묻는다 (설명 줄 대신)
     await tester.tap(find.text('추천 보기 · 2장'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('(3개 남음)'), findsOneWidget);
+    expect(find.textContaining('3개 남음 ·'), findsOneWidget);
     await tester.tap(find.text('취소')); // 취소하면 아무것도 안 쓴다
     await tester.pumpAndSettle();
     expect(find.text('2장 휴지통으로'), findsNothing);

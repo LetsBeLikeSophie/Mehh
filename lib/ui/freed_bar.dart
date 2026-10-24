@@ -12,25 +12,27 @@ import 'widgets.dart';
 /// 용량 막대 (2026-10-24 Sophie). 홈과 정리 화면이 같은 막대·같은 뜻을 쓴다.
 /// 막대 전체 = 사진 전체 용량 + 이번 달 휴지통으로 보낸 용량. 왼쪽부터
 /// - 검정: 사진 (남는 것)
-/// - 연한 코랄: 추천 정리 (앱이 추천했는데 아직 선택 안 한 것)
-/// - 코랄: 선택 (내가 선택한 것) — 추천을 선택하면 연한 코랄에서 코랄로 옮겨 간다
+/// - 연한 코랄: 추천 정리 (앱 추천 + 선택해 둔 것)
+/// - 코랄: 정리 화면에서만, 이 묶음에서 지금 선택한 것 — 선택하면 연한 코랄에서 코랄로 옮겨 간다
 /// - 회색: 휴지통 (이번 달 보낸 것)
 /// 아래 한 줄은 글자 색이 칸 색과 같고, 길면 줄을 바꾸지 않고 글자를 줄인다.
 class FreedBar extends ConsumerWidget {
-  const FreedBar({super.key, this.extra = const []});
+  const FreedBar({super.key, this.selected});
 
-  /// 선택으로 저장되지 않았지만 지금 화면에서 X로 보이는 사진 (정리 화면의 "처음부터 X")
-  final List<String> extra;
+  /// 정리 화면: 이 묶음에서 지금 선택한(X) 사진 → 코랄 칸. 홈은 null: 선택 칸 없이
+  /// 선택한 것도 추천 정리(연한 코랄)에 넣는다 (2026-10-24 Sophie)
+  final List<String>? selected;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final photos = ref.watch(photoBytesProvider).value ?? 0;
     final freed = ref.watch(freedThisMonthProvider).value ?? 0;
-    final selectedIds = {...ref.watch(selectedIdsProvider), ...extra};
-    final pickIds = ref
-        .watch(cleanableIdsProvider)
-        .where((id) => !selectedIds.contains(id));
-    final selected =
+    final selectedIds = {...?selected};
+    final pickIds = {
+      ...ref.watch(cleanableIdsProvider),
+      ...ref.watch(selectedIdsProvider),
+    }.where((id) => !selectedIds.contains(id));
+    final selectedBytes =
         ref
             .watch(idsBytesProvider((selectedIds.toList()..sort()).join(',')))
             .value ??
@@ -41,7 +43,7 @@ class FreedBar extends ConsumerWidget {
             .value ??
         0;
     if (photos == 0) return const SizedBox.shrink();
-    final sel = selected.clamp(0, photos);
+    final sel = selectedBytes.clamp(0, photos);
     final rec = picks.clamp(0, photos - sel);
     final l = context.l;
     const small = TextStyle(fontSize: MehhText.label);

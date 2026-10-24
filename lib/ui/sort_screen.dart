@@ -597,14 +597,8 @@ class _SortScreenState extends ConsumerState<SortScreen>
                                     ],
                                   ]),
                                   // 홈과 같은 막대·같은 뜻: 선택하면 추천 정리(연한 코랄)가 선택(코랄)으로, 보내면 휴지통으로
-                                  FreedBar(
-                                    extra: [
-                                      for (final id in marked)
-                                        if (stateOf(decisions, id) !=
-                                            DecisionState.toTrash)
-                                          id,
-                                    ],
-                                  ),
+                                  // 이 묶음에서 선택한 것만 코랄 (전체 기준 아님)
+                                  FreedBar(selected: marked),
                                   const SizedBox(height: 12),
                                   Row(
                                     // 버튼은 글자 길이만큼, 자리가 모자랄 때만 줄인다 (가운데 빈칸 없이 양 끝으로)
