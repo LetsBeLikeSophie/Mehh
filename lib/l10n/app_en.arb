@@ -186,5 +186,8 @@
   "coinWord": "coin",
   "bigVideos": "Big videos",
   "videosMeta": "{count, plural, =1{1 video · {size}} other{{count} videos · {size}}}",
-  "cortexAskNote": "Cortex analyzes them with AI"
+  "cortexAskNote": "Cortex analyzes them with AI",
+  "cortexGetTitle": "You need Cortex",
+  "cortexGetBody": "Cortex turns photos and screenshots into notes. Install it, then tap To Cortex again.",
+  "cortexGetYes": "Get Cortex"
 }

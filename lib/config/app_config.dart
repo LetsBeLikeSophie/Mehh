@@ -1,5 +1,5 @@
 /// 앱 버전 (pubspec.yaml version과 같이 고친다). 설정 화면과 문의 메일 제목에 쓴다.
-const appVersion = '1.17.1';
+const appVersion = '1.17.2';
 
 /// 비공개 테스트 동안 그날의 묶음을 코인 없이 모두 연다 (2026-10-24 Sophie). 결제를 켜고 정식 출시할 때 false
 const closedTestFree = true;
@@ -29,6 +29,10 @@ const finishHintsTotal = 5;
 
 /// 안내가 떠 있는 시간
 const focusHintShown = Duration(seconds: 3);
+
+/// Cortex 스토어 주소. Cortex가 없을 때 [Cortex로]를 누르면 여기로 (비우면 버튼을 숨긴다)
+const cortexStoreUrl =
+    'https://play.google.com/store/apps/details?id=dev.itssophie.cortex';
 
 /// 개인정보처리방침 (web/privacy.html, 스토어 등록 정보에도 같은 주소)
 const privacyPolicyUrl = 'https://itssophie.dev/mehh/privacy.html';

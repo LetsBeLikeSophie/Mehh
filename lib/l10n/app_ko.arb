@@ -502,5 +502,8 @@
       }
     }
   },
-  "cortexAskNote": "Cortex에서 AI로 분석해요"
+  "cortexAskNote": "Cortex에서 AI로 분석해요",
+  "cortexGetTitle": "Cortex가 필요해요",
+  "cortexGetBody": "사진·캡처를 메모로 정리해 주는 앱이에요. 받은 뒤 다시 [Cortex로]를 눌러 주세요.",
+  "cortexGetYes": "받으러 가기"
 }

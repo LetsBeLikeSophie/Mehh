@@ -727,4 +727,14 @@ class L10nKo extends L10n {
 
   @override
   String get cortexAskNote => 'Cortex에서 AI로 분석해요';
+
+  @override
+  String get cortexGetTitle => 'Cortex가 필요해요';
+
+  @override
+  String get cortexGetBody =>
+      '사진·캡처를 메모로 정리해 주는 앱이에요. 받은 뒤 다시 [Cortex로]를 눌러 주세요.';
+
+  @override
+  String get cortexGetYes => '받으러 가기';
 }

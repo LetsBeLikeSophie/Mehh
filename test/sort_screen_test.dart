@@ -744,6 +744,19 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('Cortex가 없으면 [Cortex로]를 눌렀을 때 받으러 가기 안내', (tester) async {
+    await pump(tester, SortScreen(kind: SortKind.singles, group: group));
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cortex로'));
+    await tester.pumpAndSettle();
+    expect(find.text('Cortex가 필요해요'), findsOneWidget);
+    expect(find.text('받으러 가기'), findsOneWidget);
+    await tester.tap(find.text('취소'));
+    await tester.pumpAndSettle();
+    await flush(tester);
+  });
+
   testWidgets('묶음 이름: 제목을 누르면 바꾸고, [원래 이름으로]로 되돌린다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     final title = find.textContaining('낱장 사진');
@@ -1029,7 +1042,7 @@ void main() {
     );
     await pump(tester, SortScreen(kind: SortKind.screenshots, group: shots));
     expect(find.textContaining('추천 보기'), findsNothing);
-    expect(find.text('Cortex로'), findsNothing); // Cortex가 없으면 버튼도 없다
+    expect(find.text('Cortex로'), findsNothing); // 고르기 전엔 없다
 
     final container = ProviderScope.containerOf(
       tester.element(find.byType(SortScreen)),

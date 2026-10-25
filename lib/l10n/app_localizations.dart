@@ -1218,6 +1218,24 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'Cortex에서 AI로 분석해요'**
   String get cortexAskNote;
+
+  /// No description provided for @cortexGetTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'Cortex가 필요해요'**
+  String get cortexGetTitle;
+
+  /// No description provided for @cortexGetBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진·캡처를 메모로 정리해 주는 앱이에요. 받은 뒤 다시 [Cortex로]를 눌러 주세요.'**
+  String get cortexGetBody;
+
+  /// No description provided for @cortexGetYes.
+  ///
+  /// In ko, this message translates to:
+  /// **'받으러 가기'**
+  String get cortexGetYes;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

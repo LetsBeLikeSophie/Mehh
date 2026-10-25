@@ -864,4 +864,14 @@ class L10nEn extends L10n {
 
   @override
   String get cortexAskNote => 'Cortex analyzes them with AI';
+
+  @override
+  String get cortexGetTitle => 'You need Cortex';
+
+  @override
+  String get cortexGetBody =>
+      'Cortex turns photos and screenshots into notes. Install it, then tap To Cortex again.';
+
+  @override
+  String get cortexGetYes => 'Get Cortex';
 }

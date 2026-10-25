@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../config/app_config.dart';
 import '../data/handoff.dart';
@@ -313,6 +314,23 @@ class _SortScreenState extends ConsumerState<SortScreen>
     if (v != null) {
       await ref.read(groupNamesProvider.notifier).rename(g.id, v);
     }
+  }
+
+  /// Cortex가 없을 때: 무슨 앱인지 한 줄 + [받으러 가기] → 스토어
+  Future<void> _getCortex() async {
+    final l = context.l;
+    final ok = await askMehh(
+      context,
+      title: l.cortexGetTitle,
+      body: l.cortexGetBody,
+      no: l.cancel,
+      yes: l.cortexGetYes,
+    );
+    if (!ok) return;
+    await launchUrl(
+      Uri.parse(cortexStoreUrl),
+      mode: LaunchMode.externalApplication,
+    );
   }
 
   /// 켜 둔 추천 끄기: 추천으로 들어간 X만 표시 없음으로 (직접 선택한 다른 사진은 그대로).
@@ -872,10 +890,16 @@ class _SortScreenState extends ConsumerState<SortScreen>
                     ),
                   ),
                   // 고른 캡처가 있으면 [휴지통으로] 옆에 작은 Cortex 버튼 (공유하기처럼, 2026-10-23 Sophie)
-                  if (cortex && marked.isNotEmpty) ...[
+                  // Cortex가 없어도 버튼은 보이고, 누르면 받으러 가기 (2026-10-25 Sophie)
+                  if ((cortex || cortexStoreUrl.isNotEmpty) &&
+                      marked.isNotEmpty) ...[
                     const SizedBox(width: 8),
                     OutlinedButton.icon(
-                      onPressed: _busy ? null : () => _sendCortex(marked),
+                      onPressed: _busy
+                          ? null
+                          : cortex
+                          ? () => _sendCortex(marked)
+                          : _getCortex,
                       icon: const Icon(Icons.north_east, size: 16),
                       label: Text(l.toCortex),
                       style: OutlinedButton.styleFrom(
