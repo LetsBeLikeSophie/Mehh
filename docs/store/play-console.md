@@ -9,7 +9,7 @@ Sophie가 Play Console에서 그대로 붙여 넣을 수 있게 정리한 문서
 | 앱 번들 (AAB) | `build/app/outputs/bundle/release/app-release.aab` | 1.17.2 (60), 출시용 키로 서명 |
 | 앱 아이콘 512×512 | `docs/store/icon-512.png` | 흰 바탕 염소 |
 | 그래픽 이미지 1024×500 | `docs/store/feature-graphic-ko.png`, `feature-graphic-en.png` | |
-| 폰 스크린샷 2~8장 | **Sophie 폰에서 찍기** | 사진이 실제로 보여야 해서 테스트 도구 이미지는 못 씀 |
+| 폰 스크린샷 2~8장 | `docs/store/screenshots-ko/` 5장 (1080×1920) | 에뮬레이터 + 직접 그린 가짜 사진. '테스트 무료'가 보이니 정식 출시 전 다시 찍기 |
 | 개인정보처리방침 | https://itssophie.dev/mehh/privacy.html | 한국어·영어 |
 | 문의 메일 | hello@itssophie.dev | |
 
@@ -156,6 +156,8 @@ These features need to compare every photo with every other photo (for example, 
 - 판매하면 한국 앱 페이지에 사업자 정보 표시(Play 판매자 프로필)
 
 ## 7. 출시 트랙
+
+> 2026-10-25: 비공개 테스트(Alpha) 1.17.2 (60) 검토 제출. 대한민국, 테스터 목록 'Soph'+'테스터 목록'(45명), 의견 hello@itssophie.dev. AI 라벨: 아이콘·그래픽·홈 스크린샷.
 
 1. **비공개 테스트** 트랙 만들기 → 테스터 이메일 목록(12명 이상) → AAB 업로드 → 검토 제출. 테스트 동안은 앱 안에서 그날의 묶음이 무료(`closedTestFree`), 인앱 상품 없어도 됨
 2. AAB가 올라가면 **수익 창출 > 인앱 상품**:
