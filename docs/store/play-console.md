@@ -1,4 +1,4 @@
-# Play Console 준비 (2026-10-23, Mehh 1.9.0)
+# Play Console 준비 (2026-10-25, Mehh 1.17.2)
 
 Sophie가 Play Console에서 그대로 붙여 넣을 수 있게 정리한 문서. 위에서부터 하면 된다.
 
@@ -6,14 +6,14 @@ Sophie가 Play Console에서 그대로 붙여 넣을 수 있게 정리한 문서
 
 | 무엇 | 파일 | 비고 |
 |---|---|---|
-| 앱 번들 (AAB) | `build/app/outputs/bundle/release/app-release.aab` | 1.9.0 (27), 출시용 키로 서명 |
+| 앱 번들 (AAB) | `build/app/outputs/bundle/release/app-release.aab` | 1.17.2 (60), 출시용 키로 서명 |
 | 앱 아이콘 512×512 | `docs/store/icon-512.png` | 흰 바탕 염소 |
 | 그래픽 이미지 1024×500 | `docs/store/feature-graphic-ko.png`, `feature-graphic-en.png` | |
 | 폰 스크린샷 2~8장 | **Sophie 폰에서 찍기** | 사진이 실제로 보여야 해서 테스트 도구 이미지는 못 씀 |
 | 개인정보처리방침 | https://itssophie.dev/mehh/privacy.html | 한국어·영어 |
 | 문의 메일 | hello@itssophie.dev | |
 
-추천 스크린샷 순서: ① 홈(정리할 묶음 N개) ② 묶음에서 [추천 보기] 누른 뒤(X와 이유) ③ 크게 보기(위 정리·아래 킵) ④ 캡처 추천 ⑤ 똑같은 사진 ⑥ 설정의 "사진과 기록은 이 폰에만 있어요".
+추천 스크린샷 순서 (폰에서 찍기, 사진이 많은 폰이 좋다): ① 홈(정리할 묶음 N개 + 용량 막대) ② 그날의 묶음에서 [추천 보기] 켠 뒤(X와 이유: 비슷한 컷·흔들림·눈 감음) ③ 크게 보기(위 정리·아래 킵) ④ 캡처 추천 ⑤ 큰 동영상 ⑥ 설정의 "사진과 기록은 이 폰에만 있어요".
 
 ## 1. 앱 만들기
 
@@ -28,34 +28,37 @@ Sophie가 Play Console에서 그대로 붙여 넣을 수 있게 정리한 문서
 ### 한국어
 
 - 앱 이름 (30자): `Mehh - 귀찮은 사람의 사진 정리`
-- 간단한 설명 (80자): `흔들린 사진, 비슷한 연속 컷, 똑같은 사진을 앱이 먼저 골라 두고 나는 확인만. 사진은 폰 밖으로 안 나가요.`
+- 간단한 설명 (80자): `비슷한 컷·흔들린 사진·눈 감은 컷·큰 동영상을 앱이 먼저 골라 둬요. 사진은 폰 밖으로 안 나가요.`
 - 자세한 설명:
 
 ```
 사진첩 정리, 하고는 싶은데 귀찮죠. Mehh가 먼저 골라 둘게요.
 
-■ 찍은 날짜와 장소로 묶어서
-여행 하루, 생일 파티처럼 그날 찍은 사진을 한 묶음으로 보여 줘요.
+■ 그날 단위로 묶어서
+여행 하루, 생일 파티처럼 그날 찍은 사진을 한 묶음으로 보여 줘요. 이름도 바꿀 수 있어요.
 
-■ 앱이 먼저 골라 두고, 나는 확인만
-비슷한 연속 컷에서는 가장 잘 나온 한 장을 남기고, 흔들린 사진·실수로 찍힌 사진·똑같은 사진을 골라 둬요. [추천 보기]를 누르면 X가 쳐지고, 마음에 안 들면 X만 끄면 돼요.
+■ 앱이 먼저 고르고, 나는 확인만
+비슷한 연속 컷에서는 확실히 잘 나온 한 장을 남기고, 흔들린 사진·눈 감은 컷·실수로 찍힌 사진·똑같은 사진을 골라 둬요. [추천 보기]를 켜면 X가 쳐지고, 마음에 안 드는 건 X만 끄면 돼요.
 
-■ 위로 밀면 정리, 아래로 밀면 킵
-크게 보면서 한 장씩 넘길 수도 있어요.
+■ 손가락 하나로
+옆으로 끌면 여러 장을 한 번에 선택하고, 길게 누르면 정리를 끝내요. 크게 보면서 위로 밀면 정리, 아래로 밀면 킵.
+
+■ 큰 동영상과 캡처도
+용량 큰 동영상을 크기순으로, 오래된 캡처와 연달아 찍은 캡처를 따로 모아 보여 줘요.
 
 ■ 바로 지우지 않아요
 [휴지통으로]를 누른 사진만 휴대폰 휴지통으로 가요. 30일 동안 갤러리에서 되살릴 수 있어요.
 
 ■ 사진은 폰 밖으로 나가지 않아요
-모든 분석은 휴대폰 안에서 해요. 서버로 사진을 보내지 않고, 클라우드 AI도 쓰지 않아요. 회원 가입도 없어요.
+모든 분석(눈 감은 컷 확인 포함)은 휴대폰 안에서 해요. 서버로 사진을 보내지 않고, 클라우드 AI도 쓰지 않아요. 회원 가입도 없어요.
 
 ■ 무료로 쓸 수 있는 것
-· 똑같은 사진, 낱장 사진, 캡처 정리와 그 추천
+· 똑같은 사진, 낱장 사진, 캡처, 큰 동영상 정리
 · 그날의 묶음 추천 매달 3개
-· 직접 X로 고르기, 크게 보기
+· 직접 고르기, 크게 보기
 
 ■ Mehh Pro
-모든 묶음의 정리 추천을 바로 봐요. 평생 이용권(한 번 구매) 또는 1년 이용권(자동 갱신, 언제든 해지).
+모든 묶음의 추천 정리를 바로 봐요. 평생 이용권(한 번 구매) 또는 1년 이용권(자동 갱신, 언제든 해지).
 
 문의: hello@itssophie.dev
 ```
@@ -63,31 +66,34 @@ Sophie가 Play Console에서 그대로 붙여 넣을 수 있게 정리한 문서
 ### English
 
 - App name (30): `Mehh: Lazy Photo Cleanup`
-- Short description (80): `The app picks blurry shots, similar bursts and duplicates. You just check.`
+- Short description (80): `Mehh picks similar, blurry and eyes-closed shots and big videos. You just check.`
 - Full description:
 
 ```
 You want a tidy photo library, but it's a chore. Mehh does the first pass.
 
-■ Grouped by day and place
-A trip, a birthday party — each day's photos show up as one set.
+■ One set per day
+A trip, a birthday party — each day's photos show up as one set. You can rename it.
 
 ■ The app picks, you check
-In each burst, Mehh keeps the best shot and marks blurry, accidental and duplicate photos. Tap Show picks to mark them, and unmark anything you want to keep.
+In each burst, Mehh keeps the clearly best shot and marks blurry, eyes-closed, accidental and duplicate photos. Turn on Show picks to mark them, and unmark anything you want to keep.
 
-■ Swipe up to remove, down to keep
-Or flip through them one by one in the large view.
+■ One finger
+Drag sideways to select many at once, press and hold to finish. In the large view, swipe up to remove, down to keep.
+
+■ Big videos and screenshots too
+See your largest videos by size, plus old and repeated screenshots.
 
 ■ Nothing is deleted right away
 Only photos you send with Move to trash go to your phone's trash, where you can restore them for 30 days.
 
 ■ Your photos never leave your phone
-All analysis happens on your phone. No uploads, no cloud AI, no sign-up.
+All analysis — including the closed-eye check — happens on your phone. No uploads, no cloud AI, no sign-up.
 
 ■ Free
-· Exact duplicates, single shots, screenshots — including picks
+· Duplicates, single shots, screenshots and big videos
 · Picks for 3 day sets every month
-· Marking photos yourself and the large view
+· Selecting yourself and the large view
 
 ■ Mehh Pro
 See picks for every set right away. Lifetime (one-time) or 1 year (auto-renews, cancel anytime).
@@ -106,7 +112,7 @@ Contact: hello@itssophie.dev
 | 앱 액세스 | 모든 기능을 로그인 없이 쓸 수 있음 (특별한 액세스 필요 없음) |
 | 광고 | 광고 없음 |
 | 콘텐츠 등급 (IARC) | 카테고리 "유틸리티·생산성" 계열. 폭력·성적 내용·도박·사용자 간 소통·위치 공유 없음 → 전체이용가 예상 |
-| 타겟층 | 13세 이상 (아동 대상 아님) |
+| 타겟층 | 13세 이상 (아동 대상 아님) — 13~15, 16~17, 18+ 선택 |
 | 뉴스 앱 / 정부 앱 / 금융 기능 / 건강 | 아니요 |
 | 데이터 보안 | 아래 4번 |
 | 사진·동영상 권한 | 아래 5번 |
@@ -141,9 +147,15 @@ These features need to compare every photo with every other photo (for example, 
 - 데모 영상이 필요하다고 하면: 홈 → 묶음 → [추천 보기] → [휴지통으로] → 갤러리 휴지통에서 확인하는 30초 화면 녹화.
 - `ACCESS_MEDIA_LOCATION`: 사진 EXIF 위치로 장소별로 묶기 위해 (기기 위치 권한은 쓰지 않음).
 
-## 6. 출시 트랙
+## 6. 출시 국가 (2026-10-24 정리)
 
-1. **내부 테스트** 트랙 만들기 → 테스터 이메일 목록(본인) → AAB 업로드 → 출시
+- 비공개 테스트: **대한민국**만
+- 정식 출시: **모든 국가 − 러시아·벨라루스**(Play 결제 제한). EU에 팔면 판매자(trader) 정보(주소·전화·이메일)가 EU 스토어에 공개되니, 싫으면 처음엔 EU를 빼고 시작
+- 판매하면 한국 앱 페이지에 사업자 정보 표시(Play 판매자 프로필)
+
+## 7. 출시 트랙
+
+1. **비공개 테스트** 트랙 만들기 → 테스터 이메일 목록(12명 이상) → AAB 업로드 → 검토 제출. 테스트 동안은 앱 안에서 그날의 묶음이 무료(`closedTestFree`), 인앱 상품 없어도 됨
 2. AAB가 올라가면 **수익 창출 > 인앱 상품**:
    - `mehh_pro_lifetime` 일회성 상품 · ₩12,900 / $9.99
    - `mehh_pro_yearly` 구독 · 1년 · ₩7,900 / $5.99
