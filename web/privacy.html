@@ -29,6 +29,7 @@
     <li>앱은 사진을 날짜·장소로 묶고 비슷하거나 똑같은 사진을 찾기 위해 사진첩 전체에 접근합니다.</li>
     <li>사진 분석(흐림·밝기·그림 해시 등)은 모두 휴대폰 안에서 합니다. 사진이나 분석 값을 운영자나 다른 서버로 보내지 않고, 클라우드 AI를 쓰지 않습니다.</li>
     <li>눈 감은 컷 찾기: 비슷한 연속 컷에서 눈 감은 사진을 고르려고, 휴대폰 안의 얼굴 감지(Google ML Kit, 기기 안에서만 동작)로 얼굴이 있는지와 눈을 떴는지만 봅니다. 사람을 알아보지 않고, 얼굴 모양 같은 정보는 저장하거나 밖으로 보내지 않습니다. 사진마다 "눈 감음" 여부 하나만 휴대폰 안에 남습니다.</li>
+    <li>진단 정보: 눈 감은 컷 찾기에 쓰는 Google ML Kit는 기능의 성능과 오류를 살피려고 기기 정보(기종·OS 버전), 앱 정보(패키지 이름·버전), 설치마다 정해지는 식별자, 성능 지표·오류 코드 같은 진단 정보를 Google로 보냅니다. 전송은 HTTPS로 암호화되고 Google은 이를 제3자에게 넘기지 않습니다. 사진, 얼굴 정보, 분석 결과는 보내지 않습니다. 자세한 내용은 <a href="https://developers.google.com/ml-kit/android-data-disclosure">Google ML Kit 데이터 공개</a>를 참고하세요.</li>
     <li>큰 동영상: 용량이 큰 동영상을 모아 보여 주려고 동영상의 크기·길이·날짜만 읽습니다. 동영상 내용은 분석하지 않습니다.</li>
     <li>얼굴을 알아보거나 사람별로 묶지 않습니다.</li>
   </ul>
@@ -78,6 +79,7 @@
     <li>The app reads your whole photo library to group photos by date and place and to find similar or identical photos.</li>
     <li>All analysis (blur, brightness, image hashes, etc.) happens on your phone. Photos and analysis values are never sent to the developer or any other server, and no cloud AI is used.</li>
     <li>Closed-eye check: to pick out shots with closed eyes among similar shots, on-device face detection (Google ML Kit, runs only on your phone) checks whether there is a face and whether the eyes are open. It does not recognize people, and no face data is stored or sent anywhere. Only a yes/no "eyes closed" flag per photo stays on your phone.</li>
+    <li>Diagnostics: Google ML Kit, used for the closed-eye check, sends diagnostic information to Google to monitor performance and errors — device information (model, OS version), app information (package name, version), a per-installation identifier, and performance metrics and error codes. It is encrypted in transit (HTTPS) and Google does not transfer it to third parties. Photos, face data and analysis results are not sent. See <a href="https://developers.google.com/ml-kit/android-data-disclosure">Google ML Kit data disclosure</a>.</li>
     <li>Big videos: to list large videos, the app reads only each video's size, length and date. Video content is not analyzed.</li>
     <li>The app does not recognize faces or group photos by person.</li>
   </ul>
