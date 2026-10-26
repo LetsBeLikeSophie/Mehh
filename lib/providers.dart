@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart' show AppLifecycleListener;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
@@ -40,10 +41,13 @@ final placeNamerProvider = Provider<PlaceNamer>(
 
 final handoffProvider = Provider((ref) => Handoff());
 
-/// Cortex가 설치돼 있으면 캡처를 Cortex로 보낼 수 있다
-final cortexInstalledProvider = FutureProvider<bool>(
-  (ref) => ref.read(handoffProvider).cortexInstalled(),
-);
+/// Cortex가 설치돼 있으면 캡처를 Cortex로 보낼 수 있다.
+/// 앱으로 돌아올 때마다 다시 묻는다: [받으러 가기]로 설치하고 돌아와도 바로 보낼 수 있게 (UX-56)
+final cortexInstalledProvider = FutureProvider<bool>((ref) {
+  final lifecycle = AppLifecycleListener(onResume: ref.invalidateSelf);
+  ref.onDispose(lifecycle.dispose);
+  return ref.read(handoffProvider).cortexInstalled();
+});
 
 final storeProvider = Provider<Store>(
   (ref) => isDemo ? MemoryStore() : SqliteStore(),

@@ -893,6 +893,41 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('Cortex를 받으러 가서 설치하고 돌아오면 [Cortex로]가 바로 보내기를 묻는다 (UX-56)', (
+    tester,
+  ) async {
+    final handoff = _FakeHandoff(installed: false);
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.singles, group: group),
+      extra: [handoffProvider.overrideWithValue(handoff)],
+    );
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cortex로'));
+    await tester.pumpAndSettle();
+    expect(find.text('Cortex가 필요해요'), findsOneWidget);
+    await tester.tap(find.text('취소'));
+    await tester.pumpAndSettle();
+
+    // 스토어에서 설치하고 최근 앱으로 돌아온다
+    handoff.installed = true;
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cortex로'));
+    await tester.pumpAndSettle();
+    expect(find.text('Cortex가 필요해요'), findsNothing);
+    expect(find.text('1장을 Cortex로 보낼까요?'), findsOneWidget);
+    await tester.tap(find.text('취소'));
+    await tester.pumpAndSettle();
+    await flush(tester);
+  });
+
   testWidgets('Cortex가 없으면 [Cortex로]를 눌렀을 때 받으러 가기 안내', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     await tester.tap(find.byType(XToggle).at(0));
@@ -1917,7 +1952,12 @@ void main() {
 }
 
 class _FakeHandoff extends Handoff {
+  _FakeHandoff({this.installed = true});
+  bool installed;
   final sent = <String>[];
+
+  @override
+  Future<bool> cortexInstalled() async => installed;
   final saved = StreamController<CortexSaved>.broadcast();
 
   @override
