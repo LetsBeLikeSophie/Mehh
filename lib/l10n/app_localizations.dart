@@ -1066,7 +1066,7 @@ abstract class L10n {
   /// No description provided for @barPhotos.
   ///
   /// In ko, this message translates to:
-  /// **'사진 {size}'**
+  /// **'사진·동영상 {size}'**
   String barPhotos(Object size);
 
   /// No description provided for @barSent.

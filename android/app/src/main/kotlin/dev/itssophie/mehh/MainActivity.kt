@@ -64,16 +64,19 @@ class MainActivity : FlutterActivity() {
         return out
     }
 
-    /// 사진첩 사진 전체 용량(바이트). 휴지통에 있는 것은 빠진다(안드로이드 11+ 기본 조회).
+    /// 사진첩 사진·동영상 전체 용량(바이트). 휴지통에 있는 것은 빠진다(안드로이드 11+ 기본 조회).
+    /// 동영상도 센다: 용량 막대 = 사진+동영상 (2026-10-26 Sophie V2-A)
     private fun photoBytes(): Long {
         var total = 0L
-        contentResolver.query(
+        for (uri in listOf(
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            arrayOf(MediaStore.MediaColumns.SIZE),
-            null, null, null,
-        )?.use { c ->
-            val col = c.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE)
-            while (c.moveToNext()) total += c.getLong(col)
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+        )) {
+            contentResolver.query(uri, arrayOf(MediaStore.MediaColumns.SIZE), null, null, null)
+                ?.use { c ->
+                    val col = c.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE)
+                    while (c.moveToNext()) total += c.getLong(col)
+                }
         }
         return total
     }

@@ -161,7 +161,7 @@
   "focusFinishYes": "Finish",
   "focusHint": "Press and hold to finish",
   "focusFinishSemantics": "Finish sorting",
-  "barPhotos": "Photos {size}",
+  "barPhotos": "Photos & videos {size}",
   "barSent": "Trash {size}",
   "openGallery": "Gallery",
   "noGallery": "Couldn't find a gallery app",

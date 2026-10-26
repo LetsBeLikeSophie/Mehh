@@ -636,7 +636,7 @@ class L10nKo extends L10n {
 
   @override
   String barPhotos(Object size) {
-    return '사진 $size';
+    return '사진·동영상 $size';
   }
 
   @override

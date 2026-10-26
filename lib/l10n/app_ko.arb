@@ -452,7 +452,7 @@
       }
     }
   },
-  "barPhotos": "사진 {size}",
+  "barPhotos": "사진·동영상 {size}",
   "barSent": "휴지통 {size}",
   "openGallery": "갤러리",
   "noGallery": "갤러리 앱을 찾지 못했어요",

@@ -876,6 +876,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('1개 휴지통으로'), findsOneWidget);
     expect(find.text('1장 휴지통으로'), findsNothing);
+    // 용량 막대는 사진·동영상을 센다 (V2): 고른 동영상이 막대의 선택·추천 정리에 들어간다
+    final c = ProviderScope.containerOf(
+      tester.element(find.byType(SortScreen)),
+    );
+    expect(find.textContaining('사진·동영상 '), findsOneWidget);
+    expect(c.read(selectedIdsProvider), isNot(contains('v2')));
     await flush(tester);
   });
 
@@ -1013,6 +1019,47 @@ void main() {
     await tester.tap(find.text('취소'));
     await tester.pumpAndSettle();
     await flush(tester);
+  });
+
+  test('용량 막대: 큰 동영상 크기도 전체에 들어가고, 고른 동영상은 선택에 든다 (V2)', () async {
+    final v = PhotoMeta(
+      id: 'v1',
+      takenAt: DateTime(2026, 10, 1),
+      width: 1920,
+      height: 1080,
+      isVideo: true,
+      durationSec: 60,
+      sizeBytes: 300 * 1024 * 1024,
+    );
+    final videos = DayGroup(
+      id: 'videos',
+      kind: DayGroupKind.videos,
+      photos: [v],
+    );
+    final store = MemoryStore()
+      ..decisions['v1'] = Decision(
+        photoId: 'v1',
+        state: DecisionState.toTrash,
+        at: DateTime(2026, 10, 1),
+      );
+    final c = ProviderContainer(
+      overrides: [
+        closedTestFreeProvider.overrideWithValue(false),
+        storeProvider.overrideWithValue(store),
+        photoLibraryProvider.overrideWithValue(
+          DemoPhotoLibrary() as PhotoLibrary,
+        ),
+        libraryProvider.overrideWith(
+          () => _FixedLibrary(LibraryState(photos: photos, groups: [videos])),
+        ),
+      ],
+    );
+    addTearDown(c.dispose);
+    await c.read(libraryProvider.future);
+    await c.read(decisionsProvider.future);
+    expect(c.read(selectedIdsProvider), contains('v1'));
+    final all = await c.read(photoBytesProvider.future);
+    expect(all, greaterThanOrEqualTo(300 * 1024 * 1024));
   });
 
   testWidgets('Cortex가 없으면 [Cortex로]를 눌렀을 때 받으러 가기 안내', (tester) async {
