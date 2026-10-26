@@ -230,6 +230,25 @@ final unlockedProvider = Provider.family<bool, DayGroup>(
           false),
 );
 
+/// 이 폰에서 아직 잠긴 그날의 묶음과 그 추천 (Pro 안내의 "이 폰에서" 한 줄, 2026-10-26 Sophie P2-A).
+/// 이미 계산해 둔 추천만 센다 (새 분석 없음)
+final lockedPicksProvider =
+    Provider.autoDispose<({int groups, Set<String> ids})>((ref) {
+      final lib = ref.watch(libraryProvider).value;
+      var groups = 0;
+      final ids = <String>{};
+      for (final g in lib?.groups ?? const <DayGroup>[]) {
+        if (g.kind != DayGroupKind.day || ref.watch(unlockedProvider(g))) {
+          continue;
+        }
+        final trash = ref.watch(groupPlanProvider(g)).trash.keys;
+        if (trash.isEmpty) continue;
+        groups++;
+        ids.addAll(trash);
+      }
+      return (groups: groups, ids: ids);
+    });
+
 // ───────────────────────── 권한
 
 /// 사진 접근 권한. null = 아직 확인 전.

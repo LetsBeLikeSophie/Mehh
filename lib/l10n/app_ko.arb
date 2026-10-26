@@ -564,5 +564,22 @@
         "format": "decimalPattern"
       }
     }
+  },
+  "proOnPhone": "이 폰에서: 잠긴 묶음 {groups}개 · 추천 {count}장 · 약 {size}",
+  "@proOnPhone": {
+    "description": "Pro 안내 상품 위: 이 폰의 잠긴 묶음·추천 장수·용량",
+    "placeholders": {
+      "groups": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
   }
 }

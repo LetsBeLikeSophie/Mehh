@@ -1284,6 +1284,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'이미 Cortex로 보낸 {count}장도 다시 보내요'**
   String cortexAskResend(int count);
+
+  /// Pro 안내 상품 위: 이 폰의 잠긴 묶음·추천 장수·용량
+  ///
+  /// In ko, this message translates to:
+  /// **'이 폰에서: 잠긴 묶음 {groups}개 · 추천 {count}장 · 약 {size}'**
+  String proOnPhone(int groups, int count, String size);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

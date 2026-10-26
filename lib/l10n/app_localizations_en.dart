@@ -949,4 +949,22 @@ class L10nEn extends L10n {
     );
     return '$_temp0';
   }
+
+  @override
+  String proOnPhone(int groups, int count, String size) {
+    final intl.NumberFormat groupsNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String groupsString = groupsNumberFormat.format(groups);
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      groups,
+      locale: localeName,
+      other: '$groupsString locked sets',
+      one: '1 locked set',
+    );
+    return 'On this phone: $_temp0 · $countString picks · about $size';
+  }
 }

@@ -157,6 +157,7 @@ void main() {
     await tester.tap(find.text('Mehh Pro'));
     await tester.pumpAndSettle();
     expect(find.text('구매 복원'), findsOneWidget);
+    await flush(tester);
   });
 
   testWidgets('설정: 비공개 테스트 동안 Pro 시트에 가격·코인 남은 수가 없다 (UX-51)', (tester) async {
@@ -168,6 +169,7 @@ void main() {
     expect(find.textContaining('₩'), findsNothing);
     expect(find.textContaining('남음', findRichText: true), findsNothing);
     expect(find.text('구매 복원'), findsOneWidget);
+    await flush(tester);
   });
 
   Override realPlan(Map<String, PhotoFeatures> features) =>
@@ -2034,6 +2036,28 @@ void main() {
     await tester.pumpAndSettle();
     await sendCortex(tester);
     expect(handoff.sent, ['new']);
+    await flush(tester);
+  });
+
+  testWidgets('Pro 안내: 이 폰의 잠긴 묶음·추천 장수를 상품 위에 한 줄 (P2)', (tester) async {
+    final day = DayGroup(
+      id: 'day-p0',
+      kind: DayGroupKind.day,
+      photos: burstPhotos,
+    );
+    await pump(
+      tester,
+      const SettingsScreen(),
+      extra: [
+        realPlan(paid),
+        libraryProvider.overrideWith(
+          () => _FixedLibrary(LibraryState(photos: burstPhotos, groups: [day])),
+        ),
+      ],
+    );
+    await tester.tap(find.text('Mehh Pro'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('이 폰에서: 잠긴 묶음 1개 · 추천 2장 · 약 '), findsOneWidget);
     await flush(tester);
   });
 

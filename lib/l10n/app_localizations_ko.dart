@@ -785,4 +785,16 @@ class L10nKo extends L10n {
 
     return '이미 Cortex로 보낸 $countString장도 다시 보내요';
   }
+
+  @override
+  String proOnPhone(int groups, int count, String size) {
+    final intl.NumberFormat groupsNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String groupsString = groupsNumberFormat.format(groups);
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '이 폰에서: 잠긴 묶음 $groupsString개 · 추천 $countString장 · 약 $size';
+  }
 }

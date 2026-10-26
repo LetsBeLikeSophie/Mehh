@@ -175,6 +175,8 @@ class _ProSheetState extends ConsumerState<_ProSheet> {
               if (!testFree && pro.freeLeft(DateTime.now()) == 0)
                 const _FreeTodo(),
               const SizedBox(height: 16),
+              // 돈 낼 이유를 이 사람의 사진으로: 잠긴 묶음·추천·용량 (P2-A)
+              if (!testFree) const _OnPhone(),
               if (testFree)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -423,6 +425,35 @@ class _FreeTodo extends ConsumerWidget {
         child: Text(
           useShots ? l.freeTodoShots(shotPicks) : l.freeTodoDuplicates(dups),
           style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+      ),
+    );
+  }
+}
+
+/// "이 폰에서: 잠긴 묶음 N개 · 추천 N장 · 약 N GB". 잠긴 추천이 없으면 그리지 않는다
+class _OnPhone extends ConsumerWidget {
+  const _OnPhone();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final locked = ref.watch(lockedPicksProvider);
+    if (locked.groups == 0) return const SizedBox.shrink();
+    final bytes = ref
+        .watch(idsBytesProvider((locked.ids.toList()..sort()).join(',')))
+        .value;
+    if (bytes == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(bottom: 10),
+      child: Text(
+        context.l.proOnPhone(
+          locked.groups,
+          locked.ids.length,
+          formatBytes(bytes),
+        ),
+        style: const TextStyle(
+          fontSize: MehhText.body,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
