@@ -94,6 +94,8 @@ class _ProSheetState extends ConsumerState<_ProSheet> {
   Widget build(BuildContext context) {
     final l = context.l;
     final pro = ref.watch(proProvider).value ?? const ProState();
+    // 비공개 테스트 동안은 코인·상품 대신 "테스트 동안 무료"만 (UX-51, 테스터가 돈을 내지 않게)
+    final testFree = ref.watch(closedTestFreeProvider);
     ref.listen<bool>(proProvider.select((s) => s.value?.pro ?? false), (
       was,
       now,
@@ -146,14 +148,19 @@ class _ProSheetState extends ConsumerState<_ProSheet> {
                   size: 18,
                   color: MehhColors.icon,
                 ),
-                CoinText(
-                  l.proFree(
-                    freeGroupsPerMonth,
-                    pro.freeLeft(DateTime.now()),
-                    formatDate(nextFreeReset(DateTime.now()), l.localeName),
-                  ),
-                  style: muted,
-                ),
+                testFree
+                    ? Text(l.proTestFree, style: muted)
+                    : CoinText(
+                        l.proFree(
+                          freeGroupsPerMonth,
+                          pro.freeLeft(DateTime.now()),
+                          formatDate(
+                            nextFreeReset(DateTime.now()),
+                            l.localeName,
+                          ),
+                        ),
+                        style: muted,
+                      ),
               ),
               // 무료 종류 추천은 Pro 없이도 늘 무료 (UX-37)
               _ProLine(
@@ -165,38 +172,45 @@ class _ProSheetState extends ConsumerState<_ProSheet> {
                 Text(l.proFreeKinds, style: muted),
               ),
               // 무료를 다 썼으면 지금 무료로 할 수 있는 일을 하나 보여 준다 (Sophie P1-A)
-              if (pro.freeLeft(DateTime.now()) == 0) const _FreeTodo(),
+              if (!testFree && pro.freeLeft(DateTime.now()) == 0)
+                const _FreeTodo(),
               const SizedBox(height: 16),
-              FutureBuilder(
-                future: _offers,
-                builder: (context, snap) {
-                  final offers = snap.data;
-                  if (offers == null) {
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24),
-                      child: Center(child: CircularProgressIndicator()),
-                    );
-                  }
-                  if (offers.isEmpty) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: Text(l.billingUnavailable, style: muted),
-                    );
-                  }
-                  return Column(
-                    children: [
-                      for (final o in offers) ...[
-                        _OfferRow(
-                          offer: o,
-                          busy: _buying == o.plan,
-                          onTap: _buying == null ? () => _buy(o) : null,
-                        ),
-                        const SizedBox(height: 8),
+              if (testFree)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Text(l.proAtLaunch, style: muted),
+                )
+              else
+                FutureBuilder(
+                  future: _offers,
+                  builder: (context, snap) {
+                    final offers = snap.data;
+                    if (offers == null) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24),
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+                    if (offers.isEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Text(l.billingUnavailable, style: muted),
+                      );
+                    }
+                    return Column(
+                      children: [
+                        for (final o in offers) ...[
+                          _OfferRow(
+                            offer: o,
+                            busy: _buying == o.plan,
+                            onTap: _buying == null ? () => _buy(o) : null,
+                          ),
+                          const SizedBox(height: 8),
+                        ],
                       ],
-                    ],
-                  );
-                },
-              ),
+                    );
+                  },
+                ),
             ],
             const SizedBox(height: 4),
             Text(l.proNotes, style: muted),

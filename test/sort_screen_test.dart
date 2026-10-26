@@ -51,6 +51,7 @@ void main() {
     Store? store,
     Billing? billing,
     PhotoLibrary? library,
+    bool testFree = false,
   }) async {
     tester.view.physicalSize = const Size(390 * 3, 844 * 3);
     tester.view.devicePixelRatio = 3;
@@ -61,7 +62,7 @@ void main() {
           photoLibraryProvider.overrideWithValue(
             library ?? DemoPhotoLibrary() as PhotoLibrary,
           ),
-          closedTestFreeProvider.overrideWithValue(false),
+          closedTestFreeProvider.overrideWithValue(testFree),
           storeProvider.overrideWithValue(store ?? MemoryStore()),
           proVaultProvider.overrideWithValue(vault ?? MemoryProVault()),
           billingProvider.overrideWithValue(
@@ -155,6 +156,21 @@ void main() {
     expect(find.text('개인정보처리방침'), findsOneWidget);
     await tester.tap(find.text('Mehh Pro'));
     await tester.pumpAndSettle();
+    expect(find.text('구매 복원'), findsOneWidget);
+  });
+
+  testWidgets('설정: 비공개 테스트 동안 Pro 시트에 가격·코인 남은 수가 없다 (UX-51)', (tester) async {
+    await pump(
+      tester,
+      const SettingsScreen(),
+      testFree: true,
+    );
+    await tester.tap(find.text('Mehh Pro'));
+    await tester.pumpAndSettle();
+    expect(find.text('비공개 테스트 동안은 모든 묶음 추천이 무료예요'), findsOneWidget);
+    expect(find.text('Pro는 정식 출시 때 살 수 있어요'), findsOneWidget);
+    expect(find.textContaining('₩'), findsNothing);
+    expect(find.textContaining('남음', findRichText: true), findsNothing);
     expect(find.text('구매 복원'), findsOneWidget);
   });
 

@@ -770,4 +770,10 @@ class L10nKo extends L10n {
 
   @override
   String get focusFinishNoneVideos => '고른 동영상이 없어요. 끝낼까요?';
+
+  @override
+  String get proTestFree => '비공개 테스트 동안은 모든 묶음 추천이 무료예요';
+
+  @override
+  String get proAtLaunch => 'Pro는 정식 출시 때 살 수 있어요';
 }

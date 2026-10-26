@@ -194,5 +194,7 @@
   "trashCountVideos": "{count, plural, =1{Move 1 video to trash} other{Move {count} videos to trash}}",
   "trashedVideos": "{count, plural, =1{✓ 1 video · {size} moved to trash · restore it within 30 days, or empty the trash to free up that space} other{✓ {count} videos · {size} moved to trash · restore them within 30 days, or empty the trash to free up that space}}",
   "nothingMarkedVideos": "No videos selected",
-  "focusFinishNoneVideos": "No videos selected. Finish?"
+  "focusFinishNoneVideos": "No videos selected. Finish?",
+  "proTestFree": "During the closed test, picks for every set are free",
+  "proAtLaunch": "Pro will be available at launch"
 }

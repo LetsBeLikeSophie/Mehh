@@ -1266,6 +1266,18 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'고른 동영상이 없어요. 끝낼까요?'**
   String get focusFinishNoneVideos;
+
+  /// 비공개 테스트 동안 Pro 시트의 코인 줄 대신
+  ///
+  /// In ko, this message translates to:
+  /// **'비공개 테스트 동안은 모든 묶음 추천이 무료예요'**
+  String get proTestFree;
+
+  /// 비공개 테스트 동안 Pro 시트의 상품 목록 자리
+  ///
+  /// In ko, this message translates to:
+  /// **'Pro는 정식 출시 때 살 수 있어요'**
+  String get proAtLaunch;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

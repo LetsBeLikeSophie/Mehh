@@ -927,4 +927,11 @@ class L10nEn extends L10n {
 
   @override
   String get focusFinishNoneVideos => 'No videos selected. Finish?';
+
+  @override
+  String get proTestFree =>
+      'During the closed test, picks for every set are free';
+
+  @override
+  String get proAtLaunch => 'Pro will be available at launch';
 }
