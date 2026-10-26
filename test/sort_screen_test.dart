@@ -106,6 +106,43 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('홈: 살펴보는 동안에도 "캡처 N장은 지금 바로 정리할 수 있어요 ›" → 캡처 화면 (H1)', (
+    tester,
+  ) async {
+    final shots = DayGroup(
+      id: 'shots',
+      kind: DayGroupKind.screenshots,
+      photos: [
+        for (var i = 0; i < 3; i++)
+          PhotoMeta(
+            id: 'old$i',
+            takenAt: DateTime(2025, 1, 1 + i),
+            width: 100,
+            height: 200,
+            isScreenshot: true,
+          ),
+      ],
+    );
+    await pump(
+      tester,
+      const Scaffold(body: HomeTab()),
+      library: _NeverAnalyzedLibrary(),
+      extra: [
+        libraryProvider.overrideWith(
+          () => _FixedLibrary(
+            LibraryState(photos: shots.photos, groups: [shots]),
+          ),
+        ),
+      ],
+    );
+    final ready = find.text('캡처 3장은 지금 바로 정리할 수 있어요 ›');
+    expect(ready, findsOneWidget);
+    await tester.tap(ready);
+    await tester.pumpAndSettle();
+    expect(find.byType(SortScreen), findsOneWidget);
+    await flush(tester);
+  });
+
   testWidgets('홈: 용량 막대 — 사진·추천 정리·선택·휴지통 (글자 색 = 칸 색, 한 줄)', (tester) async {
     final store = MemoryStore()
       ..freed[monthKey(DateTime.now())] = 5 * 1024 * 1024;

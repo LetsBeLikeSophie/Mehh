@@ -967,4 +967,19 @@ class L10nEn extends L10n {
     );
     return 'On this phone: $_temp0 · $countString picks · about $size';
   }
+
+  @override
+  String shotsReadyNow(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString screenshots are ready to clean up now ›',
+      one: '1 screenshot is ready to clean up now ›',
+    );
+    return '$_temp0';
+  }
 }

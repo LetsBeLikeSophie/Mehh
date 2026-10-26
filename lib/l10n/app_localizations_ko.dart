@@ -797,4 +797,13 @@ class L10nKo extends L10n {
 
     return '이 폰에서: 잠긴 묶음 $groupsString개 · 추천 $countString장 · 약 $size';
   }
+
+  @override
+  String shotsReadyNow(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '캡처 $countString장은 지금 바로 정리할 수 있어요 ›';
+  }
 }

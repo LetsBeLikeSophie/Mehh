@@ -1290,6 +1290,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'이 폰에서: 잠긴 묶음 {groups}개 · 추천 {count}장 · 약 {size}'**
   String proOnPhone(int groups, int count, String size);
+
+  /// 처음 사진을 살펴보는 동안 홈 큰 글씨 아래: 캡처 추천은 이미 준비됨
+  ///
+  /// In ko, this message translates to:
+  /// **'캡처 {count}장은 지금 바로 정리할 수 있어요 ›'**
+  String shotsReadyNow(int count);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

@@ -199,6 +199,8 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                       ),
                       const SizedBox(height: 6),
                       const _Subtitle(),
+                      // 살펴보는 동안에도 캡처 추천은 날짜만 보면 돼서 준비돼 있다 (2026-10-26 Sophie H1-A)
+                      if (left == 0) const _ShotsReadyNow(),
                     ]),
                     const FreedBar(),
                     if (limited) ...[
@@ -438,6 +440,51 @@ class _DottedTrack extends CustomPainter {
 
   @override
   bool shouldRepaint(_DottedTrack old) => false;
+}
+
+/// 처음 사진을 살펴보는 동안에만: "캡처 N장은 지금 바로 정리할 수 있어요 ›" → 캡처 화면
+class _ShotsReadyNow extends ConsumerWidget {
+  const _ShotsReadyNow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (ref.watch(analysisProvider.select((a) => a.done))) {
+      return const SizedBox.shrink();
+    }
+    final groups = ref.watch(libraryProvider).value?.groups ?? const [];
+    final shots = [
+      for (final g in groups)
+        if (g.kind == DayGroupKind.screenshots) g,
+    ].firstOrNull;
+    if (shots == null) return const SizedBox.shrink();
+    final n = planScreenshots(
+      shots.photos,
+      ref.watch(analysisProvider.select((a) => a.features)),
+      ref.watch(decisionsProvider).value ?? const {},
+      now: DateTime.now(),
+    ).length;
+    if (n == 0) return const SizedBox.shrink();
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: TextButton(
+        onPressed: () =>
+            Navigator.of(context)
+                .push(sortRoute(SortKind.screenshots, group: shots)),
+        style: TextButton.styleFrom(
+          foregroundColor: MehhColors.text,
+          padding: EdgeInsets.zero,
+          minimumSize: const Size(44, 36),
+        ),
+        child: Text(
+          context.l.shotsReadyNow(n),
+          style: const TextStyle(
+            fontSize: MehhText.bodySmall,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// "사진 N장" · 분석/위치 진행 상황

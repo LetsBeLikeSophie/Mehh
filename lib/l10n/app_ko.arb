@@ -581,5 +581,15 @@
         "type": "String"
       }
     }
+  },
+  "shotsReadyNow": "캡처 {count}장은 지금 바로 정리할 수 있어요 ›",
+  "@shotsReadyNow": {
+    "description": "처음 사진을 살펴보는 동안 홈 큰 글씨 아래: 캡처 추천은 이미 준비됨",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
   }
 }
