@@ -567,7 +567,9 @@ class _SortScreenState extends ConsumerState<SortScreen>
       _seenTags[e.key] = e.value.name;
     }
     _preMarkedSeen.addAll(src.preMarked);
-    // Cortex로 보내기는 모든 종류에서 같은 자리 (2026-10-24 Sophie)
+    // Cortex로 보내기는 모든 종류에서 같은 자리 (2026-10-24 Sophie).
+    // 큰 동영상은 빼다: Cortex는 사진·캡처만 받는다 (SPEC 큰 동영상 "Cortex 없음")
+    final cortexKind = widget.kind != SortKind.videos;
     final cortex = ref.watch(cortexInstalledProvider).value ?? false;
     final decisions = ref.watch(decisionsProvider).value ?? const {};
     final entities = ref.read(photoLibraryProvider).entities;
@@ -891,7 +893,8 @@ class _SortScreenState extends ConsumerState<SortScreen>
                   ),
                   // 고른 캡처가 있으면 [휴지통으로] 옆에 작은 Cortex 버튼 (공유하기처럼, 2026-10-23 Sophie)
                   // Cortex가 없어도 버튼은 보이고, 누르면 받으러 가기 (2026-10-25 Sophie)
-                  if ((cortex || cortexStoreUrl.isNotEmpty) &&
+                  if (cortexKind &&
+                      (cortex || cortexStoreUrl.isNotEmpty) &&
                       marked.isNotEmpty) ...[
                     const SizedBox(width: 8),
                     OutlinedButton.icon(

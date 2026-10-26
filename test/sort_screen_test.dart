@@ -715,9 +715,7 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('큰 동영상: 50MB 넘는 것만 용량 큰 순, 길이·용량 표시, 선택해서 휴지통으로', (
-    tester,
-  ) async {
+  testWidgets('큰 동영상: 50MB 넘는 것만 용량 큰 순, 길이·용량 표시, 선택해서 휴지통으로', (tester) async {
     final t = DateTime(2026, 10, 1);
     PhotoMeta v(String id, int mb, int sec) => PhotoMeta(
       id: id,
@@ -741,6 +739,35 @@ void main() {
     await tester.tap(find.byType(XToggle).at(0));
     await tester.pumpAndSettle();
     expect(find.text('1장 휴지통으로'), findsOneWidget);
+    await flush(tester);
+  });
+
+  testWidgets('큰 동영상: Cortex가 깔려 있어도 [Cortex로]가 없다 (Cortex는 사진·캡처만)', (
+    tester,
+  ) async {
+    PhotoMeta v(String id) => PhotoMeta(
+      id: id,
+      takenAt: DateTime(2026, 10, 1),
+      width: 1920,
+      height: 1080,
+      isVideo: true,
+      durationSec: 60,
+      sizeBytes: 200 * 1024 * 1024,
+    );
+    final videos = DayGroup(
+      id: 'videos',
+      kind: DayGroupKind.videos,
+      photos: [v('v1'), v('v2')],
+    );
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.videos, group: videos),
+      extra: [cortexInstalledProvider.overrideWith((ref) async => true)],
+    );
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.pumpAndSettle();
+    expect(find.byType(XToggle), findsNWidgets(2));
+    expect(find.text('Cortex로'), findsNothing);
     await flush(tester);
   });
 
