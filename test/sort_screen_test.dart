@@ -846,6 +846,57 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('묶음 이름: 1장만 남겨 낱장 사진으로 옮겨 가도 낱장 줄·제목은 그대로 (UX-47)', (
+    tester,
+  ) async {
+    final store = MemoryStore();
+    await pump(
+      tester,
+      SortScreen(
+        kind: SortKind.day,
+        group: DayGroup(id: 'day-p0', kind: DayGroupKind.day, photos: photos),
+      ),
+      store: store,
+    );
+    await tester.tap(find.textContaining('9월 1일').first);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '지우 돌잔치');
+    await tester.tap(find.text('저장'));
+    await tester.pumpAndSettle();
+    await flush(tester);
+
+    // 나머지를 보내 p2만 남으면 묶음이 사라지고 p2는 낱장 사진으로 간다
+    final singles = DayGroup(
+      id: 'singles',
+      kind: DayGroupKind.singles,
+      photos: [photos[2]],
+    );
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.singles, group: singles),
+      store: store,
+    );
+    expect(find.textContaining('지우 돌잔치'), findsNothing);
+    expect(find.textContaining('낱장 사진'), findsWidgets);
+    final names = await store.loadNames();
+    expect(groupNameOf(names, singles), isNull);
+
+    // 둘로 갈라지면 원래 id를 가진 쪽만 이름을 갖는다
+    final front = DayGroup(
+      id: 'day-p0',
+      kind: DayGroupKind.day,
+      photos: photos.sublist(0, 2),
+    );
+    final back = DayGroup(
+      id: 'day-p2',
+      kind: DayGroupKind.day,
+      photos: photos.sublist(2),
+    );
+    expect(groupNameOf(names, front, all: [front, back]), '지우 돌잔치');
+    expect(groupNameOf(names, back, all: [front, back]), isNull);
+    await flush(tester);
+  });
+
   testWidgets('그리드: 화면 왼쪽 끝에서 안쪽으로 밀면 뒤로 간다 (사진 선택 대신)', (tester) async {
     await pump(
       tester,

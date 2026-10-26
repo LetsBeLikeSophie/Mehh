@@ -611,7 +611,12 @@ class _GroupTile extends ConsumerWidget {
 
     final original = groupTitle(group, l, place: place, withYear: false);
     final title =
-        groupNameOf(ref.watch(groupNamesProvider).value, group) ?? original;
+        groupNameOf(
+          ref.watch(groupNamesProvider).value,
+          group,
+          all: ref.watch(libraryProvider).value?.groups ?? const [],
+        ) ??
+        original;
     return InkWell(
       // 길게 누르면 이름 바꾸기 (2026-10-24 Sophie)
       onLongPress: () async {

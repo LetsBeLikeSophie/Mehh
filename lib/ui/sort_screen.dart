@@ -308,7 +308,13 @@ class _SortScreenState extends ConsumerState<SortScreen>
     final original = sortTitle(widget.kind, g, widget.place, context.l);
     final v = await askGroupName(
       context,
-      current: groupNameOf(ref.read(groupNamesProvider).value, g) ?? original,
+      current:
+          groupNameOf(
+            ref.read(groupNamesProvider).value,
+            g,
+            all: ref.read(libraryProvider).value?.groups ?? const [],
+          ) ??
+          original,
       original: original,
     );
     if (v != null) {
@@ -771,6 +777,14 @@ class _SortScreenState extends ConsumerState<SortScreen>
                                                         )
                                                         .value,
                                                     g,
+                                                    all:
+                                                        ref
+                                                            .watch(
+                                                              libraryProvider,
+                                                            )
+                                                            .value
+                                                            ?.groups ??
+                                                        const [],
                                                   ) ??
                                                   sortTitle(
                                                     widget.kind,

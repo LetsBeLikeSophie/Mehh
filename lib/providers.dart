@@ -789,13 +789,33 @@ final groupPlanProvider = Provider.autoDispose.family<GroupPlan, DayGroup>((
 
 /// [g]에 붙은 이름의 저장 키. 먼저 묶음 id, 없으면 사진이 가장 많이 겹치는 이름
 /// (첫 사진을 지우면 묶음 id가 바뀌어도 이름이 남게, 코인 열림과 같은 방식)
-String? groupNameKey(Map<String, GroupName>? names, DayGroup? g) {
+/// 겹침으로 찾기는 그날의 묶음(day-*)끼리만, 그리고 한 이름은 지금 묶음들([all]) 중
+/// 가장 많이 겹치는 한 곳에만 (낱장 사진으로 옮겨 간 1장이나 둘로 갈라진 다른 쪽이
+/// 이름을 가져가지 않게, UX-47)
+String? groupNameKey(
+  Map<String, GroupName>? names,
+  DayGroup? g, {
+  Iterable<DayGroup> all = const [],
+}) {
   if (names == null || g == null) return null;
   if (names.containsKey(g.id)) return g.id;
+  if (g.kind != DayGroupKind.day) return null;
+  int overlap(DayGroup d, GroupName v) =>
+      d.photos.where((p) => v.photoIds.contains(p.id)).length;
   String? best;
   var most = 0;
   for (final e in names.entries) {
-    final n = g.photos.where((p) => e.value.photoIds.contains(p.id)).length;
+    if (!e.key.startsWith('day-')) continue;
+    final n = overlap(g, e.value);
+    if (n == 0) continue;
+    // 그 이름의 원래 묶음이 아직 있거나, 더 많이(같게) 겹치는 다른 묶음이 있으면 양보
+    final taken = all.any(
+      (o) =>
+          o.id != g.id &&
+          (o.id == e.key ||
+              (o.kind == DayGroupKind.day && overlap(o, e.value) >= n)),
+    );
+    if (taken) continue;
     if (n > most) {
       most = n;
       best = e.key;
@@ -805,8 +825,11 @@ String? groupNameKey(Map<String, GroupName>? names, DayGroup? g) {
 }
 
 /// [g]의 바꾼 이름. 없으면 null (기본 이름을 쓴다)
-String? groupNameOf(Map<String, GroupName>? names, DayGroup? g) =>
-    names?[groupNameKey(names, g)]?.name;
+String? groupNameOf(
+  Map<String, GroupName>? names,
+  DayGroup? g, {
+  Iterable<DayGroup> all = const [],
+}) => names?[groupNameKey(names, g, all: all)]?.name;
 
 /// 사용자가 바꾼 묶음 이름 (2026-10-24 Sophie). 기본 이름은 따로 계산하므로 언제든 되돌릴 수 있다
 class GroupNamesNotifier extends AsyncNotifier<Map<String, GroupName>> {
@@ -820,7 +843,11 @@ class GroupNamesNotifier extends AsyncNotifier<Map<String, GroupName>> {
     final store = ref.read(storeProvider);
     final next = {...state.value ?? {}};
     // 옛 id로 남아 있던 이름은 지금 id로 옮긴다
-    final old = groupNameKey(next, group);
+    final old = groupNameKey(
+      next,
+      group,
+      all: ref.read(libraryProvider).value?.groups ?? const [],
+    );
     if (old != null && old != group.id) {
       await store.saveName(old, null);
       next.remove(old);
