@@ -1062,6 +1062,55 @@ void main() {
     expect(all, greaterThanOrEqualTo(300 * 1024 * 1024));
   });
 
+  testWidgets('비공개 테스트 동안 [추천 보기]로 본 묶음은 테스트가 끝나도 열려 있다 (T1)', (tester) async {
+    final day = DayGroup(
+      id: 'day-p0',
+      kind: DayGroupKind.day,
+      photos: burstPhotos,
+    );
+    final vault = MemoryProVault();
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.day, group: day),
+      vault: vault,
+      testFree: true,
+      extra: [realPlan(paid)],
+    );
+    await tester.tap(find.textContaining('추천 보기'));
+    await tester.pumpAndSettle();
+    expect(
+      vault.value.unlockedPhotos,
+      containsAll(burstPhotos.map((p) => p.id)),
+    );
+    expect(vault.value.freeUsed, 0); // 코인은 안 쓴다
+    await flush(tester);
+
+    // 테스트가 끝난 빌드: 같은 묶음은 코인 없이 그대로 열려 있다
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.day, group: day),
+      vault: vault,
+      extra: [realPlan(paid)],
+    );
+    expect(find.byIcon(Icons.lock_outline), findsNothing);
+    expect(find.text('추천 보기 · 2장'), findsOneWidget);
+    await flush(tester);
+  });
+
+  testWidgets('비공개 테스트가 끝나고 처음 켜면 홈에 한 번 "비공개 테스트가 끝났어요 · 이번 달 ◉ 3개" (T1)', (
+    tester,
+  ) async {
+    final store = MemoryStore()..counters['closedTest'] = 1;
+    await pump(tester, const Scaffold(body: HomeTab()), store: store);
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('비공개 테스트가 끝났어요', findRichText: true),
+      findsOneWidget,
+    );
+    expect(store.counters['closedTest'], 2); // 다음엔 안 뜬다
+    await flush(tester);
+  });
+
   testWidgets('Cortex가 없으면 [Cortex로]를 눌렀을 때 받으러 가기 안내', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     await tester.tap(find.byType(XToggle).at(0));

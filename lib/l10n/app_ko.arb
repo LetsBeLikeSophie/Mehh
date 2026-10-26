@@ -599,5 +599,14 @@
   },
   "@videoOpenFailed": {
     "description": "▶를 눌렀는데 동영상을 열 앱이 없을 때"
+  },
+  "testEnded": "비공개 테스트가 끝났어요 · 이번 달 ◉ {count}개",
+  "@testEnded": {
+    "description": "비공개 테스트가 끝나고 처음 켤 때 한 번",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

@@ -82,7 +82,35 @@ class ProNotifier extends AsyncNotifier<ProState> {
     Future.microtask(() => restore(quiet: true));
     // 새 달이 됐으면 무료 묶음이 다시 생겼다고 한 번 알린다
     Future.microtask(checkMonth);
+    Future.microtask(_checkTestEnded);
     return s;
+  }
+
+  /// 비공개 테스트 동안 켠 적이 있는데 이제 테스트가 끝났으면 한 번 알린다 (2026-10-26 Sophie T1-A).
+  /// 기록: closedTest 0 = 처음, 1 = 테스트 동안 켬, 2 = 끝났다고 알림
+  Future<void> _checkTestEnded() async {
+    try {
+      final store = ref.read(storeProvider);
+      final seen = await store.counter('closedTest');
+      if (!ref.mounted) return;
+      if (ref.read(closedTestFreeProvider)) {
+        if (seen == 0) await store.bumpCounter('closedTest');
+      } else if (seen == 1) {
+        await store.bumpCounter('closedTest');
+        if (ref.mounted) ref.read(testEndedProvider.notifier).raise();
+      }
+    } catch (_) {
+      // 기록을 못 읽으면 알리지 않는다 (돈 상태는 그대로)
+    }
+  }
+
+  /// 비공개 테스트 동안 [추천 보기]로 본 묶음: 코인 없이 사진만 기억해 둔다.
+  /// 테스트가 끝나도 계속 열려 있게 (2026-10-26 Sophie T1-A)
+  Future<void> keepOpen(Iterable<String> photoIds) async {
+    final s = await future;
+    final ids = photoIds.toSet();
+    if (s.unlockedPhotos.containsAll(ids)) return;
+    await _save(s.copyWith(unlockedPhotos: {...s.unlockedPhotos, ...ids}));
   }
 
   /// 달이 바뀌어 무료 묶음이 다시 채워졌으면 한 번 알린다 (UX 리뷰 2026-10-23 UX-40).
@@ -204,6 +232,11 @@ final yearlyEndedProvider = NotifierProvider<OneShotNotifier, bool>(
 
 /// 이번 달 무료 묶음이 방금 다시 생겼다 (홈이 한 번 알리고 내린다)
 final freeRefilledProvider = NotifierProvider<OneShotNotifier, bool>(
+  OneShotNotifier.new,
+);
+
+/// 비공개 테스트가 방금 끝났다 (홈이 "비공개 테스트가 끝났어요 · 이번 달 ◉ 3개"를 한 번 알린다)
+final testEndedProvider = NotifierProvider<OneShotNotifier, bool>(
   OneShotNotifier.new,
 );
 

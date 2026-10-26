@@ -1308,6 +1308,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'이 동영상을 열 앱을 찾지 못했어요'**
   String get videoOpenFailed;
+
+  /// 비공개 테스트가 끝나고 처음 켤 때 한 번
+  ///
+  /// In ko, this message translates to:
+  /// **'비공개 테스트가 끝났어요 · 이번 달 ◉ {count}개'**
+  String testEnded(int count);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

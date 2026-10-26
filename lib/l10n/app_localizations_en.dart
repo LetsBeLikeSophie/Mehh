@@ -988,4 +988,15 @@ class L10nEn extends L10n {
 
   @override
   String get videoOpenFailed => 'Couldn\'t find an app to play this video';
+
+  @override
+  String testEnded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'The closed test is over · ◉ $count this month',
+      one: 'The closed test is over · ◉ 1 this month',
+    );
+    return '$_temp0';
+  }
 }

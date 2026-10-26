@@ -812,4 +812,9 @@ class L10nKo extends L10n {
 
   @override
   String get videoOpenFailed => '이 동영상을 열 앱을 찾지 못했어요';
+
+  @override
+  String testEnded(int count) {
+    return '비공개 테스트가 끝났어요 · 이번 달 ◉ $count개';
+  }
 }
