@@ -64,6 +64,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
           ? (widget.kind == SortKind.videos
                 ? l.trashCountVideos(marked)
                 : l.trashCount(marked))
+          : widget.kind == SortKind.videos
+          ? l.focusFinishNoneVideos
           : l.focusFinishNone,
       no: l.focusKeepLooking,
       yes: marked > 0 ? l.toTrash : l.focusFinishYes,

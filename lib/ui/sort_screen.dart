@@ -458,7 +458,11 @@ class _SortScreenState extends ConsumerState<SortScreen>
     final ok = await askMehh(
       context,
       // 제목 = 아래 버튼과 같은 말 "N장 휴지통으로" (2026-10-24 Sophie: 반복되는 말 없이)
-      title: n > 0 ? _trashCount(l, n) : l.focusFinishNone,
+      title: n > 0
+          ? _trashCount(l, n)
+          : widget.kind == SortKind.videos
+          ? l.focusFinishNoneVideos
+          : l.focusFinishNone,
       no: l.focusKeepLooking,
       yes: n > 0 ? l.toTrash : l.focusFinishYes,
     );
@@ -913,7 +917,9 @@ class _SortScreenState extends ConsumerState<SortScreen>
                           : () => _send(marked, src, order),
                       child: Text(
                         marked.isEmpty
-                            ? l.nothingMarked
+                            ? (widget.kind == SortKind.videos
+                                  ? l.nothingMarkedVideos
+                                  : l.nothingMarked)
                             : _trashCount(l, marked.length),
                         style: const TextStyle(
                           fontSize: MehhText.body,

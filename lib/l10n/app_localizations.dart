@@ -1254,6 +1254,18 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'✓ {count}개 · {size} 휴지통으로 보냈어요 · 30일 안에 되살릴 수 있고, 휴지통을 비우면 그만큼 공간이 생겨요'**
   String trashedVideos(int count, String size);
+
+  /// 큰 동영상 화면에서 아무것도 안 골랐을 때 흐린 버튼
+  ///
+  /// In ko, this message translates to:
+  /// **'고른 동영상이 없어요'**
+  String get nothingMarkedVideos;
+
+  /// 큰 동영상에서 고른 것 없이 길게 눌러 끝낼 때 확인 창
+  ///
+  /// In ko, this message translates to:
+  /// **'고른 동영상이 없어요. 끝낼까요?'**
+  String get focusFinishNoneVideos;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

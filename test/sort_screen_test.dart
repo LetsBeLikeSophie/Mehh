@@ -737,6 +737,8 @@ void main() {
     expect(find.text('0:40 · 300MB'), findsOneWidget);
     expect(find.text('추천 보기 · 0장'), findsNothing); // 앱이 골라 주지 않는다
     expect(find.textContaining('2개'), findsWidgets); // 홈 줄과 같은 단위
+    expect(find.text('고른 동영상이 없어요'), findsOneWidget); // 빈 상태도 동영상 말로 (UX-50)
+    expect(find.text('정리할 사진이 없어요'), findsNothing);
     await tester.tap(find.byType(XToggle).at(0));
     await tester.pumpAndSettle();
     expect(find.text('1개 휴지통으로'), findsOneWidget);

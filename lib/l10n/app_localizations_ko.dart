@@ -764,4 +764,10 @@ class L10nKo extends L10n {
 
     return '✓ $countString개 · $size 휴지통으로 보냈어요 · 30일 안에 되살릴 수 있고, 휴지통을 비우면 그만큼 공간이 생겨요';
   }
+
+  @override
+  String get nothingMarkedVideos => '고른 동영상이 없어요';
+
+  @override
+  String get focusFinishNoneVideos => '고른 동영상이 없어요. 끝낼까요?';
 }

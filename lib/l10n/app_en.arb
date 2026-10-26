@@ -192,5 +192,7 @@
   "cortexGetYes": "Get Cortex",
   "videosCount": "{count, plural, =1{1 video} other{{count} videos}}",
   "trashCountVideos": "{count, plural, =1{Move 1 video to trash} other{Move {count} videos to trash}}",
-  "trashedVideos": "{count, plural, =1{✓ 1 video · {size} moved to trash · restore it within 30 days, or empty the trash to free up that space} other{✓ {count} videos · {size} moved to trash · restore them within 30 days, or empty the trash to free up that space}}"
+  "trashedVideos": "{count, plural, =1{✓ 1 video · {size} moved to trash · restore it within 30 days, or empty the trash to free up that space} other{✓ {count} videos · {size} moved to trash · restore them within 30 days, or empty the trash to free up that space}}",
+  "nothingMarkedVideos": "No videos selected",
+  "focusFinishNoneVideos": "No videos selected. Finish?"
 }
