@@ -55,6 +55,9 @@ class _SortScreenState extends ConsumerState<SortScreen>
   /// 나중에 X를 꺼서 킵하면 추천에서 빠지므로, 누른 순간의 목록을 기억한다)
   final _picked = <String>{};
 
+  /// 손으로(X 버튼·끌어서·[전체 선택]) 고른 사진. Cortex로 보낼 수 있는 것 (C1)
+  final _chosen = <String>{};
+
   /// 화면에 보였던 이유 표시 (킵해서 사라진 표시도 기록에 남기려고)
   final _seenTags = <String, String>{};
 
@@ -198,7 +201,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
 
   Future<void> _toggle(String id, bool marked) {
     // 손으로 누른 사진은 추천이 아니라 "직접 고른 사진" (Cortex로 보낼 수 있다, C1)
-    _picked.remove(id);
+    marked ? _chosen.remove(id) : _chosen.add(id);
     return ref.read(decisionsProvider.notifier).set([
       id,
     ], marked ? DecisionState.keep : DecisionState.toTrash);
@@ -212,15 +215,16 @@ class _SortScreenState extends ConsumerState<SortScreen>
     Map<String, Decision> decisions,
   ) => [
     for (final id in marked)
-      if (!_picked.contains(id) &&
-          !(src.preMarked.contains(id) &&
-              stateOf(decisions, id) == DecisionState.undecided))
+      if (_chosen.contains(id) ||
+          (!_picked.contains(id) &&
+              !(src.preMarked.contains(id) &&
+                  stateOf(decisions, id) == DecisionState.undecided)))
         id,
   ];
 
   /// [전체 선택] = 모두 X
   Future<void> _selectAll(List<String> ids) {
-    _picked.removeAll(ids); // 직접 고른 것
+    _chosen.addAll(ids); // 직접 고른 것
     return ref.read(decisionsProvider.notifier).set(ids, DecisionState.toTrash);
   }
 
@@ -308,7 +312,8 @@ class _SortScreenState extends ConsumerState<SortScreen>
 
   void _paint(String id) {
     _painted.add(id);
-    _picked.remove(id); // 끌어서 고른 것도 직접 고른 사진
+    // 끌어서 고른 것도 직접 고른 사진
+    _paintTo! ? _chosen.add(id) : _chosen.remove(id);
     _paintLast = id;
     // X 버튼과 같은 결과: 켜면 정리(X), 끄면 킵
     ref.read(decisionsProvider.notifier).set([
