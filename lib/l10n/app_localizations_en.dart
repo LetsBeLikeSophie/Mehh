@@ -934,4 +934,19 @@ class L10nEn extends L10n {
 
   @override
   String get proAtLaunch => 'Pro will be available at launch';
+
+  @override
+  String cortexAskResend(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Includes $countString already sent to Cortex',
+      one: 'Includes 1 already sent to Cortex',
+    );
+    return '$_temp0';
+  }
 }

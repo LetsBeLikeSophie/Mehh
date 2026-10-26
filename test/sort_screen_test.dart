@@ -928,6 +928,50 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('Cortex: 이미 보낸 사진이 섞여 있으면 보낼까요? 창이 그 장수를 말한다 (UX-57)', (
+    tester,
+  ) async {
+    final five = [
+      for (var i = 0; i < 5; i++)
+        PhotoMeta(
+          id: 'c$i',
+          takenAt: DateTime(2026, 9, 1 + i * 5, 10),
+          width: 100,
+          height: 100,
+        ),
+    ];
+    // 지난주 [나중에]로 남긴 "Cortex에 있음" 2장
+    final store = MemoryStore()..cortexSent.addAll({'c0': true, 'c1': true});
+    await pump(
+      tester,
+      SortScreen(
+        kind: SortKind.singles,
+        group: DayGroup(
+          id: 'singles',
+          kind: DayGroupKind.singles,
+          photos: five,
+        ),
+      ),
+      store: store,
+      extra: [
+        cortexInstalledProvider.overrideWith((ref) async => true),
+        handoffProvider.overrideWithValue(_FakeHandoff()),
+      ],
+    );
+    expect(find.text('Cortex에 있음'), findsNWidgets(2));
+    for (var i = 0; i < 5; i++) {
+      await tester.tap(find.byType(XToggle).at(i));
+    }
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cortex로'));
+    await tester.pumpAndSettle();
+    expect(find.text('5장을 Cortex로 보낼까요?'), findsOneWidget);
+    expect(find.textContaining('이미 Cortex로 보낸 2장도 다시 보내요'), findsOneWidget);
+    await tester.tap(find.text('취소'));
+    await tester.pumpAndSettle();
+    await flush(tester);
+  });
+
   testWidgets('Cortex가 없으면 [Cortex로]를 눌렀을 때 받으러 가기 안내', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     await tester.tap(find.byType(XToggle).at(0));

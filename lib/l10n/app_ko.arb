@@ -554,5 +554,15 @@
   "proAtLaunch": "Pro는 정식 출시 때 살 수 있어요",
   "@proAtLaunch": {
     "description": "비공개 테스트 동안 Pro 시트의 상품 목록 자리"
+  },
+  "cortexAskResend": "이미 Cortex로 보낸 {count}장도 다시 보내요",
+  "@cortexAskResend": {
+    "description": "Cortex로 보낼까요? 창: 고른 사진 중 이미 보낸 장수",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
   }
 }

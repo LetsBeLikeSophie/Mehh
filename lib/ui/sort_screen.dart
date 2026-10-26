@@ -159,11 +159,16 @@ class _SortScreenState extends ConsumerState<SortScreen>
   Future<void> _sendCortex(List<String> ids) async {
     // 매번 한 줄로 묻는다: "N장을 Cortex로 보낼까요?" (UX-43, 2026-10-24 Sophie: 지우기는 받은 뒤에 묻는다)
     final l = context.l;
+    // 이미 Cortex로 보낸 사진이 섞여 있으면 말해 준다 (보내는 범위는 그대로, UX-57)
+    final sent = ref.read(cortexSentProvider).value ?? const {};
+    final again = ids.where(sent.containsKey).length;
     final ok = await askMehh(
       context,
       title: l.cortexAskTitle(ids.length),
       // 사진이 AI 앱으로 간다는 것만 한 줄 (2026-10-24 Sophie)
-      body: l.cortexAskNote,
+      body: again > 0
+          ? '${l.cortexAskNote}\n${l.cortexAskResend(again)}'
+          : l.cortexAskNote,
       no: l.cancel,
       yes: l.cortexAskYes,
     );

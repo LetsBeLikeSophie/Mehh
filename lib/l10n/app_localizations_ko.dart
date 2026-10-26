@@ -776,4 +776,13 @@ class L10nKo extends L10n {
 
   @override
   String get proAtLaunch => 'Pro는 정식 출시 때 살 수 있어요';
+
+  @override
+  String cortexAskResend(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '이미 Cortex로 보낸 $countString장도 다시 보내요';
+  }
 }

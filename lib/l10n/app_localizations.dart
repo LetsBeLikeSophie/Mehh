@@ -1278,6 +1278,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'Pro는 정식 출시 때 살 수 있어요'**
   String get proAtLaunch;
+
+  /// Cortex로 보낼까요? 창: 고른 사진 중 이미 보낸 장수
+  ///
+  /// In ko, this message translates to:
+  /// **'이미 Cortex로 보낸 {count}장도 다시 보내요'**
+  String cortexAskResend(int count);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

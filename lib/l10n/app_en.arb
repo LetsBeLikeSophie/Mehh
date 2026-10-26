@@ -196,5 +196,6 @@
   "nothingMarkedVideos": "No videos selected",
   "focusFinishNoneVideos": "No videos selected. Finish?",
   "proTestFree": "During the closed test, picks for every set are free",
-  "proAtLaunch": "Pro will be available at launch"
+  "proAtLaunch": "Pro will be available at launch",
+  "cortexAskResend": "{count, plural, =1{Includes 1 already sent to Cortex} other{Includes {count} already sent to Cortex}}"
 }
