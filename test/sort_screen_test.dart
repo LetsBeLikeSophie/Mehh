@@ -1971,7 +1971,16 @@ void main() {
       ],
     );
     await openLocked(tester, '추천 보기 · 2장');
+    // 추천으로 X가 된 사진은 Cortex로 안 간다(C1). 하나를 손으로 다시 고르면 그것만 간다
+    final rec = find.byWidgetPredicate((w) => w is XToggle && w.on).first;
+    await tester.tap(rec);
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byWidgetPredicate((w) => w is XToggle && !w.on).first,
+    );
+    await tester.pumpAndSettle();
     await sendCortex(tester);
+    expect(handoff.sent, hasLength(1));
     handoff.saved.add(CortexSaved(handoff.sent.length, null));
     await tester.pumpAndSettle();
     await tester.tap(find.text('휴지통으로'));
@@ -1979,6 +1988,52 @@ void main() {
     final picks = await store.loadPicks();
     expect(picks.where((p) => p.kind == 'day'), isNotEmpty);
     expect(picks.where((p) => p.sent), isNotEmpty);
+    await flush(tester);
+  });
+
+  testWidgets('Cortex: [추천 보기]로 X가 된 사진은 안 보내고, 직접 고른 사진만 보낸다 (C1)', (
+    tester,
+  ) async {
+    final shots = DayGroup(
+      id: 'shots',
+      kind: DayGroupKind.screenshots,
+      photos: [
+        for (var i = 0; i < 4; i++)
+          PhotoMeta(
+            id: 's$i',
+            takenAt: DateTime(2025, 1, 1 + i), // 오래된 캡처 = 추천
+            width: 100,
+            height: 200,
+            isScreenshot: true,
+          ),
+        PhotoMeta(
+          id: 'new',
+          takenAt: DateTime.now(),
+          width: 100,
+          height: 200,
+          isScreenshot: true,
+        ),
+      ],
+    );
+    final handoff = _FakeHandoff();
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.screenshots, group: shots),
+      extra: [
+        cortexInstalledProvider.overrideWith((ref) async => true),
+        handoffProvider.overrideWithValue(handoff),
+      ],
+    );
+    await tester.tap(find.textContaining('추천 보기'));
+    await tester.pumpAndSettle();
+    expect(find.text('Cortex로'), findsNothing); // 추천만 X면 Cortex 버튼 없음
+    // 새 캡처 하나를 직접 고른다
+    await tester.tap(
+      find.byWidgetPredicate((w) => w is XToggle && !w.on).first,
+    );
+    await tester.pumpAndSettle();
+    await sendCortex(tester);
+    expect(handoff.sent, ['new']);
     await flush(tester);
   });
 

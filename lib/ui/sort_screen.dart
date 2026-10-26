@@ -196,13 +196,33 @@ class _SortScreenState extends ConsumerState<SortScreen>
     }
   }
 
-  Future<void> _toggle(String id, bool marked) => ref
-      .read(decisionsProvider.notifier)
-      .set([id], marked ? DecisionState.keep : DecisionState.toTrash);
+  Future<void> _toggle(String id, bool marked) {
+    // 손으로 누른 사진은 추천이 아니라 "직접 고른 사진" (Cortex로 보낼 수 있다, C1)
+    _picked.remove(id);
+    return ref.read(decisionsProvider.notifier).set([
+      id,
+    ], marked ? DecisionState.keep : DecisionState.toTrash);
+  }
+
+  /// [Cortex로]가 보내는 사진: 직접 고른 것만. [추천 보기]로 X가 됐거나 처음부터 X인
+  /// 추천은 빼다 (2026-10-26 Sophie C1-B: 버릴 캡처 수천 장이 AI 앱으로 가지 않게)
+  List<String> _cortexIds(
+    List<String> marked,
+    SortSource src,
+    Map<String, Decision> decisions,
+  ) => [
+    for (final id in marked)
+      if (!_picked.contains(id) &&
+          !(src.preMarked.contains(id) &&
+              stateOf(decisions, id) == DecisionState.undecided))
+        id,
+  ];
 
   /// [전체 선택] = 모두 X
-  Future<void> _selectAll(List<String> ids) =>
-      ref.read(decisionsProvider.notifier).set(ids, DecisionState.toTrash);
+  Future<void> _selectAll(List<String> ids) {
+    _picked.removeAll(ids); // 직접 고른 것
+    return ref.read(decisionsProvider.notifier).set(ids, DecisionState.toTrash);
+  }
 
   /// [선택 해제] = 모두 표시 없음 (처음 상태). 추천이 지워지지 않아 [추천 보기]로 다시 받을 수 있다.
   /// 처음부터 X로 보이는 사진(preMarked)만은 킵으로 저장해야 X가 꺼진다 (2026-10-22 Sophie R2-A)
@@ -288,6 +308,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
 
   void _paint(String id) {
     _painted.add(id);
+    _picked.remove(id); // 끌어서 고른 것도 직접 고른 사진
     _paintLast = id;
     // X 버튼과 같은 결과: 켜면 정리(X), 끄면 킵
     ref.read(decisionsProvider.notifier).set([
@@ -622,6 +643,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
     // 추천이 모두 X. 끈 상태 = 처음 상태(실수 사진처럼 처음부터 X인 것만 X)
     final markedSet = marked.toSet();
     _markedNow = markedSet;
+    final cortexIds = _cortexIds(marked, src, decisions);
     final picksOn =
         src.locked == 0 &&
         src.suggested.any(_picked.contains) &&
@@ -946,13 +968,13 @@ class _SortScreenState extends ConsumerState<SortScreen>
                   // Cortex가 없어도 버튼은 보이고, 누르면 받으러 가기 (2026-10-25 Sophie)
                   if (cortexKind &&
                       (cortex || cortexStoreUrl.isNotEmpty) &&
-                      marked.isNotEmpty) ...[
+                      cortexIds.isNotEmpty) ...[
                     const SizedBox(width: 8),
                     OutlinedButton.icon(
                       onPressed: _busy
                           ? null
                           : cortex
-                          ? () => _sendCortex(marked)
+                          ? () => _sendCortex(cortexIds)
                           : _getCortex,
                       icon: const Icon(Icons.north_east, size: 16),
                       label: Text(l.toCortex),
