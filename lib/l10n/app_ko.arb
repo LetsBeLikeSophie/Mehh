@@ -591,5 +591,13 @@
         "format": "decimalPattern"
       }
     }
+  },
+  "playVideo": "재생",
+  "videoOpenFailed": "이 동영상을 열 앱을 찾지 못했어요",
+  "@playVideo": {
+    "description": "큰 동영상 크게 보기의 ▶ 버튼 (읽어 주기용 이름)"
+  },
+  "@videoOpenFailed": {
+    "description": "▶를 눌렀는데 동영상을 열 앱이 없을 때"
   }
 }

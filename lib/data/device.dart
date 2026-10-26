@@ -28,6 +28,17 @@ class Device {
     }
   }
 
+  /// 동영상 하나를 갤러리(기본 동영상 앱)에서 재생 (2026-10-26 Sophie V3-A). 못 열면 false
+  Future<bool> openVideo(String id) async {
+    if (kIsWeb || !Platform.isAndroid) return false;
+    try {
+      return await _channel.invokeMethod<bool>('openVideo', {'id': id}) ??
+          false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// 갤러리 앱 열기 (2026-10-24 Sophie). 열 앱이 없으면 false
   Future<bool> openGallery() async {
     if (kIsWeb || !Platform.isAndroid) return false;

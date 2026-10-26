@@ -227,7 +227,10 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                 ),
               ),
               if (label != null)
-                Center(child: _Chip(label, dark: true, big: true)),
+                Center(child: _Chip(label, dark: true, big: true))
+              // 큰 동영상: ▶ → 갤러리에서 재생 (2026-10-26 Sophie V3-A)
+              else if (video != null)
+                Center(child: _PlayButton(id: video.id)),
             ],
           ),
         ),
@@ -592,6 +595,32 @@ class _ActionBar extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// 큰 동영상 가운데 ▶. 누르면 갤러리(기본 동영상 앱)에서 그 영상을 연다
+class _PlayButton extends ConsumerWidget {
+  const _PlayButton({required this.id});
+  final String id;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l;
+    return Material(
+      color: MehhColors.black.withValues(alpha: 0.6),
+      shape: const CircleBorder(),
+      child: IconButton(
+        tooltip: l.playVideo,
+        iconSize: 40,
+        padding: const EdgeInsets.all(12),
+        color: MehhColors.white,
+        icon: const Icon(Icons.play_arrow_rounded),
+        onPressed: () async {
+          final ok = await ref.read(deviceProvider).openVideo(id);
+          if (!ok && context.mounted) showNote(context, l.videoOpenFailed);
+        },
       ),
     );
   }

@@ -982,4 +982,10 @@ class L10nEn extends L10n {
     );
     return '$_temp0';
   }
+
+  @override
+  String get playVideo => 'Play';
+
+  @override
+  String get videoOpenFailed => 'Couldn\'t find an app to play this video';
 }

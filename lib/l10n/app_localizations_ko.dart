@@ -806,4 +806,10 @@ class L10nKo extends L10n {
 
     return '캡처 $countString장은 지금 바로 정리할 수 있어요 ›';
   }
+
+  @override
+  String get playVideo => '재생';
+
+  @override
+  String get videoOpenFailed => '이 동영상을 열 앱을 찾지 못했어요';
 }

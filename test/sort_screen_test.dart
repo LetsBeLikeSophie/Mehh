@@ -929,6 +929,10 @@ void main() {
       FocusScreen(kind: SortKind.videos, group: videos, initialId: 'v1'),
     );
     expect(find.text('12:40 · 1.5GB · 10월 3일'), findsOneWidget);
+    // ▶는 갤러리에서 재생 (V3). 테스트 기기엔 열 앱이 없어서 안내가 뜬다
+    await tester.tap(find.byTooltip('재생'));
+    await tester.pumpAndSettle();
+    expect(find.text('이 동영상을 열 앱을 찾지 못했어요'), findsOneWidget);
     await flush(tester);
   });
 

@@ -43,6 +43,7 @@ class MainActivity : FlutterActivity() {
                     "photoBytes" -> result.success(photoBytes())
                     "videoSizes" -> result.success(videoSizes())
                     "openGallery" -> result.success(openGallery())
+                    "openVideo" -> result.success(openVideo(call.argument<String>("id")))
                     else -> result.notImplemented()
                 }
             }
@@ -89,6 +90,16 @@ class MainActivity : FlutterActivity() {
             if (start(it)) return true
         }
         return false
+    }
+
+    /// 큰 동영상 재생: 그 영상을 갤러리(기본 동영상 앱)에서 연다. 앱 안 재생기는 없다 (2026-10-26 Sophie V3-A)
+    private fun openVideo(id: String?): Boolean {
+        val n = id?.toLongOrNull() ?: return false
+        val uri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, n)
+        val view = Intent(Intent.ACTION_VIEW)
+            .setDataAndType(uri, "video/*")
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        return start(view)
     }
 
     private fun start(intent: Intent): Boolean = try {

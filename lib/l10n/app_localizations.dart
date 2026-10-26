@@ -1296,6 +1296,18 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'캡처 {count}장은 지금 바로 정리할 수 있어요 ›'**
   String shotsReadyNow(int count);
+
+  /// 큰 동영상 크게 보기의 ▶ 버튼 (읽어 주기용 이름)
+  ///
+  /// In ko, this message translates to:
+  /// **'재생'**
+  String get playVideo;
+
+  /// ▶를 눌렀는데 동영상을 열 앱이 없을 때
+  ///
+  /// In ko, this message translates to:
+  /// **'이 동영상을 열 앱을 찾지 못했어요'**
+  String get videoOpenFailed;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {
