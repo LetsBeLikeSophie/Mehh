@@ -773,6 +773,30 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('큰 동영상 크게 보기: 길이·용량·날짜가 보인다 (UX-49)', (tester) async {
+    final videos = DayGroup(
+      id: 'videos',
+      kind: DayGroupKind.videos,
+      photos: [
+        PhotoMeta(
+          id: 'v1',
+          takenAt: DateTime(2026, 10, 3, 12),
+          width: 1920,
+          height: 1080,
+          isVideo: true,
+          durationSec: 760,
+          sizeBytes: 1536 * 1024 * 1024,
+        ),
+      ],
+    );
+    await pump(
+      tester,
+      FocusScreen(kind: SortKind.videos, group: videos, initialId: 'v1'),
+    );
+    expect(find.text('12:40 · 1.5GB · 10월 3일'), findsOneWidget);
+    await flush(tester);
+  });
+
   testWidgets('Cortex가 없으면 [Cortex로]를 눌렀을 때 받으러 가기 안내', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     await tester.tap(find.byType(XToggle).at(0));

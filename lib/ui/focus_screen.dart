@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../l10n/l10n.dart';
+import '../logic/format.dart';
 import '../models/day_group.dart';
 import '../models/decision.dart';
 import '../providers.dart';
@@ -173,6 +174,9 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     if (ids.isEmpty) return const Scaffold();
     final current = ids.contains(_currentId) ? _currentId : ids.first;
     final index = ids.indexOf(current);
+    final video = widget.kind == SortKind.videos
+        ? src.photos.where((p) => p.id == current && p.isVideo).firstOrNull
+        : null;
     final marked = isMarked(current, decisions, src);
     final state = stateOf(decisions, current);
     final (inFrom, outTo) = _slide;
@@ -209,6 +213,13 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                     if (src.tags[current] case final t?)
                       _Chip(
                         noteText(t, src.bestReasons[current] ?? const [], l),
+                      ),
+                    // 큰 동영상: 첫 장면만 보이니 무엇인지 알 수 있게 길이·용량·날짜 (UX-49)
+                    if (video != null)
+                      _Chip(
+                        '${formatDuration(video.durationSec)} · '
+                        '${formatBytes(video.sizeBytes)} · '
+                        '${formatDate(video.takenAt, l.localeName)}',
                       ),
                   ],
                 ),
