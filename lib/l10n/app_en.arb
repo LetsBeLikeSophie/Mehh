@@ -88,7 +88,7 @@
   "proChip": "Pro",
   "proTitle": "Mehh Pro",
   "proBody": "See picks for every set right away",
-  "proFree": "Without Pro: ◉ {limit} a month · {count} left · refills {date}",
+  "proFree": "Without Pro: ◉ 1 per set · {limit} a month · {count} left · refills {date}",
   "proActive": "You have Pro. Every set's picks are open.",
   "planLifetime": "Lifetime",
   "planLifetimeNote": "Pay once, keep it",

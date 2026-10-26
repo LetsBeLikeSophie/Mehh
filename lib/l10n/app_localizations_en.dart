@@ -377,7 +377,7 @@ class L10nEn extends L10n {
 
   @override
   String proFree(int limit, int count, String date) {
-    return 'Without Pro: ◉ $limit a month · $count left · refills $date';
+    return 'Without Pro: ◉ 1 per set · $limit a month · $count left · refills $date';
   }
 
   @override

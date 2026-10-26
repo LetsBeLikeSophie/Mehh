@@ -201,7 +201,7 @@
   "proChip": "Pro",
   "proTitle": "Mehh Pro",
   "proBody": "모든 묶음의 추천 정리를 바로 봐요",
-  "proFree": "Pro 없이: 매달 ◉ {limit}개 · {count}개 남음 · {date} 다시 채움",
+  "proFree": "Pro 없이: 묶음 하나에 ◉ 1개 · 매달 {limit}개 · {count}개 남음 · {date} 다시 채움",
   "@proFree": {
     "placeholders": {
       "limit": {

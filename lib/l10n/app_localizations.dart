@@ -628,7 +628,7 @@ abstract class L10n {
   /// No description provided for @proFree.
   ///
   /// In ko, this message translates to:
-  /// **'Pro 없이: 매달 ◉ {limit}개 · {count}개 남음 · {date} 다시 채움'**
+  /// **'Pro 없이: 묶음 하나에 ◉ 1개 · 매달 {limit}개 · {count}개 남음 · {date} 다시 채움'**
   String proFree(int limit, int count, String date);
 
   /// No description provided for @proActive.

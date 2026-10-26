@@ -332,7 +332,7 @@ class L10nKo extends L10n {
 
   @override
   String proFree(int limit, int count, String date) {
-    return 'Pro 없이: 매달 ◉ $limit개 · $count개 남음 · $date 다시 채움';
+    return 'Pro 없이: 묶음 하나에 ◉ 1개 · 매달 $limit개 · $count개 남음 · $date 다시 채움';
   }
 
   @override
