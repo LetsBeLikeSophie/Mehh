@@ -160,11 +160,7 @@ void main() {
   });
 
   testWidgets('설정: 비공개 테스트 동안 Pro 시트에 가격·코인 남은 수가 없다 (UX-51)', (tester) async {
-    await pump(
-      tester,
-      const SettingsScreen(),
-      testFree: true,
-    );
+    await pump(tester, const SettingsScreen(), testFree: true);
     await tester.tap(find.text('Mehh Pro'));
     await tester.pumpAndSettle();
     expect(find.text('비공개 테스트 동안은 모든 묶음 추천이 무료예요'), findsOneWidget);
@@ -631,6 +627,88 @@ void main() {
     expect(find.text('추천 보기 · 3장'), findsOneWidget);
     await flush(tester);
   });
+
+  testWidgets(
+    '코인 0개: 길게 눌러 끝낸 뒤 Pro 안내의 "지금 무료로" → 캡처 화면이 열려 있고, 뒤로 가면 처음 화면 (UX-52)',
+    (tester) async {
+      final shots = DayGroup(
+        id: 'shots',
+        kind: DayGroupKind.screenshots,
+        photos: [
+          for (var i = 0; i < 3; i++)
+            PhotoMeta(
+              id: 's$i',
+              takenAt: DateTime(2026, 1, 1 + i),
+              width: 100,
+              height: 200,
+              isScreenshot: true,
+            ),
+        ],
+      );
+      final day = DayGroup(
+        id: 'day-p0',
+        kind: DayGroupKind.day,
+        photos: photos,
+      );
+      await pump(
+        tester,
+        Builder(
+          builder: (context) => Scaffold(
+            body: Center(
+              child: TextButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => SortScreen(kind: SortKind.day, group: day),
+                  ),
+                ),
+                child: const Text('열기'),
+              ),
+            ),
+          ),
+        ),
+        vault: MemoryProVault(
+          ProState(
+            freeMonth: monthKey(DateTime.now()),
+            freeUsed: freeGroupsPerMonth,
+          ),
+        ),
+        extra: [
+          libraryProvider.overrideWith(
+            () => _FixedLibrary(
+              LibraryState(
+                photos: [...photos, ...shots.photos],
+                groups: [day, shots],
+              ),
+            ),
+          ),
+        ],
+      );
+      await tester.tap(find.text('열기'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(XToggle).first);
+      await tester.pumpAndSettle();
+      // 그리드 제목 옆 빈 곳을 길게 눌러 끝내기
+      final g = await tester.startGesture(
+        tester.getTopRight(find.byType(SortScreen)) + const Offset(-60, 140),
+      );
+      for (var i = 0; i < 5; i++) {
+        await tester.pump(const Duration(milliseconds: 400));
+      }
+      await g.up();
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('휴지통으로'));
+      await tester.pumpAndSettle();
+      expect(find.text('지금 무료로: 캡처 추천 3장 보기 ›'), findsOneWidget);
+      await tester.tap(find.text('지금 무료로: 캡처 추천 3장 보기 ›'));
+      await tester.pumpAndSettle();
+      expect(find.text('추천 보기 · 3장'), findsOneWidget); // 캡처 화면이 남아 있다
+      await tester.tap(find.byType(MehhBackButton));
+      await tester.pumpAndSettle();
+      expect(find.text('열기'), findsOneWidget); // 묶음 화면은 이미 닫혔다
+      expect(find.byType(SortScreen), findsNothing);
+      await flush(tester);
+    },
+  );
 
   testWidgets('그리드: X를 켜면 휴지통 버튼, 보내면 그 사진만 빠진다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
@@ -1886,4 +1964,29 @@ class _FixedLibrary extends LibraryNotifier {
 
   @override
   Future<LibraryState> build() async => value;
+
+  // 보낸 사진만 빼고 묶음은 그대로 (실제는 다시 묶지만 테스트에선 고정)
+  @override
+  void removePhotos(Set<String> ids) {
+    final now = state.value ?? value;
+    state = AsyncData(
+      LibraryState(
+        photos: [
+          for (final p in now.photos)
+            if (!ids.contains(p.id)) p,
+        ],
+        groups: [
+          for (final g in now.groups)
+            DayGroup(
+              id: g.id,
+              kind: g.kind,
+              photos: [
+                for (final p in g.photos)
+                  if (!ids.contains(p.id)) p,
+              ],
+            ),
+        ],
+      ),
+    );
+  }
 }

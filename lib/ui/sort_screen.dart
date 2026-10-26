@@ -468,7 +468,16 @@ class _SortScreenState extends ConsumerState<SortScreen>
     );
     if (!ok || !mounted) return;
     if (n > 0 && !await _send(marked, src, order)) return;
-    if (mounted) await Navigator.of(context).maybePop();
+    if (!mounted) return;
+    // 이 정리 화면만 닫는다. Pro 안내에서 "지금 무료로"를 눌러 다른 화면이 위에 열렸으면
+    // 그 화면은 두고 아래의 이 화면만 뺀다 (UX-52: maybePop이 새로 연 캡처 화면을 닫았다)
+    final route = ModalRoute.of(context);
+    final nav = Navigator.of(context);
+    if (route == null || route.isCurrent) {
+      await nav.maybePop();
+    } else if (route.isActive) {
+      nav.removeRoute(route);
+    }
   }
 
   /// 휴지통으로 보내고 그 뒤 할 일: 정확도 기록, 잠긴 묶음 "다 봤어요"(R3), Pro 안내.
