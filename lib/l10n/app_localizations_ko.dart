@@ -292,7 +292,7 @@ class L10nKo extends L10n {
 
   @override
   String get onboardingBody =>
-      '찍은 날짜와 장소로 사진을 묶고, 똑같은 사진을 찾으려면 사진 전체에 접근해야 해요.';
+      '찍은 날짜와 장소로 사진을 묶고, 똑같은 사진과 큰 동영상을 찾으려면 사진·동영상 전체에 접근해야 해요.';
 
   @override
   String get promiseLocal => '사진과 기록은 폰 밖으로 나가지 않아요.';
@@ -304,7 +304,7 @@ class L10nKo extends L10n {
   String get promiseRestore => '휴지통으로 보낸 사진은 30일 동안 갤러리 휴지통에서 되살릴 수 있어요.';
 
   @override
-  String get allowAccess => '사진 접근 허용';
+  String get allowAccess => '사진·동영상 접근 허용';
 
   @override
   String get allowInSettings => '설정에서 허용하기';

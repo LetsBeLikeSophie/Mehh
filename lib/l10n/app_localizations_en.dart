@@ -335,7 +335,7 @@ class L10nEn extends L10n {
 
   @override
   String get onboardingBody =>
-      'To group photos by date and place and find duplicates, Mehh needs access to all your photos.';
+      'To group photos by date and place and find duplicates and big videos, Mehh needs access to all your photos and videos.';
 
   @override
   String get promiseLocal => 'Your photos and records never leave your phone.';
@@ -349,7 +349,7 @@ class L10nEn extends L10n {
       'Photos moved to trash can be restored from your gallery\'s trash for 30 days.';
 
   @override
-  String get allowAccess => 'Allow photo access';
+  String get allowAccess => 'Allow photo and video access';
 
   @override
   String get allowInSettings => 'Allow in Settings';

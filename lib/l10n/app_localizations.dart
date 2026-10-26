@@ -550,7 +550,7 @@ abstract class L10n {
   /// No description provided for @onboardingBody.
   ///
   /// In ko, this message translates to:
-  /// **'찍은 날짜와 장소로 사진을 묶고, 똑같은 사진을 찾으려면 사진 전체에 접근해야 해요.'**
+  /// **'찍은 날짜와 장소로 사진을 묶고, 똑같은 사진과 큰 동영상을 찾으려면 사진·동영상 전체에 접근해야 해요.'**
   String get onboardingBody;
 
   /// No description provided for @promiseLocal.
@@ -574,7 +574,7 @@ abstract class L10n {
   /// No description provided for @allowAccess.
   ///
   /// In ko, this message translates to:
-  /// **'사진 접근 허용'**
+  /// **'사진·동영상 접근 허용'**
   String get allowAccess;
 
   /// No description provided for @allowInSettings.
