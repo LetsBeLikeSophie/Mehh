@@ -807,6 +807,43 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('묶음 이름: 첫 사진을 휴지통으로 보내 묶음 id가 바뀌어도 바꾼 이름이 남는다', (tester) async {
+    final store = MemoryStore();
+    final before = DayGroup(
+      id: 'day-p0',
+      kind: DayGroupKind.day,
+      photos: photos,
+    );
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.day, group: before),
+      store: store,
+    );
+    await tester.tap(find.textContaining('9월 1일').first);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '제주 여행');
+    await tester.tap(find.text('저장'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('제주 여행'), findsOneWidget);
+    await flush(tester);
+
+    // 첫 사진(p0)이 휴지통으로 가면 다시 묶일 때 id가 day-p1이 된다
+    final after = DayGroup(
+      id: 'day-p1',
+      kind: DayGroupKind.day,
+      photos: photos.sublist(1),
+    );
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.day, group: after),
+      store: store,
+    );
+    expect(find.textContaining('제주 여행'), findsOneWidget);
+    // 홈 줄도 같은 함수로 이름을 찾는다
+    expect(groupNameOf(await store.loadNames(), after), '제주 여행');
+    await flush(tester);
+  });
+
   testWidgets('그리드: 화면 왼쪽 끝에서 안쪽으로 밀면 뒤로 간다 (사진 선택 대신)', (tester) async {
     await pump(
       tester,

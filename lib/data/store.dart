@@ -38,9 +38,13 @@ abstract class Store {
   Future<Map<String, bool>> loadFaces();
   Future<void> saveFaces(Map<String, bool> eyesClosed);
 
-  /// 사용자가 바꾼 묶음 이름 (묶음 id → 이름). 없으면 기본 이름
-  Future<Map<String, String>> loadNames();
-  Future<void> saveName(String groupId, String? name);
+  /// 사용자가 바꾼 묶음 이름 (묶음 id → 이름 + 그때의 사진 id). 없으면 기본 이름
+  Future<Map<String, GroupName>> loadNames();
+  Future<void> saveName(
+    String groupId,
+    String? name, {
+    Iterable<String> photoIds = const [],
+  });
 
   /// 작은 횟수 기록 (예: 오늘 "길게 눌러 끝내기" 안내를 몇 번 보였나)
   Future<int> counter(String key);
@@ -57,6 +61,14 @@ String dayKey(DateTime d) =>
     '${monthKey(d)}-${d.day.toString().padLeft(2, '0')}';
 
 /// 웹 미리보기·테스트용. 앱을 끄면 사라진다.
+/// 바꾼 묶음 이름. 묶음 id는 첫 사진이 지워지면 바뀌므로(day-<첫 사진 id>)
+/// 그때의 사진 id도 같이 남겨, id로 못 찾으면 사진이 겹치는 이름을 쓴다
+class GroupName {
+  const GroupName(this.name, [this.photoIds = const {}]);
+  final String name;
+  final Set<String> photoIds;
+}
+
 class MemoryStore implements Store {
   final features = <String, PhotoFeatures>{};
   final decisions = <String, Decision>{};
@@ -68,17 +80,21 @@ class MemoryStore implements Store {
   final cortexSent = <String, bool>{};
   final counters = <String, int>{};
   final faces = <String, bool>{};
-  final names = <String, String>{};
+  final names = <String, GroupName>{};
 
   @override
-  Future<Map<String, String>> loadNames() async => {...names};
+  Future<Map<String, GroupName>> loadNames() async => {...names};
 
   @override
-  Future<void> saveName(String groupId, String? name) async {
+  Future<void> saveName(
+    String groupId,
+    String? name, {
+    Iterable<String> photoIds = const [],
+  }) async {
     if (name == null) {
       names.remove(groupId);
     } else {
-      names[groupId] = name;
+      names[groupId] = GroupName(name, photoIds.toSet());
     }
   }
 

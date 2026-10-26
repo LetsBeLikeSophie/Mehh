@@ -787,28 +787,57 @@ final groupPlanProvider = Provider.autoDispose.family<GroupPlan, DayGroup>((
   );
 });
 
+/// [g]에 붙은 이름의 저장 키. 먼저 묶음 id, 없으면 사진이 가장 많이 겹치는 이름
+/// (첫 사진을 지우면 묶음 id가 바뀌어도 이름이 남게, 코인 열림과 같은 방식)
+String? groupNameKey(Map<String, GroupName>? names, DayGroup? g) {
+  if (names == null || g == null) return null;
+  if (names.containsKey(g.id)) return g.id;
+  String? best;
+  var most = 0;
+  for (final e in names.entries) {
+    final n = g.photos.where((p) => e.value.photoIds.contains(p.id)).length;
+    if (n > most) {
+      most = n;
+      best = e.key;
+    }
+  }
+  return best;
+}
+
+/// [g]의 바꾼 이름. 없으면 null (기본 이름을 쓴다)
+String? groupNameOf(Map<String, GroupName>? names, DayGroup? g) =>
+    names?[groupNameKey(names, g)]?.name;
+
 /// 사용자가 바꾼 묶음 이름 (2026-10-24 Sophie). 기본 이름은 따로 계산하므로 언제든 되돌릴 수 있다
-class GroupNamesNotifier extends AsyncNotifier<Map<String, String>> {
+class GroupNamesNotifier extends AsyncNotifier<Map<String, GroupName>> {
   @override
-  Future<Map<String, String>> build() => ref.read(storeProvider).loadNames();
+  Future<Map<String, GroupName>> build() => ref.read(storeProvider).loadNames();
 
   /// [name]이 비었거나 null이면 기본 이름으로 되돌린다
-  Future<void> rename(String groupId, String? name) async {
+  Future<void> rename(DayGroup group, String? name) async {
     final v = name?.trim();
     final keep = v == null || v.isEmpty ? null : v;
-    await ref.read(storeProvider).saveName(groupId, keep);
+    final store = ref.read(storeProvider);
     final next = {...state.value ?? {}};
+    // 옛 id로 남아 있던 이름은 지금 id로 옮긴다
+    final old = groupNameKey(next, group);
+    if (old != null && old != group.id) {
+      await store.saveName(old, null);
+      next.remove(old);
+    }
+    final ids = [for (final p in group.photos) p.id];
+    await store.saveName(group.id, keep, photoIds: ids);
     if (keep == null) {
-      next.remove(groupId);
+      next.remove(group.id);
     } else {
-      next[groupId] = keep;
+      next[group.id] = GroupName(keep, ids.toSet());
     }
     state = AsyncData(next);
   }
 }
 
 final groupNamesProvider =
-    AsyncNotifierProvider<GroupNamesNotifier, Map<String, String>>(
+    AsyncNotifierProvider<GroupNamesNotifier, Map<String, GroupName>>(
       GroupNamesNotifier.new,
     );
 

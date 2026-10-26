@@ -610,7 +610,8 @@ class _GroupTile extends ConsumerWidget {
     }
 
     final original = groupTitle(group, l, place: place, withYear: false);
-    final title = ref.watch(groupNamesProvider).value?[group.id] ?? original;
+    final title =
+        groupNameOf(ref.watch(groupNamesProvider).value, group) ?? original;
     return InkWell(
       // 길게 누르면 이름 바꾸기 (2026-10-24 Sophie)
       onLongPress: () async {
@@ -620,7 +621,7 @@ class _GroupTile extends ConsumerWidget {
           original: original,
         );
         if (v != null) {
-          await ref.read(groupNamesProvider.notifier).rename(group.id, v);
+          await ref.read(groupNamesProvider.notifier).rename(group, v);
         }
       },
       onTap: () => Navigator.of(context).push(

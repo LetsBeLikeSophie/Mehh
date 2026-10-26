@@ -20,7 +20,8 @@ const _picksTable = '''
 const _seenTable = 'CREATE TABLE seen (id TEXT PRIMARY KEY)';
 const _cortexSentTable =
     'CREATE TABLE cortex_sent (id TEXT PRIMARY KEY, at INTEGER, got INTEGER DEFAULT 0)';
-const _namesTable = 'CREATE TABLE names (id TEXT PRIMARY KEY, name TEXT)';
+const _namesTable =
+    'CREATE TABLE names (id TEXT PRIMARY KEY, name TEXT, photos TEXT)';
 const _facesTable = 'CREATE TABLE faces (id TEXT PRIMARY KEY, closed INTEGER)';
 const _countersTable =
     'CREATE TABLE counters (key TEXT PRIMARY KEY, n INTEGER)';
@@ -30,7 +31,7 @@ class SqliteStore implements Store {
 
   Future<Database> get _database async => _db ??= await openDatabase(
     'mehh.db',
-    version: 9,
+    version: 10,
     onUpgrade: (db, from, _) async {
       // 분석 결과는 캐시라서 버리고 다시 계산한다
       if (from < 3) {
@@ -48,7 +49,11 @@ class SqliteStore implements Store {
       }
       if (from < 7) await db.execute(_countersTable);
       if (from < 8) await db.execute(_facesTable);
-      if (from < 9) await db.execute(_namesTable);
+      if (from < 9) {
+        await db.execute(_namesTable);
+      } else if (from < 10) {
+        await db.execute("ALTER TABLE names ADD COLUMN photos TEXT DEFAULT ''");
+      }
     },
     onCreate: (db, _) async {
       await db.execute(_featuresTable);
@@ -273,13 +278,20 @@ class SqliteStore implements Store {
   };
 
   @override
-  Future<Map<String, String>> loadNames() async => {
+  Future<Map<String, GroupName>> loadNames() async => {
     for (final r in await (await _database).query('names'))
-      r['id'] as String: r['name'] as String,
+      r['id'] as String: GroupName(r['name'] as String, {
+        for (final id in ((r['photos'] as String?) ?? '').split(','))
+          if (id.isNotEmpty) id,
+      }),
   };
 
   @override
-  Future<void> saveName(String groupId, String? name) async {
+  Future<void> saveName(
+    String groupId,
+    String? name, {
+    Iterable<String> photoIds = const [],
+  }) async {
     final db = await _database;
     if (name == null) {
       await db.delete('names', where: 'id = ?', whereArgs: [groupId]);
@@ -287,6 +299,7 @@ class SqliteStore implements Store {
       await db.insert('names', {
         'id': groupId,
         'name': name,
+        'photos': photoIds.join(','),
       }, conflictAlgorithm: ConflictAlgorithm.replace);
     }
   }
