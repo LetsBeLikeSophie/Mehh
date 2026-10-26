@@ -1236,6 +1236,24 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'받으러 가기'**
   String get cortexGetYes;
+
+  /// 큰 동영상 개수 (정리 화면 제목 뒤)
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}개'**
+  String videosCount(int count);
+
+  /// 큰 동영상 화면의 [휴지통으로] 버튼·확인 창 제목
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}개 휴지통으로'**
+  String trashCountVideos(int count);
+
+  /// 큰 동영상을 휴지통으로 보낸 뒤 알림
+  ///
+  /// In ko, this message translates to:
+  /// **'✓ {count}개 · {size} 휴지통으로 보냈어요 · 30일 안에 되살릴 수 있고, 휴지통을 비우면 그만큼 공간이 생겨요'**
+  String trashedVideos(int count, String size);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

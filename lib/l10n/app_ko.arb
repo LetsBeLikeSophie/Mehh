@@ -505,5 +505,38 @@
   "cortexAskNote": "Cortex에서 AI로 분석해요",
   "cortexGetTitle": "Cortex가 필요해요",
   "cortexGetBody": "사진·캡처를 메모로 정리해 주는 앱이에요. 받은 뒤 다시 [Cortex로]를 눌러 주세요.",
-  "cortexGetYes": "받으러 가기"
+  "cortexGetYes": "받으러 가기",
+  "videosCount": "{count}개",
+  "@videosCount": {
+    "description": "큰 동영상 개수 (정리 화면 제목 뒤)",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "trashCountVideos": "{count}개 휴지통으로",
+  "@trashCountVideos": {
+    "description": "큰 동영상 화면의 [휴지통으로] 버튼·확인 창 제목",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "trashedVideos": "✓ {count}개 · {size} 휴지통으로 보냈어요 · 30일 안에 되살릴 수 있고, 휴지통을 비우면 그만큼 공간이 생겨요",
+  "@trashedVideos": {
+    "description": "큰 동영상을 휴지통으로 보낸 뒤 알림",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  }
 }

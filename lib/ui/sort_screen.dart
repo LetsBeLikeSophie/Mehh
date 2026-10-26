@@ -452,7 +452,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
     final ok = await askMehh(
       context,
       // 제목 = 아래 버튼과 같은 말 "N장 휴지통으로" (2026-10-24 Sophie: 반복되는 말 없이)
-      title: n > 0 ? l.trashCount(n) : l.focusFinishNone,
+      title: n > 0 ? _trashCount(l, n) : l.focusFinishNone,
       no: l.focusKeepLooking,
       yes: n > 0 ? l.toTrash : l.focusFinishYes,
     );
@@ -463,6 +463,10 @@ class _SortScreenState extends ConsumerState<SortScreen>
 
   /// 휴지통으로 보내고 그 뒤 할 일: 정확도 기록, 잠긴 묶음 "다 봤어요"(R3), Pro 안내.
   /// [N장 휴지통으로]와 Cortex 길이 같이 쓴다 (시니어 리뷰 2026-10-24 S-2)
+  /// "N장 휴지통으로" — 큰 동영상은 "N개" (홈 줄과 같은 단위)
+  String _trashCount(L10n l, int n) =>
+      widget.kind == SortKind.videos ? l.trashCountVideos(n) : l.trashCount(n);
+
   Future<bool> _trashAndAfter(
     List<String> ids,
     SortSource src,
@@ -474,7 +478,15 @@ class _SortScreenState extends ConsumerState<SortScreen>
     final pro = ref.read(proProvider.notifier);
     final nudge = widget.kind == SortKind.day && await pro.canNudge();
     if (!mounted) return false;
-    final n = await sendToTrash(context, ref, ids, quiet: nudge);
+    final n = await sendToTrash(
+      context,
+      ref,
+      ids,
+      quiet: nudge,
+      doneNote: widget.kind == SortKind.videos
+          ? (n, size) => context.l.trashedVideos(n, size)
+          : null,
+    );
     if (n > 0) await _recordPicks(ids, src, shown);
     // 잠긴 묶음을 직접 정리해 보냈으면 다음부터 "다 봤어요" (2026-10-22 Sophie R3-A)
     if (n > 0 && src.locked > 0) {
@@ -769,7 +781,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
                                             ),
                                             TextSpan(
                                               text:
-                                                  '  ${l.photos(order.length)}',
+                                                  '  ${widget.kind == SortKind.videos ? l.videosCount(order.length) : l.photos(order.length)}',
                                               style: const TextStyle(
                                                 fontSize: MehhText.bodySmall,
                                                 fontWeight: FontWeight.w500,
@@ -888,7 +900,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
                       child: Text(
                         marked.isEmpty
                             ? l.nothingMarked
-                            : l.trashCount(marked.length),
+                            : _trashCount(l, marked.length),
                         style: const TextStyle(
                           fontSize: MehhText.body,
                           fontWeight: FontWeight.w500,

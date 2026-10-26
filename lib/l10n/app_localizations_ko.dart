@@ -737,4 +737,31 @@ class L10nKo extends L10n {
 
   @override
   String get cortexGetYes => '받으러 가기';
+
+  @override
+  String videosCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString개';
+  }
+
+  @override
+  String trashCountVideos(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString개 휴지통으로';
+  }
+
+  @override
+  String trashedVideos(int count, String size) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '✓ $countString개 · $size 휴지통으로 보냈어요 · 30일 안에 되살릴 수 있고, 휴지통을 비우면 그만큼 공간이 생겨요';
+  }
 }

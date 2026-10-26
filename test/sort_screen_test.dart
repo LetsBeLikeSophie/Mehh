@@ -736,9 +736,11 @@ void main() {
     expect(find.text('2:05 · 900MB'), findsOneWidget);
     expect(find.text('0:40 · 300MB'), findsOneWidget);
     expect(find.text('추천 보기 · 0장'), findsNothing); // 앱이 골라 주지 않는다
+    expect(find.textContaining('2개'), findsWidgets); // 홈 줄과 같은 단위
     await tester.tap(find.byType(XToggle).at(0));
     await tester.pumpAndSettle();
-    expect(find.text('1장 휴지통으로'), findsOneWidget);
+    expect(find.text('1개 휴지통으로'), findsOneWidget);
+    expect(find.text('1장 휴지통으로'), findsNothing);
     await flush(tester);
   });
 

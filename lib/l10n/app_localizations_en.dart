@@ -874,4 +874,51 @@ class L10nEn extends L10n {
 
   @override
   String get cortexGetYes => 'Get Cortex';
+
+  @override
+  String videosCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString videos',
+      one: '1 video',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String trashCountVideos(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Move $countString videos to trash',
+      one: 'Move 1 video to trash',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String trashedVideos(int count, String size) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '✓ $countString videos · $size moved to trash · restore them within 30 days, or empty the trash to free up that space',
+      one:
+          '✓ 1 video · $size moved to trash · restore it within 30 days, or empty the trash to free up that space',
+    );
+    return '$_temp0';
+  }
 }
