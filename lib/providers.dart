@@ -912,6 +912,26 @@ String? groupNameKey(
   return best;
 }
 
+/// 정리 화면을 연 뒤 사진첩이 바뀌었으면(새로 찍은 사진·다시 묶임) 지금의 같은 묶음.
+/// 같은 종류에서 그날의 묶음은 같은 id 먼저, 아니면 사진이 가장 많이 겹치는 것. 못 찾으면 [old]
+/// (열어 둔 정리 화면도 새 캡처를 보게, UX-70 2026-10-27)
+DayGroup? freshGroup(List<DayGroup> groups, DayGroup? old) {
+  if (old == null) return null;
+  final ids = {for (final p in old.photos) p.id};
+  DayGroup? best;
+  var most = 0;
+  for (final g in groups) {
+    if (g.kind != old.kind) continue;
+    if (g.kind == DayGroupKind.day && g.id == old.id) return g;
+    final n = g.photos.where((p) => ids.contains(p.id)).length;
+    if (n > most) {
+      most = n;
+      best = g;
+    }
+  }
+  return best ?? old;
+}
+
 /// [g]의 바꾼 이름. 없으면 null (기본 이름을 쓴다)
 String? groupNameOf(
   Map<String, GroupName>? names,

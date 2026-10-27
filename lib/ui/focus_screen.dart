@@ -166,7 +166,14 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
   @override
   Widget build(BuildContext context) {
     final l = context.l;
-    final src = watchSortSource(ref, widget.kind, widget.group);
+    final src = watchSortSource(
+      ref,
+      widget.kind,
+      freshGroup(
+        ref.watch(libraryProvider).value?.groups ?? const [],
+        widget.group,
+      ),
+    );
     final decisions = ref.watch(decisionsProvider).value ?? const {};
     final entities = ref.read(photoLibraryProvider).entities;
     final ids = [

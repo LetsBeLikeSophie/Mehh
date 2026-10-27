@@ -2452,6 +2452,46 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('정리 화면을 연 채 그 사이 새 캡처가 생기면 화면에 보이고 장수도 바뀐다 (UX-70)', (
+    tester,
+  ) async {
+    PhotoMeta shot(String id, DateTime t) => PhotoMeta(
+      id: id,
+      takenAt: t,
+      width: 100,
+      height: 200,
+      isScreenshot: true,
+    );
+    final before = DayGroup(
+      id: 'shots',
+      kind: DayGroupKind.screenshots,
+      photos: [
+        shot('a', DateTime(2026, 10, 1)),
+        shot('b', DateTime(2026, 10, 2)),
+      ],
+    );
+    final lib = _FixedLibrary(
+      LibraryState(photos: before.photos, groups: [before]),
+    );
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.screenshots, group: before),
+      extra: [libraryProvider.overrideWith(() => lib)],
+    );
+    expect(find.byType(PhotoThumb), findsNWidgets(2));
+    // 회의 중에 캡처를 하나 더 찍고 돌아왔다
+    final after = DayGroup(
+      id: 'shots',
+      kind: DayGroupKind.screenshots,
+      photos: [...before.photos, shot('c', DateTime(2026, 10, 3))],
+    );
+    lib.replace(LibraryState(photos: after.photos, groups: [after]));
+    await tester.pumpAndSettle();
+    expect(find.byType(PhotoThumb), findsNWidgets(3));
+    expect(find.textContaining('3장', findRichText: true), findsWidgets);
+    await flush(tester);
+  });
+
   testWidgets('Cortex: 캡처가 아닌 낱장 사진에서도 [휴지통으로] 옆에 [Cortex로]', (tester) async {
     await pump(
       tester,
@@ -2518,6 +2558,9 @@ class _FixedLibrary extends LibraryNotifier {
 
   @override
   Future<LibraryState> build() async => value;
+
+  /// 사진첩이 바뀐 것처럼 (새로 찍은 사진 등)
+  void replace(LibraryState next) => state = AsyncData(next);
 
   // 보낸 사진만 빼고 묶음은 그대로 (실제는 다시 묶지만 테스트에선 고정)
   @override

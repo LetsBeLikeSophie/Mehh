@@ -207,6 +207,12 @@ class _SortScreenState extends ConsumerState<SortScreen>
     ], marked ? DecisionState.keep : DecisionState.toTrash);
   }
 
+  /// 지금 사진첩의 같은 묶음 (열어 둔 사이 새로 찍은 사진까지, UX-70)
+  DayGroup? get _group => freshGroup(
+    ref.read(libraryProvider).value?.groups ?? const [],
+    widget.group,
+  );
+
   /// [추천 보기]를 켠 적이 있나: 이 화면에서 켰거나(_picked), 손으로 고르지 않았는데 X인 추천이
   /// 있으면(화면을 나갔다 와도 DB에 X로 남아 있다). 처음부터 X인 것은 신호가 아니다.
   /// [추천 보기] 켜짐 표시와 정확도 기록이 같이 쓴다 (UX-60 2026-10-27)
@@ -392,7 +398,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
   }
 
   Future<void> _showPicks(SortSource src) async {
-    final g = widget.group;
+    final g = _group;
     final pro = ref.read(proProvider.notifier);
     // 그날의 묶음은 열려 있어도 늘 unlock을 부른다: Pro면 사진만 기억해서
     // 1년 이용권이 끝나도 계속 열려 있게 한다 (F3-A, UX 리뷰 2026-10-23 UX-35)
@@ -464,7 +470,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
       MaterialPageRoute(
         builder: (_) => FocusScreen(
           kind: widget.kind,
-          group: widget.group,
+          group: _group,
           place: widget.place,
           initialId: id,
         ),
@@ -653,7 +659,11 @@ class _SortScreenState extends ConsumerState<SortScreen>
   @override
   Widget build(BuildContext context) {
     final l = context.l;
-    final src = watchSortSource(ref, widget.kind, widget.group);
+    final group = freshGroup(
+      ref.watch(libraryProvider).value?.groups ?? const [],
+      widget.group,
+    );
+    final src = watchSortSource(ref, widget.kind, group);
     for (final e in src.tags.entries) {
       _seenTags[e.key] = e.value.name;
     }
@@ -775,7 +785,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
       );
     }
 
-    final g = widget.group;
+    final g = group;
     final range = widget.kind == SortKind.day && g != null
         ? groupTimeRange(g, l)
         : null;
