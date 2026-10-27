@@ -2323,6 +2323,55 @@ void main() {
     },
   );
 
+  // 오래된 캡처 n장 (추천) 묶음과, 그 묶음을 여는 버튼이 있는 첫 화면
+  PhotoMeta oldShot(int i) => PhotoMeta(
+    id: 'o$i',
+    takenAt: DateTime(2025, 1, 1 + i),
+    width: 100,
+    height: 200,
+    isScreenshot: true,
+  );
+  Widget opener(DayGroup Function() group) => Builder(
+    builder: (context) => Scaffold(
+      body: Center(
+        child: TextButton(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) =>
+                  SortScreen(kind: SortKind.screenshots, group: group()),
+            ),
+          ),
+          child: const Text('열기'),
+        ),
+      ),
+    ),
+  );
+
+  testWidgets('[추천 보기]를 켜고 나갔다 다시 열면 켜짐(✓)으로 보이고, 한 번 누르면 꺼진다 (UX-60)', (
+    tester,
+  ) async {
+    final shots = DayGroup(
+      id: 'shots',
+      kind: DayGroupKind.screenshots,
+      photos: [oldShot(0), oldShot(1)],
+    );
+    await pump(tester, opener(() => shots));
+    await tester.tap(find.text('열기'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining('추천 보기'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(MehhBackButton));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('열기'));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.check_box), findsOneWidget);
+    await tester.tap(find.textContaining('추천 보기'));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.check_box_outline_blank), findsOneWidget);
+    expect(find.text('정리할 사진이 없어요'), findsOneWidget);
+    await flush(tester);
+  });
+
   testWidgets('Cortex: 캡처가 아닌 낱장 사진에서도 [휴지통으로] 옆에 [Cortex로]', (tester) async {
     await pump(
       tester,

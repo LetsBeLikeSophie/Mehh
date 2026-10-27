@@ -207,6 +207,18 @@ class _SortScreenState extends ConsumerState<SortScreen>
     ], marked ? DecisionState.keep : DecisionState.toTrash);
   }
 
+  /// [추천 보기]를 켠 적이 있나: 이 화면에서 켰거나(_picked), 손으로 고르지 않았는데 X인 추천이
+  /// 있으면(화면을 나갔다 와도 DB에 X로 남아 있다). 처음부터 X인 것은 신호가 아니다.
+  /// [추천 보기] 켜짐 표시와 정확도 기록이 같이 쓴다 (UX-60 2026-10-27)
+  bool _picksTurnedOn(SortSource src, Set<String> marked) =>
+      src.suggested.any(_picked.contains) ||
+      src.suggested.any(
+        (id) =>
+            !src.preMarked.contains(id) &&
+            marked.contains(id) &&
+            !_chosen.contains(id),
+      );
+
   /// [Cortex로]가 보내는 사진: 직접 고른 것만. [추천 보기]로 X가 됐거나 처음부터 X인
   /// 추천은 빼다 (2026-10-26 Sophie C1-B: 버릴 캡처 수천 장이 AI 앱으로 가지 않게)
   List<String> _cortexIds(
@@ -570,19 +582,11 @@ class _SortScreenState extends ConsumerState<SortScreen>
     // 보지 못한 추천을 "거절"로 세면 취향 학습이 멀쩡한 추천을 끈다 (시니어 리뷰 2026-10-23 S-1)
     // 화면을 나갔다 와서 _picked가 비어도, 손으로 고르지 않았는데 X인 추천이 있으면 [추천 보기]가
     // 켜져 있던 것: 그 추천 전체를 보인 추천으로 센다(잠긴 묶음 제외, S-1 2026-10-27)
-    final picksWereOn =
-        src.locked == 0 &&
-        src.suggested.any(
-          (id) =>
-              !src.preMarked.contains(id) && // 처음부터 X인 것은 신호가 아니다
-              marked.contains(id) &&
-              !_chosen.contains(id),
-        );
     final shownPicks = {
       ..._picked,
       ..._preMarkedSeen,
       ...src.preMarked,
-      if (picksWereOn) ...src.suggested,
+      if (src.locked == 0 && _picksTurnedOn(src, marked)) ...src.suggested,
     };
     if (shownPicks.isEmpty) return;
     await ref
@@ -674,8 +678,8 @@ class _SortScreenState extends ConsumerState<SortScreen>
     final cortexIds = _cortexIds(marked, src, decisions);
     final picksOn =
         src.locked == 0 &&
-        src.suggested.any(_picked.contains) &&
-        src.suggested.every(markedSet.contains);
+        src.suggested.every(markedSet.contains) &&
+        _picksTurnedOn(src, markedSet);
     // 앱이 고른 추천 장수 (잠긴 묶음은 열기 전 장수)
     // [추천 보기 · N장]의 N = 누르면 X가 되는 장수 (잠긴 추천 + 이미 X로 보이는 실수 사진).
     // 66장이라 해 놓고 78장이 X가 되던 것 (2026-10-24 Sophie 버그)
