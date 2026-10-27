@@ -937,7 +937,13 @@ DayGroup? freshGroup(List<DayGroup> groups, DayGroup? old) {
       best = g;
     }
   }
-  return best ?? old;
+  // 사진이 그대로면 연 묶음을 쓴다 (사진첩에 바뀐 게 없다)
+  if (best == null ||
+      (best.photos.length == ids.length &&
+          best.photos.every((p) => ids.contains(p.id)))) {
+    return old;
+  }
+  return best;
 }
 
 /// [g]의 바꾼 이름. 없으면 null (기본 이름을 쓴다)
