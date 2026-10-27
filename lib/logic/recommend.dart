@@ -39,6 +39,11 @@ class GroupPlan {
   int count(TrashReason r) => trash.values.where((v) => v == r).length;
 }
 
+/// 그날의 묶음에서 돈(코인·Pro)이 드는 추천 장수. 실수 사진(junk)은 늘 무료라 빼고,
+/// 이 수가 0이면 묶음은 잠기지 않는다. 정리 화면의 잠금과 Pro 안내의 "잠긴 묶음"이 같이 쓴다 (S-2 2026-10-27)
+int paidPickCount(GroupPlan plan) =>
+    plan.trash.values.where((r) => r != TrashReason.junk).length;
+
 /// SPEC 6-3, 6-4 (3단계 임시 기준: dHash + 선명도·밝기, ML 없음).
 /// [photos]는 시간순. 킵으로 결정한 사진은 추천에서 빠진다.
 ///

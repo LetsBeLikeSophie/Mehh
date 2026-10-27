@@ -236,7 +236,7 @@ SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
         for (final e in plan.trash.entries)
           if (e.value == TrashReason.junk) e.key,
       };
-      final paid = plan.trash.length - junk.length;
+      final paid = paidPickCount(plan);
       if (kind == SortKind.day && paid > 0 && !ref.watch(unlockedProvider(g))) {
         return SortSource(
           photos: g.photos,

@@ -2198,6 +2198,55 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('Pro 안내: 실수 사진만 있는 묶음은 잠긴 묶음으로 세지 않는다 (S-2 10-27)', (
+    tester,
+  ) async {
+    final dark = [
+      PhotoMeta(
+        id: 'd0',
+        takenAt: DateTime(2026, 9, 1, 10),
+        width: 100,
+        height: 100,
+      ),
+      PhotoMeta(
+        id: 'd1',
+        takenAt: DateTime(2026, 9, 1, 15),
+        width: 100,
+        height: 100,
+      ),
+    ];
+    final day = DayGroup(id: 'day-d0', kind: DayGroupKind.day, photos: dark);
+    await pump(
+      tester,
+      const SettingsScreen(),
+      extra: [
+        realPlan({
+          'd0': const PhotoFeatures(
+            id: 'd0',
+            hashHi: 1,
+            hashLo: 1,
+            sharpness: 500,
+            brightness: 120,
+          ),
+          'd1': const PhotoFeatures(
+            id: 'd1',
+            hashHi: 9,
+            hashLo: 9,
+            sharpness: 500,
+            brightness: 3, // 까만 사진 = 실수(무료)
+          ),
+        }),
+        libraryProvider.overrideWith(
+          () => _FixedLibrary(LibraryState(photos: dark, groups: [day])),
+        ),
+      ],
+    );
+    await tester.tap(find.text('Mehh Pro'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('이 폰에서'), findsNothing);
+    await flush(tester);
+  });
+
   testWidgets(
     'Cortex: [추천 보기] 뒤 화면을 나갔다 와도 추천은 Cortex로 안 가고, 보내면 정확도 기록에 추천으로 남는다 (S-1 10-27)',
     (tester) async {

@@ -198,7 +198,7 @@
   "proTestFree": "During the closed test, picks for every set are free",
   "proAtLaunch": "Pro will be available at launch",
   "cortexAskResend": "{count, plural, =1{Includes 1 already sent to Cortex} other{Includes {count} already sent to Cortex}}",
-  "proOnPhone": "On this phone: {groups, plural, =1{1 locked set} other{{groups} locked sets}} · {count} picks · about {size}",
+  "proOnPhone": "On this phone: {groups, plural, =1{1 locked set} other{{groups} locked sets}} · {count, plural, =1{1 pick} other{{count} picks}} · about {size}",
   "shotsReadyNow": "{count, plural, =1{1 screenshot is ready to clean up now ›} other{{count} screenshots are ready to clean up now ›}}",
   "playVideo": "Play",
   "videoOpenFailed": "Couldn't find an app to play this video",

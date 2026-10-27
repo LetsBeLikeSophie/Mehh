@@ -965,7 +965,13 @@ class L10nEn extends L10n {
       other: '$groupsString locked sets',
       one: '1 locked set',
     );
-    return 'On this phone: $_temp0 · $countString picks · about $size';
+    String _temp1 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString picks',
+      one: '1 pick',
+    );
+    return 'On this phone: $_temp0 · $_temp1 · about $size';
   }
 
   @override

@@ -274,10 +274,12 @@ final lockedPicksProvider =
         if (g.kind != DayGroupKind.day || ref.watch(unlockedProvider(g))) {
           continue;
         }
-        final trash = ref.watch(groupPlanProvider(g)).trash.keys;
-        if (trash.isEmpty) continue;
+        final plan = ref.watch(groupPlanProvider(g));
+        // 정리 화면과 같은 잠금 판단: 돈 드는 추천이 없으면(실수 사진만) 잠기지 않는다
+        if (paidPickCount(plan) == 0) continue;
         groups++;
-        ids.addAll(trash);
+        // 장수는 정리 화면 [추천 보기 · N장]과 같은 수 (잠긴 추천 + 실수 사진)
+        ids.addAll(plan.trash.keys);
       }
       return (groups: groups, ids: ids);
     });
