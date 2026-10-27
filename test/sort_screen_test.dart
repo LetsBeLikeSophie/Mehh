@@ -2372,6 +2372,39 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('다시 열었을 때 그 사이 새로 생긴 추천은 "보여 준 추천"으로 세지 않는다 (UX-61)', (
+    tester,
+  ) async {
+    var photos2 = [oldShot(0), oldShot(1)];
+    final store = MemoryStore();
+    await pump(
+      tester,
+      opener(
+        () => DayGroup(
+          id: 'shots',
+          kind: DayGroupKind.screenshots,
+          photos: photos2,
+        ),
+      ),
+      store: store,
+    );
+    await tester.tap(find.text('열기'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining('추천 보기'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(MehhBackButton));
+    await tester.pumpAndSettle();
+    photos2 = [...photos2, oldShot(2)]; // 그 사이 90일 넘은 캡처가 하나 더 생겼다
+    await tester.tap(find.text('열기'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('2장 휴지통으로'));
+    await tester.pumpAndSettle();
+    final stats = PickStats.of(await store.loadPicks());
+    expect(stats.suggested, 2);
+    expect(stats.accepted, 2);
+    await flush(tester);
+  });
+
   testWidgets('Cortex: 캡처가 아닌 낱장 사진에서도 [휴지통으로] 옆에 [Cortex로]', (tester) async {
     await pump(
       tester,

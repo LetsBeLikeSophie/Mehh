@@ -582,11 +582,13 @@ class _SortScreenState extends ConsumerState<SortScreen>
     // 보지 못한 추천을 "거절"로 세면 취향 학습이 멀쩡한 추천을 끈다 (시니어 리뷰 2026-10-23 S-1)
     // 화면을 나갔다 와서 _picked가 비어도, 손으로 고르지 않았는데 X인 추천이 있으면 [추천 보기]가
     // 켜져 있던 것: 그 추천 전체를 보인 추천으로 센다(잠긴 묶음 제외, S-1 2026-10-27)
+    // 지금 X인 추천만 보인 추천으로 (그 사이 새로 생긴 추천은 X로 보인 적이 없다, UX-61)
     final shownPicks = {
       ..._picked,
       ..._preMarkedSeen,
       ...src.preMarked,
-      if (src.locked == 0 && _picksTurnedOn(src, marked)) ...src.suggested,
+      if (src.locked == 0 && _picksTurnedOn(src, marked))
+        ...src.suggested.where(marked.contains),
     };
     if (shownPicks.isEmpty) return;
     await ref
