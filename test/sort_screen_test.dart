@@ -2405,6 +2405,53 @@ void main() {
     await flush(tester);
   });
 
+  Future<DemoBilling> openProFromLocked(WidgetTester tester) async {
+    final billing = DemoBilling(korean: true);
+    final day = DayGroup(
+      id: 'day-p0',
+      kind: DayGroupKind.day,
+      photos: burstPhotos,
+    );
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.day, group: day),
+      billing: billing,
+      vault: MemoryProVault(
+        ProState(
+          freeMonth: monthKey(DateTime.now()),
+          freeUsed: freeGroupsPerMonth,
+        ),
+      ),
+      extra: [realPlan(paid)],
+    );
+    await tester.tap(find.textContaining('추천 보기'));
+    await tester.pumpAndSettle();
+    expect(find.text('Mehh Pro'), findsOneWidget); // 코인이 없으니 Pro 안내
+    return billing;
+  }
+
+  testWidgets('결제가 대기로 가면 이용권 버튼 대신 "결제를 확인하는 중이에요" (UX-64)', (tester) async {
+    final billing = await openProFromLocked(tester);
+    billing.pendingNext = true;
+    await tester.tap(find.text('₩12,900'));
+    await tester.pumpAndSettle();
+    expect(find.text('₩12,900'), findsNothing); // 다시 눌러 두 번 결제하지 않게
+    expect(find.text('결제를 확인하는 중이에요'), findsWidgets);
+    await flush(tester);
+  });
+
+  testWidgets('결제 창을 못 띄우면 실패를 알리고 이용권 버튼이 다시 눌린다 (UX-64)', (tester) async {
+    final billing = await openProFromLocked(tester);
+    billing.failNext = true;
+    await tester.tap(find.text('₩12,900'));
+    await tester.pumpAndSettle();
+    expect(find.text('결제를 마치지 못했어요'), findsOneWidget);
+    await tester.tap(find.text('₩12,900')); // 다시 눌린다
+    await tester.pumpAndSettle();
+    expect(billing.owned, contains(Plan.lifetime));
+    await flush(tester);
+  });
+
   testWidgets('Cortex: 캡처가 아닌 낱장 사진에서도 [휴지통으로] 옆에 [Cortex로]', (tester) async {
     await pump(
       tester,

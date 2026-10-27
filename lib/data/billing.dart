@@ -127,10 +127,16 @@ class StoreBilling implements Billing {
       _status.add(BillingStatus.unavailable);
       return;
     }
-    // 평생권·구독 모두 "다시 쓰는" 상품이라 buyNonConsumable
-    await _iap.buyNonConsumable(
-      purchaseParam: PurchaseParam(productDetails: d),
-    );
+    // 평생권·구독 모두 "다시 쓰는" 상품이라 buyNonConsumable.
+    // 결제 창을 못 띄우면(false·오류) 실패로 알려 버튼이 계속 돌지 않게 (UX-64)
+    try {
+      final started = await _iap.buyNonConsumable(
+        purchaseParam: PurchaseParam(productDetails: d),
+      );
+      if (!started) _status.add(BillingStatus.failed);
+    } catch (_) {
+      _status.add(BillingStatus.failed);
+    }
   }
 
   @override
@@ -192,6 +198,10 @@ class DemoBilling implements Billing {
   DemoBilling({required this.korean});
 
   final bool korean;
+
+  /// 테스트용: 다음 결제를 대기(가족 승인 등)로 / 결제 창 실패로 흉내 낸다
+  bool pendingNext = false;
+  bool failNext = false;
   final _status = StreamController<BillingStatus>.broadcast();
   final owned = <Plan>{};
   OnOwned? _onOwned;
@@ -214,6 +224,16 @@ class DemoBilling implements Billing {
   @override
   Future<void> buy(Offer o) async {
     await Future<void>.delayed(const Duration(milliseconds: 300));
+    if (pendingNext) {
+      pendingNext = false;
+      _status.add(BillingStatus.pending);
+      return;
+    }
+    if (failNext) {
+      failNext = false;
+      _status.add(BillingStatus.failed);
+      return;
+    }
     owned.add(o.plan);
     await _onOwned?.call(o.plan);
   }

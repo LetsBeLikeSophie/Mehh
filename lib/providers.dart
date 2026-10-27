@@ -78,6 +78,13 @@ class ProNotifier extends AsyncNotifier<ProState> {
   Future<ProState> build() async {
     final s = await _vault.load();
     _billing.listen(_owned);
+    // 결제 대기 중인지 기억한다: 시트를 닫았다 열어도 대기 이야기가 보이게 (UX-64)
+    final sub = _billing.status.listen(
+      (st) => ref
+          .read(billingPendingProvider.notifier)
+          .set(st == BillingStatus.pending),
+    );
+    ref.onDispose(sub.cancel);
     // 1년 이용권이 끝났는지, 다른 폰에서 산 게 있는지 조용히 확인
     Future.microtask(() => restore(quiet: true));
     // 새 달이 됐으면 무료 묶음이 다시 생겼다고 한 번 알린다
@@ -129,6 +136,7 @@ class ProNotifier extends AsyncNotifier<ProState> {
   }
 
   Future<void> _owned(Plan plan) async {
+    ref.read(billingPendingProvider.notifier).set(false);
     final s = await future;
     await _save(
       plan == Plan.lifetime
@@ -216,6 +224,18 @@ class ProNotifier extends AsyncNotifier<ProState> {
     if (!was && s.pro) ref.read(proStartedProvider.notifier).raise();
   }
 }
+
+/// 결제가 대기 중(가족 승인 등). 앱이 켜져 있는 동안만 기억. 산 것이 오거나 실패·취소면 내린다 (UX-64)
+class BillingPendingNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void set(bool v) => state = v;
+}
+
+final billingPendingProvider = NotifierProvider<BillingPendingNotifier, bool>(
+  BillingPendingNotifier.new,
+);
 
 /// 돈이 걸린 상태가 방금 바뀌었다는 한 번짜리 신호 (홈이 알리고 내린다)
 class OneShotNotifier extends Notifier<bool> {

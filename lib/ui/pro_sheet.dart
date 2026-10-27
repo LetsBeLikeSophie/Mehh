@@ -182,6 +182,12 @@ class _ProSheetState extends ConsumerState<_ProSheet> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   child: Text(l.proAtLaunch, style: muted),
                 )
+              // 결제 대기 중이면 이용권 버튼 대신 대기 이야기만 (다시 눌러 두 번 결제하지 않게, UX-64)
+              else if (ref.watch(billingPendingProvider))
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Text(l.billingPending, style: muted),
+                )
               else
                 FutureBuilder(
                   future: _offers,
