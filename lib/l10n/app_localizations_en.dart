@@ -304,7 +304,7 @@ class L10nEn extends L10n {
 
   @override
   String get clearBody =>
-      'This clears photo analysis, keep/remove records, and trashed-size history.\nYour photos aren\'t deleted.';
+      'This clears photo analysis, keep/remove records, trashed-size history, renamed sets and Sent to Cortex marks.\nYour photos aren\'t deleted.';
 
   @override
   String get clearConfirm => 'Clear';

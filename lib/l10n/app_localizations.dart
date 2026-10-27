@@ -496,7 +496,7 @@ abstract class L10n {
   /// No description provided for @clearBody.
   ///
   /// In ko, this message translates to:
-  /// **'사진 분석 결과, 킵·정리 기록, 휴지통으로 보낸 용량 기록을 지워요.\n사진은 지워지지 않아요.'**
+  /// **'사진 분석 결과, 킵·정리 기록, 휴지통으로 보낸 용량 기록, 바꾼 묶음 이름, Cortex로 보낸 표시를 지워요.\n사진은 지워지지 않아요.'**
   String get clearBody;
 
   /// No description provided for @clearConfirm.

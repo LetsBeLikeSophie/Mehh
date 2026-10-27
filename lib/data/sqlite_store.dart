@@ -355,12 +355,13 @@ class SqliteStore implements Store {
         'picks',
         'seen',
         'cortex_sent',
-        'counters',
         'faces',
         'names',
       ]) {
         await tx.delete(t);
       }
+      // 비공개 테스트를 거쳤다는 표시는 남긴다 ("테스트가 끝났어요" 알림, UX-74)
+      await tx.delete('counters', where: 'key != ?', whereArgs: ['closedTest']);
     });
   }
 }

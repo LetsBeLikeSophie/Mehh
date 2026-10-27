@@ -2492,6 +2492,34 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('[모든 기록 지우기] 뒤 바로 바꾼 이름·Cortex 표시가 사라진다 (UX-71)', (tester) async {
+    final store = MemoryStore()
+      ..names['singles'] = const GroupName('여행 사진', {'p0'})
+      ..cortexSent['p0'] = true
+      ..counters['closedTest'] = 2;
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.singles, group: group),
+      store: store,
+    );
+    expect(find.textContaining('여행 사진'), findsOneWidget);
+    expect(find.text('Cortex에 있음'), findsOneWidget);
+    await tester.tap(find.byTooltip('설정'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('모든 기록 지우기'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('바꾼 묶음 이름, Cortex로 보낸 표시'), findsOneWidget);
+    await tester.tap(find.text('지우기'));
+    await tester.pumpAndSettle();
+    Navigator.of(tester.element(find.byType(SettingsScreen))).pop();
+    await tester.pumpAndSettle();
+    expect(find.textContaining('여행 사진'), findsNothing);
+    expect(find.textContaining('낱장 사진'), findsWidgets);
+    expect(find.text('Cortex에 있음'), findsNothing);
+    expect(store.counters['closedTest'], 2); // 테스트를 거쳤다는 표시는 남는다 (UX-74)
+    await flush(tester);
+  });
+
   testWidgets('Cortex: 캡처가 아닌 낱장 사진에서도 [휴지통으로] 옆에 [Cortex로]', (tester) async {
     await pump(
       tester,

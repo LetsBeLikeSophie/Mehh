@@ -60,7 +60,6 @@ String monthKey(DateTime d) =>
 String dayKey(DateTime d) =>
     '${monthKey(d)}-${d.day.toString().padLeft(2, '0')}';
 
-/// 웹 미리보기·테스트용. 앱을 끄면 사라진다.
 /// 바꾼 묶음 이름. 묶음 id는 첫 사진이 지워지면 바뀌므로(day-<첫 사진 id>)
 /// 그때의 사진 id도 같이 남겨, id로 못 찾으면 사진이 겹치는 이름을 쓴다
 class GroupName {
@@ -69,6 +68,7 @@ class GroupName {
   final Set<String> photoIds;
 }
 
+/// 웹 미리보기·테스트용. 앱을 끄면 사라진다.
 class MemoryStore implements Store {
   final features = <String, PhotoFeatures>{};
   final decisions = <String, Decision>{};
@@ -186,7 +186,8 @@ class MemoryStore implements Store {
   @override
   Future<void> clearAll() async {
     cortexSent.clear();
-    counters.clear();
+    // 비공개 테스트를 거쳤다는 표시는 기록이 아니라 남긴다 ("테스트가 끝났어요" 알림, UX-74)
+    counters.removeWhere((k, _) => k != 'closedTest');
     faces.clear();
     names.clear();
     features.clear();

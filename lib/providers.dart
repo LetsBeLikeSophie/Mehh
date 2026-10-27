@@ -803,11 +803,19 @@ final cleanerProvider = Provider((ref) => Cleaner(ref));
 /// 이 폰에 남긴 모든 기록 지우기 (설정 화면). 사진 자체는 건드리지 않는다.
 Future<void> clearAllRecords(WidgetRef ref) async {
   await ref.read(storeProvider).clearAll();
-  await ref.read(photoLibraryProvider).clearCache();
-  await ref.read(placeNamerProvider).clearCache();
+  // 지운 기록으로 만든 화면 상태도 바로 비운다: 바꾼 이름·Cortex 표시·"다 봤어요"·
+  // 취향 학습으로 꺼 둔 이유·눈 감음 (앱을 다시 켜기 전까지 남아 있지 않게, UX-71).
+  // 캐시 비우기(파일)보다 먼저: 그쪽이 늦거나 실패해도 화면은 바로 맞는다
   ref.invalidate(decisionsProvider);
   ref.invalidate(viewsProvider);
   ref.invalidate(freedThisMonthProvider);
+  ref.invalidate(groupNamesProvider);
+  ref.invalidate(cortexSentProvider);
+  ref.invalidate(seenProvider);
+  ref.invalidate(mutedReasonsProvider);
+  ref.invalidate(eyesClosedProvider);
+  await ref.read(photoLibraryProvider).clearCache();
+  await ref.read(placeNamerProvider).clearCache();
   ref.read(analysisProvider.notifier).reset();
   ref.invalidate(placeNameProvider);
   ref.read(libraryProvider.notifier).reload();

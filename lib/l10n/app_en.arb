@@ -66,7 +66,7 @@
   "trashFailed": "Couldn't move to trash. Your photos are unchanged.",
   "trashed": "{count, plural, =1{✓ 1 photo · {size} moved to trash · restore it within 30 days, or empty the trash to free up that space} other{✓ {count} photos · {size} moved to trash · restore them within 30 days, or empty the trash to free up that space}}",
   "clearTitle": "Clear all records?",
-  "clearBody": "This clears photo analysis, keep/remove records, and trashed-size history.\nYour photos aren't deleted.",
+  "clearBody": "This clears photo analysis, keep/remove records, trashed-size history, renamed sets and Sent to Cortex marks.\nYour photos aren't deleted.",
   "clearConfirm": "Clear",
   "cleared": "All records cleared",
   "privacyTitle": "Your photos and records stay on this phone",
