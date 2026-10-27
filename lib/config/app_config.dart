@@ -1,5 +1,5 @@
 /// 앱 버전 (pubspec.yaml version과 같이 고친다). 설정 화면과 문의 메일 제목에 쓴다.
-const appVersion = '1.17.7';
+const appVersion = '1.17.8';
 
 /// 비공개 테스트 동안 그날의 묶음을 코인 없이 모두 연다 (2026-10-24 Sophie). 결제를 켜고 정식 출시할 때 false
 const closedTestFree = true;
