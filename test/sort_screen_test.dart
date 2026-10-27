@@ -2198,6 +2198,82 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets(
+    'Cortex: [추천 보기] 뒤 화면을 나갔다 와도 추천은 Cortex로 안 가고, 보내면 정확도 기록에 추천으로 남는다 (S-1 10-27)',
+    (tester) async {
+      final shots = DayGroup(
+        id: 'shots',
+        kind: DayGroupKind.screenshots,
+        photos: [
+          for (var i = 0; i < 4; i++)
+            PhotoMeta(
+              id: 's$i',
+              takenAt: DateTime(2025, 1, 1 + i),
+              width: 100,
+              height: 200,
+              isScreenshot: true,
+            ),
+          PhotoMeta(
+            id: 'new',
+            takenAt: DateTime.now(),
+            width: 100,
+            height: 200,
+            isScreenshot: true,
+          ),
+        ],
+      );
+      final handoff = _FakeHandoff();
+      final store = MemoryStore();
+      await pump(
+        tester,
+        Builder(
+          builder: (context) => Scaffold(
+            body: Center(
+              child: TextButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        SortScreen(kind: SortKind.screenshots, group: shots),
+                  ),
+                ),
+                child: const Text('열기'),
+              ),
+            ),
+          ),
+        ),
+        store: store,
+        extra: [
+          cortexInstalledProvider.overrideWith((ref) async => true),
+          handoffProvider.overrideWithValue(handoff),
+        ],
+      );
+      await tester.tap(find.text('열기'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.textContaining('추천 보기'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(MehhBackButton)); // 나갔다가
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('열기')); // 다시 들어온다
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byWidgetPredicate((w) => w is XToggle && !w.on).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cortex로'));
+      await tester.pumpAndSettle();
+      expect(find.text('1장을 Cortex로 보낼까요?'), findsOneWidget);
+      await tester.tap(find.text('취소'));
+      await tester.pumpAndSettle();
+      // 그대로 [5장 휴지통으로]: 다시 들어와 보낸 추천도 정확도 기록에 추천으로 남는다
+      await tester.tap(find.text('5장 휴지통으로'));
+      await tester.pumpAndSettle();
+      final stats = PickStats.of(await store.loadPicks());
+      expect(stats.suggested, 4);
+      expect(stats.accepted, 4);
+      await flush(tester);
+    },
+  );
+
   testWidgets('Cortex: 캡처가 아닌 낱장 사진에서도 [휴지통으로] 옆에 [Cortex로]', (tester) async {
     await pump(
       tester,

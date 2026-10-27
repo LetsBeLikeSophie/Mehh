@@ -214,11 +214,11 @@ class _SortScreenState extends ConsumerState<SortScreen>
     SortSource src,
     Map<String, Decision> decisions,
   ) => [
+    // 앱이 고른 추천(지금의 추천·처음부터 X)은 이 화면에서 손으로 고른 것만. 화면을 나갔다 와도
+    // [추천 보기]로 X가 된 추천은 DB에 X로 남아 있으니 State가 아니라 추천 목록으로 가린다 (S-1 2026-10-27)
     for (final id in marked)
       if (_chosen.contains(id) ||
-          (!_picked.contains(id) &&
-              !(src.preMarked.contains(id) &&
-                  stateOf(decisions, id) == DecisionState.undecided)))
+          !(src.suggested.contains(id) || src.preMarked.contains(id)))
         id,
   ];
 
@@ -528,6 +528,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
     SortSource src,
     List<String> shown,
   ) async {
+    final markedBefore = _markedNow; // 보내면 다시 그려져 바뀌므로 먼저 잡아 둔다
     setState(() => _busy = true);
     // 정리를 끝낸 순간에 Pro 안내 (Pro가 아니면 하루 한 번까지). 안내 시트가 아래 알림을 덮으니
     // 그때는 알림 대신 시트 첫 줄에 "30일 안에 되살릴 수 있어요"까지 넣는다 (UX 리뷰 2026-10-22)
@@ -543,7 +544,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
           ? (n, size) => context.l.trashedVideos(n, size)
           : null,
     );
-    if (n > 0) await _recordPicks(ids, src, shown);
+    if (n > 0) await _recordPicks(ids, src, shown, markedBefore);
     // 잠긴 묶음을 직접 정리해 보냈으면 다음부터 "다 봤어요" (2026-10-22 Sophie R3-A)
     if (n > 0 && src.locked > 0) {
       final sent = ids.toSet();
@@ -563,10 +564,26 @@ class _SortScreenState extends ConsumerState<SortScreen>
     List<String> sent,
     SortSource src,
     List<String> shown,
+    Set<String> marked,
   ) async {
     // 사용자에게 X로 보였던 추천만 센다: [추천 보기]로 받은 것 + 처음부터 X였던 것.
     // 보지 못한 추천을 "거절"로 세면 취향 학습이 멀쩡한 추천을 끈다 (시니어 리뷰 2026-10-23 S-1)
-    final shownPicks = {..._picked, ..._preMarkedSeen, ...src.preMarked};
+    // 화면을 나갔다 와서 _picked가 비어도, 손으로 고르지 않았는데 X인 추천이 있으면 [추천 보기]가
+    // 켜져 있던 것: 그 추천 전체를 보인 추천으로 센다(잠긴 묶음 제외, S-1 2026-10-27)
+    final picksWereOn =
+        src.locked == 0 &&
+        src.suggested.any(
+          (id) =>
+              !src.preMarked.contains(id) && // 처음부터 X인 것은 신호가 아니다
+              marked.contains(id) &&
+              !_chosen.contains(id),
+        );
+    final shownPicks = {
+      ..._picked,
+      ..._preMarkedSeen,
+      ...src.preMarked,
+      if (picksWereOn) ...src.suggested,
+    };
     if (shownPicks.isEmpty) return;
     await ref
         .read(storeProvider)
