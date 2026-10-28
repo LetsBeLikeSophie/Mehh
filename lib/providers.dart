@@ -297,6 +297,8 @@ final lockedPicksProvider =
         final plan = ref.watch(groupPlanProvider(g));
         // 정리 화면과 같은 잠금 판단: 돈 드는 추천이 없으면(실수 사진만) 잠기지 않는다
         if (paidPickCount(plan) == 0) continue;
+        // 홈에서 "다 봤어요"로 끝낸 묶음은 세지 않는다: 홈과 같은 숫자 (2026-10-28 Sophie P3-A)
+        if (ref.watch(groupStatusProvider(g)) == GroupStatus.done) continue;
         groups++;
         // 장수는 정리 화면 [추천 보기 · N장]과 같은 수 (잠긴 추천 + 실수 사진)
         ids.addAll(plan.trash.keys);

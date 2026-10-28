@@ -2264,6 +2264,31 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('Pro 안내: 홈에서 "다 봤어요"로 끝낸 잠긴 묶음은 세지 않는다 (P3)', (tester) async {
+    final day = DayGroup(
+      id: 'day-p0',
+      kind: DayGroupKind.day,
+      photos: burstPhotos,
+    );
+    // 잠긴 채 손으로 정리해 지금 추천(p1·p2)을 모두 본 묶음
+    final store = MemoryStore()..seen.addAll(['p0', 'p1', 'p2']);
+    await pump(
+      tester,
+      const SettingsScreen(),
+      store: store,
+      extra: [
+        realPlan(paid),
+        libraryProvider.overrideWith(
+          () => _FixedLibrary(LibraryState(photos: burstPhotos, groups: [day])),
+        ),
+      ],
+    );
+    await tester.tap(find.text('Mehh Pro'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('이 폰에서'), findsNothing);
+    await flush(tester);
+  });
+
   testWidgets('Pro 안내: 실수 사진만 있는 묶음은 잠긴 묶음으로 세지 않는다 (S-2 10-27)', (
     tester,
   ) async {
