@@ -2520,6 +2520,45 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets(
+    '캡처 화면을 연 채 갤러리에서 ♥를 누르면 돌아온 뒤 [추천 보기]가 그 사진을 X로 넣지 않는다 (S-1 10-28)',
+    (tester) async {
+      PhotoMeta shot(String id, {bool fav = false}) => PhotoMeta(
+        id: id,
+        takenAt: DateTime(2025, 1, 1),
+        width: 100,
+        height: 200,
+        isScreenshot: true,
+        isFavorite: fav,
+      );
+      final before = DayGroup(
+        id: 'shots',
+        kind: DayGroupKind.screenshots,
+        photos: [shot('a'), shot('b')],
+      );
+      final lib = _FixedLibrary(
+        LibraryState(photos: before.photos, groups: [before]),
+      );
+      await pump(
+        tester,
+        SortScreen(kind: SortKind.screenshots, group: before),
+        extra: [libraryProvider.overrideWith(() => lib)],
+      );
+      // 갤러리에서 'a'에 ♥ (사진 구성은 같다)
+      final after = DayGroup(
+        id: 'shots',
+        kind: DayGroupKind.screenshots,
+        photos: [shot('a', fav: true), shot('b')],
+      );
+      lib.replace(LibraryState(photos: after.photos, groups: [after]));
+      await tester.pumpAndSettle();
+      await tester.tap(find.textContaining('추천 보기'));
+      await tester.pumpAndSettle();
+      expect(find.text('1장 휴지통으로'), findsOneWidget); // ♥ 사진은 빠진다
+      await flush(tester);
+    },
+  );
+
   testWidgets('Cortex: 캡처가 아닌 낱장 사진에서도 [휴지통으로] 옆에 [Cortex로]', (tester) async {
     await pump(
       tester,

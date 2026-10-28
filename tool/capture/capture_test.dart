@@ -186,7 +186,26 @@ void main() {
           ),
       ]..sort((a, b) => a.takenAt.compareTo(b.takenAt)),
     );
-    await open(tester, SortScreen(kind: SortKind.screenshots, group: aged));
+    // 날짜만 바꾼 묶음은 이 화면의 사진첩으로 넣어 연다 (정리 화면은 늘 사진첩의 묶음을 본다)
+    final lib = c.read(libraryProvider).value!;
+    await open(
+      tester,
+      ProviderScope(
+        overrides: [
+          libraryProvider.overrideWith(
+            () => _FixedLibrary(
+              LibraryState(
+                photos: lib.photos,
+                groups: [
+                  for (final g in lib.groups) g.id == shots.id ? aged : g,
+                ],
+              ),
+            ),
+          ),
+        ],
+        child: SortScreen(kind: SortKind.screenshots, group: aged),
+      ),
+    );
     await shot(tester, '05a_screenshots_before');
     await tester.tap(find.textContaining('추천 보기'));
     await tester.pump(const Duration(seconds: 1));
@@ -263,4 +282,13 @@ void main() {
     await open(tester, const SettingsScreen());
     await shot(tester, '08_settings');
   });
+}
+
+/// 캡처 도구용: 정해 둔 사진첩 그대로
+class _FixedLibrary extends LibraryNotifier {
+  _FixedLibrary(this.value);
+  final LibraryState value;
+
+  @override
+  Future<LibraryState> build() async => value;
 }
