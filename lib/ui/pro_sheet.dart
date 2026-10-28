@@ -86,7 +86,11 @@ class _ProSheetState extends ConsumerState<_ProSheet> {
     showNote(context, switch (found) {
       null => l.billingUnavailable,
       true => l.restored,
-      false => l.nothingToRestore,
+      // 승인 대기 중인 구매가 있으면 "없어요" 대신 대기 이야기 (UX-79)
+      false =>
+        ref.read(billingPendingProvider)
+            ? l.billingPending
+            : l.nothingToRestore,
     });
   }
 

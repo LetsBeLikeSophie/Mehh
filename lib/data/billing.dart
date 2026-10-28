@@ -3,6 +3,8 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:in_app_purchase_android/billing_client_wrappers.dart'
+    show PurchaseStateWrapper;
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:pointycastle/export.dart';
 import 'package:pointycastle/asn1.dart';
@@ -71,29 +73,38 @@ class StoreBilling implements Billing {
   void listen(OnOwned onOwned) {
     _sub ??= _iap.purchaseStream.listen((list) async {
       for (final p in list) {
-        switch (p.status) {
-          case PurchaseStatus.pending:
+        final plan = Plan.of(p.productID);
+        // 복원은 모든 구매를 restored로 바꿔 보낸다: Play 쪽 상태가 대기면 아직 산 게 아니다 (UX-79)
+        final playPending =
+            p is GooglePlayPurchaseDetails &&
+            p.billingClientPurchase.purchaseState ==
+                PurchaseStateWrapper.pending;
+        final outcome = purchaseOutcome(
+          status: p.status,
+          playPending: playPending,
+          known: plan != null,
+          verified: plan != null && _verified(p),
+        );
+        switch (outcome) {
+          case PurchaseOutcome.pending:
             _status.add(BillingStatus.pending);
-          case PurchaseStatus.canceled:
+          case PurchaseOutcome.canceled:
             _status.add(BillingStatus.canceled);
-          case PurchaseStatus.error:
+          case PurchaseOutcome.failed:
             _status.add(BillingStatus.failed);
-          case PurchaseStatus.purchased:
-          case PurchaseStatus.restored:
-            final plan = Plan.of(p.productID);
-            if (plan != null && _verified(p)) {
-              _restoring?.add(plan);
-              await onOwned(plan);
-            } else {
-              _status.add(BillingStatus.failed);
-            }
+          case PurchaseOutcome.owned:
+            _restoring?.add(plan!);
+            await onOwned(plan!);
         }
-        // 확인에 실패한 구매는 "전달 완료"로 알리지 않는다: 그래야 Play가 3일 뒤 자동 환불한다
-        final bought =
-            p.status == PurchaseStatus.purchased ||
-            p.status == PurchaseStatus.restored;
-        final ok = !bought || (Plan.of(p.productID) != null && _verified(p));
-        if (shouldComplete(pending: p.pendingCompletePurchase, verified: ok)) {
+        // 확인된 구매만 "전달 완료"로 알린다: 확인 실패는 Play가 3일 뒤 자동 환불하고,
+        // 대기는 승인되면 다시 온다
+        if (shouldComplete(
+          pending: p.pendingCompletePurchase,
+          verified:
+              outcome != PurchaseOutcome.pending &&
+              (outcome != PurchaseOutcome.failed ||
+                  p.status == PurchaseStatus.error),
+        )) {
           await _iap.completePurchase(p);
         }
       }
@@ -202,6 +213,9 @@ class DemoBilling implements Billing {
   /// 테스트용: 다음 결제를 대기(가족 승인 등)로 / 결제 창 실패로 흉내 낸다
   bool pendingNext = false;
   bool failNext = false;
+
+  /// 테스트용: 복원 때 승인 대기 중인 구매가 하나 있다 (가족 승인 등)
+  bool pendingOnRestore = false;
   final _status = StreamController<BillingStatus>.broadcast();
   final owned = <Plan>{};
   OnOwned? _onOwned;
@@ -239,11 +253,36 @@ class DemoBilling implements Billing {
   }
 
   @override
-  Future<Set<Plan>?> restore() async => {...owned};
+  Future<Set<Plan>?> restore() async {
+    // 대기 구매는 산 것으로 돌려주지 않고 대기만 알린다 (UX-79)
+    if (pendingOnRestore) _status.add(BillingStatus.pending);
+    return {...owned};
+  }
 
   @override
   void dispose() => _status.close();
 }
+
+enum PurchaseOutcome { pending, canceled, failed, owned }
+
+/// 스토어가 보낸 구매 하나를 어떻게 받을까. [playPending]은 Play 쪽 구매 상태가 대기인지
+/// (복원은 대기 구매도 restored로 보낸다). 대기는 산 것이 아니다 (UX-79 2026-10-28)
+PurchaseOutcome purchaseOutcome({
+  required PurchaseStatus status,
+  required bool playPending,
+  required bool known,
+  required bool verified,
+}) => switch (status) {
+  PurchaseStatus.pending => PurchaseOutcome.pending,
+  PurchaseStatus.canceled => PurchaseOutcome.canceled,
+  PurchaseStatus.error => PurchaseOutcome.failed,
+  PurchaseStatus.purchased || PurchaseStatus.restored =>
+    playPending
+        ? PurchaseOutcome.pending
+        : known && verified
+        ? PurchaseOutcome.owned
+        : PurchaseOutcome.failed,
+};
 
 /// 이 빌드에서 팔아도 되는가: 안드로이드는 구매를 확인할 공개키가 있어야 한다
 bool canSell({required bool android, String publicKey = playPublicKey}) =>

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:in_app_purchase/in_app_purchase.dart' show PurchaseStatus;
 import 'package:photo_manager/photo_manager.dart' show PermissionState;
 import 'package:mehh/data/billing.dart';
 import 'package:mehh/data/pro.dart';
@@ -2621,6 +2622,66 @@ void main() {
     expect(find.text('허용한 사진이 없어요'), findsOneWidget);
     expect(find.text('사진 고르기'), findsOneWidget);
     expect(find.text('정리할 사진이 없어요'), findsNothing);
+    await flush(tester);
+  });
+
+  test('결제 받기: 복원으로 온 구매라도 Play 쪽이 대기면 산 것이 아니다 (UX-79)', () {
+    PurchaseOutcome o(PurchaseStatus s, {bool pending = false}) =>
+        purchaseOutcome(
+          status: s,
+          playPending: pending,
+          known: true,
+          verified: true,
+        );
+    expect(o(PurchaseStatus.restored, pending: true), PurchaseOutcome.pending);
+    expect(o(PurchaseStatus.purchased, pending: true), PurchaseOutcome.pending);
+    expect(o(PurchaseStatus.restored), PurchaseOutcome.owned);
+    expect(o(PurchaseStatus.pending), PurchaseOutcome.pending);
+    expect(
+      purchaseOutcome(
+        status: PurchaseStatus.purchased,
+        playPending: false,
+        known: true,
+        verified: false,
+      ),
+      PurchaseOutcome.failed,
+    );
+  });
+
+  testWidgets('승인 대기 중인 구매가 있으면 다시 켜도 Pro가 아니고, 시트는 대기 이야기 (UX-79)', (
+    tester,
+  ) async {
+    final billing = DemoBilling(korean: true)..pendingOnRestore = true;
+    final vault = MemoryProVault(
+      ProState(
+        freeMonth: monthKey(DateTime.now()),
+        freeUsed: freeGroupsPerMonth,
+      ),
+    );
+    await pump(
+      tester,
+      SortScreen(
+        kind: SortKind.day,
+        group: DayGroup(
+          id: 'day-p0',
+          kind: DayGroupKind.day,
+          photos: burstPhotos,
+        ),
+      ),
+      billing: billing,
+      vault: vault,
+      extra: [realPlan(paid)],
+    );
+    await tester.tap(find.textContaining('추천 보기'));
+    await tester.pumpAndSettle();
+    expect(vault.value.pro, isFalse);
+    expect(find.text('Pro가 열렸어요'), findsNothing);
+    expect(find.text('₩12,900'), findsNothing);
+    expect(find.text('결제를 확인하는 중이에요'), findsOneWidget);
+    await tester.tap(find.text('구매 복원'));
+    await tester.pumpAndSettle();
+    expect(find.text('복원할 구매가 없어요'), findsNothing);
+    expect(find.text('결제를 확인하는 중이에요'), findsWidgets);
     await flush(tester);
   });
 
