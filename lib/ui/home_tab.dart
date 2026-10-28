@@ -125,7 +125,22 @@ class _HomeTabState extends ConsumerState<HomeTab> {
           action: (l.retry, () => ref.read(libraryProvider.notifier).reload()),
         ),
         data: (state) {
-          if (state.groups.isEmpty) return _Message(l.noPhotos);
+          if (state.groups.isEmpty) {
+            // 일부만 허용했는데 0장이면 더 허용할 길을 같이 보인다 (UX-76)
+            if (!limited) return _Message(l.noPhotos);
+            return _Message(
+              l.noAllowedPhotos,
+              below: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                child: _LimitedBanner(
+                  onTap: () async {
+                    await ref.read(photoLibraryProvider).presentLimited();
+                    ref.read(libraryProvider.notifier).reload();
+                  },
+                ),
+              ),
+            );
+          }
           final days = [
             for (final g in state.groups)
               if (g.kind == DayGroupKind.day) g,
@@ -799,10 +814,13 @@ class _LimitedBanner extends StatelessWidget {
 }
 
 class _Message extends StatelessWidget {
-  const _Message(this.text, {this.action});
+  const _Message(this.text, {this.action, this.below});
 
   final String text;
   final (String, VoidCallback)? action;
+
+  /// 문구 아래에 붙일 것 (예: 일부만 허용 안내)
+  final Widget? below;
 
   @override
   Widget build(BuildContext context) {
@@ -822,6 +840,7 @@ class _Message extends StatelessWidget {
             const SizedBox(height: 12),
             OutlinedButton(onPressed: a.$2, child: Text(a.$1)),
           ],
+          ?below,
         ],
       ),
     );

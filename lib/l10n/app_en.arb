@@ -202,5 +202,6 @@
   "shotsReadyNow": "{count, plural, =1{1 screenshot is ready to clean up now ›} other{{count} screenshots are ready to clean up now ›}}",
   "playVideo": "Play",
   "videoOpenFailed": "Couldn't find an app to play this video",
-  "testEnded": "{count, plural, =1{The closed test is over · ◉ 1 this month} other{The closed test is over · ◉ {count} this month}}"
+  "testEnded": "{count, plural, =1{The closed test is over · ◉ 1 this month} other{The closed test is over · ◉ {count} this month}}",
+  "noAllowedPhotos": "No photos allowed yet"
 }

@@ -1314,6 +1314,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'비공개 테스트가 끝났어요 · 이번 달 ◉ {count}개'**
   String testEnded(int count);
+
+  /// 일부만 허용했는데 허용한 사진이 0장일 때 홈
+  ///
+  /// In ko, this message translates to:
+  /// **'허용한 사진이 없어요'**
+  String get noAllowedPhotos;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

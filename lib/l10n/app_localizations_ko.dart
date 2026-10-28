@@ -817,4 +817,7 @@ class L10nKo extends L10n {
   String testEnded(int count) {
     return '비공개 테스트가 끝났어요 · 이번 달 ◉ $count개';
   }
+
+  @override
+  String get noAllowedPhotos => '허용한 사진이 없어요';
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:photo_manager/photo_manager.dart' show PermissionState;
 import 'package:mehh/data/billing.dart';
 import 'package:mehh/data/pro.dart';
 import 'package:mehh/data/demo.dart';
@@ -2611,6 +2612,18 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('일부만 허용했는데 0장이면 "허용한 사진이 없어요"와 [사진 고르기] (UX-76)', (tester) async {
+    await pump(
+      tester,
+      const Scaffold(body: HomeTab()),
+      library: _EmptyLimitedLibrary(),
+    );
+    expect(find.text('허용한 사진이 없어요'), findsOneWidget);
+    expect(find.text('사진 고르기'), findsOneWidget);
+    expect(find.text('정리할 사진이 없어요'), findsNothing);
+    await flush(tester);
+  });
+
   testWidgets('Cortex: 캡처가 아닌 낱장 사진에서도 [휴지통으로] 옆에 [Cortex로]', (tester) async {
     await pump(
       tester,
@@ -2705,4 +2718,12 @@ class _FixedLibrary extends LibraryNotifier {
       ),
     );
   }
+}
+
+class _EmptyLimitedLibrary extends DemoPhotoLibrary {
+  @override
+  Future<PermissionState> permissionState() async => PermissionState.limited;
+
+  @override
+  Future<List<PhotoMeta>> loadAll() async => const [];
 }
