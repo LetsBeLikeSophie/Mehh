@@ -2559,6 +2559,58 @@ void main() {
     },
   );
 
+  testWidgets('열어 둔 그날의 묶음이 다시 묶여 갈라져도 보던 사진은 그대로, 다시 열면 갈린 묶음 (UX-75)', (
+    tester,
+  ) async {
+    final whole = DayGroup(
+      id: 'day-p0',
+      kind: DayGroupKind.day,
+      photos: photos,
+    );
+    final front = DayGroup(
+      id: 'day-p0',
+      kind: DayGroupKind.day,
+      photos: photos.sublist(0, 2),
+    );
+    final back = DayGroup(
+      id: 'day-p2',
+      kind: DayGroupKind.day,
+      photos: photos.sublist(2),
+    );
+    final lib = _FixedLibrary(LibraryState(photos: photos, groups: [whole]));
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.day, group: whole),
+      extra: [libraryProvider.overrideWith(() => lib)],
+    );
+    expect(find.byType(PhotoThumb), findsNWidgets(4));
+    await tester.tap(find.byType(XToggle).at(2));
+    await tester.tap(find.byType(XToggle).at(3));
+    await tester.pumpAndSettle();
+    expect(find.text('2장 휴지통으로'), findsOneWidget);
+    // 첫 장소 확인이 끝나 뒤 2장이 3km 떨어진 곳으로 갈렸다
+    lib.replace(LibraryState(photos: photos, groups: [front, back]));
+    await tester.pumpAndSettle();
+    expect(find.byType(PhotoThumb), findsNWidgets(4)); // 보던 사진이 그대로
+    expect(find.text('2장 휴지통으로'), findsOneWidget);
+    await flush(tester);
+
+    // 다시 열면(홈에서 갈린 묶음을 누르면) 갈린 대로 2장
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.day, group: front),
+      extra: [
+        libraryProvider.overrideWith(
+          () => _FixedLibrary(
+            LibraryState(photos: photos, groups: [front, back]),
+          ),
+        ),
+      ],
+    );
+    expect(find.byType(PhotoThumb), findsNWidgets(2));
+    await flush(tester);
+  });
+
   testWidgets('Cortex: 캡처가 아닌 낱장 사진에서도 [휴지통으로] 옆에 [Cortex로]', (tester) async {
     await pump(
       tester,

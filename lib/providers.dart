@@ -930,7 +930,10 @@ DayGroup? freshGroup(List<DayGroup> groups, DayGroup? old) {
   var most = 0;
   for (final g in groups) {
     if (g.kind != old.kind) continue;
-    if (g.kind == DayGroupKind.day && g.id == old.id) return g;
+    if (g.kind == DayGroupKind.day && g.id == old.id) {
+      best = g;
+      break;
+    }
     final n = g.photos.where((p) => ids.contains(p.id)).length;
     if (n > most) {
       most = n;
@@ -938,8 +941,47 @@ DayGroup? freshGroup(List<DayGroup> groups, DayGroup? old) {
     }
   }
   // 찾으면 늘 사진첩의 것: 사진 구성이 같아도 ♥·앨범 이동 같은 표시가 바뀌었을 수 있다 (S-1 2026-10-28)
-  return best ?? old;
+  if (best == null) return old;
+  if (old.kind != DayGroupKind.day) return best;
+  return _keepOpened(groups, best, old);
 }
+
+/// 그날의 묶음이 열려 있는 동안 다시 묶여(첫 장소 확인 등) 갈라져도, 연 묶음 사진 중
+/// 사진첩에 아직 있는 것은 그대로 보인다(새 메타데이터로). 지운 사진은 빠지고 새 사진은 붙는다.
+/// 다시 열면 갈린 묶음으로 보인다 (UX-75 2026-10-28)
+DayGroup _keepOpened(List<DayGroup> groups, DayGroup now, DayGroup old) {
+  final last = _lastKept;
+  if (last != null && identical(last.$1, now) && identical(last.$2, old)) {
+    return last.$3;
+  }
+  final have = {for (final p in now.photos) p.id};
+  final wanted = {for (final p in old.photos) p.id}..removeAll(have);
+  final DayGroup out;
+  if (wanted.isEmpty) {
+    out = now;
+  } else {
+    final moved = [
+      for (final g in groups)
+        for (final p in g.photos)
+          if (wanted.contains(p.id)) p,
+    ];
+    out = moved.isEmpty
+        ? now
+        : DayGroup(
+            id: now.id,
+            kind: now.kind,
+            photos: [...now.photos, ...moved]
+              ..sort((a, b) => a.takenAt.compareTo(b.takenAt)),
+            centerLat: now.centerLat,
+            centerLng: now.centerLng,
+          );
+  }
+  _lastKept = (now, old, out);
+  return out;
+}
+
+/// 같은 입력이면 같은 묶음 객체를 돌려준다 (묶음별 추천 계산이 매번 새로 돌지 않게)
+(DayGroup, DayGroup, DayGroup)? _lastKept;
 
 /// [g]의 바꾼 이름. 없으면 null (기본 이름을 쓴다)
 String? groupNameOf(
