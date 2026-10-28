@@ -829,6 +829,35 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('크게 보기: 사진을 눌러도 따로 열리는 화면이 없고, 두 손가락으로 벌려 옮겨도 정리·킵이 되지 않는다', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      FocusScreen(kind: SortKind.singles, group: group, initialId: 'p3'),
+    );
+    await tester.tap(card());
+    await tester.pumpAndSettle();
+    expect(find.byType(FocusScreen), findsOneWidget);
+    expect(find.byTooltip('닫기'), findsNothing); // 예전 사진 화면의 닫기
+    // 두 손가락으로 벌리면서 아래로 크게 옮긴다 (한 손가락이면 킵이 될 거리)
+    final c = tester.getCenter(card());
+    final a = await tester.startGesture(c - const Offset(20, 0));
+    final b = await tester.startGesture(c + const Offset(20, 0));
+    await tester.pump();
+    for (var i = 0; i < 10; i++) {
+      await a.moveBy(const Offset(-6, 20));
+      await b.moveBy(const Offset(6, 20));
+      await tester.pump();
+    }
+    await a.up();
+    await b.up();
+    await tester.pumpAndSettle();
+    expect(find.text('✓ 킵'), findsNothing);
+    expect(find.text('✕ 정리'), findsNothing);
+    await flush(tester);
+  });
+
   testWidgets('크게 보기: 위로 밀면 정리, 아래로 밀면 킵, 그리드에 반영된다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     await tester.tap(find.byType(PhotoThumb).first);

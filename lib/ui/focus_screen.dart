@@ -51,6 +51,10 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
   bool _zooming = false;
   double _zoom = 1;
 
+  /// 두 손가락 확대: 벌리기 시작한 곳과, 그 뒤 손가락이 옮겨 간 만큼 (확대한 곳이 손가락을 따라간다)
+  Offset _zoomAt = Offset.zero;
+  Offset _zoomPan = Offset.zero;
+
   _Motion _motion = _Motion.next;
 
   /// 길게 누르면: X 친 사진이 있으면 "N장을 휴지통으로 보내고 끝낼까요?",
@@ -101,15 +105,25 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
   void _onScaleStart(ScaleStartDetails d) => setState(() {
     _dragging = true;
     _zooming = d.pointerCount >= 2;
+    if (_zooming) {
+      _zoomAt = d.localFocalPoint;
+      _zoomPan = Offset.zero;
+    }
   });
 
   void _onScaleUpdate(ScaleUpdateDetails d) {
     if (_zooming || d.pointerCount >= 2) {
-      // 두 손가락: 확대해서 보기 (손을 떼면 원래 크기로)
+      // 두 손가락: 벌린 곳을 확대하고, 손가락을 옮기면 확대한 곳이 따라간다.
+      // 손을 떼면 원래 크기로 (한 손가락 밀기 = 정리·킵·넘기기와 부딪히지 않게, 2026-10-29 Sophie)
       setState(() {
+        if (!_zooming) {
+          _zoomAt = d.localFocalPoint;
+          _zoomPan = Offset.zero;
+        }
         _zooming = true;
         _drag = Offset.zero;
         _zoom = d.scale.clamp(1.0, 4.0);
+        _zoomPan = d.localFocalPoint - _zoomAt;
       });
       return;
     }
@@ -137,6 +151,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
       _dragging = false;
       _zooming = false;
       _zoom = 1;
+      _zoomPan = Offset.zero;
     });
     if (wasZoom) return;
     if (d.dy < -90) {
@@ -197,9 +212,18 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
       key: ValueKey(current),
       child: Transform.translate(
         offset: _drag,
-        child: AnimatedScale(
-          scale: _zoom,
+        child: AnimatedContainer(
           duration: Duration(milliseconds: _zooming ? 0 : 180),
+          // 벌린 곳(_zoomAt)을 중심으로 키우고, 손가락이 옮겨 간 만큼(_zoomPan) 따라간다
+          transform: Matrix4.identity()
+            ..translateByDouble(
+              _zoomAt.dx + _zoomPan.dx,
+              _zoomAt.dy + _zoomPan.dy,
+              0,
+              1,
+            )
+            ..scaleByDouble(_zoom, _zoom, 1, 1)
+            ..translateByDouble(-_zoomAt.dx, -_zoomAt.dy, 0, 1),
           child: Stack(
             fit: StackFit.expand,
             children: [
@@ -295,7 +319,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                         onScaleStart: _onScaleStart,
                         onScaleUpdate: _onScaleUpdate,
                         onScaleEnd: (_) => _onScaleEnd(ids),
-                        onTap: () => openPhoto(context, current),
+                        // 탭해서 따로 여는 사진 화면은 두지 않는다: 같은 사진이 한 겹 더 열려
+                        // 무엇이 바뀐지 모르고 나가기도 헷갈렸다. 확대는 두 손가락으로 (2026-10-29 Sophie)
                         child: ClipRect(
                           child: AnimatedSwitcher(
                             duration: Duration(
