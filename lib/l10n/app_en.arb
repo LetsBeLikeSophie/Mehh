@@ -203,5 +203,6 @@
   "playVideo": "Play",
   "videoOpenFailed": "Couldn't find an app to play this video",
   "testEnded": "{count, plural, =1{The closed test is over · ◉ 1 this month} other{The closed test is over · ◉ {count} this month}}",
-  "noAllowedPhotos": "No photos allowed yet"
+  "noAllowedPhotos": "No photos allowed yet",
+  "cortexAskSkip": "{count, plural, =1{Skips 1 already in Cortex} other{Skips {count} already in Cortex}}"
 }

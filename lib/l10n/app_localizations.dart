@@ -1320,6 +1320,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'허용한 사진이 없어요'**
   String get noAllowedPhotos;
+
+  /// Cortex로 보낼까요? 창: 고른 사진 중 Cortex가 이미 받아 빼는 장수
+  ///
+  /// In ko, this message translates to:
+  /// **'이미 Cortex에 있는 {count}장은 빼요'**
+  String cortexAskSkip(int count);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

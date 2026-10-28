@@ -820,4 +820,13 @@ class L10nKo extends L10n {
 
   @override
   String get noAllowedPhotos => '허용한 사진이 없어요';
+
+  @override
+  String cortexAskSkip(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '이미 Cortex에 있는 $countString장은 빼요';
+  }
 }

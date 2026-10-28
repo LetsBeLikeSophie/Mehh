@@ -1043,7 +1043,7 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('Cortex: 이미 보낸 사진이 섞여 있으면 보낼까요? 창이 그 장수를 말한다 (UX-57)', (
+  testWidgets('Cortex: 이미 받은 사진이 섞여 있으면 빼고 보내고, 창이 그 장수를 말한다 (UX-57·C3)', (
     tester,
   ) async {
     final five = [
@@ -1080,8 +1080,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Cortex로'));
     await tester.pumpAndSettle();
-    expect(find.text('5장을 Cortex로 보낼까요?'), findsOneWidget);
-    expect(find.textContaining('이미 Cortex로 보낸 2장도 다시 보내요'), findsOneWidget);
+    // Cortex가 이미 받은 2장은 빼고 3장만 보낸다 (C3-B)
+    expect(find.text('3장을 Cortex로 보낼까요?'), findsOneWidget);
+    expect(find.textContaining('이미 Cortex에 있는 2장은 빼요'), findsOneWidget);
+    expect(find.textContaining('다시 보내요'), findsNothing);
     await tester.tap(find.text('취소'));
     await tester.pumpAndSettle();
     await flush(tester);
@@ -2066,25 +2068,29 @@ void main() {
     expect(find.text('Cortex에 있음'), findsOneWidget);
     expect(find.text('Cortex로 보냄'), findsOneWidget);
 
+    // 다시 보내면 이미 받은 1장("Cortex에 있음")은 빼고 나머지 1장만 간다 (C3-B).
     // 장수만 와도 다 받았으면 묻고, [휴지통으로]면 보낸다 (장수·용량 알림)
     await sendCortex(tester);
-    handoff.saved.add(const CortexSaved(2, null));
+    expect(handoff.sent, hasLength(1));
+    handoff.saved.add(const CortexSaved(1, null));
     await tester.pumpAndSettle();
-    expect(find.text('✓ Cortex가 2장 받았어요'), findsOneWidget);
+    expect(find.text('✓ Cortex가 1장 받았어요'), findsOneWidget);
     await tester.tap(find.text('휴지통으로'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('  2장'), findsOneWidget);
+    expect(find.textContaining('  3장'), findsOneWidget);
     expect(
-      find.textContaining(RegExp(r'✓ 2장 · .+ 휴지통으로 보냈어요')),
+      find.textContaining(RegExp(r'✓ 1장 · .+ 휴지통으로 보냈어요')),
       findsOneWidget,
     );
-    expect(find.text('Cortex에 있음'), findsNothing);
+    expect(find.text('Cortex에 있음'), findsOneWidget); // 이미 받은 사진은 남아 있다 (C3-B)
     expect(find.text('Cortex로 보냄'), findsNothing);
     await tester.pump(const Duration(seconds: 9));
     await tester.pumpAndSettle();
 
     // 늦게 온 신호: 신호 없이 돌아온 뒤에 "받았어요"가 와도 묻는다
-    await tester.tap(find.byType(XToggle).at(0));
+    await tester.tap(
+      find.byWidgetPredicate((w) => w is XToggle && !w.on).first,
+    );
     await tester.pumpAndSettle();
     handoff.sent.clear();
     await sendCortex(tester);
@@ -2099,7 +2105,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('휴지통으로'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('  1장'), findsOneWidget);
+    expect(find.textContaining('  2장'), findsOneWidget);
     await flush(tester);
   });
 

@@ -159,19 +159,27 @@ class _SortScreenState extends ConsumerState<SortScreen>
   }
 
   /// 여러 장을 한 번에 Cortex로 보낸다. Cortex가 받으면 지울지 묻고, 분석은 Cortex가 뒤에서.
-  Future<void> _sendCortex(List<String> ids) async {
+  Future<void> _sendCortex(List<String> chosen) async {
     // 매번 한 줄로 묻는다: "N장을 Cortex로 보낼까요?" (UX-43, 2026-10-24 Sophie: 지우기는 받은 뒤에 묻는다)
     final l = context.l;
-    // 이미 Cortex로 보낸 사진이 섞여 있으면 말해 준다 (보내는 범위는 그대로, UX-57)
     final sent = ref.read(cortexSentProvider).value ?? const {};
+    // Cortex가 이미 받은 사진("Cortex에 있음")은 빼고 보낸다: 같은 메모·AI 분석이 또 생기지 않게
+    // (2026-10-28 Sophie C3-B). 보냈지만 받았다는 신호가 없는 것은 다시 보낸다(UX-57 한 줄)
+    final ids = [
+      for (final id in chosen)
+        if (sent[id] != true) id,
+    ];
+    final skipped = chosen.length - ids.length;
     final again = ids.where(sent.containsKey).length;
     final ok = await askMehh(
       context,
       title: l.cortexAskTitle(ids.length),
-      // 사진이 AI 앱으로 간다는 것만 한 줄 (2026-10-24 Sophie)
-      body: again > 0
-          ? '${l.cortexAskNote}\n${l.cortexAskResend(again)}'
-          : l.cortexAskNote,
+      // 사진이 AI 앱으로 간다는 것만 한 줄 (2026-10-24 Sophie). 키마다 한 줄
+      body: [
+        l.cortexAskNote,
+        if (skipped > 0) l.cortexAskSkip(skipped),
+        if (again > 0) l.cortexAskResend(again),
+      ].join('\n'),
       no: l.cancel,
       yes: l.cortexAskYes,
     );
@@ -1012,7 +1020,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
                   // Cortex가 없어도 버튼은 보이고, 누르면 받으러 가기 (2026-10-25 Sophie)
                   if (cortexKind &&
                       (cortex || cortexStoreUrl.isNotEmpty) &&
-                      cortexIds.isNotEmpty) ...[
+                      cortexIds.any((id) => cortexSent[id] != true)) ...[
                     const SizedBox(width: 8),
                     OutlinedButton.icon(
                       onPressed: _busy

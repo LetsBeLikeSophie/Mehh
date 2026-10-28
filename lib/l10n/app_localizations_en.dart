@@ -1008,4 +1008,19 @@ class L10nEn extends L10n {
 
   @override
   String get noAllowedPhotos => 'No photos allowed yet';
+
+  @override
+  String cortexAskSkip(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Skips $countString already in Cortex',
+      one: 'Skips 1 already in Cortex',
+    );
+    return '$_temp0';
+  }
 }
