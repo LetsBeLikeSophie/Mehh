@@ -364,6 +364,70 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets(
+    '잠긴 채 직접 정리해 "다 봤어요"가 된 묶음도 그 뒤 새 사진에 추천이 생기면 다시 정리할 묶음 (UX-81)',
+    (tester) async {
+      final day = DayGroup(
+        id: 'day-p0',
+        kind: DayGroupKind.day,
+        photos: burstPhotos,
+      );
+      // 1시간 뒤 같은 장면을 10초 간격으로 두 장 더 (q1 흔들림 → 새 추천)
+      final later = [
+        for (final (i, d) in [3600, 3610].indexed)
+          PhotoMeta(
+            id: 'q$i',
+            takenAt: t0.add(Duration(seconds: d)),
+            width: 100,
+            height: 100,
+          ),
+      ];
+      final feats = {
+        ...paid,
+        'q0': const PhotoFeatures(
+          id: 'q0',
+          hashHi: 5,
+          hashLo: 6,
+          sharpness: 900,
+          brightness: 120,
+        ),
+        'q1': const PhotoFeatures(
+          id: 'q1',
+          hashHi: 5,
+          hashLo: 6,
+          sharpness: 5,
+          brightness: 120,
+        ),
+      };
+      await pump(
+        tester,
+        SortScreen(kind: SortKind.day, group: day),
+        extra: [realPlan(feats)],
+      );
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(SortScreen)),
+      );
+      await tester.tap(find.byType(XToggle).at(3)); // 잠긴 채 p3을 직접 X
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('1장 휴지통으로'));
+      await tester.pumpAndSettle();
+      final rest = DayGroup(
+        id: 'day-p0',
+        kind: DayGroupKind.day,
+        photos: burstPhotos.sublist(0, 3),
+      );
+      expect(container.read(groupStatusProvider(rest)), GroupStatus.done);
+      // 같은 날 이어 찍은 사진이 붙었다
+      final more = DayGroup(
+        id: 'day-p0',
+        kind: DayGroupKind.day,
+        photos: [...burstPhotos.sublist(0, 3), ...later],
+      );
+      expect(container.read(groupStatusProvider(more)), GroupStatus.needsWork);
+      await flush(tester);
+    },
+  );
+
   testWidgets('설정: Cortex가 있으면 개인정보 안내에 Cortex AI 줄 (사진·캡처)', (tester) async {
     await pump(
       tester,

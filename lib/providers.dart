@@ -1187,11 +1187,12 @@ final groupStatusProvider = Provider.autoDispose.family<GroupStatus, DayGroup>((
   final plan = ref.watch(groupPlanProvider(g));
   if (pile) return GroupStatus.needsWork;
   if (plan.trash.isNotEmpty) {
-    // 잠긴 묶음을 추천 없이 직접 정리해 한 번 보냈으면 "다 봤어요" (보이지 않는 추천으로 남지 않게)
+    // 잠긴 묶음을 추천 없이 직접 정리해 한 번 보냈으면 "다 봤어요" (보이지 않는 추천으로 남지 않게).
+    // 지금 추천이 모두 그때 본 사진일 때만: 그 뒤 새로 찍은 사진에 추천이 생기면 다시 정리할 묶음 (UX-81)
     final seen = ref.watch(seenProvider).value ?? const {};
     final locked =
         g.kind == DayGroupKind.day && !ref.watch(unlockedProvider(g));
-    if (locked && g.photos.any((p) => seen.contains(p.id))) {
+    if (locked && plan.trash.keys.every(seen.contains)) {
       return GroupStatus.done;
     }
     return GroupStatus.needsWork;
