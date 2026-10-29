@@ -271,6 +271,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
           group: _group,
           place: widget.place,
           initialId: id,
+          picksShown: _picked.isNotEmpty,
         ),
       ),
     );
@@ -346,12 +347,12 @@ class _SortScreenState extends ConsumerState<SortScreen>
 
     Widget tile(String id) {
       final out = marked.contains(id);
-      // 이유 표시는 X가 쳐진 사진에만 ("왜 X인지"). 남길 사진·베스트는 추천을 받은 뒤에만 (2026-10-22)
-      final t = src.tags[id];
-      final keepTag = t == PhotoTag.best || t == PhotoTag.original;
-      final tag = keepTag
-          ? (_picked.isNotEmpty || src.preMarked.isNotEmpty ? t : null)
-          : (out ? t : null);
+      final tag = shownTag(
+        src,
+        id,
+        marked: out,
+        picksShown: _picked.isNotEmpty,
+      );
       return MetaData(
         metaData: id,
         behavior: HitTestBehavior.translucent,

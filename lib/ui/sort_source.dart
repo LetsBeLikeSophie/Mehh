@@ -112,6 +112,20 @@ String noteText(PhotoTag t, List<BestReason> reasons, L10n l) => switch (t) {
   PhotoTag.repeatShot => l.noteRepeatShot,
 };
 
+/// 사진에 붙이는 이유 표시: X 사진에는 "왜 X인지", 남길 사진·베스트는 [추천 보기]를 받은 뒤에만
+/// (2026-10-22). 그리드와 크게 보기가 같이 쓴다 (UX-86)
+PhotoTag? shownTag(
+  SortSource src,
+  String id, {
+  required bool marked,
+  required bool picksShown,
+}) {
+  final t = src.tags[id];
+  final keepTag = t == PhotoTag.best || t == PhotoTag.original;
+  if (keepTag) return picksShown || src.preMarked.isNotEmpty ? t : null;
+  return marked ? t : null;
+}
+
 /// 정리할 사진(X)인가. 앱 추천은 [추천 보기]를 눌러야 X로 들어간다 (2026-10-22).
 /// 예외: [SortSource.preMarked]는 아직 안 정했으면 처음부터 X.
 bool isMarked(String id, Map<String, Decision> decisions, SortSource src) {

@@ -337,6 +337,59 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('크게 보기의 이유 표시는 그리드와 같다: X 사진에만, 베스트는 추천을 받은 뒤 (UX-86)', (
+    tester,
+  ) async {
+    final day = DayGroup(
+      id: 'day-p0',
+      kind: DayGroupKind.day,
+      photos: burstPhotos,
+    );
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.day, group: day),
+      extra: [realPlan(paid)],
+    );
+    Future<void> look(String id) async {
+      await tester.tap(
+        find.byWidgetPredicate((w) => w is MetaData && w.metaData == id),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(FocusScreen), findsOneWidget);
+    }
+
+    Future<void> back() async {
+      await tester.tap(find.byTooltip('돌아가기'));
+      await tester.pumpAndSettle();
+    }
+
+    // 묶음을 열면 추천을 받는다: X 사진(p2 연속 컷)에 이유, 베스트(p0)에도
+    await openLocked(tester, '추천 보기 · 2장');
+    expect(find.text('2장 휴지통으로'), findsOneWidget);
+    await look('p2');
+    expect(find.text('비슷한 연속 컷'), findsOneWidget);
+    await back();
+    await look('p0');
+    expect(find.textContaining('베스트'), findsWidgets);
+    await back();
+
+    // [선택 해제]로 X를 모두 끄면 X가 아닌 사진: 그리드처럼 "왜 X인지"가 없다
+    await tester.tap(find.text('전체 선택'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('선택 해제'));
+    await tester.pumpAndSettle();
+    expect(find.text('정리할 사진이 없어요'), findsOneWidget);
+    await look('p2');
+    expect(find.text('비슷한 연속 컷'), findsNothing);
+    await back();
+    // 베스트는 이 화면에서 추천을 받았으니 그리드처럼 그대로 보인다
+    expect(find.text('베스트'), findsOneWidget);
+    await look('p0');
+    expect(find.textContaining('베스트'), findsWidgets);
+    await back();
+    await flush(tester);
+  });
+
   testWidgets('잠긴 묶음을 직접 정리해 한 번 보내면 "다 봤어요"', (tester) async {
     final day = DayGroup(
       id: 'day-p0',
@@ -2872,9 +2925,7 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('다시 읽는 중에 보낸 사진은 다 읽은 뒤에도 다시 나타나지 않는다 (UX-84)', (
-    tester,
-  ) async {
+  testWidgets('다시 읽는 중에 보낸 사진은 다 읽은 뒤에도 다시 나타나지 않는다 (UX-84)', (tester) async {
     final lib = _ReloadingLibrary(photos);
     await pump(
       tester,

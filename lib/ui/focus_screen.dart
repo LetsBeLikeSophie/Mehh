@@ -27,12 +27,16 @@ class FocusScreen extends ConsumerStatefulWidget {
     required this.initialId,
     this.group,
     this.place,
+    this.picksShown = false,
   });
 
   final SortKind kind;
   final DayGroup? group;
   final String? place;
   final String initialId;
+
+  /// 정리 화면에서 [추천 보기]를 받았나 (이유 표시를 그리드와 같게, UX-86)
+  final bool picksShown;
 
   @override
   ConsumerState<FocusScreen> createState() => _FocusScreenState();
@@ -258,7 +262,13 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                       _Chip('✕ ${l.pile}', dark: true)
                     else if (kept)
                       _Chip('✓ ${l.keep}', dark: true),
-                    if (src.tags[current] case final t?)
+                    if (shownTag(
+                          src,
+                          current,
+                          marked: marked,
+                          picksShown: widget.picksShown,
+                        )
+                        case final t?)
                       _Chip(
                         noteText(t, src.bestReasons[current] ?? const [], l),
                       ),
