@@ -14,7 +14,7 @@ import '../theme.dart';
 import 'sort_screen.dart';
 import 'widgets.dart';
 
-/// Mehh Pro 안내 (SPEC 9장): 평생 이용권 / 1년 이용권 / 구매 복원.
+/// Mehh Pro 안내 (SPEC 9장): 평생 이용권 / 구매 복원.
 /// [lead]는 정리를 끝낸 직후에 띄울 때 맨 위 한 줄.
 Future<void> showProSheet(BuildContext context, {String? lead}) =>
     showModalBottomSheet(
@@ -214,6 +214,8 @@ class _ProSheetState extends ConsumerState<_ProSheet> {
                         for (final o in offers) ...[
                           _OfferRow(
                             offer: o,
+                            // 이용권이 하나뿐이면 "추천" 배지는 뜻이 없다 (B1)
+                            badge: offers.length > 1,
                             busy: _buying == o.plan,
                             onTap: _buying == null ? () => _buy(o) : null,
                           ),
@@ -266,9 +268,15 @@ class _ProLine extends StatelessWidget {
 }
 
 class _OfferRow extends StatelessWidget {
-  const _OfferRow({required this.offer, required this.busy, this.onTap});
+  const _OfferRow({
+    required this.offer,
+    required this.busy,
+    required this.badge,
+    this.onTap,
+  });
 
   final Offer offer;
+  final bool badge;
   final bool busy;
   final VoidCallback? onTap;
 
@@ -305,7 +313,7 @@ class _OfferRow extends StatelessWidget {
                             color: fg,
                           ),
                         ),
-                        if (best) ...[
+                        if (best && badge) ...[
                           const SizedBox(width: 6),
                           MehhBadge(l.planBest, inverted: true),
                         ],

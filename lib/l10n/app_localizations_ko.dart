@@ -354,8 +354,7 @@ class L10nKo extends L10n {
   String get planBest => '추천';
 
   @override
-  String get proNotes =>
-      '회원 가입 없음 · 폰을 바꾸면 [구매 복원]\n1년 이용권은 매년 자동 결제 · 스토어에서 언제든 해지';
+  String get proNotes => '회원 가입 없음 · 폰을 바꾸면 [구매 복원]';
 
   @override
   String get restorePurchases => '구매 복원';

@@ -399,8 +399,7 @@ class L10nEn extends L10n {
   String get planBest => 'Best value';
 
   @override
-  String get proNotes =>
-      'No sign-up · new phone? tap Restore purchases\nThe 1-year plan renews yearly · cancel anytime in the store';
+  String get proNotes => 'No sign-up · new phone? tap Restore purchases';
 
   @override
   String get restorePurchases => 'Restore purchases';

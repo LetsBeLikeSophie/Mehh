@@ -1791,6 +1791,9 @@ void main() {
       find.textContaining('0개 · ', findRichText: true),
       findsOneWidget,
     ); // 왜 Pro 안내인지
+    // 파는 것은 평생 이용권 하나 (2026-10-29 Sophie B1-B)
+    expect(find.text('1년 이용권'), findsNothing);
+    expect(find.text('추천'), findsNothing); // 하나뿐이라 "추천" 배지 없음
     await tester.tap(find.text('평생 이용권'));
     await tester.pumpAndSettle();
     expect(find.text('Mehh Pro'), findsNothing); // 사면 시트가 닫힌다
@@ -1896,7 +1899,7 @@ void main() {
     expect(nextFreeReset(DateTime(2026, 12, 15)), DateTime(2027, 1, 1));
 
     final offers = await billing.offers();
-    expect(offers.first.plan, Plan.lifetime);
+    expect([for (final o in offers) o.plan], [Plan.lifetime]); // B1-B
     expect(offers.first.price, '₩12,900');
     await billing.buy(offers.first);
     expect(c.read(proProvider).value!.pro, isTrue);

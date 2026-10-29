@@ -670,7 +670,7 @@ abstract class L10n {
   /// No description provided for @proNotes.
   ///
   /// In ko, this message translates to:
-  /// **'회원 가입 없음 · 폰을 바꾸면 [구매 복원]\n1년 이용권은 매년 자동 결제 · 스토어에서 언제든 해지'**
+  /// **'회원 가입 없음 · 폰을 바꾸면 [구매 복원]'**
   String get proNotes;
 
   /// No description provided for @restorePurchases.

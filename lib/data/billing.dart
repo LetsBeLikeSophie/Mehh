@@ -20,6 +20,10 @@ enum Plan {
   const Plan(this.productId);
   final String productId;
 
+  /// 지금 파는 상품. 1년 이용권은 산 사람이 있을 때를 위해 복원·끝남 알림만 남긴다
+  /// (2026-10-29 Sophie B1-B: 평생권 하나로 시작하고, 첫 4주 전환율을 보고 필요하면 추가)
+  static const onSale = [Plan.lifetime];
+
   static Plan? of(String productId) {
     for (final p in values) {
       if (p.productId == productId) return p;
@@ -120,13 +124,13 @@ class StoreBilling implements Billing {
     }
     if (!await _iap.isAvailable()) return const [];
     final res = await _iap.queryProductDetails({
-      for (final p in Plan.values) p.productId,
+      for (final p in Plan.onSale) p.productId,
     });
     for (final d in res.productDetails) {
       if (Plan.of(d.id) case final plan?) _details[plan] = d;
     }
     return [
-      for (final plan in Plan.values)
+      for (final plan in Plan.onSale)
         if (_details[plan] case final d?) Offer(plan: plan, price: d.price),
     ];
   }
@@ -231,7 +235,7 @@ class DemoBilling implements Billing {
 
   @override
   Future<List<Offer>> offers() async => [
-    for (final p in Plan.values)
+    for (final p in Plan.onSale)
       Offer(plan: p, price: (korean ? _krw : _usd)[p]!),
   ];
 
