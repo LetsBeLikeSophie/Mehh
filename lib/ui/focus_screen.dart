@@ -13,7 +13,7 @@ import '../providers.dart';
 import '../theme.dart';
 import 'freed_bar.dart';
 import 'hold_to_finish.dart';
-import 'photo_viewer.dart';
+import 'large_photo.dart';
 import 'sort_source.dart';
 import 'widgets.dart';
 
