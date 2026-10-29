@@ -579,6 +579,9 @@ class L10nEn extends L10n {
   String get privacyPolicy => 'Privacy policy';
 
   @override
+  String get termsRefunds => 'Terms & refunds';
+
+  @override
   String cortexPartial(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

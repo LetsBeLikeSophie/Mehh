@@ -96,26 +96,8 @@ class SettingsScreen extends ConsumerWidget {
                     onTap: () => _confirmClear(context, ref),
                   ),
                   const SizedBox(height: 28),
-                  // 링크는 밑줄로 (2026-10-24 Sophie: 누를 수 있는지 보이게)
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => launchUrl(
-                      Uri.parse(privacyPolicyUrl),
-                      mode: LaunchMode.externalApplication,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: Text(
-                        context.l.privacyPolicy,
-                        style: const TextStyle(
-                          fontSize: MehhText.caption,
-                          color: MehhColors.text,
-                          decoration: TextDecoration.underline,
-                          decorationColor: MehhColors.textMuted,
-                        ),
-                      ),
-                    ),
-                  ),
+                  MehhLink(context.l.privacyPolicy, privacyPolicyUrl),
+                  MehhLink(context.l.termsRefunds, termsUrl),
                   // 버전 글자를 7번 누르면 추천 정확도 (숨은 화면, SPEC 6-8)
                   const _VersionTap(),
                 ],

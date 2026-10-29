@@ -194,6 +194,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('개인정보처리방침'), findsOneWidget);
+    expect(find.text('이용약관·환불'), findsOneWidget); // B3-B
     await tester.tap(find.text('Mehh Pro'));
     await tester.pumpAndSettle();
     expect(find.text('구매 복원'), findsOneWidget);
@@ -1794,6 +1795,7 @@ void main() {
     // 파는 것은 평생 이용권 하나 (2026-10-29 Sophie B1-B)
     expect(find.text('1년 이용권'), findsNothing);
     expect(find.text('추천'), findsNothing); // 하나뿐이라 "추천" 배지 없음
+    expect(find.text('이용약관·환불'), findsOneWidget); // 사기 전에 환불 안내 (B3-B)
     await tester.tap(find.text('평생 이용권'));
     await tester.pumpAndSettle();
     expect(find.text('Mehh Pro'), findsNothing); // 사면 시트가 닫힌다

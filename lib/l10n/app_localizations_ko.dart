@@ -498,6 +498,9 @@ class L10nKo extends L10n {
   String get privacyPolicy => '개인정보처리방침';
 
   @override
+  String get termsRefunds => '이용약관·환불';
+
+  @override
   String cortexPartial(int count) {
     return 'Cortex가 $count장만 받았다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요.';
   }

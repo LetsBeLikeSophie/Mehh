@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../config/app_config.dart';
 import '../data/billing.dart';
 import '../data/pro.dart';
 import '../l10n/l10n.dart';
@@ -228,6 +229,11 @@ class _ProSheetState extends ConsumerState<_ProSheet> {
             ],
             const SizedBox(height: 4),
             Text(l.proNotes, style: muted),
+            // 사기 전에 환불 안내를 볼 수 있게 (2026-10-29 Sophie B3-B)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: MehhLink(l.termsRefunds, termsUrl),
+            ),
             if (isDemo) Text(l.billingDemo, style: muted),
             Align(
               alignment: AlignmentDirectional.centerEnd,

@@ -37,4 +37,7 @@ const cortexStoreUrl =
 /// 개인정보처리방침 (web/privacy.html, 스토어 등록 정보에도 같은 주소)
 const privacyPolicyUrl = 'https://itssophie.dev/mehh/privacy.html';
 
+/// 이용약관·환불 안내 (web/terms.html). 설정과 Pro 안내에서 연결 (2026-10-29 Sophie B3-B)
+const termsUrl = 'https://itssophie.dev/mehh/terms.html';
+
 const supportEmail = 'hello@itssophie.dev';

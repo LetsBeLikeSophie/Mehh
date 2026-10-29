@@ -883,6 +883,12 @@ abstract class L10n {
   /// **'개인정보처리방침'**
   String get privacyPolicy;
 
+  /// No description provided for @termsRefunds.
+  ///
+  /// In ko, this message translates to:
+  /// **'이용약관·환불'**
+  String get termsRefunds;
+
   /// No description provided for @cortexPartial.
   ///
   /// In ko, this message translates to:

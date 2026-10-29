@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/l10n.dart';
 import '../theme.dart';
@@ -406,4 +407,30 @@ class CoinText extends StatelessWidget {
       semanticsLabel: text.replaceAll(coinMark, context.l.coinWord),
     );
   }
+}
+
+/// 밑줄 링크 (2026-10-24 Sophie: 누를 수 있는지 보이게). 브라우저로 연다
+class MehhLink extends StatelessWidget {
+  const MehhLink(this.label, this.url, {super.key});
+  final String label;
+  final String url;
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    behavior: HitTestBehavior.opaque,
+    onTap: () =>
+        launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: MehhText.caption,
+          color: MehhColors.text,
+          decoration: TextDecoration.underline,
+          decorationColor: MehhColors.textMuted,
+        ),
+      ),
+    ),
+  );
 }

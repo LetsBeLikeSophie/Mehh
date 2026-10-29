@@ -11,6 +11,7 @@ Sophie가 Play Console에서 그대로 붙여 넣을 수 있게 정리한 문서
 | 그래픽 이미지 1024×500 | `docs/store/feature-graphic-ko.png`, `feature-graphic-en.png` | |
 | 폰 스크린샷 2~8장 | `docs/store/screenshots-ko/` 5장 (1080×1920) | 에뮬레이터 + 직접 그린 가짜 사진. '테스트 무료'가 보이니 정식 출시 전 다시 찍기 |
 | 개인정보처리방침 | https://itssophie.dev/mehh/privacy.html | 한국어·영어 |
+| 이용약관·환불 | https://itssophie.dev/mehh/terms.html | 한국어·영어 (앱 설정·Pro 안내에서 연결, 2026-10-29 B3-B) |
 | 문의 메일 | hello@itssophie.dev | |
 
 추천 스크린샷 순서 (폰에서 찍기, 사진이 많은 폰이 좋다): ① 홈(정리할 묶음 N개 + 용량 막대) ② 그날의 묶음에서 [추천 보기] 켠 뒤(X와 이유: 비슷한 컷·흔들림·눈 감음) ③ 크게 보기(위 정리·아래 킵) ④ 캡처 추천 ⑤ 큰 동영상 ⑥ 설정의 "사진과 기록은 이 폰에만 있어요".
@@ -60,6 +61,7 @@ Sophie가 Play Console에서 그대로 붙여 넣을 수 있게 정리한 문서
 ■ Mehh Pro
 모든 묶음의 추천 정리를 바로 봐요. 평생 이용권(한 번 구매).
 
+이용약관·환불: https://itssophie.dev/mehh/terms.html
 문의: hello@itssophie.dev
 ```
 

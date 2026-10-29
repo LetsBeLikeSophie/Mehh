@@ -335,6 +335,7 @@
     }
   },
   "privacyPolicy": "개인정보처리방침",
+  "termsRefunds": "이용약관·환불",
   "cortexPartial": "Cortex가 {count}장만 받았다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요.",
   "@cortexPartial": {
     "placeholders": {
