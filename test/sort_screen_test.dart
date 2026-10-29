@@ -5,7 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:in_app_purchase/in_app_purchase.dart' show PurchaseStatus;
-import 'package:photo_manager/photo_manager.dart' show PermissionState;
+import 'package:photo_manager/photo_manager.dart'
+    show AssetEntity, PermissionState;
 import 'package:mehh/data/billing.dart';
 import 'package:mehh/data/pro.dart';
 import 'package:mehh/data/demo.dart';
@@ -2809,6 +2810,32 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('갤러리를 다시 읽는 동안 [N장 휴지통으로]를 눌러도 고른 장수가 모두 간다 (S-1 10-29)', (
+    tester,
+  ) async {
+    final lib = _ReloadingLibrary(photos);
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.singles, group: group),
+      library: lib,
+    );
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.tap(find.byType(XToggle).at(1));
+    await tester.pumpAndSettle();
+    // 10분 넘게 나갔다 돌아와 갤러리를 다시 읽기 시작했다 (읽는 중에 멈춤)
+    lib.gate = Completer<void>();
+    final c = ProviderScope.containerOf(
+      tester.element(find.byType(SortScreen)),
+    );
+    unawaited(c.read(libraryProvider.notifier).syncNow());
+    await tester.pump();
+    await tester.tap(find.text('2장 휴지통으로'));
+    await tester.pumpAndSettle();
+    expect(lib.trashed, hasLength(2));
+    lib.gate!.complete();
+    await flush(tester);
+  });
+
   testWidgets('Cortex: 캡처가 아닌 낱장 사진에서도 [휴지통으로] 옆에 [Cortex로]', (tester) async {
     await pump(
       tester,
@@ -2911,4 +2938,36 @@ class _EmptyLimitedLibrary extends DemoPhotoLibrary {
 
   @override
   Future<List<PhotoMeta>> loadAll() async => const [];
+}
+
+/// 실제 사진첩처럼 목록(entities)에 있는 사진만 휴지통으로 보낸다. [gate]가 있으면 다시 읽는 중에 멈춘다
+class _ReloadingLibrary extends DemoPhotoLibrary {
+  _ReloadingLibrary(this.photos);
+  final List<PhotoMeta> photos;
+  Completer<void>? gate;
+  final trashed = <String>[];
+
+  @override
+  Future<List<PhotoMeta>> loadAll() async {
+    for (final p in photos) {
+      entities[p.id] = AssetEntity(
+        id: p.id,
+        typeInt: 1,
+        width: p.width,
+        height: p.height,
+      );
+    }
+    await gate?.future;
+    return photos;
+  }
+
+  @override
+  Future<List<String>> trash(List<String> ids) async {
+    final done = [
+      for (final id in ids)
+        if (entities.containsKey(id)) id,
+    ];
+    trashed.addAll(done);
+    return done;
+  }
 }

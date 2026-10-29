@@ -32,6 +32,11 @@ class PhotoLibrary {
 
   Future<void> openSettings() => PhotoManager.openSetting();
 
+  /// 사진·동영상을 다 읽은 뒤 부른다: 지금 사진첩에 없는 것을 목록에서 한 번에 뺀다.
+  /// 목록을 바꾸는 곳은 여기 하나 (S-1 2026-10-29)
+  void keepOnly(Set<String> ids) =>
+      entities.removeWhere((id, _) => !ids.contains(id));
+
   /// 위치 캐시 지우기
   Future<void> clearCache() => _locationCache.delete();
 
@@ -84,7 +89,8 @@ class PhotoLibrary {
     final total = await all.assetCountAsync;
     final cached = await _locationCache.read();
 
-    entities.clear();
+    // 목록(entities)을 비우지 않고 덮어쓴다: 다시 읽는 몇 초 동안에도 [trash]·썸네일이
+    // 지금 사진을 찾을 수 있게. 없어진 사진은 다 읽은 뒤 [keepOnly]로 한 번에 뺀다 (S-1 2026-10-29)
     final metas = <PhotoMeta>[];
     const page = 1000;
     for (var start = 0; start < total; start += page) {

@@ -369,6 +369,9 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
     final lib = ref.read(photoLibraryProvider);
     _metas = await lib.loadAll();
     _videos = await _loadVideos();
+    lib.keepOnly({
+      for (final m in [..._metas, ..._videos]) m.id,
+    });
     _loadedAt = DateTime.now();
     Future.microtask(_fillLocations);
     Future.microtask(_reviveRestored);
@@ -481,10 +484,23 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
         (now ?? DateTime.now()).difference(_loadedAt) < after) {
       return;
     }
+    final before = _loadedAt;
     _loadedAt = now ?? DateTime.now();
-    final metas = await ref.read(photoLibraryProvider).loadAll();
-    final videos = await _loadVideos();
+    final lib = ref.read(photoLibraryProvider);
+    final List<PhotoMeta> metas;
+    final List<PhotoMeta> videos;
+    try {
+      metas = await lib.loadAll();
+      videos = await _loadVideos();
+    } catch (_) {
+      // 못 읽었으면 다음에 돌아올 때 다시 시도한다 (지금 목록은 그대로)
+      _loadedAt = before;
+      return;
+    }
     if (!ref.mounted) return;
+    lib.keepOnly({
+      for (final m in [...metas, ...videos]) m.id,
+    });
     _metas = metas;
     _videos = videos;
     state = AsyncData(_state());
