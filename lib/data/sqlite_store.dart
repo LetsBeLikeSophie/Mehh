@@ -31,7 +31,7 @@ class SqliteStore implements Store {
 
   Future<Database> get _database async => _db ??= await openDatabase(
     'mehh.db',
-    version: 10,
+    version: 11,
     onUpgrade: (db, from, _) async {
       // 분석 결과는 캐시라서 버리고 다시 계산한다
       if (from < 3) {
@@ -54,6 +54,8 @@ class SqliteStore implements Store {
       } else if (from < 10) {
         await db.execute("ALTER TABLE names ADD COLUMN photos TEXT DEFAULT ''");
       }
+      // 열어본 기록은 쓰는 곳도 읽는 곳도 없어졌다 (크게 보기의 사진 화면을 뺌, S-2 2026-10-29)
+      if (from < 11) await db.execute('DROP TABLE IF EXISTS views');
     },
     onCreate: (db, _) async {
       await db.execute(_featuresTable);
@@ -63,9 +65,6 @@ class SqliteStore implements Store {
       await db.execute('''
         CREATE TABLE decision_log (
           id TEXT, state TEXT, at INTEGER)''');
-      await db.execute('''
-        CREATE TABLE views (
-          id TEXT PRIMARY KEY, count INTEGER, last_at INTEGER)''');
       await db.execute('''
         CREATE TABLE freed (month TEXT PRIMARY KEY, bytes INTEGER)''');
       await db.execute(_picksTable);
@@ -151,34 +150,6 @@ class SqliteStore implements Store {
       });
     }
     await batch.commit(noResult: true);
-  }
-
-  @override
-  Future<Map<String, ViewRecord>> loadViews() async {
-    final rows = await (await _database).query('views');
-    return {
-      for (final r in rows)
-        r['id'] as String: ViewRecord(
-          count: r['count'] as int,
-          lastAt: DateTime.fromMillisecondsSinceEpoch(r['last_at'] as int),
-        ),
-    };
-  }
-
-  // UPSERT 문법은 안드로이드 10 이하 SQLite에 없어서 UPDATE 후 없으면 INSERT.
-
-  @override
-  Future<void> recordView(String photoId, DateTime at) async {
-    final ms = at.millisecondsSinceEpoch;
-    await (await _database).transaction((tx) async {
-      final n = await tx.rawUpdate(
-        'UPDATE views SET count = count + 1, last_at = ? WHERE id = ?',
-        [ms, photoId],
-      );
-      if (n == 0) {
-        await tx.insert('views', {'id': photoId, 'count': 1, 'last_at': ms});
-      }
-    });
   }
 
   @override
@@ -350,7 +321,6 @@ class SqliteStore implements Store {
         'features',
         'decisions',
         'decision_log',
-        'views',
         'freed',
         'picks',
         'seen',

@@ -680,28 +680,7 @@ DecisionState stateOf(Map<String, Decision> decisions, String id) {
   return s == null || s == DecisionState.hold ? DecisionState.undecided : s;
 }
 
-// ───────────────────────── 열람 기록, 비운 용량
-
-class ViewsNotifier extends AsyncNotifier<Map<String, ViewRecord>> {
-  @override
-  Future<Map<String, ViewRecord>> build() =>
-      ref.read(storeProvider).loadViews();
-
-  Future<void> record(String id) async {
-    final now = DateTime.now();
-    await ref.read(storeProvider).recordView(id, now);
-    final cur = state.value ?? {};
-    state = AsyncData({
-      ...cur,
-      id: ViewRecord(count: (cur[id]?.count ?? 0) + 1, lastAt: now),
-    });
-  }
-}
-
-final viewsProvider =
-    AsyncNotifierProvider<ViewsNotifier, Map<String, ViewRecord>>(
-      ViewsNotifier.new,
-    );
+// ───────────────────────── 비운 용량
 
 final freedThisMonthProvider = FutureProvider<int>(
   (ref) => ref.read(storeProvider).freedBytes(monthKey(DateTime.now())),
@@ -825,7 +804,6 @@ Future<void> clearAllRecords(WidgetRef ref) async {
   // 취향 학습으로 꺼 둔 이유·눈 감음 (앱을 다시 켜기 전까지 남아 있지 않게, UX-71).
   // 캐시 비우기(파일)보다 먼저: 그쪽이 늦거나 실패해도 화면은 바로 맞는다
   ref.invalidate(decisionsProvider);
-  ref.invalidate(viewsProvider);
   ref.invalidate(freedThisMonthProvider);
   ref.invalidate(groupNamesProvider);
   ref.invalidate(cortexSentProvider);

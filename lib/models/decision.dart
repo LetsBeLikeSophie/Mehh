@@ -18,11 +18,3 @@ class Decision {
   /// 보류한 시각 (hold일 때만)
   final DateTime? holdAt;
 }
-
-/// 앱 안에서 사진을 열어본 기록 (취향 학습용).
-class ViewRecord {
-  const ViewRecord({required this.count, required this.lastAt});
-
-  final int count;
-  final DateTime lastAt;
-}

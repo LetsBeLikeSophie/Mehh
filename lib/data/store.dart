@@ -12,9 +12,6 @@ abstract class Store {
   /// 결정을 저장하고 로그에도 남긴다 (취향 학습용, SPEC 6-7).
   Future<void> saveDecisions(List<Decision> list);
 
-  Future<Map<String, ViewRecord>> loadViews();
-  Future<void> recordView(String photoId, DateTime at);
-
   /// 'yyyy-MM' 별로 비운 용량(바이트)을 누적한다.
   Future<void> addFreedBytes(String month, int bytes);
   Future<int> freedBytes(String month);
@@ -73,7 +70,6 @@ class MemoryStore implements Store {
   final features = <String, PhotoFeatures>{};
   final decisions = <String, Decision>{};
   final log = <Decision>[];
-  final views = <String, ViewRecord>{};
   final freed = <String, int>{};
   final picks = <PickRecord>[];
   final seen = <String>{};
@@ -167,15 +163,6 @@ class MemoryStore implements Store {
   }
 
   @override
-  Future<Map<String, ViewRecord>> loadViews() async => {...views};
-
-  @override
-  Future<void> recordView(String photoId, DateTime at) async {
-    final v = views[photoId];
-    views[photoId] = ViewRecord(count: (v?.count ?? 0) + 1, lastAt: at);
-  }
-
-  @override
   Future<void> addFreedBytes(String month, int bytes) async {
     freed[month] = (freed[month] ?? 0) + bytes;
   }
@@ -193,7 +180,6 @@ class MemoryStore implements Store {
     features.clear();
     decisions.clear();
     log.clear();
-    views.clear();
     freed.clear();
     picks.clear();
     seen.clear();
