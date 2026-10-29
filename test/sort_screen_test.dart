@@ -2836,6 +2836,44 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('다시 읽는 중에 보낸 사진은 다 읽은 뒤에도 다시 나타나지 않는다 (UX-84)', (
+    tester,
+  ) async {
+    final lib = _ReloadingLibrary(photos);
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.singles, group: group),
+      library: lib,
+    );
+    final c = ProviderScope.containerOf(
+      tester.element(find.byType(SortScreen)),
+    );
+    await c.read(libraryProvider.future);
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.tap(find.byType(XToggle).at(1));
+    await tester.pumpAndSettle();
+    lib.gate = Completer<void>();
+    unawaited(c.read(libraryProvider.notifier).syncNow());
+    await tester.pump();
+    await tester.tap(find.text('2장 휴지통으로'));
+    await tester.pumpAndSettle();
+    final sent = [...lib.trashed];
+    expect(sent, hasLength(2));
+    final gate = lib.gate!;
+    lib.gate = null; // 한 번 더 읽을 때는 멈추지 않는다
+    gate.complete();
+    await flush(tester);
+    final ids = {for (final p in c.read(libraryProvider).value!.photos) p.id};
+    for (final id in sent) {
+      expect(ids, isNot(contains(id)));
+      expect(
+        stateOf(c.read(decisionsProvider).value!, id),
+        DecisionState.trashed,
+      );
+    }
+    expect(ids, hasLength(photos.length - 2)); // 보내지 않은 사진은 그대로
+  });
+
   testWidgets('Cortex: 캡처가 아닌 낱장 사진에서도 [휴지통으로] 옆에 [Cortex로]', (tester) async {
     await pump(
       tester,
@@ -2949,7 +2987,12 @@ class _ReloadingLibrary extends DemoPhotoLibrary {
 
   @override
   Future<List<PhotoMeta>> loadAll() async {
-    for (final p in photos) {
+    // 멈추기 전에 읽어 둔 목록을 돌려준다 (읽는 사이 보낸 사진이 남아 있다)
+    final read = [
+      for (final p in photos)
+        if (!trashed.contains(p.id)) p,
+    ];
+    for (final p in read) {
       entities[p.id] = AssetEntity(
         id: p.id,
         typeInt: 1,
@@ -2958,7 +3001,7 @@ class _ReloadingLibrary extends DemoPhotoLibrary {
       );
     }
     await gate?.future;
-    return photos;
+    return read;
   }
 
   @override

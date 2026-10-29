@@ -129,9 +129,13 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
     state = AsyncData(_state());
   }
 
+  /// 다시 읽는 중이면, 그 사이 휴지통으로 보낸 사진 id (다 읽은 뒤에도 빼 두려고)
+  Set<String>? _removedWhileLoading;
+
   /// 휴지통으로 보낸 사진을 목록에서 뺀다.
   void removePhotos(Set<String> ids) {
     if (ids.isEmpty) return;
+    _removedWhileLoading?.addAll(ids);
     _metas = _metas.where((m) => !ids.contains(m.id)).toList();
     _videos = _videos.where((m) => !ids.contains(m.id)).toList();
     state = AsyncData(_state());
@@ -146,12 +150,14 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
   /// (로딩 화면으로 깜빡이지 않는다)
   Future<void> refreshIfStale(Duration after, {DateTime? now}) async {
     if (!state.hasValue ||
+        _removedWhileLoading != null || // 이미 읽는 중
         (now ?? DateTime.now()).difference(_loadedAt) < after) {
       return;
     }
     final before = _loadedAt;
     _loadedAt = now ?? DateTime.now();
     final lib = ref.read(photoLibraryProvider);
+    final removed = _removedWhileLoading = <String>{};
     final List<PhotoMeta> metas;
     final List<PhotoMeta> videos;
     try {
@@ -161,16 +167,29 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
       // 못 읽었으면 다음에 돌아올 때 다시 시도한다 (지금 목록은 그대로)
       _loadedAt = before;
       return;
+    } finally {
+      _removedWhileLoading = null;
     }
     if (!ref.mounted) return;
+    // 읽는 사이 휴지통으로 보낸 사진은 읽어 둔 목록에 남아 있을 수 있다: 빼 둔다.
+    // 그 사이 페이지가 밀려 빠진 사진이 있을 수 있으니 한 번 더 읽는다 (UX-84)
+    _metas = [
+      for (final m in metas)
+        if (!removed.contains(m.id)) m,
+    ];
+    _videos = [
+      for (final v in videos)
+        if (!removed.contains(v.id)) v,
+    ];
     lib.keepOnly({
-      for (final m in [...metas, ...videos]) m.id,
+      for (final m in [..._metas, ..._videos]) m.id,
     });
-    _metas = metas;
-    _videos = videos;
     state = AsyncData(_state());
     Future.microtask(_fillLocations);
     Future.microtask(_reviveRestored);
+    if (removed.isNotEmpty) {
+      Future.microtask(() => refreshIfStale(Duration.zero));
+    }
   }
 }
 
