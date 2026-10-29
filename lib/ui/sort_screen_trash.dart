@@ -84,8 +84,10 @@ extension _Trash on _SortScreenState {
     if (mounted) _set(() => _busy = false);
     if (n > 0 && nudge && await pro.takeNudge() && mounted) {
       await showProSheet(context, lead: context.l.proNudge(n));
+    } else if (n > 0 && mounted) {
+      // 코인을 다 썼으면 다시 생길 때 알려 줄지 한 번 (창이 겹치지 않게 Pro 안내 뒤엔 안 묻는다)
+      await askMonthlyNotice(context, ref);
     }
-    if (n > 0 && mounted) await askMonthlyNotice(context, ref);
     return n > 0;
   }
 

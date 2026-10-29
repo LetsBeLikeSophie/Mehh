@@ -501,10 +501,16 @@ class L10nKo extends L10n {
   String get termsRefunds => '이용약관·환불';
 
   @override
-  String get noticeAskTitle => '한 달에 한 번 알려 드릴까요?';
+  String get noticeAskTitle => '코인이 다시 생기면 알려 드릴까요?';
 
   @override
-  String get noticeAskBody => '매달 1일에 한 번만 알려요 · 설정에서 끌 수 있어요';
+  String noticeAskBody(String date, int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$date에 코인 $countString개가 다시 생겨요\n매달 1일에 한 번만 알려요 · 설정에서 끌 수 있어요';
+  }
 
   @override
   String get noticeAskYes => '알려 주세요';
@@ -652,9 +658,6 @@ class L10nKo extends L10n {
 
     return 'Cortex가 받지 못한 $keptString장은 그대로 둬요.';
   }
-
-  @override
-  String get cortexGotBadge => 'Cortex에 있음';
 
   @override
   String get later => '나중에';
@@ -860,13 +863,4 @@ class L10nKo extends L10n {
 
   @override
   String get noAllowedPhotos => '허용한 사진이 없어요';
-
-  @override
-  String cortexAskSkip(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    return '이미 Cortex에 있는 $countString장은 빼요';
-  }
 }

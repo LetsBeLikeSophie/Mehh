@@ -892,14 +892,14 @@ abstract class L10n {
   /// No description provided for @noticeAskTitle.
   ///
   /// In ko, this message translates to:
-  /// **'한 달에 한 번 알려 드릴까요?'**
+  /// **'코인이 다시 생기면 알려 드릴까요?'**
   String get noticeAskTitle;
 
-  /// No description provided for @noticeAskBody.
+  /// 코인을 다 쓴 뒤 매달 알림을 묻는 창. date = 다음 달 1일
   ///
   /// In ko, this message translates to:
-  /// **'매달 1일에 한 번만 알려요 · 설정에서 끌 수 있어요'**
-  String get noticeAskBody;
+  /// **'{date}에 코인 {count}개가 다시 생겨요\n매달 1일에 한 번만 알려요 · 설정에서 끌 수 있어요'**
+  String noticeAskBody(String date, int count);
 
   /// No description provided for @noticeAskYes.
   ///
@@ -1098,12 +1098,6 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'Cortex가 받지 못한 {kept}장은 그대로 둬요.'**
   String cortexGotKept(int kept);
-
-  /// No description provided for @cortexGotBadge.
-  ///
-  /// In ko, this message translates to:
-  /// **'Cortex에 있음'**
-  String get cortexGotBadge;
 
   /// No description provided for @later.
   ///
@@ -1398,12 +1392,6 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'허용한 사진이 없어요'**
   String get noAllowedPhotos;
-
-  /// Cortex로 보낼까요? 창: 고른 사진 중 Cortex가 이미 받아 빼는 장수
-  ///
-  /// In ko, this message translates to:
-  /// **'이미 Cortex에 있는 {count}장은 빼요'**
-  String cortexAskSkip(int count);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

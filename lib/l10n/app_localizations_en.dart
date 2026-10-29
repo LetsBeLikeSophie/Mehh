@@ -582,11 +582,22 @@ class L10nEn extends L10n {
   String get termsRefunds => 'Terms & refunds';
 
   @override
-  String get noticeAskTitle => 'Remind you once a month?';
+  String get noticeAskTitle => 'Remind you when your coins are back?';
 
   @override
-  String get noticeAskBody =>
-      'Just once, on the 1st of each month · turn it off in Settings';
+  String noticeAskBody(String date, int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString coins come back on $date',
+      one: '1 coin comes back on $date',
+    );
+    return '$_temp0\nJust once, on the 1st of each month · turn it off in Settings';
+  }
 
   @override
   String get noticeAskYes => 'Remind me';
@@ -784,9 +795,6 @@ class L10nEn extends L10n {
     );
     return '$_temp0';
   }
-
-  @override
-  String get cortexGotBadge => 'In Cortex';
 
   @override
   String get later => 'Later';
@@ -1057,19 +1065,4 @@ class L10nEn extends L10n {
 
   @override
   String get noAllowedPhotos => 'No photos allowed yet';
-
-  @override
-  String cortexAskSkip(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
-    final String countString = countNumberFormat.format(count);
-
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Skips $countString already in Cortex',
-      one: 'Skips 1 already in Cortex',
-    );
-    return '$_temp0';
-  }
 }

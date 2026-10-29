@@ -2972,7 +2972,28 @@ void main() {
     expect(ids, hasLength(photos.length - 2)); // 보내지 않은 사진은 그대로
   });
 
-  testWidgets('매달 알림: 첫 [휴지통으로] 뒤 한 번만 묻고, 허락하면 코인 이야기로 예약된다 (B2-B)', (
+  // 이번 달 코인을 다 쓴 상태
+  MemoryProVault noCoins() => MemoryProVault(
+    ProState(freeMonth: monthKey(DateTime.now()), freeUsed: freeGroupsPerMonth),
+  );
+
+  testWidgets('매달 알림: 코인이 남아 있으면 [휴지통으로] 뒤에 묻지 않는다 (2026-10-30)', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.singles, group: group),
+      notices: DemoNotices(),
+    );
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('1장 휴지통으로'));
+    await tester.pumpAndSettle();
+    expect(find.text('코인이 다시 생기면 알려 드릴까요?'), findsNothing);
+    await flush(tester);
+  });
+
+  testWidgets('매달 알림: 코인을 다 쓴 뒤 [휴지통으로] 하면 한 번만 묻고, 허락하면 코인 이야기로 예약된다 (B2)', (
     tester,
   ) async {
     final notices = DemoNotices();
@@ -2982,23 +3003,53 @@ void main() {
       SortScreen(kind: SortKind.singles, group: group),
       notices: notices,
       store: store,
+      vault: noCoins(),
     );
     await tester.tap(find.byType(XToggle).at(0));
     await tester.pumpAndSettle();
     await tester.tap(find.text('1장 휴지통으로'));
     await tester.pumpAndSettle();
-    expect(find.text('한 달에 한 번 알려 드릴까요?'), findsOneWidget);
+    expect(find.text('코인이 다시 생기면 알려 드릴까요?'), findsOneWidget);
+    expect(find.textContaining('1일에 코인 3개가 다시 생겨요'), findsOneWidget);
     await tester.tap(find.text('알려 주세요'));
     await tester.pumpAndSettle();
     expect(find.text('매달 1일에 알려 드릴게요'), findsOneWidget);
     expect(notices.scheduled?.title, '이번 달 코인 3개가 다시 생겼어요');
+    await tester.pump(const Duration(seconds: 9)); // 알림이 사라지게
+    await tester.pumpAndSettle();
     // 두 번째로 보낼 때는 묻지 않는다. [모든 기록 지우기] 뒤에도
     await store.clearAll();
     await tester.tap(find.byType(XToggle).at(0));
     await tester.pumpAndSettle();
     await tester.tap(find.text('1장 휴지통으로'));
     await tester.pumpAndSettle();
-    expect(find.text('한 달에 한 번 알려 드릴까요?'), findsNothing);
+    expect(find.text('코인이 다시 생기면 알려 드릴까요?'), findsNothing);
+    await flush(tester);
+  });
+
+  testWidgets('매달 알림: 코인이 없어 묶음을 못 열고 Pro 안내를 닫으면 묻는다 (2026-10-30)', (
+    tester,
+  ) async {
+    final day = DayGroup(
+      id: 'day-p0',
+      kind: DayGroupKind.day,
+      photos: burstPhotos,
+    );
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.day, group: day),
+      notices: DemoNotices(),
+      vault: noCoins(),
+      extra: [realPlan(paid)],
+    );
+    await tester.tap(find.textContaining('추천 보기'));
+    await tester.pumpAndSettle();
+    expect(find.text('코인이 다시 생기면 알려 드릴까요?'), findsNothing); // Pro 안내가 먼저
+    await tester.tapAt(const Offset(20, 20)); // 시트 밖을 눌러 닫기
+    await tester.pumpAndSettle();
+    expect(find.text('코인이 다시 생기면 알려 드릴까요?'), findsOneWidget);
+    await tester.tap(find.text('괜찮아요'));
+    await tester.pumpAndSettle();
     await flush(tester);
   });
 
@@ -3008,6 +3059,7 @@ void main() {
       tester,
       SortScreen(kind: SortKind.singles, group: group),
       notices: notices,
+      vault: noCoins(),
     );
     await tester.tap(find.byType(XToggle).at(0));
     await tester.pumpAndSettle();
@@ -3020,19 +3072,30 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('매달 알림: 테스트 동안 무료면 코인 대신 Pro 안내와 같은 말로 (B2-B)', (tester) async {
+  testWidgets('매달 알림: 테스트 동안 무료면 묻지 않고, 설정에서 켜면 Pro 안내와 같은 말로 (B2-B)', (
+    tester,
+  ) async {
     final notices = DemoNotices();
     await pump(
       tester,
       SortScreen(kind: SortKind.singles, group: group),
       notices: notices,
       testFree: true,
+      vault: noCoins(),
     );
     await tester.tap(find.byType(XToggle).at(0));
     await tester.pumpAndSettle();
     await tester.tap(find.text('1장 휴지통으로'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('알려 주세요'));
+    expect(find.text('코인이 다시 생기면 알려 드릴까요?'), findsNothing);
+    await flush(tester);
+    await pump(
+      tester,
+      const SettingsScreen(),
+      notices: notices,
+      testFree: true,
+    );
+    await tester.tap(find.byType(Switch));
     await tester.pumpAndSettle();
     expect(notices.scheduled?.title, '지난달 사진 묶음이 기다려요');
     expect(notices.scheduled?.body, '비공개 테스트 동안은 모든 묶음 추천이 무료예요');

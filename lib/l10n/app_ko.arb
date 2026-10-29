@@ -336,8 +336,20 @@
   },
   "privacyPolicy": "개인정보처리방침",
   "termsRefunds": "이용약관·환불",
-  "noticeAskTitle": "한 달에 한 번 알려 드릴까요?",
-  "noticeAskBody": "매달 1일에 한 번만 알려요 · 설정에서 끌 수 있어요",
+  "noticeAskTitle": "코인이 다시 생기면 알려 드릴까요?",
+  "noticeAskBody": "{date}에 코인 {count}개가 다시 생겨요\n매달 1일에 한 번만 알려요 · 설정에서 끌 수 있어요",
+  "@noticeAskBody": {
+    "description": "코인을 다 쓴 뒤 매달 알림을 묻는 창. date = 다음 달 1일",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
   "noticeAskYes": "알려 주세요",
   "noticeAskNo": "괜찮아요",
   "noticeOn": "매달 1일에 알려 드릴게요",
