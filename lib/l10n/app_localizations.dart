@@ -889,6 +889,78 @@ abstract class L10n {
   /// **'이용약관·환불'**
   String get termsRefunds;
 
+  /// No description provided for @noticeAskTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'한 달에 한 번 알려 드릴까요?'**
+  String get noticeAskTitle;
+
+  /// No description provided for @noticeAskBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'매달 1일에 한 번만 알려요 · 설정에서 끌 수 있어요'**
+  String get noticeAskBody;
+
+  /// No description provided for @noticeAskYes.
+  ///
+  /// In ko, this message translates to:
+  /// **'알려 주세요'**
+  String get noticeAskYes;
+
+  /// No description provided for @noticeAskNo.
+  ///
+  /// In ko, this message translates to:
+  /// **'괜찮아요'**
+  String get noticeAskNo;
+
+  /// No description provided for @noticeOn.
+  ///
+  /// In ko, this message translates to:
+  /// **'매달 1일에 알려 드릴게요'**
+  String get noticeOn;
+
+  /// No description provided for @noticeBlocked.
+  ///
+  /// In ko, this message translates to:
+  /// **'폰 설정에서 Mehh 알림이 꺼져 있어요'**
+  String get noticeBlocked;
+
+  /// No description provided for @noticeSetting.
+  ///
+  /// In ko, this message translates to:
+  /// **'매달 알림'**
+  String get noticeSetting;
+
+  /// No description provided for @noticeSettingSub.
+  ///
+  /// In ko, this message translates to:
+  /// **'매달 1일에 한 번'**
+  String get noticeSettingSub;
+
+  /// No description provided for @noticeCoinsTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 달 코인 {count}개가 다시 생겼어요'**
+  String noticeCoinsTitle(int count);
+
+  /// No description provided for @noticeCoinsBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'지난달 사진 묶음의 추천을 볼 수 있어요'**
+  String get noticeCoinsBody;
+
+  /// No description provided for @noticeSetsTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'지난달 사진 묶음이 기다려요'**
+  String get noticeSetsTitle;
+
+  /// No description provided for @noticeProBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'추천을 보고 한 번에 휴지통으로 보낼 수 있어요'**
+  String get noticeProBody;
+
   /// No description provided for @cortexPartial.
   ///
   /// In ko, this message translates to:

@@ -173,8 +173,8 @@ class MemoryStore implements Store {
   @override
   Future<void> clearAll() async {
     cortexSent.clear();
-    // 비공개 테스트를 거쳤다는 표시는 기록이 아니라 남긴다 ("테스트가 끝났어요" 알림, UX-74)
-    counters.removeWhere((k, _) => k != 'closedTest');
+    // 비공개 테스트를 거쳤다는 표시·매달 알림을 물었다는 표시는 기록이 아니라 남긴다 (UX-74, B2-B)
+    counters.removeWhere((k, _) => k != 'closedTest' && k != 'noticeAsked');
     faces.clear();
     names.clear();
     features.clear();

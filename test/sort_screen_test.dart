@@ -11,6 +11,7 @@ import 'package:mehh/data/billing.dart';
 import 'package:mehh/data/pro.dart';
 import 'package:mehh/data/demo.dart';
 import 'package:mehh/data/handoff.dart';
+import 'package:mehh/data/notices.dart';
 import 'package:mehh/data/photo_library.dart';
 import 'package:mehh/data/store.dart';
 import 'package:mehh/l10n/l10n.dart';
@@ -54,6 +55,7 @@ void main() {
     Store? store,
     Billing? billing,
     PhotoLibrary? library,
+    Notices? notices,
     bool testFree = false,
   }) async {
     tester.view.physicalSize = const Size(390 * 3, 844 * 3);
@@ -70,6 +72,10 @@ void main() {
           proVaultProvider.overrideWithValue(vault ?? MemoryProVault()),
           billingProvider.overrideWithValue(
             billing ?? DemoBilling(korean: true),
+          ),
+          // 매달 알림은 따로 보는 테스트만 (다른 테스트에서 묻는 창이 뜨지 않게)
+          noticesProvider.overrideWithValue(
+            notices ?? DemoNotices(supported: false),
           ),
           ...extra,
         ],
@@ -2964,6 +2970,98 @@ void main() {
       );
     }
     expect(ids, hasLength(photos.length - 2)); // 보내지 않은 사진은 그대로
+  });
+
+  testWidgets('매달 알림: 첫 [휴지통으로] 뒤 한 번만 묻고, 허락하면 코인 이야기로 예약된다 (B2-B)', (
+    tester,
+  ) async {
+    final notices = DemoNotices();
+    final store = MemoryStore();
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.singles, group: group),
+      notices: notices,
+      store: store,
+    );
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('1장 휴지통으로'));
+    await tester.pumpAndSettle();
+    expect(find.text('한 달에 한 번 알려 드릴까요?'), findsOneWidget);
+    await tester.tap(find.text('알려 주세요'));
+    await tester.pumpAndSettle();
+    expect(find.text('매달 1일에 알려 드릴게요'), findsOneWidget);
+    expect(notices.scheduled?.title, '이번 달 코인 3개가 다시 생겼어요');
+    // 두 번째로 보낼 때는 묻지 않는다. [모든 기록 지우기] 뒤에도
+    await store.clearAll();
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('1장 휴지통으로'));
+    await tester.pumpAndSettle();
+    expect(find.text('한 달에 한 번 알려 드릴까요?'), findsNothing);
+    await flush(tester);
+  });
+
+  testWidgets('매달 알림: 폰 설정에서 허락을 못 받으면 켜지지 않고 그렇다고 알린다 (B2-B)', (tester) async {
+    final notices = DemoNotices()..allowed = false;
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.singles, group: group),
+      notices: notices,
+    );
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('1장 휴지통으로'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('알려 주세요'));
+    await tester.pumpAndSettle();
+    expect(find.text('폰 설정에서 Mehh 알림이 꺼져 있어요'), findsOneWidget);
+    expect(notices.scheduled, isNull);
+    await flush(tester);
+  });
+
+  testWidgets('매달 알림: 테스트 동안 무료면 코인 대신 Pro 안내와 같은 말로 (B2-B)', (tester) async {
+    final notices = DemoNotices();
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.singles, group: group),
+      notices: notices,
+      testFree: true,
+    );
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('1장 휴지통으로'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('알려 주세요'));
+    await tester.pumpAndSettle();
+    expect(notices.scheduled?.title, '지난달 사진 묶음이 기다려요');
+    expect(notices.scheduled?.body, '비공개 테스트 동안은 모든 묶음 추천이 무료예요');
+    await flush(tester);
+  });
+
+  testWidgets('설정의 매달 알림: 폰 설정에서 끄고 돌아오면 꺼짐으로 보인다 (B2-B)', (tester) async {
+    final notices = DemoNotices();
+    await pump(tester, const SettingsScreen(), notices: notices);
+    Switch sw() => tester.widget<Switch>(find.byType(Switch));
+    expect(find.text('매달 알림'), findsOneWidget);
+    expect(sw().value, isFalse);
+    await tester.tap(find.byType(Switch));
+    await tester.pumpAndSettle();
+    expect(sw().value, isTrue);
+    notices.allowed = false; // 폰 설정에서 끔
+    for (final s in [
+      AppLifecycleState.inactive,
+      AppLifecycleState.hidden,
+      AppLifecycleState.paused,
+      AppLifecycleState.hidden,
+      AppLifecycleState.inactive,
+      AppLifecycleState.resumed,
+    ]) {
+      tester.binding.handleAppLifecycleStateChanged(s);
+    }
+    await tester.pumpAndSettle();
+    expect(sw().value, isFalse);
+    await flush(tester);
   });
 
   testWidgets('Cortex: 캡처가 아닌 낱장 사진에서도 [휴지통으로] 옆에 [Cortex로]', (tester) async {

@@ -9,6 +9,7 @@ import '../l10n/l10n.dart';
 import '../providers.dart';
 import '../theme.dart';
 import 'accuracy_screen.dart';
+import 'monthly_notice.dart';
 import 'pro_sheet.dart';
 import 'widgets.dart';
 
@@ -89,6 +90,8 @@ class SettingsScreen extends ConsumerWidget {
                       sub: supportEmail,
                       onTap: () => _contact(context),
                     ),
+                  if (ref.watch(noticesProvider).supported)
+                    const _MonthlyNoticeRow(),
                   _Tap(
                     icon: Icons.restart_alt,
                     label: context.l.clearAll,
@@ -281,6 +284,58 @@ class _ProRow extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// 매달 알림 켜고 끄기 (2026-10-29 Sophie B2-B). 폰 설정에서 끄면 돌아올 때 꺼짐으로 보인다
+class _MonthlyNoticeRow extends ConsumerWidget {
+  const _MonthlyNoticeRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l;
+    final on = ref.watch(monthlyNoticeProvider).value ?? false;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.notifications_none,
+            size: 20,
+            color: MehhColors.text,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l.noticeSetting,
+                  style: const TextStyle(
+                    fontSize: MehhText.body,
+                    color: MehhColors.text,
+                  ),
+                ),
+                Text(
+                  l.noticeSettingSub,
+                  style: const TextStyle(
+                    fontSize: MehhText.label,
+                    color: MehhColors.textMuted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: on,
+            activeTrackColor: MehhColors.black,
+            onChanged: (v) => v
+                ? turnOnMonthlyNotice(context, ref)
+                : turnOffMonthlyNotice(ref),
+          ),
+        ],
       ),
     );
   }

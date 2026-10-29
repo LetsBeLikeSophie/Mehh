@@ -22,6 +22,7 @@ import 'pro_sheet.dart';
 import 'focus_screen.dart';
 import 'freed_bar.dart';
 import 'hold_to_finish.dart';
+import 'monthly_notice.dart';
 import 'sort_source.dart';
 import 'trash_flow.dart';
 import 'widgets.dart';

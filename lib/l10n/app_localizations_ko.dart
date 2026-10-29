@@ -501,6 +501,44 @@ class L10nKo extends L10n {
   String get termsRefunds => '이용약관·환불';
 
   @override
+  String get noticeAskTitle => '한 달에 한 번 알려 드릴까요?';
+
+  @override
+  String get noticeAskBody => '매달 1일에 한 번만 알려요 · 설정에서 끌 수 있어요';
+
+  @override
+  String get noticeAskYes => '알려 주세요';
+
+  @override
+  String get noticeAskNo => '괜찮아요';
+
+  @override
+  String get noticeOn => '매달 1일에 알려 드릴게요';
+
+  @override
+  String get noticeBlocked => '폰 설정에서 Mehh 알림이 꺼져 있어요';
+
+  @override
+  String get noticeSetting => '매달 알림';
+
+  @override
+  String get noticeSettingSub => '매달 1일에 한 번';
+
+  @override
+  String noticeCoinsTitle(int count) {
+    return '이번 달 코인 $count개가 다시 생겼어요';
+  }
+
+  @override
+  String get noticeCoinsBody => '지난달 사진 묶음의 추천을 볼 수 있어요';
+
+  @override
+  String get noticeSetsTitle => '지난달 사진 묶음이 기다려요';
+
+  @override
+  String get noticeProBody => '추천을 보고 한 번에 휴지통으로 보낼 수 있어요';
+
+  @override
   String cortexPartial(int count) {
     return 'Cortex가 $count장만 받았다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요.';
   }

@@ -5,6 +5,7 @@ import 'package:photo_manager/photo_manager.dart';
 import '../config/app_config.dart';
 import '../providers.dart';
 import 'home_tab.dart';
+import 'monthly_notice.dart';
 import 'onboarding_screen.dart';
 
 /// 권한이 없으면 온보딩, 있으면 홈 (보류함 탭은 2026-10-21에 없앰).
@@ -27,8 +28,12 @@ class _RootScreenState extends ConsumerState<RootScreen> {
         ref.read(permissionProvider.notifier).refresh();
         ref.read(libraryProvider.notifier).refreshIfStale(reloadLibraryAfter);
         ref.read(proProvider.notifier).checkMonth();
+        refreshMonthlyNotice(context, ref);
       },
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) refreshMonthlyNotice(context, ref);
+    });
   }
 
   @override

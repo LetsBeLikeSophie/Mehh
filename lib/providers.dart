@@ -12,6 +12,7 @@ import 'data/demo.dart';
 import 'data/device.dart';
 import 'data/face_check.dart';
 import 'data/handoff.dart';
+import 'data/notices.dart';
 import 'data/photo_library.dart';
 import 'data/pro.dart';
 import 'data/place_namer.dart';
@@ -59,6 +60,17 @@ final cortexInstalledProvider = FutureProvider<bool>((ref) {
   final lifecycle = AppLifecycleListener(onResume: ref.invalidateSelf);
   ref.onDispose(lifecycle.dispose);
   return ref.read(handoffProvider).cortexInstalled();
+});
+
+final noticesProvider = Provider<Notices>(
+  (ref) => isDemo ? DemoNotices(supported: false) : PhoneNotices(),
+);
+
+/// 매달 알림이 켜져 있나 (B2-B). 폰 설정에서 끌 수도 있어 앱으로 돌아올 때마다 다시 본다
+final monthlyNoticeProvider = FutureProvider<bool>((ref) {
+  final lifecycle = AppLifecycleListener(onResume: ref.invalidateSelf);
+  ref.onDispose(lifecycle.dispose);
+  return ref.read(noticesProvider).isOn();
 });
 
 final storeProvider = Provider<Store>(

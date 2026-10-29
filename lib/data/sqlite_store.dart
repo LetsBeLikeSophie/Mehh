@@ -330,8 +330,13 @@ class SqliteStore implements Store {
       ]) {
         await tx.delete(t);
       }
-      // 비공개 테스트를 거쳤다는 표시는 남긴다 ("테스트가 끝났어요" 알림, UX-74)
-      await tx.delete('counters', where: 'key != ?', whereArgs: ['closedTest']);
+      // 비공개 테스트를 거쳤다는 표시는 남긴다 ("테스트가 끝났어요" 알림, UX-74).
+      // 매달 알림을 이미 물었다는 표시도 설정이라 남긴다 (B2-B)
+      await tx.delete(
+        'counters',
+        where: 'key NOT IN (?, ?)',
+        whereArgs: ['closedTest', 'noticeAsked'],
+      );
     });
   }
 }

@@ -85,6 +85,7 @@ extension _Trash on _SortScreenState {
     if (n > 0 && nudge && await pro.takeNudge() && mounted) {
       await showProSheet(context, lead: context.l.proNudge(n));
     }
+    if (n > 0 && mounted) await askMonthlyNotice(context, ref);
     return n > 0;
   }
 

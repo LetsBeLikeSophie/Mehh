@@ -7,6 +7,9 @@
     <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
     <!-- 사진 EXIF 위치 (기기 위치 권한은 쓰지 않음) -->
     <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
+    <!-- 매달 알림 (2026-10-29 Sophie B2-B): 알림 허락, 폰을 다시 켜도 예약 유지. 정확한 시각 알람은 쓰지 않음 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:label="Mehh"
@@ -15,6 +18,14 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
+        <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
         <activity
             android:name=".MainActivity"
             android:exported="true"

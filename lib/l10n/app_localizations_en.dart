@@ -582,6 +582,53 @@ class L10nEn extends L10n {
   String get termsRefunds => 'Terms & refunds';
 
   @override
+  String get noticeAskTitle => 'Remind you once a month?';
+
+  @override
+  String get noticeAskBody =>
+      'Just once, on the 1st of each month · turn it off in Settings';
+
+  @override
+  String get noticeAskYes => 'Remind me';
+
+  @override
+  String get noticeAskNo => 'No thanks';
+
+  @override
+  String get noticeOn => 'We\'ll remind you on the 1st of each month';
+
+  @override
+  String get noticeBlocked =>
+      'Notifications for Mehh are off in your phone settings';
+
+  @override
+  String get noticeSetting => 'Monthly reminder';
+
+  @override
+  String get noticeSettingSub => 'Once, on the 1st of each month';
+
+  @override
+  String noticeCoinsTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Your $count coins for this month are back',
+      one: 'Your 1 coin for this month is back',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noticeCoinsBody => 'See suggestions for last month\'s photo sets';
+
+  @override
+  String get noticeSetsTitle => 'Last month\'s photo sets are ready';
+
+  @override
+  String get noticeProBody =>
+      'See suggestions and move them to trash in one go';
+
+  @override
   String cortexPartial(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
