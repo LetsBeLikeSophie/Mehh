@@ -391,9 +391,10 @@ class _SortScreenState extends ConsumerState<SortScreen>
                       ),
                     ),
                   ),
-                // Cortex로 보낸 사진: 받았는지까지 보이게 (어디서 멈췄는지 알 수 있게).
+                // Cortex로 보낸 사진: 보낸 기록만 보인다. Mehh는 Cortex에 지금 그 사진이
+                // 있는지 알 수 없어서 "있음"이라고 하지 않는다 (2026-10-30 Sophie).
                 // X 버튼 아래에 깔고 누르기를 막지 않는다 (작은 칸에서 X를 덮지 않게)
-                if (cortexSent[id] case final got?)
+                if (cortexSent.containsKey(id))
                   Positioned(
                     left: 4,
                     top: 4,
@@ -401,10 +402,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
                     child: IgnorePointer(
                       child: Align(
                         alignment: AlignmentDirectional.topStart,
-                        child: MehhBadge(
-                          got ? l.cortexGotBadge : l.cortexSentBadge,
-                          inverted: out,
-                        ),
+                        child: MehhBadge(l.cortexSentBadge, inverted: out),
                       ),
                     ),
                   ),
@@ -647,7 +645,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
                   // Cortex가 없어도 버튼은 보이고, 누르면 받으러 가기 (2026-10-25 Sophie)
                   if (cortexKind &&
                       (cortex || cortexStoreUrl.isNotEmpty) &&
-                      cortexIds.any((id) => cortexSent[id] != true)) ...[
+                      cortexIds.isNotEmpty) ...[
                     const SizedBox(width: 8),
                     OutlinedButton.icon(
                       onPressed: _busy

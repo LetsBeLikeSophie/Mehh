@@ -167,7 +167,6 @@
   "cortexGotTitle": "{count, plural, =1{✓ Cortex got 1} other{✓ Cortex got {count}}}",
   "cortexGotBody": "Cortex analyzes them in the background. You can close the app.\nMove these photos to trash?",
   "cortexGotKept": "{kept, plural, =1{1 Cortex didn't get stays as is.} other{{kept} Cortex didn't get stay as is.}}",
-  "cortexGotBadge": "In Cortex",
   "later": "Later",
   "focusFinishNone": "Nothing to clean up. Finish?",
   "focusKeepLooking": "Keep looking",
@@ -216,6 +215,5 @@
   "playVideo": "Play",
   "videoOpenFailed": "Couldn't find an app to play this video",
   "testEnded": "{count, plural, =1{The closed test is over · ◉ 1 this month} other{The closed test is over · ◉ {count} this month}}",
-  "noAllowedPhotos": "No photos allowed yet",
-  "cortexAskSkip": "{count, plural, =1{Skips 1 already in Cortex} other{Skips {count} already in Cortex}}"
+  "noAllowedPhotos": "No photos allowed yet"
 }

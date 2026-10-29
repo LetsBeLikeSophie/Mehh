@@ -25,7 +25,7 @@ abstract class Store {
   Future<void> addSeen(Iterable<String> photoIds);
   Future<Set<String>> loadSeen();
 
-  /// Cortex로 보낸 사진 → Cortex가 받았는지(got). 그리드에 "Cortex로 보냄"/"Cortex에 있음" 표시.
+  /// Cortex로 보낸 사진 → Cortex가 받았는지(got). 그리드에는 "Cortex로 보냄" 하나만 보이고, got은 기다리는 사진을 가리는 데만 쓴다.
   /// 휴지통으로 가면 지운다 (2026-10-23·24 Sophie)
   Future<void> addCortexSent(Iterable<String> photoIds, {bool got = false});
   Future<void> removeCortexSent(Iterable<String> photoIds);

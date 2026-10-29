@@ -1169,7 +1169,7 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('Cortex: 이미 받은 사진이 섞여 있으면 빼고 보내고, 창이 그 장수를 말한다 (UX-57·C3)', (
+  testWidgets('Cortex: 전에 보낸 사진도 빼지 않고 다 보내고, 창이 그 장수를 말한다 (UX-57)', (
     tester,
   ) async {
     final five = [
@@ -1181,7 +1181,8 @@ void main() {
           height: 100,
         ),
     ];
-    // 지난주 [나중에]로 남긴 "Cortex에 있음" 2장
+    // 지난주 Cortex가 받았다고 알려 와서 [나중에]로 남긴 2장. Mehh는 Cortex에 아직
+    // 있는지 모르니 "보냄"으로만 보이고, 다시 고르면 다시 간다 (2026-10-30 Sophie)
     final store = MemoryStore()..cortexSent.addAll({'c0': true, 'c1': true});
     await pump(
       tester,
@@ -1199,17 +1200,17 @@ void main() {
         handoffProvider.overrideWithValue(_FakeHandoff()),
       ],
     );
-    expect(find.text('Cortex에 있음'), findsNWidgets(2));
+    expect(find.text('Cortex로 보냄'), findsNWidgets(2));
+    expect(find.text('Cortex에 있음'), findsNothing);
     for (var i = 0; i < 5; i++) {
       await tester.tap(find.byType(XToggle).at(i));
     }
     await tester.pumpAndSettle();
     await tester.tap(find.text('Cortex로'));
     await tester.pumpAndSettle();
-    // Cortex가 이미 받은 2장은 빼고 3장만 보낸다 (C3-B)
-    expect(find.text('3장을 Cortex로 보낼까요?'), findsOneWidget);
-    expect(find.textContaining('이미 Cortex에 있는 2장은 빼요'), findsOneWidget);
-    expect(find.textContaining('다시 보내요'), findsNothing);
+    expect(find.text('5장을 Cortex로 보낼까요?'), findsOneWidget);
+    expect(find.textContaining('이미 Cortex로 보낸 2장도 다시 보내요'), findsOneWidget);
+    expect(find.textContaining('빼요'), findsNothing);
     await tester.tap(find.text('취소'));
     await tester.pumpAndSettle();
     await flush(tester);
@@ -2183,7 +2184,7 @@ void main() {
     await tester.pump(const Duration(seconds: 6));
     await tester.pumpAndSettle();
 
-    // 받은 사진 목록이 오면 그 사진만 묻는다. [나중에]면 X 그대로, "Cortex에 있음"
+    // 받은 사진 목록이 오면 그 사진만 묻는다. [나중에]면 X 그대로, 표시는 "Cortex로 보냄"
     await sendCortex(tester);
     final first = handoff.sent.first;
     handoff.sent.clear();
@@ -2195,24 +2196,23 @@ void main() {
     await tester.tap(find.text('나중에'));
     await tester.pumpAndSettle();
     expect(find.textContaining('  4장'), findsOneWidget);
-    expect(find.text('Cortex에 있음'), findsOneWidget);
-    expect(find.text('Cortex로 보냄'), findsOneWidget);
+    expect(find.text('Cortex로 보냄'), findsNWidgets(2));
+    expect(find.text('Cortex에 있음'), findsNothing);
 
-    // 다시 보내면 이미 받은 1장("Cortex에 있음")은 빼고 나머지 1장만 간다 (C3-B).
+    // 다시 보내면 받았다고 했던 1장도 같이 간다 (Cortex에서 지웠을 수도 있다).
     // 장수만 와도 다 받았으면 묻고, [휴지통으로]면 보낸다 (장수·용량 알림)
     await sendCortex(tester);
-    expect(handoff.sent, hasLength(1));
-    handoff.saved.add(const CortexSaved(1, null));
+    expect(handoff.sent, hasLength(2));
+    handoff.saved.add(const CortexSaved(2, null));
     await tester.pumpAndSettle();
-    expect(find.text('✓ Cortex가 1장 받았어요'), findsOneWidget);
+    expect(find.text('✓ Cortex가 2장 받았어요'), findsOneWidget);
     await tester.tap(find.text('휴지통으로'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('  3장'), findsOneWidget);
+    expect(find.textContaining('  2장'), findsOneWidget);
     expect(
-      find.textContaining(RegExp(r'✓ 1장 · .+ 휴지통으로 보냈어요')),
+      find.textContaining(RegExp(r'✓ 2장 · .+ 휴지통으로 보냈어요')),
       findsOneWidget,
     );
-    expect(find.text('Cortex에 있음'), findsOneWidget); // 이미 받은 사진은 남아 있다 (C3-B)
     expect(find.text('Cortex로 보냄'), findsNothing);
     await tester.pump(const Duration(seconds: 9));
     await tester.pumpAndSettle();
@@ -2235,7 +2235,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('휴지통으로'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('  2장'), findsOneWidget);
+    expect(find.textContaining('  1장'), findsOneWidget);
     await flush(tester);
   });
 
@@ -2286,8 +2286,8 @@ void main() {
     expect(find.text('✓ Cortex가 2장 받았어요'), findsOneWidget);
     await tester.tap(find.text('나중에'));
     await tester.pumpAndSettle();
-    expect(find.text('Cortex로 보냄'), findsNothing);
-    expect(find.text('Cortex에 있음'), findsNWidgets(3));
+    expect(find.text('Cortex로 보냄'), findsNWidgets(3));
+    expect(find.text('Cortex에 있음'), findsNothing);
     await flush(tester);
   });
 
@@ -2730,7 +2730,7 @@ void main() {
       store: store,
     );
     expect(find.textContaining('여행 사진'), findsOneWidget);
-    expect(find.text('Cortex에 있음'), findsOneWidget);
+    expect(find.text('Cortex로 보냄'), findsOneWidget);
     await tester.tap(find.byTooltip('설정'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('모든 기록 지우기'));
@@ -2742,7 +2742,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('여행 사진'), findsNothing);
     expect(find.textContaining('낱장 사진'), findsWidgets);
-    expect(find.text('Cortex에 있음'), findsNothing);
+    expect(find.text('Cortex로 보냄'), findsNothing);
     expect(store.counters['closedTest'], 2); // 테스트를 거쳤다는 표시는 남는다 (UX-74)
     await flush(tester);
   });

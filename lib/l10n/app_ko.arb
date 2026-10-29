@@ -449,7 +449,6 @@
   "cortexGotTitle": "✓ Cortex가 {count}장 받았어요",
   "cortexGotBody": "분석은 Cortex가 뒤에서 해요. 앱을 닫아도 돼요.\n이 사진을 휴지통으로 보낼까요?",
   "cortexGotKept": "Cortex가 받지 못한 {kept}장은 그대로 둬요.",
-  "cortexGotBadge": "Cortex에 있음",
   "later": "나중에",
   "focusFinishNone": "정리할 사진이 없어요. 끝낼까요?",
   "focusKeepLooking": "계속 보기",
@@ -632,15 +631,5 @@
   "noAllowedPhotos": "허용한 사진이 없어요",
   "@noAllowedPhotos": {
     "description": "일부만 허용했는데 허용한 사진이 0장일 때 홈"
-  },
-  "cortexAskSkip": "이미 Cortex에 있는 {count}장은 빼요",
-  "@cortexAskSkip": {
-    "description": "Cortex로 보낼까요? 창: 고른 사진 중 Cortex가 이미 받아 빼는 장수",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "format": "decimalPattern"
-      }
-    }
   }
 }

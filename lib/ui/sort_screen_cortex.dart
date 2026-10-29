@@ -42,7 +42,7 @@ extension _Cortex on _SortScreenState {
   }
 
   /// "✓ Cortex가 N장 받았어요 · 분석은 뒤에서 · 휴지통으로 보낼까요?" → 안드로이드 휴지통 확인 창
-  /// [나중에]면 X는 그대로, 사진에 "Cortex에 있음" 표시가 남는다
+  /// [나중에]면 X는 그대로, 사진에 "Cortex로 보냄" 표시가 남는다
   Future<void> _askTrashAfterCortex(List<String> ids, {int kept = 0}) async {
     await ref.read(cortexSentProvider.notifier).add(ids, got: true);
     if (!mounted) return;
@@ -66,17 +66,12 @@ extension _Cortex on _SortScreenState {
   }
 
   /// 여러 장을 한 번에 Cortex로 보낸다. Cortex가 받으면 지울지 묻고, 분석은 Cortex가 뒤에서.
-  Future<void> _sendCortex(List<String> chosen) async {
+  Future<void> _sendCortex(List<String> ids) async {
     // 매번 한 줄로 묻는다: "N장을 Cortex로 보낼까요?" (UX-43, 2026-10-24 Sophie: 지우기는 받은 뒤에 묻는다)
     final l = context.l;
     final sent = ref.read(cortexSentProvider).value ?? const {};
-    // Cortex가 이미 받은 사진("Cortex에 있음")은 빼고 보낸다: 같은 메모·AI 분석이 또 생기지 않게
-    // (2026-10-28 Sophie C3-B). 보냈지만 받았다는 신호가 없는 것은 다시 보낸다(UX-57 한 줄)
-    final ids = [
-      for (final id in chosen)
-        if (sent[id] != true) id,
-    ];
-    final skipped = chosen.length - ids.length;
+    // 고른 사진은 다 보낸다. 전에 보낸 사진이 섞여 있으면 한 줄로 알린다(UX-57).
+    // Cortex에서 지웠을 수도 있어서 Mehh가 빼지 않는다 (2026-10-30 Sophie, C3-B 대신)
     final again = ids.where(sent.containsKey).length;
     final ok = await askMehh(
       context,
@@ -84,7 +79,6 @@ extension _Cortex on _SortScreenState {
       // 사진이 AI 앱으로 간다는 것만 한 줄 (2026-10-24 Sophie). 키마다 한 줄
       body: [
         l.cortexAskNote,
-        if (skipped > 0) l.cortexAskSkip(skipped),
         if (again > 0) l.cortexAskResend(again),
       ].join('\n'),
       no: l.cancel,
