@@ -28,6 +28,10 @@ import 'widgets.dart';
 
 export 'sort_source.dart' show SortKind;
 
+part 'sort_screen_cortex.dart';
+part 'sort_screen_paint.dart';
+part 'sort_screen_trash.dart';
+
 /// 정리 화면: 앨범처럼 한눈에 보는 그리드.
 ///
 /// 위쪽: 제목·장수, 그 아래 한 줄 [추천 보기 · N장] [Cortex로 보내기(캡처)] … [전체 선택].
@@ -82,6 +86,9 @@ class _SortScreenState extends ConsumerState<SortScreen>
 
   StreamSubscription<CortexSaved>? _savedSub;
 
+  /// 파트 파일(sort_screen_*.dart)의 확장에서 화면을 다시 그릴 때
+  void _set(VoidCallback f) => setState(f);
+
   /// Cortex에서 돌아왔는데 "저장 완료" 신호가 없으면, 조금 기다렸다가 옮기지 않고 알린다
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -93,118 +100,6 @@ class _SortScreenState extends ConsumerState<SortScreen>
       setState(() => _busy = false);
       showNote(context, context.l.cortexNotSaved(sent.length));
     });
-  }
-
-  /// Cortex가 "받았어요"(파일을 자기 쪽에 복사함) 신호를 보내면, 받았다고 알리고
-  /// 휴지통으로 보낼지 묻는다. 분석은 그 뒤 Cortex가 혼자 한다 (2026-10-24 Sophie)
-  void _onCortexSaved(CortexSaved saved) {
-    if (!mounted) return;
-    final last = _sentToCortex;
-    if (saved.ids case final savedIds?) {
-      // 받은 사진 목록이 오면 기다리는 사진(cortex_sent, 아직 못 받음) 중 받은 것만 묻는다.
-      // 기다리는 동안 또 보내도 묶음이 섞이지 않는다 (시니어 리뷰 2026-10-24 S-3)
-      final waiting = ref.read(cortexSentProvider).value ?? const {};
-      final done = [
-        for (final id in savedIds)
-          if (waiting[id] == false) id,
-      ];
-      if (done.isEmpty) {
-        // 마지막으로 보낸 것을 하나도 못 받았다고 알려 온 경우만 알린다
-        if (last != null && savedIds.isEmpty) {
-          _sentToCortex = null;
-          showNote(context, context.l.cortexPartial(0));
-        }
-        return;
-      }
-      final fromLast = last != null && done.every(last.contains);
-      if (fromLast) _sentToCortex = null;
-      _askTrashAfterCortex(
-        done,
-        kept: fromLast ? last.length - done.length : 0,
-      );
-      return;
-    }
-    // 장수만 오면(예전 Cortex) 마지막으로 보낸 묶음과 견줘, 다 받았을 때만 묻는다 (S-2)
-    if (last == null) return;
-    _sentToCortex = null;
-    if (saved.count < last.length) {
-      showNote(context, context.l.cortexPartial(saved.count));
-      return;
-    }
-    _askTrashAfterCortex(last);
-  }
-
-  /// "✓ Cortex가 N장 받았어요 · 분석은 뒤에서 · 휴지통으로 보낼까요?" → 안드로이드 휴지통 확인 창
-  /// [나중에]면 X는 그대로, 사진에 "Cortex에 있음" 표시가 남는다
-  Future<void> _askTrashAfterCortex(List<String> ids, {int kept = 0}) async {
-    await ref.read(cortexSentProvider.notifier).add(ids, got: true);
-    if (!mounted) return;
-    final l = context.l;
-    final ok = await askMehh(
-      context,
-      title: l.cortexGotTitle(ids.length),
-      body: kept > 0
-          ? '${l.cortexGotBody}\n${l.cortexGotKept(kept)}'
-          : l.cortexGotBody,
-      no: l.later,
-      yes: l.toTrash,
-    );
-    if (!ok || !mounted) return;
-    final src = _src;
-    if (src == null) {
-      await sendToTrash(context, ref, ids);
-    } else {
-      await _trashAndAfter(ids, src, _order);
-    }
-  }
-
-  /// 여러 장을 한 번에 Cortex로 보낸다. Cortex가 받으면 지울지 묻고, 분석은 Cortex가 뒤에서.
-  Future<void> _sendCortex(List<String> chosen) async {
-    // 매번 한 줄로 묻는다: "N장을 Cortex로 보낼까요?" (UX-43, 2026-10-24 Sophie: 지우기는 받은 뒤에 묻는다)
-    final l = context.l;
-    final sent = ref.read(cortexSentProvider).value ?? const {};
-    // Cortex가 이미 받은 사진("Cortex에 있음")은 빼고 보낸다: 같은 메모·AI 분석이 또 생기지 않게
-    // (2026-10-28 Sophie C3-B). 보냈지만 받았다는 신호가 없는 것은 다시 보낸다(UX-57 한 줄)
-    final ids = [
-      for (final id in chosen)
-        if (sent[id] != true) id,
-    ];
-    final skipped = chosen.length - ids.length;
-    final again = ids.where(sent.containsKey).length;
-    final ok = await askMehh(
-      context,
-      title: l.cortexAskTitle(ids.length),
-      // 사진이 AI 앱으로 간다는 것만 한 줄 (2026-10-24 Sophie). 키마다 한 줄
-      body: [
-        l.cortexAskNote,
-        if (skipped > 0) l.cortexAskSkip(skipped),
-        if (again > 0) l.cortexAskResend(again),
-      ].join('\n'),
-      no: l.cancel,
-      yes: l.cortexAskYes,
-    );
-    if (!ok || !mounted) return;
-    setState(() => _busy = true);
-    final r = await ref.read(handoffProvider).sendManyToCortex(ids);
-    if (!mounted) return;
-    switch (r) {
-      case SendResult.ok:
-        // Cortex가 받았다고 알려 오면 지울지 묻는다 (안 알려 오면 그대로 둔다)
-        _savedSub ??= ref
-            .read(handoffProvider)
-            .cortexSaved
-            .listen(_onCortexSaved);
-        _sentToCortex = ids;
-        // 받았다는 신호가 올 때까지 "Cortex로 보냄" 표시. 기다리는 동안 버튼은 잠그지 않는다
-        await ref.read(cortexSentProvider.notifier).add(ids);
-        if (mounted) setState(() => _busy = false);
-      case SendResult.unsupported:
-        setState(() => _busy = false);
-        showNote(context, l.cortexMultiUnsupported);
-      case SendResult.failed:
-        setState(() => _busy = false);
-        showNote(context, l.cortexFailed);
-    }
   }
 
   Future<void> _toggle(String id, bool marked) {
@@ -232,21 +127,6 @@ class _SortScreenState extends ConsumerState<SortScreen>
             marked.contains(id) &&
             !_chosen.contains(id),
       );
-
-  /// [Cortex로]가 보내는 사진: 직접 고른 것만. [추천 보기]로 X가 됐거나 처음부터 X인
-  /// 추천은 빼다 (2026-10-26 Sophie C1-B: 버릴 캡처 수천 장이 AI 앱으로 가지 않게)
-  List<String> _cortexIds(
-    List<String> marked,
-    SortSource src,
-    Map<String, Decision> decisions,
-  ) => [
-    // 앱이 고른 추천(지금의 추천·처음부터 X)은 이 화면에서 손으로 고른 것만. 화면을 나갔다 와도
-    // [추천 보기]로 X가 된 추천은 DB에 X로 남아 있으니 State가 아니라 추천 목록으로 가린다 (S-1 2026-10-27)
-    for (final id in marked)
-      if (_chosen.contains(id) ||
-          !(src.suggested.contains(id) || src.preMarked.contains(id)))
-        id,
-  ];
 
   /// [전체 선택] = 모두 X
   Future<void> _selectAll(List<String> ids) {
@@ -281,85 +161,12 @@ class _SortScreenState extends ConsumerState<SortScreen>
   bool? _paintTo;
   final _painted = <String>{};
 
-  String? _photoAt(Offset global) {
-    final box = _gridKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box == null) return null;
-    final result = BoxHitTestResult();
-    box.hitTest(result, position: box.globalToLocal(global));
-    for (final e in result.path) {
-      final t = e.target;
-      if (t is RenderMetaData && t.metaData is String) {
-        return t.metaData as String;
-      }
-    }
-    return null;
-  }
-
   /// 가장자리에서 시작한 끌기: 사진 선택 대신 뒤로 가기 (2026-10-24 Sophie: 캡처 묶음에서 스와이프로
   /// 뒤로 안 갔다 — 사진이 화면을 꽉 채워 끌어 선택이 먼저 잡혔다)
   Offset? _edgeFrom;
   double _edgeDx = 0;
 
-  void _paintStart(Offset global) {
-    final width = MediaQuery.sizeOf(context).width;
-    if (global.dx < backEdge || global.dx > width - backEdge) {
-      _edgeFrom = global;
-      _edgeDx = 0;
-      return;
-    }
-    final id = _photoAt(global);
-    if (id == null) return;
-    _painted.clear();
-    _paintTo = !_markedNow.contains(id);
-    _paint(id);
-  }
-
-  void _paintMove(Offset global) {
-    if (_edgeFrom case final from?) {
-      _edgeDx = global.dx - from.dx;
-      return;
-    }
-    if (_paintTo == null) return;
-    final id = _photoAt(global);
-    if (id == null || id == _paintLast) return;
-    // 빨리 끌어 건너뛴 사진도: 화면 순서로 지난 사진과 지금 사진 사이를 모두
-    final a = _order.indexOf(_paintLast ?? id), b = _order.indexOf(id);
-    if (a < 0 || b < 0) {
-      if (!_painted.contains(id)) _paint(id);
-    } else {
-      for (var i = a < b ? a : b; i <= (a < b ? b : a); i++) {
-        if (!_painted.contains(_order[i])) _paint(_order[i]);
-      }
-    }
-    _paintLast = id;
-  }
-
   String? _paintLast;
-
-  void _paint(String id) {
-    _painted.add(id);
-    // 끌어서 고른 것도 직접 고른 사진
-    _paintTo! ? _chosen.add(id) : _chosen.remove(id);
-    _paintLast = id;
-    // X 버튼과 같은 결과: 켜면 정리(X), 끄면 킵
-    ref.read(decisionsProvider.notifier).set([
-      id,
-    ], _paintTo! ? DecisionState.toTrash : DecisionState.keep);
-  }
-
-  void _paintEnd(double? velocity) {
-    // 가장자리에서 안쪽으로 충분히(또는 빠르게) 밀었으면 뒤로
-    if (_edgeFrom != null &&
-        (_edgeDx.abs() > backSwipeDistance || (velocity ?? 0).abs() > 600)) {
-      _edgeFrom = null;
-      Navigator.of(context).maybePop();
-      return;
-    }
-    _edgeFrom = null;
-    _paintTo = null;
-    _paintLast = null;
-    _painted.clear();
-  }
 
   Future<void> _rename(DayGroup g) async {
     final original = sortTitle(widget.kind, g, widget.place, context.l);
@@ -377,23 +184,6 @@ class _SortScreenState extends ConsumerState<SortScreen>
     if (v != null) {
       await ref.read(groupNamesProvider.notifier).rename(g, v);
     }
-  }
-
-  /// Cortex가 없을 때: 무슨 앱인지 한 줄 + [받으러 가기] → 스토어
-  Future<void> _getCortex() async {
-    final l = context.l;
-    final ok = await askMehh(
-      context,
-      title: l.cortexGetTitle,
-      body: l.cortexGetBody,
-      no: l.cancel,
-      yes: l.cortexGetYes,
-    );
-    if (!ok) return;
-    await launchUrl(
-      Uri.parse(cortexStoreUrl),
-      mode: LaunchMode.externalApplication,
-    );
   }
 
   /// 켜 둔 추천 끄기: 추천으로 들어간 X만 표시 없음으로 (직접 선택한 다른 사진은 그대로).
@@ -498,171 +288,6 @@ class _SortScreenState extends ConsumerState<SortScreen>
   /// 큰 동영상 칸의 길이·용량 표시용
   Map<String, PhotoMeta> _videoMeta = const {};
   List<String> _order = const [];
-
-  /// 반환: 실제로 휴지통으로 보냈는지
-  Future<bool> _send(
-    List<String> ids,
-    SortSource src,
-    List<String> shown,
-  ) async {
-    if (!await _confirmSceneLoss(ids, src) || !mounted) return false;
-    return _trashAndAfter(ids, src, shown);
-  }
-
-  /// 그리드 어디든 길게 눌러 동그라미가 다 차면: 지금 선택한 사진 기준으로 묻고,
-  /// 보내면 이 묶음을 끝내고 나간다 (2026-10-24 Sophie)
-  Future<void> _finishHere(
-    List<String> marked,
-    SortSource src,
-    List<String> order,
-  ) async {
-    final l = context.l;
-    final n = marked.length;
-    final ok = await askMehh(
-      context,
-      // 제목 = 아래 버튼과 같은 말 "N장 휴지통으로" (2026-10-24 Sophie: 반복되는 말 없이)
-      title: n > 0
-          ? _trashCount(l, n)
-          : widget.kind == SortKind.videos
-          ? l.focusFinishNoneVideos
-          : l.focusFinishNone,
-      no: l.focusKeepLooking,
-      yes: n > 0 ? l.toTrash : l.focusFinishYes,
-    );
-    if (!ok || !mounted) return;
-    if (n > 0 && !await _send(marked, src, order)) return;
-    if (!mounted) return;
-    // 이 정리 화면만 닫는다. Pro 안내에서 "지금 무료로"를 눌러 다른 화면이 위에 열렸으면
-    // 그 화면은 두고 아래의 이 화면만 뺀다 (UX-52: maybePop이 새로 연 캡처 화면을 닫았다)
-    final route = ModalRoute.of(context);
-    final nav = Navigator.of(context);
-    if (route == null || route.isCurrent) {
-      await nav.maybePop();
-    } else if (route.isActive) {
-      nav.removeRoute(route);
-    }
-  }
-
-  /// 휴지통으로 보내고 그 뒤 할 일: 정확도 기록, 잠긴 묶음 "다 봤어요"(R3), Pro 안내.
-  /// [N장 휴지통으로]와 Cortex 길이 같이 쓴다 (시니어 리뷰 2026-10-24 S-2)
-  /// "N장 휴지통으로" — 큰 동영상은 "N개" (홈 줄과 같은 단위)
-  String _trashCount(L10n l, int n) =>
-      widget.kind == SortKind.videos ? l.trashCountVideos(n) : l.trashCount(n);
-
-  Future<bool> _trashAndAfter(
-    List<String> ids,
-    SortSource src,
-    List<String> shown,
-  ) async {
-    final markedBefore = _markedNow; // 보내면 다시 그려져 바뀌므로 먼저 잡아 둔다
-    setState(() => _busy = true);
-    // 정리를 끝낸 순간에 Pro 안내 (Pro가 아니면 하루 한 번까지). 안내 시트가 아래 알림을 덮으니
-    // 그때는 알림 대신 시트 첫 줄에 "30일 안에 되살릴 수 있어요"까지 넣는다 (UX 리뷰 2026-10-22)
-    final pro = ref.read(proProvider.notifier);
-    final nudge = widget.kind == SortKind.day && await pro.canNudge();
-    if (!mounted) return false;
-    final n = await sendToTrash(
-      context,
-      ref,
-      ids,
-      quiet: nudge,
-      doneNote: widget.kind == SortKind.videos
-          ? (n, size) => context.l.trashedVideos(n, size)
-          : null,
-    );
-    if (n > 0) await _recordPicks(ids, src, shown, markedBefore);
-    // 잠긴 묶음을 직접 정리해 보냈으면 다음부터 "다 봤어요" (2026-10-22 Sophie R3-A)
-    if (n > 0 && src.locked > 0) {
-      final sent = ids.toSet();
-      await ref
-          .read(seenProvider.notifier)
-          .mark(shown.where((id) => !sent.contains(id)));
-    }
-    if (mounted) setState(() => _busy = false);
-    if (n > 0 && nudge && await pro.takeNudge() && mounted) {
-      await showProSheet(context, lead: context.l.proNudge(n));
-    }
-    return n > 0;
-  }
-
-  /// 추천 정확도 기록 (SPEC 6-8). [추천 보기]를 눌렀거나 처음부터 X인 추천이 있을 때만 센다.
-  Future<void> _recordPicks(
-    List<String> sent,
-    SortSource src,
-    List<String> shown,
-    Set<String> marked,
-  ) async {
-    // 사용자에게 X로 보였던 추천만 센다: [추천 보기]로 받은 것 + 처음부터 X였던 것.
-    // 보지 못한 추천을 "거절"로 세면 취향 학습이 멀쩡한 추천을 끈다 (시니어 리뷰 2026-10-23 S-1)
-    // 화면을 나갔다 와서 _picked가 비어도, 손으로 고르지 않았는데 X인 추천이 있으면 [추천 보기]가
-    // 켜져 있던 것: 그 추천 전체를 보인 추천으로 센다(잠긴 묶음 제외, S-1 2026-10-27)
-    // 지금 X인 추천만 보인 추천으로 (그 사이 새로 생긴 추천은 X로 보인 적이 없다, UX-61)
-    final shownPicks = {
-      ..._picked,
-      ..._preMarkedSeen,
-      ...src.preMarked,
-      if (src.locked == 0 && _picksTurnedOn(src, marked))
-        ...src.suggested.where(marked.contains),
-    };
-    if (shownPicks.isEmpty) return;
-    await ref
-        .read(storeProvider)
-        .addPicks(
-          pickRecords(
-            at: DateTime.now(),
-            kind: widget.kind.name,
-            shown: shown,
-            sent: sent.toSet(),
-            suggested: shownPicks,
-            tags: {
-              ..._seenTags,
-              for (final e in src.tags.entries) e.key: e.value.name,
-            },
-          ),
-        );
-    // 기록이 쌓였으니 자주 되돌린 이유를 다시 계산 (취향 학습). 새로 꺼진 이유는 한 줄로 알린다 (L1-B)
-    final before = ref.read(mutedReasonsProvider).value ?? const {};
-    ref.invalidate(mutedReasonsProvider);
-    final after = await ref.read(mutedReasonsProvider.future);
-    final newly = after.difference(before);
-    if (newly.isNotEmpty && mounted) {
-      final l = context.l;
-      showNote(
-        context,
-        [
-          for (final r in newly)
-            switch (r) {
-              TrashReason.burst => l.mutedBurst,
-              TrashReason.blurry => l.mutedBlurry,
-              TrashReason.junk => l.mutedJunk,
-              TrashReason.eyesClosed => l.mutedEyesClosed,
-            },
-        ].join('\n'),
-      );
-    }
-  }
-
-  /// 연속 컷·중복 묶음이 통째로 사라지면 한 번 묻는다 (묶음마다 최소 1장)
-  Future<bool> _confirmSceneLoss(List<String> ids, SortSource src) async {
-    final decisions = ref.read(decisionsProvider).value ?? const {};
-    final sending = ids.toSet();
-    final emptied = src.units.where(
-      (u) => u.every(
-        (id) =>
-            sending.contains(id) ||
-            stateOf(decisions, id) == DecisionState.trashed,
-      ),
-    );
-    if (emptied.isEmpty) return true;
-    final l = context.l;
-    return askMehh(
-      context,
-      title: l.sceneLossTitle(emptied.length),
-      body: l.sceneLossBody,
-      no: l.lookAgain,
-      yes: l.toTrash,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
