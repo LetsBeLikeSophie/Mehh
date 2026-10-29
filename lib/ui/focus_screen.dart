@@ -55,6 +55,11 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
   Offset _zoomAt = Offset.zero;
   Offset _zoomPan = Offset.zero;
 
+  /// 화면에 닿아 있는 손가락 수. 확대가 시작된 터치는 손가락이 모두 떨어질 때까지
+  /// 밀기로 읽지 않는다: 한 손가락을 먼저 떼도 남은 손가락이 정리·킵·넘기기가 되지 않게 (UX-85)
+  int _pointers = 0;
+  bool _zoomTouch = false;
+
   _Motion _motion = _Motion.next;
 
   /// 길게 누르면: X 친 사진이 있으면 "N장을 휴지통으로 보내고 끝낼까요?",
@@ -102,10 +107,18 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
 
   // ───────────────────────── 밀기·확대
 
+  void _onPointerDown(PointerDownEvent _) => _pointers++;
+
+  void _onPointerUp(PointerEvent _) {
+    if (_pointers > 0) _pointers--;
+    if (_pointers == 0) _zoomTouch = false;
+  }
+
   void _onScaleStart(ScaleStartDetails d) => setState(() {
     _dragging = true;
     _zooming = d.pointerCount >= 2;
     if (_zooming) {
+      _zoomTouch = true;
       _zoomAt = d.localFocalPoint;
       _zoomPan = Offset.zero;
     }
@@ -121,12 +134,14 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
           _zoomPan = Offset.zero;
         }
         _zooming = true;
+        _zoomTouch = true;
         _drag = Offset.zero;
         _zoom = d.scale.clamp(1.0, 4.0);
         _zoomPan = d.localFocalPoint - _zoomAt;
       });
       return;
     }
+    if (_zoomTouch) return; // 확대하다 남은 손가락
     _raw += d.focalPointDelta;
     // 처음 움직인 방향(가로/세로) 한 축으로만 움직인다
     _axis ??= _raw.distance < 12
@@ -153,7 +168,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
       _zoom = 1;
       _zoomPan = Offset.zero;
     });
-    if (wasZoom) return;
+    if (wasZoom || _zoomTouch) return;
     if (d.dy < -90) {
       _up(ids);
     } else if (d.dy > 90) {
@@ -315,37 +330,42 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                     child: HoldToFinish(
                       armed: markedCount > 0,
                       onDone: () => _finish(ids.length, markedCount),
-                      child: GestureDetector(
-                        onScaleStart: _onScaleStart,
-                        onScaleUpdate: _onScaleUpdate,
-                        onScaleEnd: (_) => _onScaleEnd(ids),
-                        // 탭해서 따로 여는 사진 화면은 두지 않는다: 같은 사진이 한 겹 더 열려
-                        // 무엇이 바뀐지 모르고 나가기도 헷갈렸다. 확대는 두 손가락으로 (2026-10-29 Sophie)
-                        child: ClipRect(
-                          child: AnimatedSwitcher(
-                            duration: Duration(
-                              milliseconds: _dragging ? 0 : 220,
+                      child: Listener(
+                        onPointerDown: _onPointerDown,
+                        onPointerUp: _onPointerUp,
+                        onPointerCancel: _onPointerUp,
+                        child: GestureDetector(
+                          onScaleStart: _onScaleStart,
+                          onScaleUpdate: _onScaleUpdate,
+                          onScaleEnd: (_) => _onScaleEnd(ids),
+                          // 탭해서 따로 여는 사진 화면은 두지 않는다: 같은 사진이 한 겹 더 열려
+                          // 무엇이 바뀐지 모르고 나가기도 헷갈렸다. 확대는 두 손가락으로 (2026-10-29 Sophie)
+                          child: ClipRect(
+                            child: AnimatedSwitcher(
+                              duration: Duration(
+                                milliseconds: _dragging ? 0 : 220,
+                              ),
+                              switchInCurve: Curves.easeOutCubic,
+                              switchOutCurve: Curves.easeInCubic,
+                              layoutBuilder: (cur, prev) => Stack(
+                                fit: StackFit.expand,
+                                children: [...prev, ?cur],
+                              ),
+                              transitionBuilder: (child, anim) {
+                                final incoming = child.key == ValueKey(current);
+                                return SlideTransition(
+                                  position: Tween(
+                                    begin: incoming ? inFrom : outTo,
+                                    end: Offset.zero,
+                                  ).animate(anim),
+                                  child: FadeTransition(
+                                    opacity: anim,
+                                    child: child,
+                                  ),
+                                );
+                              },
+                              child: card,
                             ),
-                            switchInCurve: Curves.easeOutCubic,
-                            switchOutCurve: Curves.easeInCubic,
-                            layoutBuilder: (cur, prev) => Stack(
-                              fit: StackFit.expand,
-                              children: [...prev, ?cur],
-                            ),
-                            transitionBuilder: (child, anim) {
-                              final incoming = child.key == ValueKey(current);
-                              return SlideTransition(
-                                position: Tween(
-                                  begin: incoming ? inFrom : outTo,
-                                  end: Offset.zero,
-                                ).animate(anim),
-                                child: FadeTransition(
-                                  opacity: anim,
-                                  child: child,
-                                ),
-                              );
-                            },
-                            child: card,
                           ),
                         ),
                       ),

@@ -859,6 +859,42 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('크게 보기: 확대하다 한 손가락을 먼저 떼고 남은 손가락으로 밀어도 정리·킵이 되지 않는다 (UX-85)', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      FocusScreen(kind: SortKind.singles, group: group, initialId: 'p3'),
+    );
+    final c = tester.getCenter(card());
+    final a = await tester.startGesture(c - const Offset(20, 0));
+    final b = await tester.startGesture(c + const Offset(20, 0));
+    await tester.pump();
+    for (var i = 0; i < 5; i++) {
+      await a.moveBy(const Offset(-6, 0));
+      await b.moveBy(const Offset(6, 0));
+      await tester.pump();
+    }
+    await b.up(); // 한 손가락을 먼저 뗀다
+    await tester.pump();
+    for (var i = 0; i < 6; i++) {
+      await a.moveBy(const Offset(0, -20)); // 남은 손가락을 위로 120px (한 손가락이면 정리)
+      await tester.pump();
+    }
+    await a.up();
+    await tester.pumpAndSettle();
+    expect(find.text('✕ 정리'), findsNothing);
+    expect(find.byKey(const ValueKey('p3')), findsOneWidget); // 같은 사진에 머묾
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(FocusScreen)),
+    );
+    expect(
+      stateOf(container.read(decisionsProvider).value ?? const {}, 'p3'),
+      isNot(DecisionState.toTrash),
+    );
+    await flush(tester);
+  });
+
   testWidgets('크게 보기: 위로 밀면 정리, 아래로 밀면 킵, 그리드에 반영된다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     await tester.tap(find.byType(PhotoThumb).first);
