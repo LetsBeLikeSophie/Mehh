@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mehh/data/billing.dart';
 import 'package:mehh/data/demo.dart';
+import 'package:mehh/data/notices.dart';
 import 'package:mehh/data/photo_library.dart';
 import 'package:mehh/data/pro.dart';
 import 'package:mehh/data/store.dart';
@@ -65,6 +66,8 @@ void main() {
           storeProvider.overrideWithValue(store ?? MemoryStore()),
           proVaultProvider.overrideWithValue(MemoryProVault(pro)),
           billingProvider.overrideWithValue(DemoBilling(korean: true)),
+          // 실제 폰처럼 설정에 [매달 알림] 스위치가 보이게
+          noticesProvider.overrideWithValue(DemoNotices()),
         ],
         child: RepaintBoundary(
           key: shotKey,
