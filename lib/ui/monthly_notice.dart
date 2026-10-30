@@ -9,15 +9,15 @@ import '../providers.dart';
 import 'widgets.dart';
 
 /// 매달 알림 글: 코인이 다시 생긴다는 말은 코인을 쓰는 사람에게만.
-/// 테스트 동안 무료면 Pro 안내와 같은 말 (2026-10-26 Sophie).
+/// 테스트 동안 무료면 돈 이야기 없이 Pro와 같은 글: 알림은 앱이 꺼진 채 폰이 보내서,
+/// 정식 출시로 업데이트한 뒤 앱을 열기 전에 1일이 오면 끝난 "무료" 이야기가 갈 수 있다
+/// (2026-10-30 Sophie N1-B, 10-26의 "Pro 안내와 같은 말" 대신).
 /// Pro 상태를 다 읽은 뒤에 불러야 한다([_noticeText]): 앱을 켠 직후엔 아직 비어 있다
 NoticeText monthlyNoticeText(BuildContext context, WidgetRef ref) {
   final l = context.l;
   final channel = l.noticeSetting;
-  if (ref.read(closedTestFreeProvider)) {
-    return (title: l.noticeSetsTitle, body: l.proTestFree, channel: channel);
-  }
-  if (ref.read(proProvider).value?.pro ?? false) {
+  if (ref.read(closedTestFreeProvider) ||
+      (ref.read(proProvider).value?.pro ?? false)) {
     return (title: l.noticeSetsTitle, body: l.noticeProBody, channel: channel);
   }
   return (

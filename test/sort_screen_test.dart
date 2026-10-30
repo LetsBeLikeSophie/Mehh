@@ -3179,7 +3179,7 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('매달 알림: 테스트 동안 무료면 묻지 않고, 설정에서 켜면 Pro 안내와 같은 말로 (B2-B)', (
+  testWidgets('매달 알림: 테스트 동안 무료면 묻지 않고, 설정에서 켜면 돈 이야기 없이 Pro와 같은 글로 (B2-B, N1-B)', (
     tester,
   ) async {
     final notices = DemoNotices();
@@ -3205,7 +3205,8 @@ void main() {
     await tester.tap(find.byType(Switch));
     await tester.pumpAndSettle();
     expect(notices.scheduled?.title, '지난달 사진 묶음이 기다려요');
-    expect(notices.scheduled?.body, '비공개 테스트 동안은 모든 묶음 추천이 무료예요');
+    // 정식 출시 뒤 앱을 열기 전에 와도 틀리지 않게 "무료" 이야기는 넣지 않는다 (N1-B)
+    expect(notices.scheduled?.body, '추천을 보고 한 번에 휴지통으로 보낼 수 있어요');
     await flush(tester);
   });
 
