@@ -877,6 +877,29 @@ void main() {
     },
   );
 
+  testWidgets('정리 화면의 용량 막대: 추천 정리·"/ 전체" 없이 선택한 것만 "선택 N" (2026-10-30)', (
+    tester,
+  ) async {
+    await pump(tester, SortScreen(kind: SortKind.singles, group: group));
+    String bar() => tester
+        .widget<Text>(
+          find.descendant(
+            of: find.byKey(const ValueKey('freedBar')),
+            matching: find.byType(Text),
+          ).first,
+        )
+        .textSpan!
+        .toPlainText();
+    expect(bar(), isNot(contains('추천 정리')));
+    expect(bar(), isNot(contains('선택')));
+    await tester.tap(find.byType(XToggle).first);
+    await tester.pumpAndSettle();
+    expect(bar(), contains('선택 '));
+    expect(bar(), isNot(contains('추천 정리')));
+    expect(bar(), isNot(contains(' / ')));
+    await flush(tester);
+  });
+
   testWidgets('그리드: X를 켜면 휴지통 버튼, 보내면 그 사진만 빠진다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     expect(find.text('정리할 사진이 없어요'), findsWidgets);

@@ -688,6 +688,11 @@ class L10nKo extends L10n {
   }
 
   @override
+  String barSelected(Object size) {
+    return '선택 $size';
+  }
+
+  @override
   String get openGallery => '갤러리';
 
   @override

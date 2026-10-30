@@ -175,6 +175,7 @@
   "focusFinishSemantics": "Finish sorting",
   "barPhotos": "Photos & videos {size}",
   "barSent": "Trash {size}",
+  "barSelected": "Selected {size}",
   "openGallery": "Gallery",
   "noGallery": "Couldn't find a gallery app",
   "coinCount": "{count, plural, =1{1 coin} other{{count} coins}}",

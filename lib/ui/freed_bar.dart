@@ -12,8 +12,9 @@ import 'widgets.dart';
 /// 용량 막대 (2026-10-24 Sophie). 홈과 정리 화면이 같은 막대·같은 뜻을 쓴다.
 /// 막대 전체 = 사진·동영상 전체 용량 + 이번 달 휴지통으로 보낸 용량 (동영상 포함, 2026-10-26 V2-A). 왼쪽부터
 /// - 검정: 사진·동영상 (남는 것)
-/// - 연한 코랄: 추천 정리 (앱 추천 + 선택해 둔 것)
-/// - 코랄: 정리 화면에서만, 이 묶음에서 지금 선택한 것 — 선택하면 연한 코랄에서 코랄로 옮겨 간다
+/// - 연한 코랄: 홈에서만, 추천 정리 (앱 추천 + 선택해 둔 것)
+/// - 코랄: 정리 화면에서만, 이 묶음에서 지금 선택한 것. 정리 화면엔 추천 정리 칸·"/ 전체"를 두지 않는다
+///   (2026-10-30 Sophie: 큰 동영상처럼 추천이 없는 화면에서 "추천 정리 5.8GB / 5.9GB"가 무슨 뜻인지 모르겠다)
 /// - 회색: 휴지통 (이번 달 보낸 것)
 /// 아래 한 줄은 글자 색이 칸 색과 같고, 길면 줄을 바꾸지 않고 글자를 줄인다.
 class FreedBar extends ConsumerWidget {
@@ -45,8 +46,9 @@ class FreedBar extends ConsumerWidget {
             .value ??
         0;
     if (photos == 0) return const SizedBox.shrink();
-    final rec = picks.clamp(0, photos);
-    final sel = selectedBytes.clamp(0, rec);
+    // 정리 화면은 선택한 것만 (추천 정리 칸 없음)
+    final rec = selected == null ? picks.clamp(0, photos) : 0;
+    final sel = selectedBytes.clamp(0, photos);
     final l = context.l;
     const small = TextStyle(fontSize: MehhText.label);
     return Padding(
@@ -69,7 +71,7 @@ class FreedBar extends ConsumerWidget {
                   final wFreed = w(freed);
                   final wSel = w(sel);
                   final wRec = w(rec);
-                  // 검정 바탕 위에 오른쪽부터 휴지통 · 추천 정리(연한 코랄), 선택(코랄)은 추천 정리 안 오른쪽
+                  // 검정 바탕 위에 오른쪽부터 휴지통 · 추천 정리(연한 코랄, 홈) 또는 선택(코랄, 정리 화면)
                   return Stack(
                     children: [
                       const Positioned.fill(
@@ -107,32 +109,22 @@ class FreedBar extends ConsumerWidget {
                           text: l.barPhotos(formatBytes(photos)),
                           style: const TextStyle(color: MehhColors.black),
                         ),
+                        // 홈: "추천 정리 116MB"
                         if (rec > 0) ...[
                           const TextSpan(text: '  ·  '),
-                          // 홈: "추천 정리 116MB" / 묶음 안: "추천 정리 65MB / 116MB" (65 = 선택, 코랄)
                           TextSpan(
-                            text: l.barRecommendedLabel,
+                            text: '${l.barRecommendedLabel}${formatBytes(rec)}',
                             style: const TextStyle(
                               color: MehhColors.accentSoftText,
                             ),
                           ),
-                          if (selected != null) ...[
-                            TextSpan(
-                              text: formatBytes(sel),
-                              style: const TextStyle(color: MehhColors.accent),
-                            ),
-                            const TextSpan(
-                              text: ' / ',
-                              style: TextStyle(
-                                color: MehhColors.accentSoftText,
-                              ),
-                            ),
-                          ],
+                        ],
+                        // 묶음 안: "선택 65MB" (코랄)
+                        if (sel > 0) ...[
+                          const TextSpan(text: '  ·  '),
                           TextSpan(
-                            text: formatBytes(rec),
-                            style: const TextStyle(
-                              color: MehhColors.accentSoftText,
-                            ),
+                            text: l.barSelected(formatBytes(sel)),
+                            style: const TextStyle(color: MehhColors.accent),
                           ),
                         ],
                       ],

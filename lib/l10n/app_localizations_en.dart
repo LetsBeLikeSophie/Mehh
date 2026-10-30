@@ -825,6 +825,11 @@ class L10nEn extends L10n {
   }
 
   @override
+  String barSelected(Object size) {
+    return 'Selected $size';
+  }
+
+  @override
   String get openGallery => 'Gallery';
 
   @override

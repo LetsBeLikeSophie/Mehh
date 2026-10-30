@@ -1147,6 +1147,12 @@ abstract class L10n {
   /// **'휴지통 {size}'**
   String barSent(Object size);
 
+  /// No description provided for @barSelected.
+  ///
+  /// In ko, this message translates to:
+  /// **'선택 {size}'**
+  String barSelected(Object size);
+
   /// No description provided for @openGallery.
   ///
   /// In ko, this message translates to:

@@ -485,6 +485,7 @@
   },
   "barPhotos": "사진·동영상 {size}",
   "barSent": "휴지통 {size}",
+  "barSelected": "선택 {size}",
   "openGallery": "갤러리",
   "noGallery": "갤러리 앱을 찾지 못했어요",
   "coinCount": "코인 {count}개",
