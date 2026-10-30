@@ -29,7 +29,18 @@ class JsonCache {
     if (await f.exists()) await f.delete();
   }
 
-  Future<void> write(Map<String, dynamic> data) async {
+  /// 파일마다 쓰기를 줄 세운다: 겹쳐 쓰면 같은 .tmp에 두 번 써 파일이 깨질 수 있다 (리뷰 2026-10-30 S-2)
+  static final _writing = <String, Future<void>>{};
+
+  Future<void> write(Map<String, dynamic> data) {
+    final next = (_writing[fileName] ?? Future.value())
+        .catchError((_) {})
+        .then((_) => _write(data));
+    _writing[fileName] = next;
+    return next;
+  }
+
+  Future<void> _write(Map<String, dynamic> data) async {
     final f = await _file();
     final tmp = File('${f.path}.tmp');
     await tmp.writeAsString(jsonEncode(data), flush: true);

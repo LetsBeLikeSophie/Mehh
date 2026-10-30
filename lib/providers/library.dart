@@ -31,16 +31,40 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
 
   @override
   Future<LibraryState> build() async {
+    _loadedAt = DateTime.now();
+    await _read();
+    return _state();
+  }
+
+  /// 사진첩을 읽어 목록을 바꾼다. 처음 읽기·다시 읽기·새로 고침이 모두 여기를 거친다.
+  /// 읽는 사이 휴지통으로 보낸 사진은 읽어 둔 목록에 남아 있을 수 있어 빼 둔다 (UX-84).
+  /// 그런 사진이 있었으면 true: 그 사이 페이지가 밀려 빠진 사진이 있을 수 있어 한 번 더 읽는다
+  Future<bool> _read() async {
     final lib = ref.read(photoLibraryProvider);
-    _metas = await lib.loadAll();
-    _videos = await _loadVideos();
+    final removed = _removedWhileLoading = <String>{};
+    final List<PhotoMeta> metas;
+    final List<PhotoMeta> videos;
+    try {
+      metas = await lib.loadAll();
+      videos = await _loadVideos();
+    } finally {
+      _removedWhileLoading = null;
+    }
+    if (!ref.mounted) return false;
+    _metas = [
+      for (final m in metas)
+        if (!removed.contains(m.id)) m,
+    ];
+    _videos = [
+      for (final v in videos)
+        if (!removed.contains(v.id)) v,
+    ];
     lib.keepOnly({
       for (final m in [..._metas, ..._videos]) m.id,
     });
-    _loadedAt = DateTime.now();
     Future.microtask(_fillLocations);
     Future.microtask(_reviveRestored);
-    return _state();
+    return removed.isNotEmpty;
   }
 
   /// 갤러리 휴지통에서 되살린 사진: 사진첩에 다시 있는데 앱은 "휴지통으로 보냄"으로 기억하고 있으면
@@ -108,7 +132,27 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
     );
   }
 
+  bool _locating = false;
+  bool _locateAgain = false;
+
+  /// 위치 채우기는 한 번에 하나만: 돌고 있으면 끝난 뒤 한 번 더 (같은 캐시 파일에 겹쳐 쓰지 않게, 리뷰 10-30 S-2)
   Future<void> _fillLocations() async {
+    if (_locating) {
+      _locateAgain = true;
+      return;
+    }
+    _locating = true;
+    try {
+      do {
+        _locateAgain = false;
+        await _fillLocationsOnce();
+      } while (_locateAgain && ref.mounted);
+    } finally {
+      _locating = false;
+    }
+  }
+
+  Future<void> _fillLocationsOnce() async {
     final lib = ref.read(photoLibraryProvider);
     final found = await lib.fillLocations(
       _metas,
@@ -141,54 +185,62 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
     state = AsyncData(_state());
   }
 
-  void reload() => ref.invalidateSelf();
+  /// 지금 도는 다시 읽기. 한 번에 하나만 돌고, 도는 중에 다시 읽으라고 하면 끝난 뒤 한 번 더
+  /// (리뷰 2026-10-30 S-2: 겹쳐 돌면 먼저 끝난 쪽 결과가 덮이고 보낸 사진이 다시 나타났다)
+  Future<void>? _running;
+  bool _again = false;
+
+  /// 접근 범위가 바뀌었거나 기록을 지운 뒤: 지금 목록을 보여 준 채로 다시 읽는다.
+  /// 처음 읽기가 실패해 목록이 없으면 처음부터
+  Future<void> reload() async {
+    if (!state.hasValue) {
+      ref.invalidateSelf();
+      return;
+    }
+    _loadedAt = DateTime.now();
+    if (_running case final running?) {
+      _again = true;
+      return running;
+    }
+    await _rereadLoop(_loadedAt);
+  }
 
   /// 지금 바로 갤러리와 다시 맞춘다 (아래로 당겨 새로 고침)
   Future<void> syncNow() => refreshIfStale(Duration.zero);
 
   /// 마지막으로 불러온 지 [after]가 지났으면, 지금 목록을 보여 준 채로 뒤에서 새로 불러온다
-  /// (로딩 화면으로 깜빡이지 않는다)
+  /// (로딩 화면으로 깜빡이지 않는다). 이미 읽는 중이면 그것으로 충분하다
   Future<void> refreshIfStale(Duration after, {DateTime? now}) async {
     if (!state.hasValue ||
-        _removedWhileLoading != null || // 이미 읽는 중
+        _running != null ||
+        _removedWhileLoading != null || // 처음 읽는 중
         (now ?? DateTime.now()).difference(_loadedAt) < after) {
       return;
     }
     final before = _loadedAt;
     _loadedAt = now ?? DateTime.now();
-    final lib = ref.read(photoLibraryProvider);
-    final removed = _removedWhileLoading = <String>{};
-    final List<PhotoMeta> metas;
-    final List<PhotoMeta> videos;
+    await _rereadLoop(before);
+  }
+
+  Future<void> _rereadLoop(DateTime before) async {
+    final done = Completer<void>();
+    _running = done.future;
     try {
-      metas = await lib.loadAll();
-      videos = await _loadVideos();
-    } catch (_) {
-      // 못 읽었으면 다음에 돌아올 때 다시 시도한다 (지금 목록은 그대로)
-      _loadedAt = before;
-      return;
+      do {
+        _again = false;
+        try {
+          if (await _read()) _again = true;
+        } catch (_) {
+          // 못 읽었으면 다음에 돌아올 때 다시 시도한다 (지금 목록은 그대로)
+          _loadedAt = before;
+          return;
+        }
+        if (!ref.mounted) return;
+        state = AsyncData(_state());
+      } while (_again);
     } finally {
-      _removedWhileLoading = null;
-    }
-    if (!ref.mounted) return;
-    // 읽는 사이 휴지통으로 보낸 사진은 읽어 둔 목록에 남아 있을 수 있다: 빼 둔다.
-    // 그 사이 페이지가 밀려 빠진 사진이 있을 수 있으니 한 번 더 읽는다 (UX-84)
-    _metas = [
-      for (final m in metas)
-        if (!removed.contains(m.id)) m,
-    ];
-    _videos = [
-      for (final v in videos)
-        if (!removed.contains(v.id)) v,
-    ];
-    lib.keepOnly({
-      for (final m in [..._metas, ..._videos]) m.id,
-    });
-    state = AsyncData(_state());
-    Future.microtask(_fillLocations);
-    Future.microtask(_reviveRestored);
-    if (removed.isNotEmpty) {
-      Future.microtask(() => refreshIfStale(Duration.zero));
+      _running = null;
+      done.complete();
     }
   }
 }

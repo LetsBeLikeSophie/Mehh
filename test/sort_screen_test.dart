@@ -2937,6 +2937,53 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('접근 범위가 바뀌어 다시 읽는 중에 보낸 사진도 다시 나타나지 않고, 겹친 새로 고침은 한 번만 읽는다 (리뷰 10-30 S-2)', (
+    tester,
+  ) async {
+    final lib = _ReloadingLibrary(photos);
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.singles, group: group),
+      library: lib,
+    );
+    final c = ProviderScope.containerOf(
+      tester.element(find.byType(SortScreen)),
+    );
+    await c.read(libraryProvider.future);
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.tap(find.byType(XToggle).at(1));
+    await tester.pumpAndSettle();
+    // 일부 허용 → 전체 허용으로 바뀌어 다시 읽기 시작 (읽는 중에 멈춤)
+    lib.gate = Completer<void>();
+    final loadsBefore = lib.loads;
+    final n = c.read(libraryProvider.notifier);
+    unawaited(n.reload());
+    await tester.pump();
+    // 앱으로 돌아온 순간 새로 고침도 같이 왔다: 읽는 중이면 또 읽지 않는다
+    unawaited(n.refreshIfStale(Duration.zero));
+    await tester.pump();
+    expect(lib.loads, loadsBefore + 1);
+    // 정리 화면은 그대로 보이고 [휴지통으로]도 된다
+    await tester.tap(find.text('2장 휴지통으로'));
+    await tester.pumpAndSettle();
+    final sent = [...lib.trashed];
+    expect(sent, hasLength(2));
+    final gate = lib.gate!;
+    lib.gate = null;
+    gate.complete();
+    await flush(tester);
+    final ids = {for (final p in c.read(libraryProvider).value!.photos) p.id};
+    for (final id in sent) {
+      expect(ids, isNot(contains(id)));
+      expect(
+        stateOf(c.read(decisionsProvider).value!, id),
+        DecisionState.trashed,
+      );
+    }
+    expect(ids, hasLength(photos.length - 2));
+    expect(find.byType(PhotoThumb), findsNWidgets(photos.length - 2));
+  });
+
   testWidgets('다시 읽는 중에 보낸 사진은 다 읽은 뒤에도 다시 나타나지 않는다 (UX-84)', (tester) async {
     final lib = _ReloadingLibrary(photos);
     await pump(
@@ -3256,9 +3303,11 @@ class _ReloadingLibrary extends DemoPhotoLibrary {
   final List<PhotoMeta> photos;
   Completer<void>? gate;
   final trashed = <String>[];
+  int loads = 0;
 
   @override
   Future<List<PhotoMeta>> loadAll() async {
+    loads++;
     // 멈추기 전에 읽어 둔 목록을 돌려준다 (읽는 사이 보낸 사진이 남아 있다)
     final read = [
       for (final p in photos)
