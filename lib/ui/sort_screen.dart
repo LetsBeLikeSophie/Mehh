@@ -104,7 +104,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
   }
 
   Future<void> _toggle(String id, bool marked) {
-    // 손으로 누른 사진은 추천이 아니라 "직접 고른 사진" (Cortex로 보낼 수 있다, C1)
+    // 손으로 누른 사진은 추천이 아니라 "직접 고른 사진" ([추천 보기] 켜짐 표시·정확도 기록)
     marked ? _chosen.remove(id) : _chosen.add(id);
     return ref.read(decisionsProvider.notifier).set([
       id,
@@ -330,7 +330,9 @@ class _SortScreenState extends ConsumerState<SortScreen>
     // 추천이 모두 X. 끈 상태 = 처음 상태(실수 사진처럼 처음부터 X인 것만 X)
     final markedSet = marked.toSet();
     _markedNow = markedSet;
-    final cortexIds = _cortexIds(marked, src, decisions);
+    // [Cortex로]는 X로 표시된 사진을 다 보낸다. 추천으로 X가 된 것과 직접 고른 것을 가리지 않는다
+    // (2026-10-30 Sophie, 10-26 C1-B "직접 고른 것만"을 되돌림). 보내기 전 창이 장수를 묻는다
+    final cortexIds = marked;
     final picksOn =
         src.locked == 0 &&
         src.suggested.every(markedSet.contains) &&

@@ -108,21 +108,6 @@ extension _Cortex on _SortScreenState {
     }
   }
 
-  /// [Cortex로]가 보내는 사진: 직접 고른 것만. [추천 보기]로 X가 됐거나 처음부터 X인
-  /// 추천은 빼다 (2026-10-26 Sophie C1-B: 버릴 캡처 수천 장이 AI 앱으로 가지 않게)
-  List<String> _cortexIds(
-    List<String> marked,
-    SortSource src,
-    Map<String, Decision> decisions,
-  ) => [
-    // 앱이 고른 추천(지금의 추천·처음부터 X)은 이 화면에서 손으로 고른 것만. 화면을 나갔다 와도
-    // [추천 보기]로 X가 된 추천은 DB에 X로 남아 있으니 State가 아니라 추천 목록으로 가린다 (S-1 2026-10-27)
-    for (final id in marked)
-      if (_chosen.contains(id) ||
-          !(src.suggested.contains(id) || src.preMarked.contains(id)))
-        id,
-  ];
-
   /// Cortex가 없을 때: 무슨 앱인지 한 줄 + [받으러 가기] → 스토어
   Future<void> _getCortex() async {
     final l = context.l;

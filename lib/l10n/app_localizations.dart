@@ -838,7 +838,7 @@ abstract class L10n {
   /// No description provided for @privacyCortex.
   ///
   /// In ko, this message translates to:
-  /// **'Cortex로 직접 보낸 사진·캡처는 Cortex에서 AI로 분석해요. 내가 고른 사진·캡처만, 보낼 때만 넘어가요.'**
+  /// **'Cortex로 보낸 사진·캡처는 Cortex에서 AI로 분석해요. [Cortex로]를 누를 때 X로 표시된 사진·캡처만 넘어가요.'**
   String get privacyCortex;
 
   /// No description provided for @cortexNotSaved.
@@ -1252,7 +1252,7 @@ abstract class L10n {
   /// No description provided for @privacyShortCortex.
   ///
   /// In ko, this message translates to:
-  /// **'Cortex에는 내가 고른 사진·캡처만, 보낼 때만 가요 (Cortex에서 AI로 분석해요)'**
+  /// **'Cortex에는 [Cortex로]를 누를 때 X로 표시된 사진·캡처만 가요 (Cortex에서 AI로 분석해요)'**
   String get privacyShortCortex;
 
   /// No description provided for @helpTitle.

@@ -320,7 +320,7 @@
     }
   },
   "proUsing": "Pro를 쓰고 있어요",
-  "privacyCortex": "Cortex로 직접 보낸 사진·캡처는 Cortex에서 AI로 분석해요. 내가 고른 사진·캡처만, 보낼 때만 넘어가요.",
+  "privacyCortex": "Cortex로 보낸 사진·캡처는 Cortex에서 AI로 분석해요. [Cortex로]를 누를 때 X로 표시된 사진·캡처만 넘어가요.",
   "cortexNotSaved": "Cortex가 받았다는 신호가 없어서 휴지통으로 보내지 않았어요 · X는 그대로예요. Cortex에서 받은 걸 확인했다면 [{count}장 휴지통으로]를 누르면 돼요.",
   "tagOldShot": "오래됨",
   "tagRepeatShot": "연달아 찍음",
@@ -517,7 +517,7 @@
   "privacyShortPlace": "장소 이름은 위치 좌표만 폰의 위치 서비스로 찾아요",
   "privacyShortFaces": "눈 감은 컷은 폰 안에서만 확인해요",
   "privacyShortTrash": "휴지통 사진은 30일 안에 되살릴 수 있어요",
-  "privacyShortCortex": "Cortex에는 내가 고른 사진·캡처만, 보낼 때만 가요 (Cortex에서 AI로 분석해요)",
+  "privacyShortCortex": "Cortex에는 [Cortex로]를 누를 때 X로 표시된 사진·캡처만 가요 (Cortex에서 AI로 분석해요)",
   "helpTitle": "도움",
   "clearAllSub": "분석 결과와 정리 기록을 지워요 · 사진은 그대로",
   "coinWord": "코인",

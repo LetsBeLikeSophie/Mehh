@@ -540,7 +540,7 @@ class L10nEn extends L10n {
 
   @override
   String get privacyCortex =>
-      'Photos and screenshots you send to Cortex are analyzed by Cortex\'s AI. Only the ones you pick, only when you send them.';
+      'Photos and screenshots you send to Cortex are analyzed by Cortex\'s AI. Only the ones marked X, only when you tap \"To Cortex\".';
 
   @override
   String cortexNotSaved(int count) {
@@ -894,7 +894,7 @@ class L10nEn extends L10n {
 
   @override
   String get privacyShortCortex =>
-      'Only the photos you pick go to Cortex, only when you send (Cortex analyzes them with AI)';
+      'Only photos marked X go to Cortex, only when you tap \"To Cortex\" (Cortex analyzes them with AI)';
 
   @override
   String get helpTitle => 'Help';

@@ -497,7 +497,7 @@ void main() {
       extra: [cortexInstalledProvider.overrideWith((ref) async => true)],
     );
     expect(find.textContaining('Cortex에서 AI로 분석해요'), findsOneWidget);
-    expect(find.textContaining('고른 사진·캡처만'), findsOneWidget);
+    expect(find.textContaining('X로 표시된 사진·캡처만'), findsOneWidget);
     // 1.10.0부터 모든 사진을 보낼 수 있다: "캡처만"이라고 하지 않는다 (시니어 리뷰 2026-10-24 S-1)
     expect(find.textContaining('고른 캡처만'), findsNothing);
   });
@@ -2313,16 +2313,9 @@ void main() {
       ],
     );
     await openLocked(tester, '추천 보기 · 2장');
-    // 추천으로 X가 된 사진은 Cortex로 안 간다(C1). 하나를 손으로 다시 고르면 그것만 간다
-    final rec = find.byWidgetPredicate((w) => w is XToggle && w.on).first;
-    await tester.tap(rec);
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.byWidgetPredicate((w) => w is XToggle && !w.on).first,
-    );
-    await tester.pumpAndSettle();
+    // 추천으로 X가 된 사진도 Cortex로 간다 (2026-10-30)
     await sendCortex(tester);
-    expect(handoff.sent, hasLength(1));
+    expect(handoff.sent, hasLength(2));
     handoff.saved.add(CortexSaved(handoff.sent.length, null));
     await tester.pumpAndSettle();
     await tester.tap(find.text('휴지통으로'));
@@ -2333,7 +2326,7 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('Cortex: [추천 보기]로 X가 된 사진은 안 보내고, 직접 고른 사진만 보낸다 (C1)', (
+  testWidgets('Cortex: [추천 보기]로 X가 된 사진도 직접 고른 사진도 가리지 않고 X인 사진을 다 보낸다 (2026-10-30)', (
     tester,
   ) async {
     final shots = DayGroup(
@@ -2368,14 +2361,14 @@ void main() {
     );
     await tester.tap(find.textContaining('추천 보기'));
     await tester.pumpAndSettle();
-    expect(find.text('Cortex로'), findsNothing); // 추천만 X면 Cortex 버튼 없음
+    expect(find.text('Cortex로'), findsOneWidget); // 추천만 X여도 Cortex 버튼이 있다
     // 새 캡처 하나를 직접 고른다
     await tester.tap(
       find.byWidgetPredicate((w) => w is XToggle && !w.on).first,
     );
     await tester.pumpAndSettle();
     await sendCortex(tester);
-    expect(handoff.sent, ['new']);
+    expect(handoff.sent.toSet(), {'s0', 's1', 's2', 's3', 'new'});
     await flush(tester);
   });
 
@@ -2476,7 +2469,7 @@ void main() {
   });
 
   testWidgets(
-    'Cortex: [추천 보기] 뒤 화면을 나갔다 와도 추천은 Cortex로 안 가고, 보내면 정확도 기록에 추천으로 남는다 (S-1 10-27)',
+    'Cortex: [추천 보기] 뒤 화면을 나갔다 와도 X인 추천까지 Cortex로 보내고, 보내면 정확도 기록에 추천으로 남는다 (S-1 10-27, 범위 10-30)',
     (tester) async {
       final shots = DayGroup(
         id: 'shots',
@@ -2538,7 +2531,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Cortex로'));
       await tester.pumpAndSettle();
-      expect(find.text('1장을 Cortex로 보낼까요?'), findsOneWidget);
+      expect(find.text('5장을 Cortex로 보낼까요?'), findsOneWidget); // 나갔다 와도 같은 범위
       await tester.tap(find.text('취소'));
       await tester.pumpAndSettle();
       // 그대로 [5장 휴지통으로]: 다시 들어와 보낸 추천도 정확도 기록에 추천으로 남는다
