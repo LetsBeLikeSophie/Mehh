@@ -72,6 +72,11 @@ class SettingsScreen extends ConsumerWidget {
                   const SizedBox(height: 20),
                   // 구매 복원은 여기서도 찾을 수 있게 (UX 리뷰 2026-10-22). 새 화면 없이 Pro 안내를 연다
                   const _ProRow(),
+                  // 알림은 코인이 다시 생긴다는 이야기라 Pro 줄 바로 아래 (2026-10-30 Sophie N2-B)
+                  if (ref.watch(noticesProvider).supported) ...[
+                    const SizedBox(height: 8),
+                    const _MonthlyNoticeRow(),
+                  ],
                   const SizedBox(height: 28),
                   // 긴 문장 대신 아이콘 + 짧은 줄 (2026-10-24 Sophie: 개발 화면처럼 보이지 않게)
                   _Heading(context.l.privacyTitle),
@@ -90,8 +95,6 @@ class SettingsScreen extends ConsumerWidget {
                       sub: supportEmail,
                       onTap: () => _contact(context),
                     ),
-                  if (ref.watch(noticesProvider).supported)
-                    const _MonthlyNoticeRow(),
                   _Tap(
                     icon: Icons.restart_alt,
                     label: context.l.clearAll,
