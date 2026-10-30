@@ -50,6 +50,10 @@ class _RootScreenState extends ConsumerState<RootScreen> {
         ref.read(libraryProvider.notifier).reload();
       }
     });
+    // Pro를 사거나 끝나면 매달 알림 글도 바로 맞춘다
+    ref.listen(proProvider.select((s) => s.value?.pro), (prev, next) {
+      if (prev != null && next != prev) refreshMonthlyNotice(context, ref);
+    });
     final permission = ref.watch(permissionProvider);
     if (permission == null) return const Scaffold();
     if (!permission.hasAccess) return const OnboardingScreen();

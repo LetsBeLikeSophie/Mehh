@@ -9,7 +9,8 @@ import '../providers.dart';
 import 'widgets.dart';
 
 /// 매달 알림 글: 코인이 다시 생긴다는 말은 코인을 쓰는 사람에게만.
-/// 테스트 동안 무료면 Pro 안내와 같은 말 (2026-10-26 Sophie)
+/// 테스트 동안 무료면 Pro 안내와 같은 말 (2026-10-26 Sophie).
+/// Pro 상태를 다 읽은 뒤에 불러야 한다([_noticeText]): 앱을 켠 직후엔 아직 비어 있다
 NoticeText monthlyNoticeText(BuildContext context, WidgetRef ref) {
   final l = context.l;
   final channel = l.noticeSetting;
@@ -56,19 +57,28 @@ Future<void> askMonthlyNotice(BuildContext context, WidgetRef ref) async {
 
 const _asked = 'noticeAsked';
 
+/// Pro 상태를 다 읽은 뒤의 알림 글. 화면이 닫혔으면 null
+Future<NoticeText?> _noticeText(BuildContext context, WidgetRef ref) async {
+  await ref.read(proProvider.future);
+  return context.mounted ? monthlyNoticeText(context, ref) : null;
+}
+
 Future<void> turnOnMonthlyNotice(BuildContext context, WidgetRef ref) async {
-  final ok = await ref
-      .read(noticesProvider)
-      .turnOn(monthlyNoticeText(context, ref));
+  final text = await _noticeText(context, ref);
+  if (text == null) return;
+  final ok = await ref.read(noticesProvider).turnOn(text);
   ref.invalidate(monthlyNoticeProvider);
   if (context.mounted) {
     showNote(context, ok ? context.l.noticeOn : context.l.noticeBlocked);
   }
 }
 
-/// 켜져 있으면 알림 글을 지금 상태(Pro·테스트 무료)로 다시 맞춘다. 앱을 켜거나 돌아올 때
-Future<void> refreshMonthlyNotice(BuildContext context, WidgetRef ref) =>
-    ref.read(noticesProvider).refresh(monthlyNoticeText(context, ref));
+/// 켜져 있으면 알림 글을 지금 상태(Pro·테스트 무료)로 다시 맞춘다. 앱을 켜거나 돌아올 때,
+/// Pro가 바뀔 때. Pro를 읽기 전에 맞추면 Pro 사용자에게 코인 글이 간다 (리뷰 2026-10-30 S-1)
+Future<void> refreshMonthlyNotice(BuildContext context, WidgetRef ref) async {
+  final text = await _noticeText(context, ref);
+  if (text != null) await ref.read(noticesProvider).refresh(text);
+}
 
 Future<void> turnOffMonthlyNotice(WidgetRef ref) async {
   await ref.read(noticesProvider).turnOff();

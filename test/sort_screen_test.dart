@@ -28,6 +28,7 @@ import 'package:mehh/ui/hold_to_finish.dart';
 import 'package:mehh/ui/home_tab.dart';
 import 'package:mehh/ui/accuracy_screen.dart';
 import 'package:mehh/ui/settings_screen.dart';
+import 'package:mehh/ui/root_screen.dart';
 import 'package:mehh/ui/sort_screen.dart';
 import 'package:mehh/ui/widgets.dart';
 
@@ -3099,6 +3100,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(notices.scheduled?.title, '지난달 사진 묶음이 기다려요');
     expect(notices.scheduled?.body, '비공개 테스트 동안은 모든 묶음 추천이 무료예요');
+    await flush(tester);
+  });
+
+  testWidgets('매달 알림: 앱을 켤 때 Pro를 다 읽은 뒤 글을 맞춰, Pro에게 코인 글이 가지 않는다 (리뷰 10-30 S-1)', (
+    tester,
+  ) async {
+    // 지난번엔 코인을 쓰다가 Pro를 산 사람: 예약된 글은 아직 코인 글
+    final notices = DemoNotices()
+      ..scheduled = (title: '이번 달 코인 3개가 다시 생겼어요', body: '', channel: '');
+    await pump(
+      tester,
+      const RootScreen(),
+      notices: notices,
+      vault: MemoryProVault(const ProState(lifetime: true)),
+    );
+    await tester.pumpAndSettle();
+    expect(notices.scheduled?.title, '지난달 사진 묶음이 기다려요');
+    expect(notices.scheduled?.body, '추천을 보고 한 번에 휴지통으로 보낼 수 있어요');
     await flush(tester);
   });
 
