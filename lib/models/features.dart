@@ -36,12 +36,17 @@ class PhotoFeatures {
       popCount32(hashHi ^ o.hashHi) + popCount32(hashLo ^ o.hashLo);
 }
 
-int popCount32(int x) {
-  x = x & 0xFFFFFFFF;
+int popCount32(int x) =>
+    _pop8[x & 0xFF] +
+    _pop8[(x >> 8) & 0xFF] +
+    _pop8[(x >> 16) & 0xFF] +
+    _pop8[(x >> 24) & 0xFF];
+
+/// 0~255의 켜진 비트 수
+final _pop8 = List<int>.generate(256, (i) {
   var c = 0;
-  while (x != 0) {
-    x &= x - 1;
+  for (var x = i; x != 0; x &= x - 1) {
     c++;
   }
   return c;
-}
+}, growable: false);

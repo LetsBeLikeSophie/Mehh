@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -120,6 +121,90 @@ void main() {
       };
       expect(findDuplicates(photos, f), isEmpty);
     });
+  });
+
+  test('조각으로 나눠 찾는 쌍이 모든 쌍을 비교한 것과 같다 (리뷰 10-30 S-4)', () {
+    final r = Random(7);
+    int flip(int w, int bits) {
+      for (var i = 0; i < bits; i++) {
+        w ^= 1 << r.nextInt(32);
+      }
+      return w;
+    }
+
+    final photos = <PhotoMeta>[];
+    final f = <String, PhotoFeatures>{};
+    const sizes = [(4000, 3000), (3000, 4000), (1080, 2400)];
+    for (var i = 0; i < 1500; i++) {
+      final (w, h) = sizes[r.nextInt(sizes.length)];
+      final id = 'p$i';
+      // 앞 사진을 0~3비트만 바꿔 비슷한 해시를 많이 만든다
+      final base = i > 0 && r.nextBool() ? f['p${r.nextInt(i)}']! : null;
+      final hi = base == null
+          ? r.nextInt(1 << 32)
+          : flip(base.hashHi, r.nextInt(2));
+      final lo = base == null
+          ? r.nextInt(1 << 32)
+          : flip(base.hashLo, r.nextInt(3));
+      photos.add(
+        PhotoMeta(
+          id: id,
+          takenAt: DateTime(2026, 1, 1).add(Duration(seconds: i * 7)),
+          width: w,
+          height: h,
+          isScreenshot: h == 2400,
+        ),
+      );
+      f[id] = PhotoFeatures(
+        id: id,
+        hashHi: hi,
+        hashLo: lo,
+        sharpness: 1,
+        brightness: 1,
+      );
+    }
+    // 예전 방식: 같은 비율 안 모든 쌍
+    final old = <(String, String)>{};
+    final byAspect = <int, List<PhotoMeta>>{};
+    for (final p in photos) {
+      byAspect.putIfAbsent((p.aspect * 100).round(), () => []).add(p);
+    }
+    for (final list in byAspect.values) {
+      for (var i = 0; i < list.length; i++) {
+        for (var j = i + 1; j < list.length; j++) {
+          if (f[list[i].id]!.hammingTo(f[list[j].id]!) <= 2) {
+            old.add((list[i].id, list[j].id));
+          }
+        }
+      }
+    }
+    final now = {for (final (a, b) in duplicatePairs(photos, f)) (a.id, b.id)};
+    expect(old, isNotEmpty);
+    expect(now, old);
+    // 크기가 모자라 빠지는 쌍까지 같은 결과
+    final sizesById = {for (final p in photos) p.id: 100};
+    final a = findDuplicates(photos, f, sizes: sizesById);
+    final b = findDuplicates(
+      photos,
+      f,
+      sizes: sizesById,
+      pairs: duplicatePairs(photos, f),
+    );
+    expect(
+      [
+        for (final s in a) [s.keep.id, ...s.remove.map((p) => p.id)],
+      ],
+      [
+        for (final s in b) [s.keep.id, ...s.remove.map((p) => p.id)],
+      ],
+    );
+  });
+
+  test('popCount32는 32비트만 센다', () {
+    expect(popCount32(0), 0);
+    expect(popCount32(0xFFFFFFFF), 32);
+    expect(popCount32(0x80000001), 2);
+    expect(popCount32(-1), 32);
   });
 
   group('연속 컷과 추천', () {

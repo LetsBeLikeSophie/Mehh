@@ -9,20 +9,25 @@ class DuplicateSet {
   final List<PhotoMeta> remove;
 }
 
+/// 해시가 거의 같은 쌍. [idsNeedingSize]와 [findDuplicates]에 같이 넘기면 한 번만 찾는다
+typedef DuplicatePairs = List<(PhotoMeta, PhotoMeta)>;
+
 /// 해시는 같아 보이지만 연속 촬영일 수도 있어서 파일 크기로 확인해야 하는 사진들.
 Set<String> idsNeedingSize(
   List<PhotoMeta> photos,
   Map<String, PhotoFeatures> features, {
+  DuplicatePairs? pairs,
   CleanupConfig config = const CleanupConfig(),
 }) {
   final out = <String>{};
-  _forEachCandidatePair(photos, features, config, (a, b) {
+  for (final (a, b)
+      in pairs ?? duplicatePairs(photos, features, config: config)) {
     if (_sameShotRisk(a, b, features, config)) {
       out
         ..add(a.id)
         ..add(b.id);
     }
-  });
+  }
   return out;
 }
 
@@ -31,6 +36,7 @@ List<DuplicateSet> findDuplicates(
   List<PhotoMeta> photos,
   Map<String, PhotoFeatures> features, {
   Map<String, int> sizes = const {},
+  DuplicatePairs? pairs,
   CleanupConfig config = const CleanupConfig(),
 }) {
   final parent = <String, String>{};
@@ -42,16 +48,17 @@ List<DuplicateSet> findDuplicates(
   }
 
   final byId = {for (final p in photos) p.id: p};
-  _forEachCandidatePair(photos, features, config, (a, b) {
+  for (final (a, b)
+      in pairs ?? duplicatePairs(photos, features, config: config)) {
     if (_sameShotRisk(a, b, features, config)) {
       final sa = sizes[a.id], sb = sizes[b.id];
-      if (sa == null || sb == null || sa == 0 || sa != sb) return;
+      if (sa == null || sb == null || sa == 0 || sa != sb) continue;
     }
     parent.putIfAbsent(a.id, () => a.id);
     parent.putIfAbsent(b.id, () => b.id);
     final ra = find(a.id), rb = find(b.id);
     if (ra != rb) parent[rb] = ra;
-  });
+  }
 
   final clusters = <String, List<PhotoMeta>>{};
   for (final id in parent.keys) {
@@ -88,13 +95,16 @@ bool _sameShotRisk(
         a.height == b.height &&
         a.takenAt.difference(b.takenAt).abs() <= c.sameShotWindow);
 
-void _forEachCandidatePair(
+/// 가로세로 비율이 같고 해시가 [CleanupConfig.duplicateMaxHamming] 비트 안으로 다른 쌍.
+/// 64비트 해시를 (max+1) 조각으로 나누면 그런 쌍은 적어도 한 조각이 똑같다(비둘기집).
+/// 같은 조각을 가진 것끼리만 비교해, 같은 비율 사진 전체를 서로 비교하지 않는다
+/// (리뷰 2026-10-30 S-4: 1만 장이면 [휴지통으로]마다 몇 초씩 걸렸다)
+DuplicatePairs duplicatePairs(
   List<PhotoMeta> photos,
-  Map<String, PhotoFeatures> features,
-  CleanupConfig config,
-  void Function(PhotoMeta a, PhotoMeta b) visit,
-) {
-  // 가로세로 비율로 먼저 나눠 비교 횟수를 줄인다
+  Map<String, PhotoFeatures> features, {
+  CleanupConfig config = const CleanupConfig(),
+}) {
+  // 가로세로 비율로 먼저 나눈다
   final buckets = <int, List<(PhotoMeta, PhotoFeatures)>>{};
   for (final p in photos) {
     final f = features[p.id];
@@ -102,15 +112,44 @@ void _forEachCandidatePair(
     final key = (p.aspect * 100).round();
     buckets.putIfAbsent(key, () => []).add((p, f));
   }
+  final max = config.duplicateMaxHamming;
+  // 조각이 32비트를 넘지 않게 적어도 둘로 (웹에서도 비트 연산이 맞도록)
+  final pieces = max + 1 < 2 ? 2 : max + 1;
+  final out = <(PhotoMeta, PhotoMeta)>[];
   for (final list in buckets.values) {
-    for (var i = 0; i < list.length; i++) {
-      for (var j = i + 1; j < list.length; j++) {
-        if (list[i].$2.hammingTo(list[j].$2) <= config.duplicateMaxHamming) {
-          visit(list[i].$1, list[j].$1);
+    final n = list.length;
+    final found = <int>{};
+    for (var k = 0; k < pieces; k++) {
+      final same = <int, List<int>>{};
+      for (var i = 0; i < n; i++) {
+        same.putIfAbsent(_piece(list[i].$2, k, pieces), () => []).add(i);
+      }
+      for (final g in same.values) {
+        for (var x = 0; x < g.length; x++) {
+          for (var y = x + 1; y < g.length; y++) {
+            final i = g[x], j = g[y];
+            if (list[i].$2.hammingTo(list[j].$2) <= max) found.add(i * n + j);
+          }
         }
       }
     }
+    // 예전처럼 사진 순서대로 (묶음 안 순서가 흔들리지 않게)
+    for (final key in found.toList()..sort()) {
+      out.add((list[key ~/ n].$1, list[key % n].$1));
+    }
   }
+  return out;
+}
+
+/// 64비트 해시의 [k]번째 조각 (비트 0~31 = hashLo, 32~63 = hashHi)
+int _piece(PhotoFeatures f, int k, int pieces) {
+  final start = k * 64 ~/ pieces, end = (k + 1) * 64 ~/ pieces;
+  var v = 0;
+  for (var b = start; b < end; b++) {
+    final word = b < 32 ? f.hashLo : f.hashHi;
+    v = (v << 1) | ((word >> (b & 31)) & 1);
+  }
+  return v;
 }
 
 /// 중복 묶음에서 남길 사진: 정리 줄·휴지통에 가지 않은 사진 중 가장 앞(가장 큰) 것.

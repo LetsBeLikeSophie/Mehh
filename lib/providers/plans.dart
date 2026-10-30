@@ -10,17 +10,28 @@ final duplicatesProvider = FutureProvider<List<DuplicateSet>?>((ref) async {
   final analysis = ref.watch(analysisProvider);
   if (photos == null || !analysis.done) return null;
   final features = analysis.features;
-  final need = await compute(_needSize, (photos, features));
+  // 해시가 거의 같은 쌍은 한 번만 찾아 두 계산에 같이 쓴다 (리뷰 2026-10-30 S-4)
+  final (need, pairs) = await compute(_needSize, (photos, features));
   final sizes = await ref.read(photoLibraryProvider).fileSizes(need);
-  return compute(_findDups, (photos, features, sizes));
+  return compute(_findDups, (photos, features, sizes, pairs));
 });
 
-Set<String> _needSize((List<PhotoMeta>, Map<String, PhotoFeatures>) a) =>
-    idsNeedingSize(a.$1, a.$2);
+(Set<String>, DuplicatePairs) _needSize(
+  (List<PhotoMeta>, Map<String, PhotoFeatures>) a,
+) {
+  final pairs = duplicatePairs(a.$1, a.$2);
+  return (idsNeedingSize(a.$1, a.$2, pairs: pairs), pairs);
+}
 
 List<DuplicateSet> _findDups(
-  (List<PhotoMeta>, Map<String, PhotoFeatures>, Map<String, int>) a,
-) => findDuplicates(a.$1, a.$2, sizes: a.$3);
+  (
+    List<PhotoMeta>,
+    Map<String, PhotoFeatures>,
+    Map<String, int>,
+    DuplicatePairs,
+  )
+  a,
+) => findDuplicates(a.$1, a.$2, sizes: a.$3, pairs: a.$4);
 
 /// 아직 고르지 않은 똑같은 사진 수 (홈 카드). 킵·휴지통으로 간 것은 빠진다.
 int duplicatesLeft(List<DuplicateSet>? sets, Map<String, Decision> decisions) =>
