@@ -3101,6 +3101,65 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets(
+    '매달 알림: Pro 안내의 "지금 무료로"로 캡처 화면에 가면 그 위에 묻지 않고, 캡처를 [휴지통으로] 한 뒤 묻는다 (UX-89)',
+    (tester) async {
+      final shots = DayGroup(
+        id: 'shots',
+        kind: DayGroupKind.screenshots,
+        photos: [
+          for (var i = 0; i < 3; i++)
+            PhotoMeta(
+              id: 's$i',
+              takenAt: DateTime(2026, 1, 1 + i),
+              width: 100,
+              height: 200,
+              isScreenshot: true,
+            ),
+        ],
+      );
+      final day = DayGroup(
+        id: 'day-p0',
+        kind: DayGroupKind.day,
+        photos: burstPhotos,
+      );
+      final store = MemoryStore();
+      await pump(
+        tester,
+        SortScreen(kind: SortKind.day, group: day),
+        notices: DemoNotices(),
+        store: store,
+        vault: noCoins(),
+        extra: [
+          realPlan(paid),
+          libraryProvider.overrideWith(
+            () => _FixedLibrary(
+              LibraryState(
+                photos: [...burstPhotos, ...shots.photos],
+                groups: [day, shots],
+              ),
+            ),
+          ),
+        ],
+      );
+      await tester.tap(find.textContaining('추천 보기'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('지금 무료로: 캡처 추천 3장 보기 ›'));
+      await tester.pumpAndSettle();
+      expect(find.text('추천 보기 · 3장'), findsOneWidget); // 캡처 화면
+      expect(find.text('코인이 다시 생기면 알려 드릴까요?'), findsNothing);
+      expect(await store.counter('noticeAsked'), 0); // 물었다고 적지 않는다
+      await tester.tap(find.text('추천 보기 · 3장'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('3장 휴지통으로'));
+      await tester.pumpAndSettle();
+      expect(find.text('코인이 다시 생기면 알려 드릴까요?'), findsOneWidget);
+      await tester.tap(find.text('괜찮아요'));
+      await tester.pumpAndSettle();
+      await flush(tester);
+    },
+  );
+
   testWidgets('매달 알림: 폰 설정에서 허락을 못 받으면 켜지지 않고 그렇다고 알린다 (B2-B)', (tester) async {
     final notices = DemoNotices()..allowed = false;
     await pump(

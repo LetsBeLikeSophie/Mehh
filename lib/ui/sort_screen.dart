@@ -245,9 +245,14 @@ class _SortScreenState extends ConsumerState<SortScreen>
               : null,
         );
         // 시트에서 Pro를 샀으면 다시 누르지 않아도 이어서 추천을 X로 (UX 리뷰 2026-10-22).
-        // 결제 대기·취소면 그대로 끝. 코인이 없어 못 연 거면 다시 생길 때 알려 줄지 한 번 묻는다
+        // 결제 대기·취소면 그대로 끝. 코인이 없어 못 연 거면 다시 생길 때 알려 줄지 한 번 묻는다.
+        // 시트의 "지금 무료로"로 다른 화면이 열렸으면 그 위에 띄우지 않고 다음 [휴지통으로] 뒤로 (UX-89)
         if (!(ref.read(proProvider).value?.pro ?? false)) {
-          if (freeBefore == 0 && mounted) await askMonthlyNotice(context, ref);
+          if (freeBefore == 0 &&
+              mounted &&
+              (ModalRoute.of(context)?.isCurrent ?? true)) {
+            await askMonthlyNotice(context, ref);
+          }
           return;
         }
         await pro.unlock(g.id, photoIds: photoIds); // Pro로 본 묶음 기억

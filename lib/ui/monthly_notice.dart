@@ -39,6 +39,8 @@ Future<void> askMonthlyNotice(BuildContext context, WidgetRef ref) async {
   final now = DateTime.now();
   final s = await ref.read(proProvider.future);
   if (s.pro || s.freeLeft(now) > 0 || await store.counter(_asked) > 0) return;
+  // 화면이 닫혀 못 물었으면 물었다고 적지 않는다 (UX-89)
+  if (!context.mounted) return;
   await store.bumpCounter(_asked);
   if (!context.mounted) return;
   final l = context.l;
