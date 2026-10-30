@@ -9,7 +9,7 @@ Sophie가 Play Console에서 그대로 붙여 넣을 수 있게 정리한 문서
 | 앱 번들 (AAB) | `build/app/outputs/bundle/release/app-release.aab` | 1.17.2 (60), 출시용 키로 서명 |
 | 앱 아이콘 512×512 | `docs/store/icon-512.png` | 흰 바탕 염소 |
 | 그래픽 이미지 1024×500 | `docs/store/feature-graphic-ko.png`, `feature-graphic-en.png` | |
-| 폰 스크린샷 2~8장 | `docs/store/screenshots-ko/` 5장 (1080×1920) | 에뮬레이터 + 직접 그린 가짜 사진. '테스트 무료'가 보이니 정식 출시 전 다시 찍기 |
+| 폰 스크린샷 2~8장 | `docs/store/screenshots-ko/` 5장 (1080×1920) | 에뮬레이터 + 직접 그린 가짜 사진. '테스트 무료'가 보이니 정식 출시 전 다시 찍기. 영어 스크린샷·캡션(`screenshots-en/`)도 정식 출시 전 필수 (2026-10-30 Sophie S2-A) |
 | 개인정보처리방침 | https://itssophie.dev/mehh/privacy.html | 한국어·영어 |
 | 이용약관·환불 | https://itssophie.dev/mehh/terms.html | 한국어·영어 (앱 설정·Pro 안내에서 연결, 2026-10-29 B3-B) |
 | 문의 메일 | hello@itssophie.dev | |
@@ -28,7 +28,7 @@ Sophie가 Play Console에서 그대로 붙여 넣을 수 있게 정리한 문서
 
 ### 한국어
 
-- 앱 이름 (30자): `Mehh - 귀찮은 사람의 사진 정리`
+- 앱 이름 (30자): `Mehh: 사진 정리·중복 사진 삭제` — 정식 출시 때 이 이름으로 (2026-10-30 Sophie S1-B: 검색어를 이름에. 비공개 테스트 제출본은 `Mehh - 귀찮은 사람의 사진 정리`, 말투는 그래픽·설명 첫 줄에)
 - 간단한 설명 (80자): `비슷한 컷·흔들린 사진·눈 감은 컷·큰 동영상을 앱이 먼저 골라 둬요. 사진은 폰 밖으로 안 나가요.`
 - 자세한 설명:
 
@@ -67,7 +67,7 @@ Sophie가 Play Console에서 그대로 붙여 넣을 수 있게 정리한 문서
 
 ### English
 
-- App name (30): `Mehh: Lazy Photo Cleanup`
+- App name (30): `Mehh: Duplicate Photo Cleaner` — at production (2026-10-30 S1-B; closed test listing: `Mehh: Lazy Photo Cleanup`)
 - Short description (80): `Mehh picks similar, blurry and eyes-closed shots and big videos. You just check.`
 - Full description:
 
@@ -154,7 +154,7 @@ These features need to compare every photo with every other photo (for example, 
 ## 6. 출시 국가 (2026-10-24 정리)
 
 - 비공개 테스트: **대한민국**만
-- 정식 출시: **모든 국가 − 러시아·벨라루스**(Play 결제 제한). EU에 팔면 판매자(trader) 정보(주소·전화·이메일)가 EU 스토어에 공개되니, 싫으면 처음엔 EU를 빼고 시작
+- 정식 출시: **모든 국가 − 러시아·벨라루스**(Play 결제 제한). 영어 스크린샷·캡션을 갖춘 뒤 (2026-10-30 Sophie S2-A). EU에 팔면 판매자(trader) 정보(주소·전화·이메일)가 EU 스토어에 공개되니, 싫으면 처음엔 EU를 빼고 시작
 - 판매하면 한국 앱 페이지에 사업자 정보 표시(Play 판매자 프로필)
 
 ## 7. 출시 트랙
@@ -168,3 +168,7 @@ These features need to compare every photo with every other photo (for example, 
 3. **수익 창출 설정 > 라이선스**의 Base64 공개키를 복사해 개발 세션에 전달 → `playPublicKey`에 넣어 다시 빌드 (그 전 빌드는 결제 버튼이 안 보이는 게 정상)
 4. 2023년 11월 이후 만든 개인 계정이면 **비공개 테스트에 테스터 12명 이상, 14일 연속** 후 프로덕션 신청 가능
 5. 결제를 켜기 전 SPEC 5단계 "출시 전 결제 체크리스트"를 모두 확인
+
+## 8. 앱 안 별점 부탁
+
+- 하지 않는다 (2026-10-30 Sophie S3-A). Play 리뷰 창·설정의 평가 링크 모두 없음
