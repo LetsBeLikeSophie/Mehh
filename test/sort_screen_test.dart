@@ -979,6 +979,28 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('크게 보기: 위·아래 줄에 화살표, 끄는 동안 사진 가운데엔 글자 대신 가는 쪽 화살표 (2026-10-30)', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      FocusScreen(kind: SortKind.singles, group: group, initialId: 'p3'),
+    );
+    // 위 정리 줄 ↑, 아래 킵 줄 ↓
+    expect(find.byIcon(Icons.arrow_upward), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_downward), findsOneWidget);
+    final g = await tester.startGesture(tester.getCenter(card()));
+    for (var i = 0; i < 4; i++) {
+      await g.moveBy(const Offset(0, -25));
+      await tester.pump();
+    }
+    expect(find.byIcon(Icons.arrow_upward), findsNWidgets(2)); // 줄 + 사진 가운데
+    expect(find.text('정리'), findsOneWidget); // 글자는 위 줄에만
+    await g.up();
+    await tester.pumpAndSettle();
+    await flush(tester);
+  });
+
   testWidgets('크게 보기: 위로 밀면 정리, 아래로 밀면 킵, 그리드에 반영된다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     await tester.tap(find.byType(PhotoThumb).first);
@@ -1653,11 +1675,11 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('크게 보기: 맨 위 쓰레기통 줄을 눌러도 정리된다', (tester) async {
+  testWidgets('크게 보기: 맨 위 정리 줄(↑)을 눌러도 정리된다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     await tester.tap(find.byType(PhotoThumb).first);
     await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.delete_outline));
+    await tester.tap(find.byIcon(Icons.arrow_upward));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('돌아가기'));
     await tester.pumpAndSettle();

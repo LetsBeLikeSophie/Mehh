@@ -184,9 +184,11 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     }
   }
 
-  String? _dragLabel(L10n l) {
-    if (_drag.dy < -40) return l.pile;
-    if (_drag.dy > 40) return l.keep;
+  /// 끄는 동안 사진 가운데: 글자 대신 가는 쪽 화살표. 뜻은 위·아래 줄이 채워지며 보인다
+  /// (2026-10-30 Sophie: "정리" 글자로는 무슨 동작인지 모르겠다)
+  IconData? get _dragArrow {
+    if (_drag.dy < -40) return Icons.arrow_upward;
+    if (_drag.dy > 40) return Icons.arrow_downward;
     return null;
   }
 
@@ -224,7 +226,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     final state = stateOf(decisions, current);
     final (inFrom, outTo) = _slide;
     final kept = state == DecisionState.keep;
-    final label = _dragLabel(l);
+    final arrow = _dragArrow;
     final markedCount = ids.where((id) => isMarked(id, decisions, src)).length;
 
     final card = KeyedSubtree(
@@ -282,8 +284,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                   ],
                 ),
               ),
-              if (label != null)
-                Center(child: _Chip(label, dark: true, big: true))
+              if (arrow != null)
+                Center(child: _Arrow(arrow))
               // 큰 동영상: ▶ → 갤러리에서 재생 (2026-10-26 Sophie V3-A)
               else if (video != null)
                 Center(child: _PlayButton(id: video.id)),
@@ -312,7 +314,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                 child: _ActionBar(
                   // 위로 끌수록 채워진다 (90px에서 꽉 참)
                   fill: (-_drag.dy / 90).clamp(0.0, 1.0),
-                  icon: Icons.delete_outline,
+                  // 화살표 = 사진을 위로 밀면 정리 (2026-10-30 Sophie)
+                  icon: Icons.arrow_upward,
                   label: l.pile,
                   semantics: l.trashBarSemantics,
                   onTap: () => _up(ids),
@@ -389,7 +392,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                 child: _ActionBar(
                   // 아래로 끌수록 채워진다 (위쪽 정리 줄과 같은 모양)
                   fill: (_drag.dy / 90).clamp(0.0, 1.0),
-                  icon: Icons.check,
+                  icon: Icons.arrow_downward,
                   label: l.keep,
                   semantics: l.keepBarSemantics,
                   onTap: () => _down(ids),
@@ -580,19 +583,15 @@ class _Check extends StatelessWidget {
 }
 
 class _Chip extends StatelessWidget {
-  const _Chip(this.text, {this.dark = false, this.big = false});
+  const _Chip(this.text, {this.dark = false});
 
   final String text;
   final bool dark;
-  final bool big;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: big ? 16 : 8,
-        vertical: big ? 8 : 3,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: dark ? MehhColors.black : MehhColors.white,
         borderRadius: BorderRadius.circular(MehhRadius.chip),
@@ -600,13 +599,30 @@ class _Chip extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          fontSize: big ? MehhText.heading : MehhText.label,
+          fontSize: MehhText.label,
           fontWeight: dark ? FontWeight.w500 : FontWeight.w400,
           color: dark ? MehhColors.white : MehhColors.text,
         ),
       ),
     );
   }
+}
+
+/// 끄는 동안 사진 가운데의 큰 화살표
+class _Arrow extends StatelessWidget {
+  const _Arrow(this.icon);
+
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(14),
+    decoration: const BoxDecoration(
+      color: MehhColors.black,
+      shape: BoxShape.circle,
+    ),
+    child: Icon(icon, size: 36, color: MehhColors.white),
+  );
 }
 
 /// 위 정리 줄·아래 킵 줄: 사진을 그쪽으로 끌면 점점 검게 채워진다. 눌러도 된다.
