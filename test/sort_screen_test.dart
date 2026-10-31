@@ -1004,6 +1004,55 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets(
+    '크게 보기 사진 줄: 위에 "지금 / 전체", 화면에 다 들어가면 세로줄 없음 (2026-10-31 Sophie)',
+    (tester) async {
+      await pump(
+        tester,
+        FocusScreen(kind: SortKind.singles, group: group, initialId: 'p1'),
+      );
+      expect(find.text('3 / 4'), findsOneWidget); // 최신순
+      expect(find.byKey(const ValueKey('stripSeam')), findsNothing);
+      await flush(tester);
+    },
+  );
+
+  testWidgets(
+    '크게 보기 사진 줄: 도는 줄은 끝과 처음 사이에 세로줄, 숫자는 넘길 때마다 바뀐다 (2026-10-31 Sophie)',
+    (tester) async {
+      final many = [
+        for (var i = 0; i < 30; i++)
+          PhotoMeta(
+            id: 'm$i',
+            takenAt: DateTime(2026, 9, 1, 10).add(Duration(minutes: i)),
+            width: 100,
+            height: 100,
+          ),
+      ];
+      await pump(
+        tester,
+        FocusScreen(
+          kind: SortKind.singles,
+          group: DayGroup(
+            id: 'singles',
+            kind: DayGroupKind.singles,
+            photos: many,
+          ),
+          initialId: 'm29',
+        ),
+      );
+      expect(find.text('1 / 30'), findsOneWidget); // 최신순: 맨 앞
+      expect(
+        find.byKey(const ValueKey('stripSeam')),
+        findsOneWidget,
+      ); // 바로 앞이 끝과 처음 사이
+      await tester.drag(card(), const Offset(-200, 0)); // 다음 사진
+      await tester.pumpAndSettle();
+      expect(find.text('2 / 30'), findsOneWidget);
+      await flush(tester);
+    },
+  );
+
   testWidgets('크게 보기: 위로 밀면 정리, 아래로 밀면 킵, 그리드에 반영된다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     await tester.tap(find.byType(PhotoThumb).first);

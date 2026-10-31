@@ -422,7 +422,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
 }
 
 /// 아래 한 줄 사진 줄. 화면보다 많으면 끝에서 처음으로 이어지며 돈다 (무한 반복),
-/// 다 들어가면 실제 장수만 보여 준다.
+/// 다 들어가면 실제 장수만 보여 준다. 위에 "12 / 47", 돌 때는 끝과 처음 사이에 세로줄:
+/// 어디가 시작과 끝인지, 얼마나 봤는지 보이게 (2026-10-31 Sophie)
 /// 지금 사진은 테두리, 정리할 사진은 흐리게 + X, 킵은 체크, 정하지 않은 사진은 표시 없음.
 class _LoopStrip extends StatefulWidget {
   const _LoopStrip({
@@ -443,6 +444,21 @@ class _LoopStrip extends StatefulWidget {
   State<_LoopStrip> createState() => _LoopStripState();
 }
 
+/// 사진 줄의 끝과 처음 사이 세로줄
+class _StripSeam extends StatelessWidget {
+  const _StripSeam();
+
+  @override
+  Widget build(BuildContext context) => const Center(
+    key: ValueKey('stripSeam'),
+    child: SizedBox(
+      width: 1,
+      height: 36,
+      child: ColoredBox(color: MehhColors.textMuted),
+    ),
+  );
+}
+
 class _LoopStripState extends State<_LoopStrip> {
   static const _extent = 54.0; // 칸 50 + 간격 4
   static const _laps = 2000; // 이만큼 반복해서 사실상 끝이 없다
@@ -451,6 +467,10 @@ class _LoopStripState extends State<_LoopStrip> {
   double _width = 0;
 
   int get _n => widget.ids.length;
+
+  /// 한 바퀴의 칸 수: 사진 + 끝과 처음 사이의 세로줄 한 칸.
+  /// 칸 폭이 모두 같아야 수천 장에서도 위치를 바로 계산한다
+  int get _lap => _n + 1;
 
   /// 화면 가운데에 [index]번째 칸이 오는 위치
   double _offsetFor(int index) => index * _extent - (_width - _extent) / 2;
@@ -461,10 +481,10 @@ class _LoopStripState extends State<_LoopStrip> {
     final s = _scroll;
     final center = s != null && s.hasClients
         ? (s.offset + (_width - _extent) / 2) / _extent
-        : (_laps ~/ 2) * _n.toDouble();
-    final lap = (center / _n).floor();
+        : (_laps ~/ 2) * _lap.toDouble();
+    final lap = (center / _lap).floor();
     final candidates = [
-      for (final l in [lap - 1, lap, lap + 1]) l * _n + i,
+      for (final l in [lap - 1, lap, lap + 1]) l * _lap + i,
     ];
     candidates.sort((a, b) => (a - center).abs().compareTo((b - center).abs()));
     return candidates.first;
@@ -493,6 +513,23 @@ class _LoopStripState extends State<_LoopStrip> {
 
   @override
   Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          context.l.focusPosition(widget.ids.indexOf(widget.current) + 1, _n),
+          style: const TextStyle(
+            fontSize: MehhText.label,
+            color: MehhColors.textMuted,
+          ),
+        ),
+        const SizedBox(height: 4),
+        _strip(),
+      ],
+    );
+  }
+
+  Widget _strip() {
     return SizedBox(
       height: 56,
       child: LayoutBuilder(
@@ -512,15 +549,17 @@ class _LoopStripState extends State<_LoopStrip> {
           }
           _scroll ??= ScrollController(
             initialScrollOffset: _offsetFor(
-              (_laps ~/ 2) * _n + widget.ids.indexOf(widget.current),
+              (_laps ~/ 2) * _lap + widget.ids.indexOf(widget.current),
             ),
           );
           return ListView.builder(
             controller: _scroll,
             scrollDirection: Axis.horizontal,
             itemExtent: _extent,
-            itemCount: _n * _laps,
-            itemBuilder: (_, i) => _tile(widget.ids[i % _n]),
+            itemCount: _lap * _laps,
+            itemBuilder: (_, i) => i % _lap == _n
+                ? const _StripSeam()
+                : _tile(widget.ids[i % _lap]),
           );
         },
       ),

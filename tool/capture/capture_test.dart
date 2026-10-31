@@ -21,6 +21,7 @@ import 'package:mehh/models/pick.dart';
 import 'package:mehh/providers.dart';
 import 'package:mehh/theme.dart';
 import 'package:mehh/ui/accuracy_screen.dart';
+import 'package:mehh/ui/focus_screen.dart';
 import 'package:mehh/ui/home_tab.dart';
 import 'package:mehh/ui/pro_sheet.dart';
 import 'package:mehh/ui/settings_screen.dart';
@@ -284,6 +285,24 @@ void main() {
     await start(tester);
     await open(tester, const SettingsScreen());
     await shot(tester, '08_settings');
+  });
+
+  testWidgets('09 크게 보기 (사진 줄의 숫자·세로줄)', (tester) async {
+    final c = await start(tester);
+    final g = c
+        .read(libraryProvider)
+        .value!
+        .groups
+        .reduce((a, b) => a.photos.length >= b.photos.length ? a : b);
+    await open(
+      tester,
+      FocusScreen(
+        kind: g.kind == DayGroupKind.day ? SortKind.day : SortKind.singles,
+        group: g,
+        initialId: g.photos.first.id,
+      ),
+    );
+    await shot(tester, '09_focus');
   });
 }
 

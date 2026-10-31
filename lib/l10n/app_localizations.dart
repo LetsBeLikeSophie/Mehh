@@ -1141,6 +1141,12 @@ abstract class L10n {
   /// **'끝내기'**
   String get focusFinishYes;
 
+  /// 크게 보기 사진 줄 위: 지금 몇 번째 사진 / 전체
+  ///
+  /// In ko, this message translates to:
+  /// **'{current} / {total}'**
+  String focusPosition(int current, int total);
+
   /// No description provided for @focusHint.
   ///
   /// In ko, this message translates to:

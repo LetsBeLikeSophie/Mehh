@@ -703,6 +703,18 @@ class L10nKo extends L10n {
   String get focusFinishYes => '끝내기';
 
   @override
+  String focusPosition(int current, int total) {
+    final intl.NumberFormat currentNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String currentString = currentNumberFormat.format(current);
+    final intl.NumberFormat totalNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String totalString = totalNumberFormat.format(total);
+
+    return '$currentString / $totalString';
+  }
+
+  @override
   String get focusHint => '길게 누르면 정리를 끝낼 수 있어요';
 
   @override

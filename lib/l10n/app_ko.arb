@@ -488,6 +488,20 @@
   "focusFinishNone": "정리할 사진이 없어요. 끝낼까요?",
   "focusKeepLooking": "계속 보기",
   "focusFinishYes": "끝내기",
+  "focusPosition": "{current} / {total}",
+  "@focusPosition": {
+    "description": "크게 보기 사진 줄 위: 지금 몇 번째 사진 / 전체",
+    "placeholders": {
+      "current": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "total": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
   "focusHint": "길게 누르면 정리를 끝낼 수 있어요",
   "focusFinishSemantics": "정리 끝내기",
   "@cortexGotTitle": {
