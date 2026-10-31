@@ -616,7 +616,17 @@ class L10nEn extends L10n {
   String get noticeSetting => 'Monthly reminder';
 
   @override
-  String get noticeSettingSub => 'Once, on the 1st of each month';
+  String noticeSettingSubCoins(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Tells you on the 1st that $countString ◉ are back';
+  }
+
+  @override
+  String get noticeSettingSubSets =>
+      'Tells you on the 1st that last month\'s photo sets are waiting';
 
   @override
   String noticeCoinsTitle(int count) {

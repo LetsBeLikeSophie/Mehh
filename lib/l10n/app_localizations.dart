@@ -931,11 +931,17 @@ abstract class L10n {
   /// **'매달 알림'**
   String get noticeSetting;
 
-  /// No description provided for @noticeSettingSub.
+  /// No description provided for @noticeSettingSubCoins.
   ///
   /// In ko, this message translates to:
-  /// **'매달 1일에 한 번'**
-  String get noticeSettingSub;
+  /// **'매달 1일에 ◉ {count}개가 다시 생겼다고 알려요'**
+  String noticeSettingSubCoins(int count);
+
+  /// No description provided for @noticeSettingSubSets.
+  ///
+  /// In ko, this message translates to:
+  /// **'매달 1일에 지난달 사진 묶음이 기다린다고 알려요'**
+  String get noticeSettingSubSets;
 
   /// No description provided for @noticeCoinsTitle.
   ///

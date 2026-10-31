@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../config/app_config.dart';
+import '../data/pro.dart';
 
 import '../l10n/l10n.dart';
 import '../providers.dart';
@@ -300,6 +301,10 @@ class _MonthlyNoticeRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l;
     final on = ref.watch(monthlyNoticeProvider).value ?? false;
+    // 무엇을 알려 주는지: 실제 알림 글(monthlyNoticeText)과 같은 기준 (2026-10-31 Sophie)
+    final noCoins =
+        ref.watch(closedTestFreeProvider) ||
+        (ref.watch(proProvider).value?.pro ?? false);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -321,8 +326,10 @@ class _MonthlyNoticeRow extends ConsumerWidget {
                     color: MehhColors.text,
                   ),
                 ),
-                Text(
-                  l.noticeSettingSub,
+                CoinText(
+                  noCoins
+                      ? l.noticeSettingSubSets
+                      : l.noticeSettingSubCoins(freeGroupsPerMonth),
                   style: const TextStyle(
                     fontSize: MehhText.label,
                     color: MehhColors.textMuted,

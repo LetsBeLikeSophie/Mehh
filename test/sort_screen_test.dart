@@ -3519,11 +3519,34 @@ void main() {
     },
   );
 
+  testWidgets(
+    '설정의 매달 알림: 테스트 동안 무료면 코인 이야기 없이 실제 알림 글과 같은 말 (2026-10-31 Sophie)',
+    (tester) async {
+      await pump(
+        tester,
+        const SettingsScreen(),
+        notices: DemoNotices(),
+        testFree: true,
+      );
+      expect(
+        find.textContaining('지난달 사진 묶음이 기다린다고', findRichText: true),
+        findsOneWidget,
+      );
+      expect(find.textContaining('다시 생겼다고', findRichText: true), findsNothing);
+    },
+  );
+
   testWidgets('설정의 매달 알림: 폰 설정에서 끄고 돌아오면 꺼짐으로 보인다 (B2-B)', (tester) async {
     final notices = DemoNotices();
     await pump(tester, const SettingsScreen(), notices: notices);
     Switch sw() => tester.widget<Switch>(find.byType(Switch));
     expect(find.text('매달 알림'), findsOneWidget);
+    // 무엇을 알려 주는지 한 줄 (2026-10-31 Sophie)
+    expect(find.textContaining('매달 1일에', findRichText: true), findsOneWidget);
+    expect(
+      find.textContaining('개가 다시 생겼다고', findRichText: true),
+      findsOneWidget,
+    );
     // 자리: Pro 줄 바로 아래, "도움"보다 위 (N2-B)
     final y = tester.getTopLeft(find.text('매달 알림')).dy;
     expect(y, greaterThan(tester.getTopLeft(find.text('Mehh Pro')).dy));

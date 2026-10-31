@@ -355,7 +355,16 @@
   "noticeOn": "매달 1일에 알려 드릴게요",
   "noticeBlocked": "폰 설정에서 Mehh 알림이 꺼져 있어요",
   "noticeSetting": "매달 알림",
-  "noticeSettingSub": "매달 1일에 한 번",
+  "noticeSettingSubCoins": "매달 1일에 ◉ {count}개가 다시 생겼다고 알려요",
+  "@noticeSettingSubCoins": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "noticeSettingSubSets": "매달 1일에 지난달 사진 묶음이 기다린다고 알려요",
   "noticeCoinsTitle": "이번 달 코인 {count}개가 다시 생겼어요",
   "@noticeCoinsTitle": {
     "placeholders": {

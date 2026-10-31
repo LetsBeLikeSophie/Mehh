@@ -528,7 +528,16 @@ class L10nKo extends L10n {
   String get noticeSetting => '매달 알림';
 
   @override
-  String get noticeSettingSub => '매달 1일에 한 번';
+  String noticeSettingSubCoins(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '매달 1일에 ◉ $countString개가 다시 생겼다고 알려요';
+  }
+
+  @override
+  String get noticeSettingSubSets => '매달 1일에 지난달 사진 묶음이 기다린다고 알려요';
 
   @override
   String noticeCoinsTitle(int count) {
