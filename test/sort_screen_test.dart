@@ -3106,6 +3106,67 @@ void main() {
     expect(ids, hasLength(photos.length - 2)); // 보내지 않은 사진은 그대로
   });
 
+  testWidgets('기록 저장이 실패해도(저장 공간 가득) 휴지통으로 간 사진은 보냈다고 알리고 그리드에서 뺀다 (2026-10-31 S-2)', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.singles, group: group),
+      store: _FullStore(),
+    );
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.tap(find.byType(XToggle).at(1));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('2장 휴지통으로'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining(RegExp(r'✓ 2장 · .+ 휴지통으로 보냈어요')), findsOneWidget);
+    expect(find.textContaining('보내지 못했어요'), findsNothing);
+    expect(find.byType(XToggle), findsNWidgets(photos.length - 2));
+    await flush(tester);
+  });
+
+  testWidgets('기록을 쓰는 사이 다시 읽기가 끝나도 보낸 사진은 "휴지통으로 보냄"으로 남는다 (2026-10-31 S-2)', (
+    tester,
+  ) async {
+    final lib = _ReloadingLibrary(photos);
+    final store = _SlowStore();
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.singles, group: group),
+      library: lib,
+      store: store,
+    );
+    final c = ProviderScope.containerOf(
+      tester.element(find.byType(SortScreen)),
+    );
+    await c.read(libraryProvider.future);
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.pumpAndSettle();
+    lib.gate = Completer<void>();
+    unawaited(c.read(libraryProvider.notifier).syncNow());
+    await tester.pump();
+    store.gate = Completer<void>();
+    await tester.tap(find.text('1장 휴지통으로'));
+    await tester.pump();
+    await tester.pump();
+    // 결정을 쓰는 중에 다시 읽기가 끝난다
+    final gate = lib.gate!;
+    lib.gate = null;
+    gate.complete();
+    await tester.pump();
+    await tester.pump();
+    store.gate!.complete();
+    store.gate = null;
+    await flush(tester);
+    final sent = lib.trashed.single;
+    final ids = {for (final p in c.read(libraryProvider).value!.photos) p.id};
+    expect(ids, isNot(contains(sent)));
+    expect(
+      stateOf(c.read(decisionsProvider).value!, sent),
+      DecisionState.trashed,
+    );
+  });
+
   // 이번 달 코인을 다 쓴 상태
   MemoryProVault noCoins() => MemoryProVault(
     ProState(freeMonth: monthKey(DateTime.now()), freeUsed: freeGroupsPerMonth),
@@ -3446,6 +3507,29 @@ class _EmptyLimitedLibrary extends DemoPhotoLibrary {
 
   @override
   Future<List<PhotoMeta>> loadAll() async => const [];
+}
+
+/// 저장 공간이 가득 찬 폰처럼 결정 저장이 실패한다
+class _FullStore extends MemoryStore {
+  @override
+  Future<void> saveDecisions(List<Decision> list) async {
+    // X 표시는 저장되고, 휴지통으로 보낸 기록부터 실패 (보내는 사이 공간이 찼다)
+    if (list.any((d) => d.state == DecisionState.trashed)) {
+      throw Exception('SQLITE_FULL');
+    }
+    return super.saveDecisions(list);
+  }
+}
+
+/// [gate]가 있으면 결정 저장 중에 멈춘다
+class _SlowStore extends MemoryStore {
+  Completer<void>? gate;
+
+  @override
+  Future<void> saveDecisions(List<Decision> list) async {
+    await gate?.future;
+    return super.saveDecisions(list);
+  }
 }
 
 /// 실제 사진첩처럼 목록(entities)에 있는 사진만 휴지통으로 보낸다. [gate]가 있으면 다시 읽는 중에 멈춘다

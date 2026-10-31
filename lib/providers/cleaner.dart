@@ -14,17 +14,30 @@ class Cleaner {
     final list = ids.toSet().toList();
     if (list.isEmpty) return (count: 0, bytes: 0);
     final lib = ref.read(photoLibraryProvider);
-    final sizes = await lib.fileSizes(list);
+    Map<String, int> sizes;
+    try {
+      sizes = await lib.fileSizes(list);
+    } catch (_) {
+      sizes = const {};
+    }
+    // 휴지통으로 옮기기만 실패로 친다 (던지면 화면이 "보내지 못했어요")
     final done = await lib.trash(list);
     if (done.isEmpty) return (count: 0, bytes: 0);
-    await ref.read(decisionsProvider.notifier).set(done, DecisionState.trashed);
-    final bytes = done.fold<int>(0, (n, id) => n + (sizes[id] ?? 0));
-    await ref
-        .read(storeProvider)
-        .addFreedBytes(monthKey(DateTime.now()), bytes);
-    ref.invalidate(freedThisMonthProvider);
+    // 사진은 이미 휴지통에 있다: 기다리지 않고 바로 목록에서 뺀다. 기록을 쓰는 사이 다시 읽기가
+    // 끝나면 아직 목록에 있는 사진의 "보냄"을 되살림으로 보고 지웠다 (리뷰 2026-10-31 S-2)
     ref.read(libraryProvider.notifier).removePhotos(done.toSet());
-    await ref.read(cortexSentProvider.notifier).remove(done);
+    final bytes = done.fold<int>(0, (n, id) => n + (sizes[id] ?? 0));
+    // 기록 저장이 실패해도(저장 공간 가득 등) 보낸 일은 보낸 것으로 알린다
+    try {
+      await ref
+          .read(decisionsProvider.notifier)
+          .set(done, DecisionState.trashed);
+      await ref
+          .read(storeProvider)
+          .addFreedBytes(monthKey(DateTime.now()), bytes);
+      await ref.read(cortexSentProvider.notifier).remove(done);
+    } catch (_) {}
+    ref.invalidate(freedThisMonthProvider);
     return (count: done.length, bytes: bytes);
   }
 }
