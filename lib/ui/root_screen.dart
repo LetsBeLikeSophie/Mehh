@@ -4,6 +4,7 @@ import 'package:photo_manager/photo_manager.dart';
 
 import '../config/app_config.dart';
 import '../providers.dart';
+import 'guide_screen.dart';
 import 'home_tab.dart';
 import 'monthly_notice.dart';
 import 'onboarding_screen.dart';
@@ -18,6 +19,22 @@ class RootScreen extends ConsumerStatefulWidget {
 
 class _RootScreenState extends ConsumerState<RootScreen> {
   late final AppLifecycleListener _lifecycle;
+  bool _guideChecked = false;
+
+  /// 사진 접근을 허락해 홈에 처음 왔을 때 사용법을 한 번 (이미 쓰던 사람도 업데이트 뒤 한 번)
+  Future<void> _showGuideOnce() async {
+    const key = 'guideSeen';
+    final store = ref.read(storeProvider);
+    if (await store.counter(key) > 0 || !mounted) return;
+    await store.bumpCounter(key);
+    if (!mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder: (_) => const GuideScreen(),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -57,6 +74,12 @@ class _RootScreenState extends ConsumerState<RootScreen> {
     final permission = ref.watch(permissionProvider);
     if (permission == null) return const Scaffold();
     if (!permission.hasAccess) return const OnboardingScreen();
+    if (!_guideChecked) {
+      _guideChecked = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _showGuideOnce();
+      });
+    }
     return const Scaffold(body: HomeTab());
   }
 }

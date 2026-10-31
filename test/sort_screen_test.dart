@@ -28,6 +28,7 @@ import 'package:mehh/ui/focus_screen.dart';
 import 'package:mehh/ui/hold_to_finish.dart';
 import 'package:mehh/ui/home_tab.dart';
 import 'package:mehh/ui/accuracy_screen.dart';
+import 'package:mehh/ui/guide_screen.dart';
 import 'package:mehh/ui/settings_screen.dart';
 import 'package:mehh/ui/root_screen.dart';
 import 'package:mehh/ui/sort_screen.dart';
@@ -3560,6 +3561,7 @@ void main() {
         const RootScreen(),
         notices: notices,
         vault: MemoryProVault(const ProState(lifetime: true)),
+        store: MemoryStore()..counters['guideSeen'] = 1,
       );
       await tester.pumpAndSettle();
       expect(notices.scheduled?.title, '지난달 사진 묶음이 기다려요');
@@ -3567,6 +3569,75 @@ void main() {
       await flush(tester);
     },
   );
+
+  testWidgets(
+    '사용법: 홈에 처음 오면 한 번 뜨고, 네 장을 넘겨 닫으면 다시 켜도 안 뜬다 (2026-10-31 Sophie)',
+    (tester) async {
+      Future<void> settle() async {
+        // 그림이 계속 움직여 pumpAndSettle은 끝나지 않는다
+        for (var i = 0; i < 6; i++) {
+          await tester.pump(const Duration(milliseconds: 100));
+        }
+      }
+
+      // 샘플 사진첩은 아직 허락 전: 온보딩에서 허락하면 사용법이 뜬다 (실제 첫 실행 길)
+      final store = MemoryStore();
+      await pump(tester, const RootScreen(), store: store);
+      await tester.tap(find.text('사진·동영상 접근 허용'));
+      await settle();
+      expect(find.text('사진을 묶어 뒀어요'), findsOneWidget);
+      await tester.tap(find.text('다음'));
+      await settle();
+      expect(find.text('사진을 눌러 크게 봐요'), findsOneWidget);
+      await tester.tap(find.text('다음'));
+      await settle();
+      expect(find.text('위로 밀면 정리, 아래로 밀면 킵'), findsOneWidget);
+      await tester.tap(find.text('다음'));
+      await settle();
+      expect(find.text('[휴지통으로]를 누르면 끝이에요'), findsOneWidget);
+      expect(find.text('건너뛰기').hitTestable(), findsNothing); // 마지막 장엔 없다
+      await tester.tap(find.text('시작하기'));
+      await tester.pumpAndSettle();
+      expect(find.byType(GuideScreen), findsNothing);
+      expect(await store.counter('guideSeen'), 1);
+
+      // 기록을 지워도 설정이라 남고, 다시 켜도 뜨지 않는다
+      await store.clearAll();
+      expect(await store.counter('guideSeen'), 1);
+      await tester.pumpWidget(const SizedBox());
+      await pump(tester, const RootScreen(), store: store);
+      await tester.tap(find.text('사진·동영상 접근 허용'));
+      await tester.pumpAndSettle();
+      expect(find.byType(GuideScreen), findsNothing);
+      await flush(tester);
+    },
+  );
+
+  testWidgets('사용법: 건너뛰면 닫히고, 설정의 [사용법]으로 다시 본다 (2026-10-31 Sophie)', (
+    tester,
+  ) async {
+    await pump(tester, const RootScreen());
+    await tester.tap(find.text('사진·동영상 접근 허용'));
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    await tester.tap(find.text('건너뛰기'));
+    await tester.pumpAndSettle();
+    expect(find.byType(GuideScreen), findsNothing);
+
+    await tester.pumpWidget(const SizedBox());
+    await pump(tester, const SettingsScreen());
+    await tester.ensureVisible(find.text('사용법'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('사용법'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(GuideScreen), findsOneWidget);
+    await tester.tap(find.text('건너뛰기'));
+    await tester.pumpAndSettle();
+    expect(find.byType(GuideScreen), findsNothing);
+    await flush(tester);
+  });
 
   testWidgets(
     '설정의 매달 알림: 테스트 동안 무료면 코인 이야기 없이 실제 알림 글과 같은 말 (2026-10-31 Sophie)',

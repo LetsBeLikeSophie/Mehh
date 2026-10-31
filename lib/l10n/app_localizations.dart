@@ -1141,6 +1141,90 @@ abstract class L10n {
   /// **'끝내기'**
   String get focusFinishYes;
 
+  /// No description provided for @guideGroupsTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진을 묶어 뒀어요'**
+  String get guideGroupsTitle;
+
+  /// No description provided for @guideGroupsBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'그날 찍은 사진, 캡처, 똑같은 사진끼리 모았어요.\n하나 눌러 들어가요.'**
+  String get guideGroupsBody;
+
+  /// No description provided for @guideOpenTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진을 눌러 크게 봐요'**
+  String get guideOpenTitle;
+
+  /// No description provided for @guideOpenBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'[추천 보기]를 누르면 정리할 만한 사진을\n앱이 먼저 골라 줘요.'**
+  String get guideOpenBody;
+
+  /// No description provided for @guideSwipeTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'위로 밀면 정리, 아래로 밀면 킵'**
+  String get guideSwipeTitle;
+
+  /// No description provided for @guideSwipeBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'잘못 정했으면 반대로 밀면 돼요.\n옆으로 밀면 다음 사진이에요.'**
+  String get guideSwipeBody;
+
+  /// No description provided for @guideSendTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'[휴지통으로]를 누르면 끝이에요'**
+  String get guideSendTitle;
+
+  /// No description provided for @guideSendBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'누르기 전에는 사진이 그대로예요.\n보낸 뒤에도 30일 안에 되살릴 수 있어요.'**
+  String get guideSendBody;
+
+  /// No description provided for @guideSkip.
+  ///
+  /// In ko, this message translates to:
+  /// **'건너뛰기'**
+  String get guideSkip;
+
+  /// No description provided for @guideNext.
+  ///
+  /// In ko, this message translates to:
+  /// **'다음'**
+  String get guideNext;
+
+  /// No description provided for @guideStart.
+  ///
+  /// In ko, this message translates to:
+  /// **'시작하기'**
+  String get guideStart;
+
+  /// No description provided for @guideRow.
+  ///
+  /// In ko, this message translates to:
+  /// **'사용법'**
+  String get guideRow;
+
+  /// No description provided for @guideRowSub.
+  ///
+  /// In ko, this message translates to:
+  /// **'묶음 보기부터 휴지통까지 네 장'**
+  String get guideRowSub;
+
+  /// No description provided for @guidePosition.
+  ///
+  /// In ko, this message translates to:
+  /// **'{current} / {total}쪽'**
+  String guidePosition(int current, int total);
+
   /// 크게 보기 사진 줄 위: 지금 몇 번째 사진 / 전체
   ///
   /// In ko, this message translates to:

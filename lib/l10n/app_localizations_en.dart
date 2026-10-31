@@ -855,6 +855,54 @@ class L10nEn extends L10n {
   String get focusFinishYes => 'Finish';
 
   @override
+  String get guideGroupsTitle => 'Your photos are grouped';
+
+  @override
+  String get guideGroupsBody =>
+      'By day, screenshots, and exact duplicates.\nTap one to go in.';
+
+  @override
+  String get guideOpenTitle => 'Tap a photo to see it big';
+
+  @override
+  String get guideOpenBody =>
+      'Tap [Show picks] and the app suggests\nphotos to clean up first.';
+
+  @override
+  String get guideSwipeTitle => 'Swipe up to clean up, down to keep';
+
+  @override
+  String get guideSwipeBody =>
+      'Changed your mind? Swipe the other way.\nSwipe sideways for the next photo.';
+
+  @override
+  String get guideSendTitle => 'Tap [Move to trash] and you\'re done';
+
+  @override
+  String get guideSendBody =>
+      'Nothing changes until you tap it.\nYou can still restore photos for 30 days.';
+
+  @override
+  String get guideSkip => 'Skip';
+
+  @override
+  String get guideNext => 'Next';
+
+  @override
+  String get guideStart => 'Get started';
+
+  @override
+  String get guideRow => 'How it works';
+
+  @override
+  String get guideRowSub => 'Four quick pages, from groups to trash';
+
+  @override
+  String guidePosition(int current, int total) {
+    return 'Page $current of $total';
+  }
+
+  @override
   String focusPosition(int current, int total) {
     final intl.NumberFormat currentNumberFormat =
         intl.NumberFormat.decimalPattern(localeName);

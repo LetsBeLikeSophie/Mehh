@@ -22,6 +22,7 @@ import 'package:mehh/providers.dart';
 import 'package:mehh/theme.dart';
 import 'package:mehh/ui/accuracy_screen.dart';
 import 'package:mehh/ui/focus_screen.dart';
+import 'package:mehh/ui/guide_screen.dart';
 import 'package:mehh/ui/home_tab.dart';
 import 'package:mehh/ui/pro_sheet.dart';
 import 'package:mehh/ui/settings_screen.dart';
@@ -303,6 +304,31 @@ void main() {
       ),
     );
     await shot(tester, '09_focus');
+  });
+
+  testWidgets('10 사용법 네 장', (tester) async {
+    await start(tester);
+    navKey.currentState!.push(
+      MaterialPageRoute<void>(builder: (_) => const GuideScreen()),
+    );
+    // 그림이 계속 움직여 pumpAndSettle은 끝나지 않는다
+    Future<void> wait([int ms = 1000]) =>
+        tester.pump(Duration(milliseconds: ms));
+    await wait();
+    await wait();
+    for (var i = 1; i <= 4; i++) {
+      await wait(i == 3 ? 700 : 300); // 3장: 위로 민 순간
+      await expectLater(
+        find.byKey(shotKey),
+        matchesGoldenFile('goldens/10_guide_$i.png'),
+      );
+      if (i < 4) {
+        await tester.tap(find.text('다음'));
+        await wait(100);
+        await wait(300);
+        await wait(300);
+      }
+    }
   });
 }
 

@@ -10,6 +10,7 @@ import '../l10n/l10n.dart';
 import '../providers.dart';
 import '../theme.dart';
 import 'accuracy_screen.dart';
+import 'guide_screen.dart';
 import 'monthly_notice.dart';
 import 'pro_sheet.dart';
 import 'widgets.dart';
@@ -89,6 +90,17 @@ class SettingsScreen extends ConsumerWidget {
                     _Line(Icons.north_east, context.l.privacyShortCortex),
                   const SizedBox(height: 28),
                   _Heading(context.l.helpTitle),
+                  _Tap(
+                    icon: Icons.help_outline,
+                    label: context.l.guideRow,
+                    sub: context.l.guideRowSub,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        fullscreenDialog: true,
+                        builder: (_) => const GuideScreen(),
+                      ),
+                    ),
+                  ),
                   if (supportEmail.isNotEmpty)
                     _Tap(
                       icon: Icons.mail_outline,

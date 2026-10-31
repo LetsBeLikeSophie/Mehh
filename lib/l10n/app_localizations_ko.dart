@@ -703,6 +703,50 @@ class L10nKo extends L10n {
   String get focusFinishYes => '끝내기';
 
   @override
+  String get guideGroupsTitle => '사진을 묶어 뒀어요';
+
+  @override
+  String get guideGroupsBody => '그날 찍은 사진, 캡처, 똑같은 사진끼리 모았어요.\n하나 눌러 들어가요.';
+
+  @override
+  String get guideOpenTitle => '사진을 눌러 크게 봐요';
+
+  @override
+  String get guideOpenBody => '[추천 보기]를 누르면 정리할 만한 사진을\n앱이 먼저 골라 줘요.';
+
+  @override
+  String get guideSwipeTitle => '위로 밀면 정리, 아래로 밀면 킵';
+
+  @override
+  String get guideSwipeBody => '잘못 정했으면 반대로 밀면 돼요.\n옆으로 밀면 다음 사진이에요.';
+
+  @override
+  String get guideSendTitle => '[휴지통으로]를 누르면 끝이에요';
+
+  @override
+  String get guideSendBody => '누르기 전에는 사진이 그대로예요.\n보낸 뒤에도 30일 안에 되살릴 수 있어요.';
+
+  @override
+  String get guideSkip => '건너뛰기';
+
+  @override
+  String get guideNext => '다음';
+
+  @override
+  String get guideStart => '시작하기';
+
+  @override
+  String get guideRow => '사용법';
+
+  @override
+  String get guideRowSub => '묶음 보기부터 휴지통까지 네 장';
+
+  @override
+  String guidePosition(int current, int total) {
+    return '$current / $total쪽';
+  }
+
+  @override
   String focusPosition(int current, int total) {
     final intl.NumberFormat currentNumberFormat =
         intl.NumberFormat.decimalPattern(localeName);
