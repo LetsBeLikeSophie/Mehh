@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mehh/config/app_config.dart';
 import 'package:in_app_purchase/in_app_purchase.dart' show PurchaseStatus;
 import 'package:photo_manager/photo_manager.dart'
     show AssetEntity, PermissionState;
@@ -883,10 +884,12 @@ void main() {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     String bar() => tester
         .widget<Text>(
-          find.descendant(
-            of: find.byKey(const ValueKey('freedBar')),
-            matching: find.byType(Text),
-          ).first,
+          find
+              .descendant(
+                of: find.byKey(const ValueKey('freedBar')),
+                matching: find.byType(Text),
+              )
+              .first,
         )
         .textSpan!
         .toPlainText();
@@ -2334,56 +2337,57 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('Cortex: 보낸 뒤 X를 끈 사진은 받았다는 신호가 와도 휴지통으로 가지 않는다 (2026-10-31 S-1)', (
-    tester,
-  ) async {
-    final shots = DayGroup(
-      id: 'shots',
-      kind: DayGroupKind.screenshots,
-      photos: photos,
-    );
-    final handoff = _FakeHandoff();
-    await pump(
-      tester,
-      SortScreen(kind: SortKind.screenshots, group: shots),
-      extra: [
-        cortexInstalledProvider.overrideWith((ref) async => true),
-        handoffProvider.overrideWithValue(handoff),
-      ],
-    );
-    await tester.tap(find.byType(XToggle).at(0));
-    await tester.tap(find.byType(XToggle).at(1));
-    await tester.pumpAndSettle();
-    await sendCortex(tester);
-    expect(handoff.sent, hasLength(2));
-    // 보낸 뒤 1장을 킵으로
-    await tester.tap(find.byType(XToggle).at(0));
-    await tester.pumpAndSettle();
-    handoff.saved.add(CortexSaved(2, handoff.sent.toSet()));
-    await tester.pumpAndSettle();
-    expect(find.text('✓ Cortex가 2장 받았어요'), findsOneWidget);
-    expect(find.textContaining('킵으로 바꾼 1장은 그대로'), findsOneWidget);
-    await tester.tap(find.text('휴지통으로'));
-    await tester.pumpAndSettle();
-    expect(find.textContaining('  3장'), findsOneWidget); // 4장 중 1장만 갔다
-    expect(find.text('Cortex로 보냄'), findsOneWidget); // 킵한 사진은 보낸 표시만
-    await tester.pump(const Duration(seconds: 9));
-    await tester.pumpAndSettle();
+  testWidgets(
+    'Cortex: 보낸 뒤 X를 끈 사진은 받았다는 신호가 와도 휴지통으로 가지 않는다 (2026-10-31 S-1)',
+    (tester) async {
+      final shots = DayGroup(
+        id: 'shots',
+        kind: DayGroupKind.screenshots,
+        photos: photos,
+      );
+      final handoff = _FakeHandoff();
+      await pump(
+        tester,
+        SortScreen(kind: SortKind.screenshots, group: shots),
+        extra: [
+          cortexInstalledProvider.overrideWith((ref) async => true),
+          handoffProvider.overrideWithValue(handoff),
+        ],
+      );
+      await tester.tap(find.byType(XToggle).at(0));
+      await tester.tap(find.byType(XToggle).at(1));
+      await tester.pumpAndSettle();
+      await sendCortex(tester);
+      expect(handoff.sent, hasLength(2));
+      // 보낸 뒤 1장을 킵으로
+      await tester.tap(find.byType(XToggle).at(0));
+      await tester.pumpAndSettle();
+      handoff.saved.add(CortexSaved(2, handoff.sent.toSet()));
+      await tester.pumpAndSettle();
+      expect(find.text('✓ Cortex가 2장 받았어요'), findsOneWidget);
+      expect(find.textContaining('킵으로 바꾼 1장은 그대로'), findsOneWidget);
+      await tester.tap(find.text('휴지통으로'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('  3장'), findsOneWidget); // 4장 중 1장만 갔다
+      expect(find.text('Cortex로 보냄'), findsOneWidget); // 킵한 사진은 보낸 표시만
+      await tester.pump(const Duration(seconds: 9));
+      await tester.pumpAndSettle();
 
-    // 장수만 오는 예전 신호도 같다. 다 킵으로 바꿨으면 창 없이 끝
-    handoff.sent.clear();
-    await tester.tap(find.byType(XToggle).at(1));
-    await tester.pumpAndSettle();
-    await sendCortex(tester);
-    expect(handoff.sent, hasLength(1));
-    await tester.tap(find.byType(XToggle).at(1));
-    await tester.pumpAndSettle();
-    handoff.saved.add(const CortexSaved(1, null));
-    await tester.pumpAndSettle();
-    expect(find.textContaining('받았어요'), findsNothing);
-    expect(find.textContaining('  3장'), findsOneWidget);
-    await flush(tester);
-  });
+      // 장수만 오는 예전 신호도 같다. 다 킵으로 바꿨으면 창 없이 끝
+      handoff.sent.clear();
+      await tester.tap(find.byType(XToggle).at(1));
+      await tester.pumpAndSettle();
+      await sendCortex(tester);
+      expect(handoff.sent, hasLength(1));
+      await tester.tap(find.byType(XToggle).at(1));
+      await tester.pumpAndSettle();
+      handoff.saved.add(const CortexSaved(1, null));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('받았어요'), findsNothing);
+      expect(find.textContaining('  3장'), findsOneWidget);
+      await flush(tester);
+    },
+  );
 
   testWidgets('Cortex: 그날의 묶음에서 Cortex로 보내고 [휴지통으로]여도 정확도 기록이 남는다 (S-2)', (
     tester,
@@ -2419,51 +2423,52 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('Cortex: [추천 보기]로 X가 된 사진도 직접 고른 사진도 가리지 않고 X인 사진을 다 보낸다 (2026-10-30)', (
-    tester,
-  ) async {
-    final shots = DayGroup(
-      id: 'shots',
-      kind: DayGroupKind.screenshots,
-      photos: [
-        for (var i = 0; i < 4; i++)
+  testWidgets(
+    'Cortex: [추천 보기]로 X가 된 사진도 직접 고른 사진도 가리지 않고 X인 사진을 다 보낸다 (2026-10-30)',
+    (tester) async {
+      final shots = DayGroup(
+        id: 'shots',
+        kind: DayGroupKind.screenshots,
+        photos: [
+          for (var i = 0; i < 4; i++)
+            PhotoMeta(
+              id: 's$i',
+              takenAt: DateTime(2025, 1, 1 + i), // 오래된 캡처 = 추천
+              width: 100,
+              height: 200,
+              isScreenshot: true,
+            ),
           PhotoMeta(
-            id: 's$i',
-            takenAt: DateTime(2025, 1, 1 + i), // 오래된 캡처 = 추천
+            id: 'new',
+            takenAt: DateTime.now(),
             width: 100,
             height: 200,
             isScreenshot: true,
           ),
-        PhotoMeta(
-          id: 'new',
-          takenAt: DateTime.now(),
-          width: 100,
-          height: 200,
-          isScreenshot: true,
-        ),
-      ],
-    );
-    final handoff = _FakeHandoff();
-    await pump(
-      tester,
-      SortScreen(kind: SortKind.screenshots, group: shots),
-      extra: [
-        cortexInstalledProvider.overrideWith((ref) async => true),
-        handoffProvider.overrideWithValue(handoff),
-      ],
-    );
-    await tester.tap(find.textContaining('추천 보기'));
-    await tester.pumpAndSettle();
-    expect(find.text('Cortex로'), findsOneWidget); // 추천만 X여도 Cortex 버튼이 있다
-    // 새 캡처 하나를 직접 고른다
-    await tester.tap(
-      find.byWidgetPredicate((w) => w is XToggle && !w.on).first,
-    );
-    await tester.pumpAndSettle();
-    await sendCortex(tester);
-    expect(handoff.sent.toSet(), {'s0', 's1', 's2', 's3', 'new'});
-    await flush(tester);
-  });
+        ],
+      );
+      final handoff = _FakeHandoff();
+      await pump(
+        tester,
+        SortScreen(kind: SortKind.screenshots, group: shots),
+        extra: [
+          cortexInstalledProvider.overrideWith((ref) async => true),
+          handoffProvider.overrideWithValue(handoff),
+        ],
+      );
+      await tester.tap(find.textContaining('추천 보기'));
+      await tester.pumpAndSettle();
+      expect(find.text('Cortex로'), findsOneWidget); // 추천만 X여도 Cortex 버튼이 있다
+      // 새 캡처 하나를 직접 고른다
+      await tester.tap(
+        find.byWidgetPredicate((w) => w is XToggle && !w.on).first,
+      );
+      await tester.pumpAndSettle();
+      await sendCortex(tester);
+      expect(handoff.sent.toSet(), {'s0', 's1', 's2', 's3', 'new'});
+      await flush(tester);
+    },
+  );
 
   testWidgets('Pro 안내: 이 폰의 잠긴 묶음·추천 장수를 상품 위에 한 줄 (P2)', (tester) async {
     final day = DayGroup(
@@ -3023,52 +3028,53 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('접근 범위가 바뀌어 다시 읽는 중에 보낸 사진도 다시 나타나지 않고, 겹친 새로 고침은 한 번만 읽는다 (리뷰 10-30 S-2)', (
-    tester,
-  ) async {
-    final lib = _ReloadingLibrary(photos);
-    await pump(
-      tester,
-      SortScreen(kind: SortKind.singles, group: group),
-      library: lib,
-    );
-    final c = ProviderScope.containerOf(
-      tester.element(find.byType(SortScreen)),
-    );
-    await c.read(libraryProvider.future);
-    await tester.tap(find.byType(XToggle).at(0));
-    await tester.tap(find.byType(XToggle).at(1));
-    await tester.pumpAndSettle();
-    // 일부 허용 → 전체 허용으로 바뀌어 다시 읽기 시작 (읽는 중에 멈춤)
-    lib.gate = Completer<void>();
-    final loadsBefore = lib.loads;
-    final n = c.read(libraryProvider.notifier);
-    unawaited(n.reload());
-    await tester.pump();
-    // 앱으로 돌아온 순간 새로 고침도 같이 왔다: 읽는 중이면 또 읽지 않는다
-    unawaited(n.refreshIfStale(Duration.zero));
-    await tester.pump();
-    expect(lib.loads, loadsBefore + 1);
-    // 정리 화면은 그대로 보이고 [휴지통으로]도 된다
-    await tester.tap(find.text('2장 휴지통으로'));
-    await tester.pumpAndSettle();
-    final sent = [...lib.trashed];
-    expect(sent, hasLength(2));
-    final gate = lib.gate!;
-    lib.gate = null;
-    gate.complete();
-    await flush(tester);
-    final ids = {for (final p in c.read(libraryProvider).value!.photos) p.id};
-    for (final id in sent) {
-      expect(ids, isNot(contains(id)));
-      expect(
-        stateOf(c.read(decisionsProvider).value!, id),
-        DecisionState.trashed,
+  testWidgets(
+    '접근 범위가 바뀌어 다시 읽는 중에 보낸 사진도 다시 나타나지 않고, 겹친 새로 고침은 한 번만 읽는다 (리뷰 10-30 S-2)',
+    (tester) async {
+      final lib = _ReloadingLibrary(photos);
+      await pump(
+        tester,
+        SortScreen(kind: SortKind.singles, group: group),
+        library: lib,
       );
-    }
-    expect(ids, hasLength(photos.length - 2));
-    expect(find.byType(PhotoThumb), findsNWidgets(photos.length - 2));
-  });
+      final c = ProviderScope.containerOf(
+        tester.element(find.byType(SortScreen)),
+      );
+      await c.read(libraryProvider.future);
+      await tester.tap(find.byType(XToggle).at(0));
+      await tester.tap(find.byType(XToggle).at(1));
+      await tester.pumpAndSettle();
+      // 일부 허용 → 전체 허용으로 바뀌어 다시 읽기 시작 (읽는 중에 멈춤)
+      lib.gate = Completer<void>();
+      final loadsBefore = lib.loads;
+      final n = c.read(libraryProvider.notifier);
+      unawaited(n.reload());
+      await tester.pump();
+      // 앱으로 돌아온 순간 새로 고침도 같이 왔다: 읽는 중이면 또 읽지 않는다
+      unawaited(n.refreshIfStale(Duration.zero));
+      await tester.pump();
+      expect(lib.loads, loadsBefore + 1);
+      // 정리 화면은 그대로 보이고 [휴지통으로]도 된다
+      await tester.tap(find.text('2장 휴지통으로'));
+      await tester.pumpAndSettle();
+      final sent = [...lib.trashed];
+      expect(sent, hasLength(2));
+      final gate = lib.gate!;
+      lib.gate = null;
+      gate.complete();
+      await flush(tester);
+      final ids = {for (final p in c.read(libraryProvider).value!.photos) p.id};
+      for (final id in sent) {
+        expect(ids, isNot(contains(id)));
+        expect(
+          stateOf(c.read(decisionsProvider).value!, id),
+          DecisionState.trashed,
+        );
+      }
+      expect(ids, hasLength(photos.length - 2));
+      expect(find.byType(PhotoThumb), findsNWidgets(photos.length - 2));
+    },
+  );
 
   testWidgets('다시 읽는 중에 보낸 사진은 다 읽은 뒤에도 다시 나타나지 않는다 (UX-84)', (tester) async {
     final lib = _ReloadingLibrary(photos);
@@ -3106,24 +3112,28 @@ void main() {
     expect(ids, hasLength(photos.length - 2)); // 보내지 않은 사진은 그대로
   });
 
-  testWidgets('기록 저장이 실패해도(저장 공간 가득) 휴지통으로 간 사진은 보냈다고 알리고 그리드에서 뺀다 (2026-10-31 S-2)', (
-    tester,
-  ) async {
-    await pump(
-      tester,
-      SortScreen(kind: SortKind.singles, group: group),
-      store: _FullStore(),
-    );
-    await tester.tap(find.byType(XToggle).at(0));
-    await tester.tap(find.byType(XToggle).at(1));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('2장 휴지통으로'));
-    await tester.pumpAndSettle();
-    expect(find.textContaining(RegExp(r'✓ 2장 · .+ 휴지통으로 보냈어요')), findsOneWidget);
-    expect(find.textContaining('보내지 못했어요'), findsNothing);
-    expect(find.byType(XToggle), findsNWidgets(photos.length - 2));
-    await flush(tester);
-  });
+  testWidgets(
+    '기록 저장이 실패해도(저장 공간 가득) 휴지통으로 간 사진은 보냈다고 알리고 그리드에서 뺀다 (2026-10-31 S-2)',
+    (tester) async {
+      await pump(
+        tester,
+        SortScreen(kind: SortKind.singles, group: group),
+        store: _FullStore(),
+      );
+      await tester.tap(find.byType(XToggle).at(0));
+      await tester.tap(find.byType(XToggle).at(1));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('2장 휴지통으로'));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(RegExp(r'✓ 2장 · .+ 휴지통으로 보냈어요')),
+        findsOneWidget,
+      );
+      expect(find.textContaining('보내지 못했어요'), findsNothing);
+      expect(find.byType(XToggle), findsNWidgets(photos.length - 2));
+      await flush(tester);
+    },
+  );
 
   testWidgets('기록을 쓰는 사이 다시 읽기가 끝나도 보낸 사진은 "휴지통으로 보냄"으로 남는다 (2026-10-31 S-2)', (
     tester,
@@ -3166,6 +3176,122 @@ void main() {
       DecisionState.trashed,
     );
   });
+
+  // 한 번에 보내는 장수 (2026-10-31 S-3)
+  {
+    final many = [
+      for (var i = 0; i < maxSendAtOnce + 5; i++)
+        PhotoMeta(
+          id: 'm$i',
+          takenAt: DateTime(2026, 9, 1, 10).add(Duration(minutes: i)),
+          width: 100,
+          height: 100,
+        ),
+    ];
+
+    testWidgets(
+      '[휴지통으로]는 앞의 2천 장만 보내고 나머지는 X 그대로 + 한 줄, 정확도 기록에 거절로 남지 않는다 (S-3)',
+      (tester) async {
+        final shots = DayGroup(
+          id: 'shots',
+          kind: DayGroupKind.screenshots,
+          photos: many,
+        );
+        final store = MemoryStore();
+        await pump(
+          tester,
+          SortScreen(kind: SortKind.screenshots, group: shots),
+          store: store,
+        );
+        await tester.tap(find.text('전체 선택'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('2,005장 휴지통으로'));
+        await tester.pumpAndSettle();
+        expect(find.textContaining('나머지 5장은 X 그대로'), findsOneWidget);
+        expect(find.text('5장 휴지통으로'), findsOneWidget);
+        final c = ProviderScope.containerOf(
+          tester.element(find.byType(SortScreen)),
+        );
+        final d = c.read(decisionsProvider).value!;
+        expect(
+          many.where((p) => stateOf(d, p.id) == DecisionState.trashed),
+          hasLength(maxSendAtOnce),
+        );
+        // 남은 5장은 보였지만 아직 정하지 않은 사진: "안 보냄"으로 남지 않는다
+        final picks = await store.loadPicks();
+        expect(picks.where((p) => !p.sent), isEmpty);
+        await flush(tester);
+      },
+    );
+
+    testWidgets('길게 눌러 끝내기도 일부만 보냈으면 화면을 나가지 않는다 (S-3)', (tester) async {
+      await pump(
+        tester,
+        Builder(
+          builder: (context) => TextButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => SortScreen(
+                  kind: SortKind.singles,
+                  group: DayGroup(
+                    id: 'singles',
+                    kind: DayGroupKind.singles,
+                    photos: many,
+                  ),
+                ),
+              ),
+            ),
+            child: const Text('열기'),
+          ),
+        ),
+      );
+      await tester.tap(find.text('열기'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('전체 선택'));
+      await tester.pumpAndSettle();
+      final g = await tester.startGesture(
+        tester.getTopRight(find.byType(SortScreen)) + const Offset(-60, 140),
+      );
+      for (var i = 0; i < 5; i++) {
+        await tester.pump(const Duration(milliseconds: 400));
+      }
+      await g.up();
+      await tester.pumpAndSettle();
+      expect(find.text('2,000장 휴지통으로'), findsOneWidget);
+      await tester.tap(find.text('휴지통으로'));
+      await tester.pumpAndSettle();
+      expect(find.byType(SortScreen), findsOneWidget);
+      expect(find.text('5장 휴지통으로'), findsOneWidget);
+      await flush(tester);
+    });
+
+    testWidgets('[Cortex로]도 앞의 2천 장만 보내고 창에 한 줄 (S-3)', (tester) async {
+      final shots = DayGroup(
+        id: 'shots',
+        kind: DayGroupKind.screenshots,
+        photos: many,
+      );
+      final handoff = _FakeHandoff();
+      await pump(
+        tester,
+        SortScreen(kind: SortKind.screenshots, group: shots),
+        extra: [
+          cortexInstalledProvider.overrideWith((ref) async => true),
+          handoffProvider.overrideWithValue(handoff),
+        ],
+      );
+      await tester.tap(find.text('전체 선택'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cortex로'));
+      await tester.pumpAndSettle();
+      expect(find.text('2,000장을 Cortex로 보낼까요?'), findsOneWidget);
+      expect(find.textContaining('나머지 5장은 X 그대로'), findsOneWidget);
+      await tester.tap(find.text('보내기'));
+      await tester.pumpAndSettle();
+      expect(handoff.sent, hasLength(maxSendAtOnce));
+      await flush(tester);
+    });
+  }
 
   // 이번 달 코인을 다 쓴 상태
   MemoryProVault noCoins() => MemoryProVault(
@@ -3326,54 +3452,56 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('매달 알림: 테스트 동안 무료면 묻지 않고, 설정에서 켜면 돈 이야기 없이 Pro와 같은 글로 (B2-B, N1-B)', (
-    tester,
-  ) async {
-    final notices = DemoNotices();
-    await pump(
-      tester,
-      SortScreen(kind: SortKind.singles, group: group),
-      notices: notices,
-      testFree: true,
-      vault: noCoins(),
-    );
-    await tester.tap(find.byType(XToggle).at(0));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('1장 휴지통으로'));
-    await tester.pumpAndSettle();
-    expect(find.text('코인이 다시 생기면 알려 드릴까요?'), findsNothing);
-    await flush(tester);
-    await pump(
-      tester,
-      const SettingsScreen(),
-      notices: notices,
-      testFree: true,
-    );
-    await tester.tap(find.byType(Switch));
-    await tester.pumpAndSettle();
-    expect(notices.scheduled?.title, '지난달 사진 묶음이 기다려요');
-    // 정식 출시 뒤 앱을 열기 전에 와도 틀리지 않게 "무료" 이야기는 넣지 않는다 (N1-B)
-    expect(notices.scheduled?.body, '추천을 보고 한 번에 휴지통으로 보낼 수 있어요');
-    await flush(tester);
-  });
+  testWidgets(
+    '매달 알림: 테스트 동안 무료면 묻지 않고, 설정에서 켜면 돈 이야기 없이 Pro와 같은 글로 (B2-B, N1-B)',
+    (tester) async {
+      final notices = DemoNotices();
+      await pump(
+        tester,
+        SortScreen(kind: SortKind.singles, group: group),
+        notices: notices,
+        testFree: true,
+        vault: noCoins(),
+      );
+      await tester.tap(find.byType(XToggle).at(0));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('1장 휴지통으로'));
+      await tester.pumpAndSettle();
+      expect(find.text('코인이 다시 생기면 알려 드릴까요?'), findsNothing);
+      await flush(tester);
+      await pump(
+        tester,
+        const SettingsScreen(),
+        notices: notices,
+        testFree: true,
+      );
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+      expect(notices.scheduled?.title, '지난달 사진 묶음이 기다려요');
+      // 정식 출시 뒤 앱을 열기 전에 와도 틀리지 않게 "무료" 이야기는 넣지 않는다 (N1-B)
+      expect(notices.scheduled?.body, '추천을 보고 한 번에 휴지통으로 보낼 수 있어요');
+      await flush(tester);
+    },
+  );
 
-  testWidgets('매달 알림: 앱을 켤 때 Pro를 다 읽은 뒤 글을 맞춰, Pro에게 코인 글이 가지 않는다 (리뷰 10-30 S-1)', (
-    tester,
-  ) async {
-    // 지난번엔 코인을 쓰다가 Pro를 산 사람: 예약된 글은 아직 코인 글
-    final notices = DemoNotices()
-      ..scheduled = (title: '이번 달 코인 3개가 다시 생겼어요', body: '', channel: '');
-    await pump(
-      tester,
-      const RootScreen(),
-      notices: notices,
-      vault: MemoryProVault(const ProState(lifetime: true)),
-    );
-    await tester.pumpAndSettle();
-    expect(notices.scheduled?.title, '지난달 사진 묶음이 기다려요');
-    expect(notices.scheduled?.body, '추천을 보고 한 번에 휴지통으로 보낼 수 있어요');
-    await flush(tester);
-  });
+  testWidgets(
+    '매달 알림: 앱을 켤 때 Pro를 다 읽은 뒤 글을 맞춰, Pro에게 코인 글이 가지 않는다 (리뷰 10-30 S-1)',
+    (tester) async {
+      // 지난번엔 코인을 쓰다가 Pro를 산 사람: 예약된 글은 아직 코인 글
+      final notices = DemoNotices()
+        ..scheduled = (title: '이번 달 코인 3개가 다시 생겼어요', body: '', channel: '');
+      await pump(
+        tester,
+        const RootScreen(),
+        notices: notices,
+        vault: MemoryProVault(const ProState(lifetime: true)),
+      );
+      await tester.pumpAndSettle();
+      expect(notices.scheduled?.title, '지난달 사진 묶음이 기다려요');
+      expect(notices.scheduled?.body, '추천을 보고 한 번에 휴지통으로 보낼 수 있어요');
+      await flush(tester);
+    },
+  );
 
   testWidgets('설정의 매달 알림: 폰 설정에서 끄고 돌아오면 꺼짐으로 보인다 (B2-B)', (tester) async {
     final notices = DemoNotices();

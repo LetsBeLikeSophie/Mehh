@@ -812,6 +812,27 @@ class L10nEn extends L10n {
   }
 
   @override
+  String sendLimitLeft(int count, int left) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+    final intl.NumberFormat leftNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String leftString = leftNumberFormat.format(left);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      left,
+      locale: localeName,
+      other:
+          'Up to $countString at a time, so $leftString more stay marked. Tap again to send them.',
+      one:
+          'Up to $countString at a time, so 1 more stays marked. Tap again to send it.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get later => 'Later';
 
   @override

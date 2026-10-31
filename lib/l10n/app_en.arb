@@ -168,6 +168,7 @@
   "cortexGotBody": "Cortex analyzes them in the background. You can close the app.\nMove these photos to trash?",
   "cortexGotKept": "{kept, plural, =1{1 Cortex didn't get stays as is.} other{{kept} Cortex didn't get stay as is.}}",
   "cortexGotUnmarked": "{count, plural, =1{The 1 you switched to keep stays as is.} other{The {count} you switched to keep stay as is.}}",
+  "sendLimitLeft": "{left, plural, =1{Up to {count} at a time, so 1 more stays marked. Tap again to send it.} other{Up to {count} at a time, so {left} more stay marked. Tap again to send them.}}",
   "later": "Later",
   "focusFinishNone": "Nothing to clean up. Finish?",
   "focusKeepLooking": "Keep looking",

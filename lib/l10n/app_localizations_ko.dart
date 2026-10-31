@@ -669,6 +669,19 @@ class L10nKo extends L10n {
   }
 
   @override
+  String sendLimitLeft(int count, int left) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+    final intl.NumberFormat leftNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String leftString = leftNumberFormat.format(left);
+
+    return '한 번에 $countString장까지라 나머지 $leftString장은 X 그대로예요. 한 번 더 누르면 돼요.';
+  }
+
+  @override
   String get later => '나중에';
 
   @override

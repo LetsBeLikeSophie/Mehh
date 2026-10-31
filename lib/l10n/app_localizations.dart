@@ -1105,6 +1105,12 @@ abstract class L10n {
   /// **'킵으로 바꾼 {count}장은 그대로 둬요.'**
   String cortexGotUnmarked(int count);
 
+  /// No description provided for @sendLimitLeft.
+  ///
+  /// In ko, this message translates to:
+  /// **'한 번에 {count}장까지라 나머지 {left}장은 X 그대로예요. 한 번 더 누르면 돼요.'**
+  String sendLimitLeft(int count, int left);
+
   /// No description provided for @later.
   ///
   /// In ko, this message translates to:

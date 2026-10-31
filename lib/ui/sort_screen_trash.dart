@@ -10,7 +10,7 @@ extension _Trash on _SortScreenState {
     List<String> order,
   ) async {
     final l = context.l;
-    final n = marked.length;
+    final n = marked.length.clamp(0, maxSendAtOnce);
     final ok = await askMehh(
       context,
       // 제목 = 아래 버튼과 같은 말 "N장 휴지통으로" (2026-10-24 Sophie: 반복되는 말 없이)
@@ -24,7 +24,8 @@ extension _Trash on _SortScreenState {
     );
     if (!ok || !mounted) return;
     if (n > 0 && !await _send(marked, src, order)) return;
-    if (!mounted) return;
+    // 한 번에 다 못 보냈으면 남은 X를 보도록 나가지 않는다 (S-3)
+    if (!mounted || marked.length > maxSendAtOnce) return;
     // 이 정리 화면만 닫는다. Pro 안내에서 "지금 무료로"를 눌러 다른 화면이 위에 열렸으면
     // 그 화면은 두고 아래의 이 화면만 뺀다 (UX-52: maybePop이 새로 연 캡처 화면을 닫았다)
     final route = ModalRoute.of(context);
@@ -42,8 +43,25 @@ extension _Trash on _SortScreenState {
     SortSource src,
     List<String> shown,
   ) async {
-    if (!await _confirmSceneLoss(ids, src) || !mounted) return false;
-    return _trashAndAfter(ids, src, shown);
+    // 한 번에 [maxSendAtOnce]장까지. 나머지는 X 그대로 두고, 보이긴 했지만 아직 정하지 않은
+    // 사진이라 정확도 기록의 "거절"로 세지 않게 shown에서 뺀다 (리뷰 2026-10-31 S-3)
+    final now = ids.length > maxSendAtOnce
+        ? ids.sublist(0, maxSendAtOnce)
+        : ids;
+    final rest = ids.length - now.length;
+    final later = ids.skip(now.length).toSet();
+    if (!await _confirmSceneLoss(now, src) || !mounted) return false;
+    return _trashAndAfter(
+      now,
+      src,
+      rest == 0
+          ? shown
+          : [
+              for (final id in shown)
+                if (!later.contains(id)) id,
+            ],
+      left: rest,
+    );
   }
 
   /// 휴지통으로 보내고 그 뒤 할 일: 정확도 기록, 잠긴 묶음 "다 봤어요"(R3), Pro 안내.
@@ -55,8 +73,9 @@ extension _Trash on _SortScreenState {
   Future<bool> _trashAndAfter(
     List<String> ids,
     SortSource src,
-    List<String> shown,
-  ) async {
+    List<String> shown, {
+    int left = 0,
+  }) async {
     final markedBefore = _markedNow; // 보내면 다시 그려져 바뀌므로 먼저 잡아 둔다
     _set(() => _busy = true);
     // 정리를 끝낸 순간에 Pro 안내 (Pro가 아니면 하루 한 번까지). 안내 시트가 아래 알림을 덮으니
@@ -69,9 +88,12 @@ extension _Trash on _SortScreenState {
       ref,
       ids,
       quiet: nudge,
-      doneNote: widget.kind == SortKind.videos
-          ? (n, size) => context.l.trashedVideos(n, size)
-          : null,
+      doneNote: (n, size) => [
+        widget.kind == SortKind.videos
+            ? context.l.trashedVideos(n, size)
+            : context.l.trashed(n, size),
+        if (left > 0) context.l.sendLimitLeft(maxSendAtOnce, left),
+      ].join('\n'),
     );
     if (n > 0) await _recordPicks(ids, src, shown, markedBefore);
     // 잠긴 묶음을 직접 정리해 보냈으면 다음부터 "다 봤어요" (2026-10-22 Sophie R3-A)
