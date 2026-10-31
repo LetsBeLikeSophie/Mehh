@@ -48,4 +48,4 @@ const privacyPolicyUrl = 'https://itssophie.dev/mehh/privacy.html';
 /// 이용약관·환불 안내 (web/terms.html). 설정과 Pro 안내에서 연결 (2026-10-29 Sophie B3-B)
 const termsUrl = 'https://itssophie.dev/mehh/terms.html';
 
-const supportEmail = 'meh@itssophie.dev';
+const supportEmail = 'mehh@itssophie.dev';

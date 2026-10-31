@@ -12,7 +12,7 @@ Sophie가 Play Console에서 그대로 붙여 넣을 수 있게 정리한 문서
 | 폰 스크린샷 2~8장 | `docs/store/screenshots-ko/` 5장 (1080×1920) | 에뮬레이터 + 직접 그린 가짜 사진. '테스트 무료'가 보이니 정식 출시 전 다시 찍기. 영어 스크린샷·캡션(`screenshots-en/`)도 정식 출시 전 필수 (2026-10-30 Sophie S2-A) |
 | 개인정보처리방침 | https://itssophie.dev/mehh/privacy.html | 한국어·영어 |
 | 이용약관·환불 | https://itssophie.dev/mehh/terms.html | 한국어·영어 (앱 설정·Pro 안내에서 연결, 2026-10-29 B3-B) |
-| 문의 메일 | meh@itssophie.dev | |
+| 문의 메일 | mehh@itssophie.dev | |
 
 추천 스크린샷 순서 (폰에서 찍기, 사진이 많은 폰이 좋다): ① 홈(정리할 묶음 N개 + 용량 막대) ② 그날의 묶음에서 [추천 보기] 켠 뒤(X와 이유: 비슷한 컷·흔들림·눈 감음) ③ 크게 보기(위 정리·아래 킵) ④ 캡처 추천 ⑤ 큰 동영상 ⑥ 설정의 "사진과 기록은 이 폰에만 있어요".
 
@@ -62,7 +62,7 @@ Sophie가 Play Console에서 그대로 붙여 넣을 수 있게 정리한 문서
 모든 묶음의 추천 정리를 바로 봐요. 평생 이용권(한 번 구매).
 
 이용약관·환불: https://itssophie.dev/mehh/terms.html
-문의: meh@itssophie.dev
+문의: mehh@itssophie.dev
 ```
 
 ### English
@@ -100,11 +100,11 @@ All analysis — including the closed-eye check — happens on your phone. No up
 ■ Mehh Pro
 See picks for every set right away. Lifetime (one-time) or 1 year (auto-renews, cancel anytime).
 
-Contact: meh@itssophie.dev
+Contact: mehh@itssophie.dev
 ```
 
 - 카테고리: **사진** · 태그: 사진 정리, 갤러리, 저장공간
-- 연락처 이메일: meh@itssophie.dev · 웹사이트: https://itssophie.dev/mehh/
+- 연락처 이메일: mehh@itssophie.dev · 웹사이트: https://itssophie.dev/mehh/
 
 ## 3. 앱 콘텐츠 설문
 
@@ -159,7 +159,7 @@ These features need to compare every photo with every other photo (for example, 
 
 ## 7. 출시 트랙
 
-> 2026-10-25: 비공개 테스트(Alpha) 1.17.2 (60) 검토 제출. 대한민국, 테스터 목록 'Soph'+'테스터 목록'(45명), 의견 meh@itssophie.dev. AI 라벨: 아이콘·그래픽·홈 스크린샷.
+> 2026-10-25: 비공개 테스트(Alpha) 1.17.2 (60) 검토 제출. 대한민국, 테스터 목록 'Soph'+'테스터 목록'(45명), 의견 mehh@itssophie.dev. AI 라벨: 아이콘·그래픽·홈 스크린샷.
 
 1. **비공개 테스트** 트랙 만들기 → 테스터 이메일 목록(12명 이상) → AAB 업로드 → 검토 제출. 테스트 동안은 앱 안에서 그날의 묶음이 무료(`closedTestFree`), 인앱 상품 없어도 됨
 2. AAB가 올라가면 **수익 창출 > 인앱 상품**:
