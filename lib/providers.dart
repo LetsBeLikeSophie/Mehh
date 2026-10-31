@@ -44,8 +44,18 @@ part 'providers/status.dart';
 const isDemo = kIsWeb;
 
 final photoLibraryProvider = Provider<PhotoLibrary>(
-  (ref) => isDemo ? DemoPhotoLibrary() : PhotoLibrary(),
+  (ref) => isDemo
+      ? DemoPhotoLibrary()
+      : PhotoLibrary(bulkSizes: () => _mediaSizes(ref.read(deviceProvider))),
 );
+
+/// 사진·동영상 크기를 기기에 한 번에 (둘 다 못 주면 null)
+Future<Map<String, int>?> _mediaSizes(Device d) async {
+  final images = await d.imageSizes();
+  final videos = await d.videoSizes();
+  if (images == null && videos == null) return null;
+  return {...?images, ...?videos};
+}
 
 final placeNamerProvider = Provider<PlaceNamer>(
   (ref) => isDemo

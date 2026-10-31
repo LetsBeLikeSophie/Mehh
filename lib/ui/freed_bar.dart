@@ -28,27 +28,21 @@ class FreedBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final photos = ref.watch(photoBytesProvider).value ?? 0;
     final freed = ref.watch(freedThisMonthProvider).value ?? 0;
-    final selectedIds = {...?selected};
-    // 추천 정리 = 앱 추천 + 선택해 둔 것. 선택해도 줄지 않는다(선택은 그 안의 일부, 2026-10-24 Sophie)
-    final pickIds = {
-      ...ref.watch(cleanableIdsProvider),
-      ...ref.watch(selectedIdsProvider),
-      ...selectedIds,
-    };
-    final selectedBytes =
-        ref
-            .watch(idsBytesProvider((selectedIds.toList()..sort()).join(',')))
-            .value ??
+    int bytesOf(Iterable<String> ids) =>
+        ref.watch(idsBytesProvider((ids.toList()..sort()).join(','))).value ??
         0;
-    final picks =
-        ref
-            .watch(idsBytesProvider((pickIds.toList()..sort()).join(',')))
-            .value ??
-        0;
+    // 정리 화면은 선택한 것만 (추천 정리 칸 없음): 추천 합계는 보지도 계산하지도 않는다 (리뷰 2026-10-31 S-4)
+    final selBytes = selected == null ? 0 : bytesOf({...selected!});
+    // 홈: 추천 정리 = 앱 추천 + 선택해 둔 것. 선택해도 줄지 않는다(선택은 그 안의 일부, 2026-10-24 Sophie)
+    final picks = selected != null
+        ? 0
+        : bytesOf({
+            ...ref.watch(cleanableIdsProvider),
+            ...ref.watch(selectedIdsProvider),
+          });
     if (photos == 0) return const SizedBox.shrink();
-    // 정리 화면은 선택한 것만 (추천 정리 칸 없음)
-    final rec = selected == null ? picks.clamp(0, photos) : 0;
-    final sel = selectedBytes.clamp(0, photos);
+    final rec = picks.clamp(0, photos);
+    final sel = selBytes.clamp(0, photos);
     final l = context.l;
     const small = TextStyle(fontSize: MehhText.label);
     return Padding(

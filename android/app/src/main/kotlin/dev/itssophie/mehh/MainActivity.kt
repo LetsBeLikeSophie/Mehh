@@ -42,6 +42,7 @@ class MainActivity : FlutterActivity() {
                 when (call.method) {
                     "photoBytes" -> result.success(photoBytes())
                     "videoSizes" -> result.success(videoSizes())
+                    "imageSizes" -> result.success(imageSizes())
                     "openGallery" -> result.success(openGallery())
                     "openVideo" -> result.success(openVideo(call.argument<String>("id")))
                     else -> result.notImplemented()
@@ -50,10 +51,15 @@ class MainActivity : FlutterActivity() {
     }
 
     /// 동영상 id → 파일 크기 (큰 동영상 정리, 한 번의 조회로)
-    private fun videoSizes(): Map<String, Long> {
+    private fun videoSizes(): Map<String, Long> = sizes(MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
+
+    /// 사진 id → 파일 크기 (용량 막대, 한 번의 조회로. 리뷰 2026-10-31 S-4)
+    private fun imageSizes(): Map<String, Long> = sizes(MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+
+    private fun sizes(uri: android.net.Uri): Map<String, Long> {
         val out = HashMap<String, Long>()
         contentResolver.query(
-            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+            uri,
             arrayOf(MediaStore.MediaColumns._ID, MediaStore.MediaColumns.SIZE),
             null, null, null,
         )?.use { c ->

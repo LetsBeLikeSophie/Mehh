@@ -18,10 +18,15 @@ class Device {
   }
 
   /// 동영상 id → 파일 크기 (한 번에). 모르면 null
-  Future<Map<String, int>?> videoSizes() async {
+  Future<Map<String, int>?> videoSizes() => _sizes('videoSizes');
+
+  /// 사진 id → 파일 크기 (한 번에). 모르면 null
+  Future<Map<String, int>?> imageSizes() => _sizes('imageSizes');
+
+  Future<Map<String, int>?> _sizes(String method) async {
     if (kIsWeb || !Platform.isAndroid) return null;
     try {
-      final m = await _channel.invokeMethod<Map>('videoSizes');
+      final m = await _channel.invokeMethod<Map>(method);
       return m?.map((k, v) => MapEntry(k.toString(), (v as num).toInt()));
     } catch (_) {
       return null;

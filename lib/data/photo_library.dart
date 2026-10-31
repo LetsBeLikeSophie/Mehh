@@ -19,6 +19,11 @@ const _permissionOption = PermissionRequestOption(
 
 /// 기기 사진첩 접근. 동영상은 "큰 동영상"에만 쓴다([loadVideos]).
 class PhotoLibrary {
+  PhotoLibrary({this.bulkSizes});
+
+  /// 기기에 한 번에 묻는 사진·동영상 크기 (안드로이드 MediaStore 조회 한 번). 모르면 null
+  final Future<Map<String, int>?> Function()? bulkSizes;
+
   final _locationCache = JsonCache('locations.json');
 
   /// id → 플랫폼 사진 객체 (썸네일 표시용)
@@ -195,6 +200,16 @@ class PhotoLibrary {
   /// 파일 크기 (바이트). 실패하면 0. 한 번 읽은 크기는 기억한다 (막대가 자주 다시 묻는다)
   Future<Map<String, int>> fileSizes(Iterable<String> ids) async {
     final out = <String, int>{};
+    // 처음 한 번은 기기에 한꺼번에 묻는다. 사진마다 따로 묻던 것 (리뷰 2026-10-31 S-4).
+    // 거기 없는 사진(그 뒤 찍은 것 등)이나 못 주는 기기는 지금처럼 하나씩
+    if (bulkSizes != null && ids.any((id) => !_sizes.containsKey(id))) {
+      final bulk = await (_bulk ??= bulkSizes!());
+      if (bulk != null) {
+        for (final e in bulk.entries) {
+          _sizes.putIfAbsent(e.key, () => e.value);
+        }
+      }
+    }
     await Future.wait(
       ids.map((id) async {
         if (_sizes[id] case final n?) {
@@ -212,6 +227,7 @@ class PhotoLibrary {
   }
 
   final _sizes = <String, int>{};
+  Future<Map<String, int>?>? _bulk;
 
   /// 휴대폰 휴지통으로 보낸다. 여러 장을 한 번의 확인 창으로.
   /// 안드로이드는 11 이상만 지원해서(minSdk 30) 항상 휴지통이 있다.

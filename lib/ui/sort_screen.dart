@@ -343,12 +343,13 @@ class _SortScreenState extends ConsumerState<SortScreen>
     final picks = src.locked > 0
         ? src.locked + src.suggested.length
         : src.suggested.length;
+    final orderSet = order.toSet();
     final sections = widget.kind == SortKind.duplicates
         ? [
             for (final u in src.units)
               [
                 for (final id in u)
-                  if (order.contains(id)) id,
+                  if (orderSet.contains(id)) id,
               ],
           ].where((u) => u.isNotEmpty).toList()
         : [order];
@@ -357,7 +358,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
         ref.watch(cortexSentProvider).value ?? const <String, bool>{};
 
     Widget tile(String id) {
-      final out = marked.contains(id);
+      final out = markedSet.contains(id);
       final tag = shownTag(
         src,
         id,
