@@ -3265,7 +3265,9 @@ void main() {
       await flush(tester);
     });
 
-    testWidgets('[Cortex로]도 앞의 2천 장만 보내고 창에 한 줄 (S-3)', (tester) async {
+    testWidgets('[Cortex로]는 200장까지, 한 번 더 누르면 아직 안 보낸 사진부터 (C1-B)', (
+      tester,
+    ) async {
       final shots = DayGroup(
         id: 'shots',
         kind: DayGroupKind.screenshots,
@@ -3284,11 +3286,25 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Cortex로'));
       await tester.pumpAndSettle();
-      expect(find.text('2,000장을 Cortex로 보낼까요?'), findsOneWidget);
-      expect(find.textContaining('나머지 5장은 X 그대로'), findsOneWidget);
+      expect(find.text('200장을 Cortex로 보낼까요?'), findsOneWidget);
+      expect(
+        find.textContaining('한 번에 200장까지라 나머지 1,805장은 X 그대로'),
+        findsOneWidget,
+      );
       await tester.tap(find.text('보내기'));
       await tester.pumpAndSettle();
-      expect(handoff.sent, hasLength(maxSendAtOnce));
+      expect(handoff.sent, hasLength(maxCortexAtOnce));
+      final first = {...handoff.sent};
+      handoff.sent.clear();
+      expect(find.text('2,005장 휴지통으로'), findsOneWidget); // X는 그대로
+
+      await tester.tap(find.text('Cortex로'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('이미 Cortex로 보낸'), findsNothing);
+      await tester.tap(find.text('보내기'));
+      await tester.pumpAndSettle();
+      expect(handoff.sent, hasLength(maxCortexAtOnce));
+      expect(first.intersection(handoff.sent.toSet()), isEmpty);
       await flush(tester);
     });
   }

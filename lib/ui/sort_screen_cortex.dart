@@ -86,14 +86,16 @@ extension _Cortex on _SortScreenState {
 
   /// 여러 장을 한 번에 Cortex로 보낸다. Cortex가 받으면 지울지 묻고, 분석은 Cortex가 뒤에서.
   Future<void> _sendCortex(List<String> all) async {
-    // 한 번에 [maxSendAtOnce]장까지, 나머지는 X 그대로 (리뷰 2026-10-31 S-3)
-    final ids = all.length > maxSendAtOnce
-        ? all.sublist(0, maxSendAtOnce)
-        : all;
-    final left = all.length - ids.length;
     // 매번 한 줄로 묻는다: "N장을 Cortex로 보낼까요?" (UX-43, 2026-10-24 Sophie: 지우기는 받은 뒤에 묻는다)
     final l = context.l;
     final sent = ref.read(cortexSentProvider).value ?? const {};
+    // 한 번에 [maxCortexAtOnce]장까지, 나머지는 X 그대로 (2026-10-31 Sophie C1-B).
+    // 아직 안 보낸 사진부터: 보낸 사진도 X로 남으니 앞에서부터 자르면 한 번 더 눌러도 같은 사진만 간다
+    final ids = [
+      ...all.where((id) => !sent.containsKey(id)),
+      ...all.where(sent.containsKey),
+    ].take(maxCortexAtOnce).toList();
+    final left = all.length - ids.length;
     // 고른 사진은 다 보낸다. 전에 보낸 사진이 섞여 있으면 한 줄로 알린다(UX-57).
     // Cortex에서 지웠을 수도 있어서 Mehh가 빼지 않는다 (2026-10-30 Sophie, C3-B 대신)
     final again = ids.where(sent.containsKey).length;
@@ -104,7 +106,7 @@ extension _Cortex on _SortScreenState {
       body: [
         l.cortexAskNote,
         if (again > 0) l.cortexAskResend(again),
-        if (left > 0) l.sendLimitLeft(maxSendAtOnce, left),
+        if (left > 0) l.sendLimitLeft(maxCortexAtOnce, left),
       ].join('\n'),
       no: l.cancel,
       yes: l.cortexAskYes,

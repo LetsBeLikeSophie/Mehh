@@ -31,10 +31,13 @@ const finishHintsTotal = 5;
 const focusHintShown = Duration(seconds: 3);
 
 /// Cortex 스토어 주소. Cortex가 없을 때 [Cortex로]를 누르면 여기로 (비우면 버튼을 숨긴다)
-/// 한 번에 휴지통·Cortex로 보내는 최대 장수. 안드로이드가 한 번에 넘길 수 있는 양(Binder)에
+/// 한 번에 휴지통으로 보내는 최대 장수. 안드로이드가 한 번에 넘길 수 있는 양(Binder)에
 /// 한계가 있어 수천 장이면 실패한다. 나머지는 X 그대로 두고 한 번 더 누르게 (리뷰 2026-10-31 S-3).
-/// Cortex 상한을 따로 낮출지는 Sophie 결정 대기(C1): 그때 Cortex 쪽만 다른 값으로
 const maxSendAtOnce = 2000;
+
+/// 한 번에 Cortex로 보내는 최대 장수. 실수로 수천 장이 AI 앱으로 가지 않게, 모바일 데이터·
+/// Cortex 무료 한도·AI 비용 때문에 휴지통보다 낮다 (2026-10-31 Sophie C1-B)
+const maxCortexAtOnce = 200;
 
 const cortexStoreUrl =
     'https://play.google.com/store/apps/details?id=dev.itssophie.cortex';
