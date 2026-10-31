@@ -797,6 +797,21 @@ class L10nEn extends L10n {
   }
 
   @override
+  String cortexGotUnmarked(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'The $countString you switched to keep stay as is.',
+      one: 'The 1 you switched to keep stays as is.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get later => 'Later';
 
   @override

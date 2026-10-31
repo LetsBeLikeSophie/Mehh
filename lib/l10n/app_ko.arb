@@ -461,6 +461,7 @@
   "cortexGotTitle": "✓ Cortex가 {count}장 받았어요",
   "cortexGotBody": "분석은 Cortex가 뒤에서 해요. 앱을 닫아도 돼요.\n이 사진을 휴지통으로 보낼까요?",
   "cortexGotKept": "Cortex가 받지 못한 {kept}장은 그대로 둬요.",
+  "cortexGotUnmarked": "킵으로 바꾼 {count}장은 그대로 둬요.",
   "later": "나중에",
   "focusFinishNone": "정리할 사진이 없어요. 끝낼까요?",
   "focusKeepLooking": "계속 보기",
@@ -468,6 +469,14 @@
   "focusHint": "길게 누르면 정리를 끝낼 수 있어요",
   "focusFinishSemantics": "정리 끝내기",
   "@cortexGotTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "@cortexGotUnmarked": {
     "placeholders": {
       "count": {
         "type": "int",

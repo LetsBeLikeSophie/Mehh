@@ -44,25 +44,44 @@ extension _Cortex on _SortScreenState {
   /// "✓ Cortex가 N장 받았어요 · 분석은 뒤에서 · 휴지통으로 보낼까요?" → 안드로이드 휴지통 확인 창
   /// [나중에]면 X는 그대로, 사진에 "Cortex로 보냄" 표시가 남는다
   Future<void> _askTrashAfterCortex(List<String> ids, {int kept = 0}) async {
+    // 받은 것은 다 "Cortex에 있음". 휴지통으로는 지금도 X인 사진만 (보낸 뒤 X를 끄면 킵, 리뷰 2026-10-31 S-1)
     await ref.read(cortexSentProvider.notifier).add(ids, got: true);
     if (!mounted) return;
+    final live = _stillMarked(ids);
+    if (live.isEmpty) return;
     final l = context.l;
     final ok = await askMehh(
       context,
       title: l.cortexGotTitle(ids.length),
-      body: kept > 0
-          ? '${l.cortexGotBody}\n${l.cortexGotKept(kept)}'
-          : l.cortexGotBody,
+      body: [
+        l.cortexGotBody,
+        if (kept > 0) l.cortexGotKept(kept),
+        if (live.length < ids.length)
+          l.cortexGotUnmarked(ids.length - live.length),
+      ].join('\n'),
       no: l.later,
       yes: l.toTrash,
     );
     if (!ok || !mounted) return;
+    // 창이 떠 있는 동안 X를 바꿨을 수도 있어서 한 번 더 본다
+    final now = _stillMarked(live);
+    if (now.isEmpty) return;
     final src = _src;
     if (src == null) {
-      await sendToTrash(context, ref, ids);
+      await sendToTrash(context, ref, now);
     } else {
-      await _trashAndAfter(ids, src, _order);
+      await _trashAndAfter(now, src, _order);
     }
+  }
+
+  /// [ids] 중 지금 X(정리할 사진)인 것
+  List<String> _stillMarked(List<String> ids) {
+    final decisions = ref.read(decisionsProvider).value ?? const {};
+    final src = _src ?? const SortSource(photos: []);
+    return [
+      for (final id in ids)
+        if (isMarked(id, decisions, src)) id,
+    ];
   }
 
   /// 여러 장을 한 번에 Cortex로 보낸다. Cortex가 받으면 지울지 묻고, 분석은 Cortex가 뒤에서.

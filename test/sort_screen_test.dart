@@ -2318,14 +2318,11 @@ void main() {
     expect(second.length, 2);
     expect(find.text('Cortex로 보냄'), findsNWidgets(3));
 
-    // 첫 묶음의 신호: 그 1장만 묻고, "0장" 알림도 "받지 못한" 줄도 없다
+    // 첫 묶음의 신호: 그 1장은 X를 꺼서 킵이라 묻지 않고, "0장" 알림도 없다 (2026-10-31 S-1)
     handoff.saved.add(CortexSaved(1, first.toSet()));
     await tester.pumpAndSettle();
-    expect(find.text('✓ Cortex가 1장 받았어요'), findsOneWidget);
-    expect(find.textContaining('받지 못한'), findsNothing);
+    expect(find.textContaining('받았어요'), findsNothing);
     expect(find.textContaining('0장만'), findsNothing);
-    await tester.tap(find.text('나중에'));
-    await tester.pumpAndSettle();
     // 둘째 묶음의 신호도 그대로 받는다
     handoff.saved.add(CortexSaved(2, second.toSet()));
     await tester.pumpAndSettle();
@@ -2334,6 +2331,57 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Cortex로 보냄'), findsNWidgets(3));
     expect(find.text('Cortex에 있음'), findsNothing);
+    await flush(tester);
+  });
+
+  testWidgets('Cortex: 보낸 뒤 X를 끈 사진은 받았다는 신호가 와도 휴지통으로 가지 않는다 (2026-10-31 S-1)', (
+    tester,
+  ) async {
+    final shots = DayGroup(
+      id: 'shots',
+      kind: DayGroupKind.screenshots,
+      photos: photos,
+    );
+    final handoff = _FakeHandoff();
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.screenshots, group: shots),
+      extra: [
+        cortexInstalledProvider.overrideWith((ref) async => true),
+        handoffProvider.overrideWithValue(handoff),
+      ],
+    );
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.tap(find.byType(XToggle).at(1));
+    await tester.pumpAndSettle();
+    await sendCortex(tester);
+    expect(handoff.sent, hasLength(2));
+    // 보낸 뒤 1장을 킵으로
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.pumpAndSettle();
+    handoff.saved.add(CortexSaved(2, handoff.sent.toSet()));
+    await tester.pumpAndSettle();
+    expect(find.text('✓ Cortex가 2장 받았어요'), findsOneWidget);
+    expect(find.textContaining('킵으로 바꾼 1장은 그대로'), findsOneWidget);
+    await tester.tap(find.text('휴지통으로'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('  3장'), findsOneWidget); // 4장 중 1장만 갔다
+    expect(find.text('Cortex로 보냄'), findsOneWidget); // 킵한 사진은 보낸 표시만
+    await tester.pump(const Duration(seconds: 9));
+    await tester.pumpAndSettle();
+
+    // 장수만 오는 예전 신호도 같다. 다 킵으로 바꿨으면 창 없이 끝
+    handoff.sent.clear();
+    await tester.tap(find.byType(XToggle).at(1));
+    await tester.pumpAndSettle();
+    await sendCortex(tester);
+    expect(handoff.sent, hasLength(1));
+    await tester.tap(find.byType(XToggle).at(1));
+    await tester.pumpAndSettle();
+    handoff.saved.add(const CortexSaved(1, null));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('받았어요'), findsNothing);
+    expect(find.textContaining('  3장'), findsOneWidget);
     await flush(tester);
   });
 

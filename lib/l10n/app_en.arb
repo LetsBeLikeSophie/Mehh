@@ -167,6 +167,7 @@
   "cortexGotTitle": "{count, plural, =1{✓ Cortex got 1} other{✓ Cortex got {count}}}",
   "cortexGotBody": "Cortex analyzes them in the background. You can close the app.\nMove these photos to trash?",
   "cortexGotKept": "{kept, plural, =1{1 Cortex didn't get stays as is.} other{{kept} Cortex didn't get stay as is.}}",
+  "cortexGotUnmarked": "{count, plural, =1{The 1 you switched to keep stays as is.} other{The {count} you switched to keep stay as is.}}",
   "later": "Later",
   "focusFinishNone": "Nothing to clean up. Finish?",
   "focusKeepLooking": "Keep looking",

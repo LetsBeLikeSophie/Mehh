@@ -60,7 +60,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
   /// 나중에 X를 꺼서 킵하면 추천에서 빠지므로, 누른 순간의 목록을 기억한다)
   final _picked = <String>{};
 
-  /// 손으로(X 버튼·끌어서·[전체 선택]) 고른 사진. Cortex로 보낼 수 있는 것 (C1)
+  /// 손으로(X 버튼·끌어서·[전체 선택]) 고른 사진 ([추천 보기] 켜짐 표시·정확도 기록용)
   final _chosen = <String>{};
 
   /// 화면에 보였던 이유 표시 (킵해서 사라진 표시도 기록에 남기려고)
@@ -69,7 +69,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
   /// 처음부터 X로 보였던 사진 (끄면 킵이 되어 목록에서 빠지므로 기억해 둔다)
   final _preMarkedSeen = <String>{};
 
-  /// Cortex로 보낸 캡처. Cortex가 다 읽은 뒤(Mehh로 돌아왔을 때) 휴지통으로 옮긴다.
+  /// 마지막으로 Cortex로 보낸 사진. 받았다는 신호가 오면 그중 아직 X인 것만 휴지통으로 보낼지 묻는다.
   List<String>? _sentToCortex;
 
   @override
@@ -651,7 +651,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
                       ),
                     ),
                   ),
-                  // 고른 캡처가 있으면 [휴지통으로] 옆에 작은 Cortex 버튼 (공유하기처럼, 2026-10-23 Sophie)
+                  // X로 표시된 사진이 있으면 [휴지통으로] 옆에 작은 Cortex 버튼 (공유하기처럼, 2026-10-23 Sophie)
                   // Cortex가 없어도 버튼은 보이고, 누르면 받으러 가기 (2026-10-25 Sophie)
                   if (cortexKind &&
                       (cortex || cortexStoreUrl.isNotEmpty) &&

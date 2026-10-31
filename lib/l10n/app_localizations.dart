@@ -1099,6 +1099,12 @@ abstract class L10n {
   /// **'Cortex가 받지 못한 {kept}장은 그대로 둬요.'**
   String cortexGotKept(int kept);
 
+  /// No description provided for @cortexGotUnmarked.
+  ///
+  /// In ko, this message translates to:
+  /// **'킵으로 바꾼 {count}장은 그대로 둬요.'**
+  String cortexGotUnmarked(int count);
+
   /// No description provided for @later.
   ///
   /// In ko, this message translates to:

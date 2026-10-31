@@ -660,6 +660,15 @@ class L10nKo extends L10n {
   }
 
   @override
+  String cortexGotUnmarked(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '킵으로 바꾼 $countString장은 그대로 둬요.';
+  }
+
+  @override
   String get later => '나중에';
 
   @override
