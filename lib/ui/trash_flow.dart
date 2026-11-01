@@ -29,9 +29,11 @@ Future<int> sendToTrash(
     }
     return 0;
   }
-  if (n > 0 && !quiet && context.mounted) {
+  if (n > 0 && context.mounted) {
     // 몇 장, 몇 MB를 보냈는지 (2026-10-23 Sophie: 홈의 "이번 달 N MB"가 뜻이 있게)
-    showNote(context, doneNote?.call(n, size) ?? context.l.trashed(n, size));
+    // quiet여도 글은 만든다: 부른 쪽이 안내를 못 띄우면 이 글을 대신 보인다
+    final note = doneNote?.call(n, size) ?? context.l.trashed(n, size);
+    if (!quiet) showNote(context, note);
   }
   return n;
 }

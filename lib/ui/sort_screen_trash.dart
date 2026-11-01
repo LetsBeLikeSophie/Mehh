@@ -75,28 +75,47 @@ extension _Trash on _SortScreenState {
     // 정리를 끝낸 순간에 Pro 안내 (Pro가 아니면 하루 한 번까지). 안내 시트가 아래 알림을 덮으니
     // 그때는 알림 대신 시트 첫 줄에 "30일 안에 되살릴 수 있어요"까지 넣는다 (UX 리뷰 2026-10-22)
     final pro = ref.read(proProvider.notifier);
-    final nudge = widget.kind == SortKind.day && await pro.canNudge();
-    if (!mounted) return false;
-    final n = await sendToTrash(
-      context,
-      ref,
-      ids,
-      quiet: nudge,
-      doneNote: (n, size) => [
-        widget.kind == SortKind.videos
-            ? context.l.trashedVideos(n, size)
-            : context.l.trashed(n, size),
-        if (left > 0) context.l.sendLimitLeft(maxSendAtOnce, left),
-      ].join('\n'),
-    );
-    if (n > 0) await _recordPicks(ids, src, decided, markedBefore);
-    // 잠긴 묶음을 직접 정리해 보냈으면 다음부터 "다 봤어요" (2026-10-22 Sophie R3-A)
-    if (n > 0 && src.locked > 0) {
-      await ref
-          .read(seenProvider.notifier)
-          .mark(decided.where((id) => !sent.contains(id)));
+    var nudge = false;
+    var n = 0;
+    var recorded = true;
+    String? done;
+    try {
+      nudge = widget.kind == SortKind.day && await pro.canNudge();
+      if (!mounted) return false;
+      n = await sendToTrash(
+        context,
+        ref,
+        ids,
+        quiet: nudge,
+        doneNote: (n, size) => done = [
+          widget.kind == SortKind.videos
+              ? context.l.trashedVideos(n, size)
+              : context.l.trashed(n, size),
+          if (left > 0) context.l.sendLimitLeft(maxSendAtOnce, left),
+        ].join('\n'),
+      );
+      if (n > 0) {
+        // 사진은 이미 갔다: 기록을 못 남겨도(저장 공간 가득) 화면이 잠기지 않는다 (리뷰 2026-11-01 S-2)
+        try {
+          await _recordPicks(ids, src, decided, markedBefore);
+          // 잠긴 묶음을 직접 정리해 보냈으면 다음부터 "다 봤어요" (2026-10-22 Sophie R3-A)
+          if (src.locked > 0) {
+            await ref
+                .read(seenProvider.notifier)
+                .mark(decided.where((id) => !sent.contains(id)));
+          }
+        } catch (_) {
+          recorded = false;
+        }
+      }
+    } finally {
+      if (mounted) _set(() => _busy = false);
     }
-    if (mounted) _set(() => _busy = false);
+    if (!recorded) {
+      // Pro 안내나 알림 묻기 대신, 보냈다는 말을 놓치지 않게 한 줄
+      if (nudge && mounted && done != null) showNote(context, done!);
+      return true;
+    }
     if (n > 0 && nudge && await pro.takeNudge() && mounted) {
       await showProSheet(context, lead: context.l.proNudge(n));
     } else if (n > 0 && mounted) {

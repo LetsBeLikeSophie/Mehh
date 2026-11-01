@@ -3185,6 +3185,89 @@ void main() {
     },
   );
 
+  testWidgets('정확도 기록이 실패해도(저장 공간 가득) 버튼이 다시 눌리고 남은 사진을 또 보낸다 (리뷰 11-01 S-2)', (
+    tester,
+  ) async {
+    final shots = DayGroup(
+      id: 'shots',
+      kind: DayGroupKind.screenshots,
+      photos: [
+        for (var i = 0; i < 3; i++)
+          PhotoMeta(
+            id: 's$i',
+            takenAt: DateTime.now().subtract(Duration(days: 200 + i)),
+            width: 100,
+            height: 200,
+            isScreenshot: true,
+          ),
+        PhotoMeta(
+          id: 'new',
+          takenAt: DateTime.now(),
+          width: 100,
+          height: 200,
+          isScreenshot: true,
+        ),
+      ],
+    );
+    final store = _PicksFullStore();
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.screenshots, group: shots),
+      store: store,
+    );
+    await tester.tap(find.text('추천 보기 · 3장'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('3장 휴지통으로'));
+    await tester.pumpAndSettle();
+    expect(store.failed, 1); // 기록을 쓰다 실패한 길을 실제로 지났다
+    expect(
+      find.textContaining(RegExp(r'✓ 3장 · .+ 휴지통으로 보냈어요')),
+      findsOneWidget,
+    );
+    await tester.tap(find.byType(XToggle));
+    await tester.pumpAndSettle();
+    final again = find.ancestor(
+      of: find.text('1장 휴지통으로'),
+      matching: find.byType(FilledButton),
+    );
+    expect(tester.widget<FilledButton>(again).onPressed, isNotNull);
+    // 알림이 버튼을 가리지 않게 사라진 뒤에 누른다
+    await tester.pump(const Duration(seconds: 9));
+    await tester.pumpAndSettle();
+    await tester.tap(again);
+    await tester.pumpAndSettle();
+    expect(find.byType(XToggle), findsNothing);
+    await flush(tester);
+  });
+
+  testWidgets('Pro 안내 차례에 기록이 실패하면 안내 대신 보냈다는 알림을 보인다 (리뷰 11-01 S-2)', (
+    tester,
+  ) async {
+    final day = DayGroup(id: 'd', kind: DayGroupKind.day, photos: burstPhotos);
+    final now = DateTime.now();
+    final store = _PicksFullStore();
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.day, group: day),
+      store: store,
+      vault: MemoryProVault(
+        ProState(freeMonth: monthKey(now), freeUsed: freeGroupsPerMonth),
+      ),
+      extra: [realPlan(paid)],
+    );
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('1장 휴지통으로'));
+    await tester.pumpAndSettle();
+    expect(store.failed, 1);
+    expect(
+      find.textContaining(RegExp(r'✓ 1장 · .+ 휴지통으로 보냈어요')),
+      findsOneWidget,
+    );
+    expect(find.textContaining('남은 묶음도 추천을 바로 볼까요?'), findsNothing);
+    await flush(tester);
+  });
+
   testWidgets('기록을 쓰는 사이 다시 읽기가 끝나도 보낸 사진은 "휴지통으로 보냄"으로 남는다 (2026-10-31 S-2)', (
     tester,
   ) async {
@@ -3866,6 +3949,23 @@ class _FullStore extends MemoryStore {
       throw Exception('SQLITE_FULL');
     }
     return super.saveDecisions(list);
+  }
+}
+
+/// 사진을 보낸 뒤 정확도 기록·"다 봤어요" 기록이 실패 (저장 공간 가득)
+class _PicksFullStore extends MemoryStore {
+  int failed = 0;
+
+  @override
+  Future<void> addPicks(List<PickRecord> list) async {
+    failed++;
+    throw Exception('SQLITE_FULL');
+  }
+
+  @override
+  Future<void> addSeen(Iterable<String> photoIds) async {
+    failed++;
+    throw Exception('SQLITE_FULL');
   }
 }
 
