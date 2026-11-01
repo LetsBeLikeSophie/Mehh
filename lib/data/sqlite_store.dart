@@ -31,7 +31,7 @@ class SqliteStore implements Store {
 
   Future<Database> get _database async => _db ??= await openDatabase(
     'mehh.db',
-    version: 11,
+    version: 12,
     onUpgrade: (db, from, _) async {
       // 분석 결과는 캐시라서 버리고 다시 계산한다
       if (from < 3) {
@@ -56,15 +56,14 @@ class SqliteStore implements Store {
       }
       // 열어본 기록은 쓰는 곳도 읽는 곳도 없어졌다 (크게 보기의 사진 화면을 뺌, S-2 2026-10-29)
       if (from < 11) await db.execute('DROP TABLE IF EXISTS views');
+      // 결정 이력은 쓰기만 하고 아무도 읽지 않았다 (주인 없는 기록, 리뷰 2026-11-01 S-4)
+      if (from < 12) await db.execute('DROP TABLE IF EXISTS decision_log');
     },
     onCreate: (db, _) async {
       await db.execute(_featuresTable);
       await db.execute('''
         CREATE TABLE decisions (
           id TEXT PRIMARY KEY, state TEXT, at INTEGER, hold_at INTEGER)''');
-      await db.execute('''
-        CREATE TABLE decision_log (
-          id TEXT, state TEXT, at INTEGER)''');
       await db.execute('''
         CREATE TABLE freed (month TEXT PRIMARY KEY, bytes INTEGER)''');
       await db.execute(_picksTable);
@@ -143,11 +142,6 @@ class SqliteStore implements Store {
         'at': d.at.millisecondsSinceEpoch,
         'hold_at': d.holdAt?.millisecondsSinceEpoch,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
-      batch.insert('decision_log', {
-        'id': d.photoId,
-        'state': d.state.name,
-        'at': d.at.millisecondsSinceEpoch,
-      });
     }
     await batch.commit(noResult: true);
   }
@@ -320,7 +314,6 @@ class SqliteStore implements Store {
       for (final t in [
         'features',
         'decisions',
-        'decision_log',
         'freed',
         'picks',
         'seen',
