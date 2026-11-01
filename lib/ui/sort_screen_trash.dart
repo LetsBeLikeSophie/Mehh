@@ -43,25 +43,12 @@ extension _Trash on _SortScreenState {
     SortSource src,
     List<String> shown,
   ) async {
-    // 한 번에 [maxSendAtOnce]장까지. 나머지는 X 그대로 두고, 보이긴 했지만 아직 정하지 않은
-    // 사진이라 정확도 기록의 "거절"로 세지 않게 shown에서 뺀다 (리뷰 2026-10-31 S-3)
+    // 한 번에 [maxSendAtOnce]장까지, 나머지는 X 그대로 (리뷰 2026-10-31 S-3)
     final now = ids.length > maxSendAtOnce
         ? ids.sublist(0, maxSendAtOnce)
         : ids;
-    final rest = ids.length - now.length;
-    final later = ids.skip(now.length).toSet();
     if (!await _confirmSceneLoss(now, src) || !mounted) return false;
-    return _trashAndAfter(
-      now,
-      src,
-      rest == 0
-          ? shown
-          : [
-              for (final id in shown)
-                if (!later.contains(id)) id,
-            ],
-      left: rest,
-    );
+    return _trashAndAfter(now, src, shown, left: ids.length - now.length);
   }
 
   /// 휴지통으로 보내고 그 뒤 할 일: 정확도 기록, 잠긴 묶음 "다 봤어요"(R3), Pro 안내.
@@ -77,6 +64,13 @@ extension _Trash on _SortScreenState {
     int left = 0,
   }) async {
     final markedBefore = _markedNow; // 보내면 다시 그려져 바뀌므로 먼저 잡아 둔다
+    final sent = ids.toSet();
+    // 지금 X인데 이번에 안 보내는 사진(상한에 걸린 나머지)은 아직 정하지 않은 사진이다. 어느 길로 보내든
+    // 정확도 기록의 "거절"이나 "다 봤어요"로 세지 않는다. 킵으로 바꾼 사진은 X가 아니라 남는다 (리뷰 2026-11-01 S-1)
+    final decided = [
+      for (final id in shown)
+        if (sent.contains(id) || !markedBefore.contains(id)) id,
+    ];
     _set(() => _busy = true);
     // 정리를 끝낸 순간에 Pro 안내 (Pro가 아니면 하루 한 번까지). 안내 시트가 아래 알림을 덮으니
     // 그때는 알림 대신 시트 첫 줄에 "30일 안에 되살릴 수 있어요"까지 넣는다 (UX 리뷰 2026-10-22)
@@ -95,13 +89,12 @@ extension _Trash on _SortScreenState {
         if (left > 0) context.l.sendLimitLeft(maxSendAtOnce, left),
       ].join('\n'),
     );
-    if (n > 0) await _recordPicks(ids, src, shown, markedBefore);
+    if (n > 0) await _recordPicks(ids, src, decided, markedBefore);
     // 잠긴 묶음을 직접 정리해 보냈으면 다음부터 "다 봤어요" (2026-10-22 Sophie R3-A)
     if (n > 0 && src.locked > 0) {
-      final sent = ids.toSet();
       await ref
           .read(seenProvider.notifier)
-          .mark(shown.where((id) => !sent.contains(id)));
+          .mark(decided.where((id) => !sent.contains(id)));
     }
     if (mounted) _set(() => _busy = false);
     if (n > 0 && nudge && await pro.takeNudge() && mounted) {

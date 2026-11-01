@@ -3233,9 +3233,13 @@ void main() {
       for (var i = 0; i < maxSendAtOnce + 5; i++)
         PhotoMeta(
           id: 'm$i',
-          takenAt: DateTime(2026, 9, 1, 10).add(Duration(minutes: i)),
+          // 오래된 캡처라 추천이 실제로 있다 (10-31에는 추천 0장이라 무엇을 고쳐도 통과했다, 리뷰 11-01 S-1)
+          takenAt: DateTime.now()
+              .subtract(const Duration(days: 200))
+              .add(Duration(minutes: i)),
           width: 100,
           height: 100,
+          isScreenshot: true,
         ),
     ];
 
@@ -3253,7 +3257,7 @@ void main() {
           SortScreen(kind: SortKind.screenshots, group: shots),
           store: store,
         );
-        await tester.tap(find.text('전체 선택'));
+        await tester.tap(find.text('추천 보기 · 2,005장'));
         await tester.pumpAndSettle();
         await tester.tap(find.text('2,005장 휴지통으로'));
         await tester.pumpAndSettle();
@@ -3269,10 +3273,67 @@ void main() {
         );
         // 남은 5장은 보였지만 아직 정하지 않은 사진: "안 보냄"으로 남지 않는다
         final picks = await store.loadPicks();
+        expect(picks.where((p) => p.sent && p.suggested), hasLength(2000));
         expect(picks.where((p) => !p.sent), isEmpty);
         await flush(tester);
       },
     );
+
+    // Cortex 200장 → 받았다는 신호 → [휴지통으로]. [keepOne]이면 신호 전에 보낸 사진 하나를 킵으로
+    Future<List<PickRecord>> cortexThenTrash(
+      WidgetTester tester, {
+      bool keepOne = false,
+    }) async {
+      final shots = DayGroup(
+        id: 'shots',
+        kind: DayGroupKind.screenshots,
+        photos: many.take(maxCortexAtOnce + 50).toList(),
+      );
+      final store = MemoryStore();
+      final handoff = _FakeHandoff();
+      await pump(
+        tester,
+        SortScreen(kind: SortKind.screenshots, group: shots),
+        store: store,
+        extra: [
+          cortexInstalledProvider.overrideWith((ref) async => true),
+          handoffProvider.overrideWithValue(handoff),
+        ],
+      );
+      await tester.tap(find.text('추천 보기 · 250장'));
+      await tester.pumpAndSettle();
+      await sendCortex(tester);
+      expect(handoff.sent, hasLength(maxCortexAtOnce));
+      if (keepOne) {
+        final first = tester.widget<XToggle>(find.byType(XToggle).first);
+        expect(first.on, isTrue);
+        await tester.tap(find.byType(XToggle).first);
+        await tester.pumpAndSettle();
+      }
+      handoff.saved.add(CortexSaved(maxCortexAtOnce, handoff.sent.toSet()));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('휴지통으로'));
+      await tester.pumpAndSettle();
+      final picks = await store.loadPicks();
+      await flush(tester);
+      return picks;
+    }
+
+    testWidgets('Cortex로 200장 보내고 지우면 남은 X는 거절로 남지 않는다 (리뷰 11-01 S-1)', (
+      tester,
+    ) async {
+      final picks = await cortexThenTrash(tester);
+      expect(picks.where((p) => p.sent && p.suggested), hasLength(200));
+      expect(picks.where((p) => !p.sent), isEmpty);
+    });
+
+    testWidgets('Cortex로 보낸 200장 중 킵으로 바꾼 1장은 거절로 남는다 (리뷰 11-01 S-1)', (
+      tester,
+    ) async {
+      final picks = await cortexThenTrash(tester, keepOne: true);
+      expect(picks.where((p) => p.sent && p.suggested), hasLength(199));
+      expect(picks.where((p) => !p.sent && p.suggested), hasLength(1));
+    });
 
     testWidgets('길게 눌러 끝내기도 일부만 보냈으면 화면을 나가지 않는다 (S-3)', (tester) async {
       await pump(
