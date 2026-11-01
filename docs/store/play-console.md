@@ -29,7 +29,7 @@ Sophie가 Play Console에서 그대로 붙여 넣을 수 있게 정리한 문서
 ### 한국어
 
 - 앱 이름 (30자): `Mehh: 사진 정리·중복 사진 삭제` — 정식 출시 때 이 이름으로 (2026-10-30 Sophie S1-B: 검색어를 이름에. 비공개 테스트 제출본은 `Mehh - 귀찮은 사람의 사진 정리`, 말투는 그래픽·설명 첫 줄에)
-- 간단한 설명 (80자): `비슷한 컷·흔들린 사진·눈 감은 컷·큰 동영상을 앱이 먼저 골라 둬요. 사진은 폰 밖으로 안 나가요.`
+- 간단한 설명 (80자): `비슷한 컷·흔들린 사진·눈 감은 컷을 앱이 먼저 골라 둬요. 사진은 폰 밖으로 안 나가요.`
 - 자세한 설명:
 
 ```
@@ -44,8 +44,8 @@ Sophie가 Play Console에서 그대로 붙여 넣을 수 있게 정리한 문서
 ■ 손가락 하나로
 옆으로 끌면 여러 장을 한 번에 선택하고, 길게 누르면 정리를 끝내요. 크게 보면서 위로 밀면 정리, 아래로 밀면 킵.
 
-■ 큰 동영상과 캡처도
-용량 큰 동영상을 크기순으로, 오래된 캡처와 연달아 찍은 캡처를 따로 모아 보여 줘요.
+■ 동영상과 캡처도
+찍은 동영상과 저장·편집한 동영상을 나눠 크기순으로, 오래된 캡처와 연달아 찍은 캡처를 따로 모아 보여 줘요.
 
 ■ 바로 지우지 않아요
 [휴지통으로]를 누른 사진만 휴대폰 휴지통으로 가요. 30일 동안 갤러리에서 되살릴 수 있어요.
@@ -68,7 +68,7 @@ Sophie가 Play Console에서 그대로 붙여 넣을 수 있게 정리한 문서
 ### English
 
 - App name (30): `Mehh: Duplicate Photo Cleaner` — at production (2026-10-30 S1-B; closed test listing: `Mehh: Lazy Photo Cleanup`)
-- Short description (80): `Mehh picks similar, blurry and eyes-closed shots and big videos. You just check.`
+- Short description (80): `Mehh picks similar, blurry and eyes-closed shots for you. You just check.`
 - Full description:
 
 ```
@@ -83,8 +83,8 @@ In each burst, Mehh keeps the clearly best shot and marks blurry, eyes-closed, a
 ■ One finger
 Drag sideways to select many at once, press and hold to finish. In the large view, swipe up to remove, down to keep.
 
-■ Big videos and screenshots too
-See your largest videos by size, plus old and repeated screenshots.
+■ Videos and screenshots too
+See camera videos and saved or edited videos by size, plus old and repeated screenshots.
 
 ■ Nothing is deleted right away
 Only photos you send with Move to trash go to your phone's trash, where you can restore them for 30 days.
