@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'data/crash_reports.dart';
 import 'l10n/l10n.dart';
 import 'theme.dart';
 import 'ui/root_screen.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await startCrashReports();
   runApp(const ProviderScope(child: MehhApp()));
 }
 

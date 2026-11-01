@@ -30,6 +30,7 @@
     <li>사진 분석(흐림·밝기·그림 해시 등)은 모두 휴대폰 안에서 합니다. 사진이나 분석 값을 운영자나 다른 서버로 보내지 않고, 클라우드 AI를 쓰지 않습니다.</li>
     <li>눈 감은 컷 찾기: 비슷한 연속 컷에서 눈 감은 사진을 고르려고, 휴대폰 안의 얼굴 감지(Google ML Kit, 기기 안에서만 동작)로 얼굴이 있는지와 눈을 떴는지만 봅니다. 사람을 알아보지 않고, 얼굴 모양 같은 정보는 저장하거나 밖으로 보내지 않습니다. 사진마다 "눈 감음" 여부 하나만 휴대폰 안에 남습니다.</li>
     <li>진단 정보: 눈 감은 컷 찾기에 쓰는 Google ML Kit는 기능의 성능과 오류를 살피려고 기기 정보(기종·OS 버전), 앱 정보(패키지 이름·버전), 설치마다 정해지는 식별자, 성능 지표·오류 코드 같은 진단 정보를 Google로 보냅니다. 전송은 HTTPS로 암호화되고 Google은 이를 제3자에게 넘기지 않습니다. 사진, 얼굴 정보, 분석 결과는 보내지 않습니다. 자세한 내용은 <a href="https://developers.google.com/ml-kit/android-data-disclosure">Google ML Kit 데이터 공개</a>를 참고하세요.</li>
+    <li>오류 기록: 앱이 멈추거나 오류가 나면 고치려고 Android 앱은 오류 종류·코드 위치, 기기 정보(기종·OS 버전), 앱 버전, 설치마다 정해지는 식별자를 Google Firebase Crashlytics로 보냅니다. 전송은 암호화되고, 90일 뒤 지워집니다. 사진, 얼굴 정보, 분석 결과, 정리 기록은 보내지 않습니다.</li>
     <li>동영상: 찍은 동영상과 다른 앱에서 저장·편집한 동영상을 나눠 크기순으로 보여 주려고 동영상의 크기·길이·날짜와 저장된 폴더 이름만 읽습니다. 폴더 이름은 폰 밖으로 보내지 않습니다. 동영상 내용은 분석하지 않습니다.</li>
     <li>얼굴을 알아보거나 사람별로 묶지 않습니다.</li>
   </ul>
@@ -52,7 +53,7 @@
   <ul>
     <li>광고 SDK, 분석(통계) SDK를 넣지 않습니다.</li>
     <li>사진·기록을 팔거나 다른 회사와 나누지 않습니다.</li>
-    <li>앱이 멈췄을 때의 오류 정보는 Google Play·App Store가 운영체제 차원에서 모아 개발자에게 익명 통계로 보여 줄 수 있습니다.</li>
+    <li>Google Play·App Store도 앱이 멈춘 정보를 운영체제 차원에서 모아 개발자에게 익명 통계로 보여 줄 수 있습니다.</li>
   </ul>
 
   <h2>5. 삭제한 사진</h2>
@@ -80,6 +81,7 @@
     <li>All analysis (blur, brightness, image hashes, etc.) happens on your phone. Photos and analysis values are never sent to the developer or any other server, and no cloud AI is used.</li>
     <li>Closed-eye check: to pick out shots with closed eyes among similar shots, on-device face detection (Google ML Kit, runs only on your phone) checks whether there is a face and whether the eyes are open. It does not recognize people, and no face data is stored or sent anywhere. Only a yes/no "eyes closed" flag per photo stays on your phone.</li>
     <li>Diagnostics: Google ML Kit, used for the closed-eye check, sends diagnostic information to Google to monitor performance and errors — device information (model, OS version), app information (package name, version), a per-installation identifier, and performance metrics and error codes. It is encrypted in transit (HTTPS) and Google does not transfer it to third parties. Photos, face data and analysis results are not sent. See <a href="https://developers.google.com/ml-kit/android-data-disclosure">Google ML Kit data disclosure</a>.</li>
+    <li>Error reports: when the app crashes or hits an error, the Android app sends the error type and code location, device information (model, OS version), app version and a per-installation identifier to Google Firebase Crashlytics so it can be fixed. It is encrypted in transit and deleted after 90 days. Photos, face data, analysis results and cleanup records are not sent.</li>
     <li>Videos: to list camera videos and videos saved or edited in other apps by size, the app reads only each video's size, length, date and folder name. Folder names never leave your phone. Video content is not analyzed.</li>
     <li>The app does not recognize faces or group photos by person.</li>
   </ul>
@@ -102,7 +104,7 @@
   <ul>
     <li>No advertising or analytics SDKs.</li>
     <li>We don't sell or share your photos or records.</li>
-    <li>Crash information may be collected by Google Play or the App Store at the operating-system level and shown to the developer as anonymous statistics.</li>
+    <li>Google Play and the App Store may also collect crash information at the operating-system level and show it to the developer as anonymous statistics.</li>
   </ul>
 
   <h2>5. Deleted photos</h2>

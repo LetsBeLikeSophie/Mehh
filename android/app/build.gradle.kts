@@ -5,6 +5,9 @@ plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+    // 앱이 멈춘 기록 (lib/data/crash_reports.dart)
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 // 출시용 서명키: android/key.properties (git에 안 올림). 없으면 디버그 키로.

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "357566899057",
+    "project_id": "mehh-f04c1",
+    "storage_bucket": "mehh-f04c1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:357566899057:android:76adab6fb9c8d58e9d0cd0",
+        "android_client_info": {
+          "package_name": "dev.itssophie.mehh"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfbZRTHeBL7ebBtYL_xSRMdrpdIehcf0I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
