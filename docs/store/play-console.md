@@ -54,7 +54,7 @@ Sophie가 Play Console에서 그대로 붙여 넣을 수 있게 정리한 문서
 모든 분석(눈 감은 컷 확인 포함)은 휴대폰 안에서 해요. 서버로 사진을 보내지 않고, 클라우드 AI도 쓰지 않아요. 회원 가입도 없어요.
 
 ■ 무료로 쓸 수 있는 것
-· 똑같은 사진, 낱장 사진, 캡처, 큰 동영상 정리
+· 똑같은 사진, 낱장 사진, 캡처, 저장한 사진, 동영상 정리
 · 그날의 묶음 추천 매달 3개
 · 직접 고르기, 크게 보기
 
@@ -93,7 +93,7 @@ Only photos you send with Move to trash go to your phone's trash, where you can 
 All analysis — including the closed-eye check — happens on your phone. No uploads, no cloud AI, no sign-up.
 
 ■ Free
-· Duplicates, single shots, screenshots and big videos
+· Duplicates, single shots, screenshots, saved photos and videos
 · Picks for 3 day sets every month
 · Selecting yourself and the large view
 
@@ -135,7 +135,7 @@ Contact: mehh@itssophie.dev
 
 ## 5. 사진·동영상 권한 신청서 (READ_MEDIA_IMAGES, READ_MEDIA_VIDEO)
 
-- READ_MEDIA_VIDEO (2026-10-24 추가): "큰 동영상" 정리 — 용량이 큰 동영상을 크기순으로 모아 보여 주고 사용자가 골라 휴지통으로 보낸다. 동영상의 크기·길이·날짜만 읽고 내용은 분석하지 않는다. 사진 정리와 같은 핵심 기능이라 사진 선택기(Photo Picker)로는 "용량 큰 순 전체 목록"을 만들 수 없다.
+- READ_MEDIA_VIDEO (2026-10-24 추가): "찍은 동영상"·"저장·편집한 동영상" 정리 — 동영상을 찍은 것과 다른 앱에서 저장·편집한 것으로 나눠 크기순으로 보여 주고 사용자가 골라 휴지통으로 보낸다. 동영상의 크기·길이·날짜와 폴더 이름만 기기 안에서 읽고 내용은 분석하지 않는다. 사진 정리와 같은 핵심 기능이라 사진 선택기(Photo Picker)로는 "용량 큰 순 전체 목록"을 만들 수 없다.
 
 
 질문: "앱의 핵심 기능에 사진·동영상에 대한 광범위한 액세스가 필요한 이유"

@@ -74,10 +74,10 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
       context,
       // 제목 = 아래 버튼과 같은 말 "N장 휴지통으로" (2026-10-24 Sophie: 반복되는 말 없이)
       title: marked > 0
-          ? (widget.kind == SortKind.videos
+          ? (widget.kind.isVideo
                 ? l.trashCountVideos(marked)
                 : l.trashCount(marked))
-          : widget.kind == SortKind.videos
+          : widget.kind.isVideo
           ? l.focusFinishNoneVideos
           : l.focusFinishNone,
       no: l.focusKeepLooking,
@@ -219,7 +219,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
     if (ids.isEmpty) return const Scaffold();
     final current = ids.contains(_currentId) ? _currentId : ids.first;
     final index = ids.indexOf(current);
-    final video = widget.kind == SortKind.videos
+    final video = widget.kind.isVideo
         ? src.photos.where((p) => p.id == current && p.isVideo).firstOrNull
         : null;
     final marked = isMarked(current, decisions, src);
@@ -274,7 +274,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                       _Chip(
                         noteText(t, src.bestReasons[current] ?? const [], l),
                       ),
-                    // 큰 동영상: 첫 장면만 보이니 무엇인지 알 수 있게 길이·용량·날짜 (UX-49)
+                    // 동영상: 첫 장면만 보이니 무엇인지 알 수 있게 길이·용량·날짜 (UX-49)
                     if (video != null)
                       _Chip(
                         '${formatDuration(video.durationSec)} · '
@@ -286,7 +286,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
               ),
               if (arrow != null)
                 Center(child: _Arrow(arrow))
-              // 큰 동영상: ▶ → 갤러리에서 재생 (2026-10-26 Sophie V3-A)
+              // 동영상: ▶ → 갤러리에서 재생 (2026-10-26 Sophie V3-A)
               else if (video != null)
                 Center(child: _PlayButton(id: video.id)),
             ],
@@ -717,7 +717,7 @@ class _ActionBar extends StatelessWidget {
   }
 }
 
-/// 큰 동영상 가운데 ▶. 누르면 갤러리(기본 동영상 앱)에서 그 영상을 연다
+/// 동영상 가운데 ▶. 누르면 갤러리(기본 동영상 앱)에서 그 영상을 연다
 class _PlayButton extends ConsumerWidget {
   const _PlayButton({required this.id});
   final String id;

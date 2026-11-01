@@ -652,7 +652,7 @@ class _GroupTile extends ConsumerWidget {
         : plan.trash.length;
 
     final l = context.l;
-    final videos = group.kind == DayGroupKind.videos;
+    final videos = group.kind.isVideo;
     final meta = StringBuffer(
       videos
           ? l.videosMeta(
@@ -703,6 +703,8 @@ class _GroupTile extends ConsumerWidget {
             DayGroupKind.singles => SortKind.singles,
             DayGroupKind.screenshots => SortKind.screenshots,
             DayGroupKind.videos => SortKind.videos,
+            DayGroupKind.saved => SortKind.saved,
+            DayGroupKind.savedVideos => SortKind.savedVideos,
           },
           group: group,
           place: place,

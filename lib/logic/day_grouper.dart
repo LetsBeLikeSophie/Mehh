@@ -6,6 +6,7 @@ import '../models/photo_meta.dart';
 
 /// 사진을 그날의 묶음으로 나눈다. 결과는 최신 묶음이 먼저.
 /// 캡처는 전부 "캡처" 하나로, 사진이 너무 적은 날은 "낱장 사진" 하나로 모은다.
+/// 카메라 밖에서 온 사진은 찍은 날의 일이 아니라서 전부 "저장한 사진" 하나로 모은다 (2026-11-01 Sophie).
 List<DayGroup> groupPhotos(
   Iterable<PhotoMeta> photos, {
   GroupingConfig config = const GroupingConfig(),
@@ -15,6 +16,7 @@ List<DayGroup> groupPhotos(
 
   final groups = <DayGroup>[];
   final shots = <PhotoMeta>[];
+  final saved = <PhotoMeta>[];
   var current = <PhotoMeta>[];
 
   void close() {
@@ -26,6 +28,10 @@ List<DayGroup> groupPhotos(
   for (final p in sorted) {
     if (p.isScreenshot) {
       shots.add(p);
+      continue;
+    }
+    if (p.fromOtherApp) {
+      saved.add(p);
       continue;
     }
     if (current.isNotEmpty && _startsNewGroup(current.last, p, config)) {
@@ -50,6 +56,9 @@ List<DayGroup> groupPhotos(
     groups.add(
       DayGroup(id: 'shots', kind: DayGroupKind.screenshots, photos: shots),
     );
+  }
+  if (saved.isNotEmpty) {
+    groups.add(DayGroup(id: 'saved', kind: DayGroupKind.saved, photos: saved));
   }
   return groups;
 }

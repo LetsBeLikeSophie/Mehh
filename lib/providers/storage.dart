@@ -10,8 +10,8 @@ final freedThisMonthProvider = FutureProvider<int>(
 
 final deviceProvider = Provider((ref) => Device());
 
-/// 사진·동영상 전체 용량 (막대 전체, 2026-10-26 Sophie V2-A). 사진·큰 동영상이 바뀌면 다시 센다.
-/// 기기에 물어보고(모든 동영상 포함), 모르면(웹·테스트) 사진마다 크기 + 큰 동영상 크기를 더한다
+/// 사진·동영상 전체 용량 (막대 전체, 2026-10-26 Sophie V2-A). 사진·동영상이 바뀌면 다시 센다.
+/// 기기에 물어보고(모든 동영상 포함), 모르면(웹·테스트) 사진마다 크기 + 동영상 크기를 더한다
 final photoBytesProvider = FutureProvider<int>((ref) async {
   final photos = ref.watch(libraryProvider.select((s) => s.value?.photos));
   if (photos == null) return 0;
@@ -25,10 +25,10 @@ final photoBytesProvider = FutureProvider<int>((ref) async {
       videos.fold<int>(0, (a, v) => a + v.sizeBytes);
 });
 
-/// 큰 동영상 묶음의 동영상들 (없으면 빈 목록)
+/// 묶음에 든 동영상들 (없으면 빈 목록)
 List<PhotoMeta> _videosOf(LibraryState? s) => [
   for (final g in s?.groups ?? const <DayGroup>[])
-    if (g.kind == DayGroupKind.videos) ...g.photos,
+    if (g.kind.isVideo) ...g.photos,
 ];
 
 /// 비울 수 있는 사진: 선택한 것(X) + 앱 추천(그날의 묶음·낱장·캡처·똑같은 사진).
@@ -43,7 +43,7 @@ final cleanableIdsProvider = Provider.autoDispose<Set<String>>((ref) {
       if (stateOf(decisions, p.id) == DecisionState.toTrash) p.id,
   };
   for (final g in lib.groups) {
-    if (g.kind == DayGroupKind.videos) continue; // 큰 동영상은 앱이 추천하지 않는다
+    if (g.kind.noPicks) continue; // 동영상·저장한 사진은 앱이 추천하지 않는다
     if (g.kind == DayGroupKind.screenshots) {
       out.addAll(
         planScreenshots(
@@ -73,7 +73,7 @@ final selectedIdsProvider = Provider<Set<String>>((ref) {
   final photos = ref.watch(libraryProvider.select((s) => s.value?.photos));
   final videos = ref.watch(libraryProvider.select((s) => _videosOf(s.value)));
   final decisions = ref.watch(decisionsProvider).value ?? const {};
-  // 선택해 둔 큰 동영상도 막대의 추천 정리에 (V2-A)
+  // 선택해 둔 동영상도 막대의 추천 정리에 (V2-A)
   return {
     for (final p in [...?photos, ...videos])
       if (stateOf(decisions, p.id) == DecisionState.toTrash) p.id,

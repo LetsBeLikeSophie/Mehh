@@ -1,10 +1,66 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mehh/config/grouping_config.dart';
 import 'package:mehh/logic/day_grouper.dart';
+import 'package:mehh/logic/screen_detect.dart';
 import 'package:mehh/models/day_group.dart';
 import 'package:mehh/models/photo_meta.dart';
 
 var _n = 0;
+
+void savedGroupTests() {
+  test('카메라 밖 사진은 그날의 묶음·낱장에 안 들어가고 저장한 사진 하나로 (2026-11-01 Sophie)', () {
+    final t = DateTime(2026, 9, 1, 10);
+    PhotoMeta p(String id, {bool other = false, bool shot = false}) =>
+        PhotoMeta(
+          id: id,
+          takenAt: t,
+          width: 100,
+          height: 100,
+          fromOtherApp: other,
+          isScreenshot: shot,
+        );
+    final groups = groupPhotos([
+      p('c'),
+      p('pin', other: true),
+      p('kakao', other: true),
+      p('s', shot: true, other: true),
+    ], config: one);
+    List<String> ids(DayGroupKind k) => [
+      for (final g in groups)
+        if (g.kind == k)
+          for (final x in g.photos) x.id,
+    ];
+    expect(ids(DayGroupKind.day), ['c']);
+    expect(ids(DayGroupKind.saved), unorderedEquals(['pin', 'kakao']));
+    expect(ids(DayGroupKind.screenshots), ['s']); // 캡처가 먼저
+  });
+
+  test('카메라 폴더 판별 (2026-11-01 Sophie)', () {
+    for (final path in [
+      'DCIM/Camera/',
+      'dcim/camera',
+      'DCIM/100ANDRO/',
+      'DCIM/',
+      'Camera/',
+      'Pictures/Camera/',
+      '',
+      null,
+    ]) {
+      expect(isCameraPath(path), isTrue, reason: '$path');
+    }
+    for (final path in [
+      'Pictures/Pinterest/',
+      'Download/',
+      'Pictures/KakaoTalk/',
+      'Movies/CapCut/',
+      'DCIM/B612/',
+      'DCIM/CapCut/',
+    ]) {
+      expect(isCameraPath(path), isFalse, reason: path);
+    }
+  });
+}
+
 PhotoMeta photo(DateTime t, {double? lat, double? lng, bool shot = false}) =>
     PhotoMeta(
       id: '${_n++}',
@@ -20,6 +76,7 @@ PhotoMeta photo(DateTime t, {double? lat, double? lng, bool shot = false}) =>
 const one = GroupingConfig(minDayPhotos: 1);
 
 void main() {
+  savedGroupTests();
   test('3시간 이상 벌어지면 새 묶음', () {
     final groups = groupPhotos([
       photo(DateTime(2026, 10, 3, 10)),

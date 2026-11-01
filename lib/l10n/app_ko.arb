@@ -188,7 +188,7 @@
   "privacyTrash": "휴지통으로 보낸 사진은 30일 동안 갤러리 휴지통에서 되살릴 수 있어요.",
   "clearAll": "모든 기록 지우기",
   "onboardingTitle": "사진 정리,\n제가 먼저 해둘게요",
-  "onboardingBody": "찍은 날짜와 장소로 사진을 묶고, 똑같은 사진과 큰 동영상을 찾으려면 사진·동영상 전체에 접근해야 해요.",
+  "onboardingBody": "찍은 날짜와 장소로 사진을 묶고, 똑같은 사진과 동영상을 찾으려면 사진·동영상 전체에 접근해야 해요.",
   "promiseLocal": "사진과 기록은 폰 밖으로 나가지 않아요.",
   "promiseLearn": "추천은 앱이 먼저 골라 둔 것일 뿐이에요. 언제든 바꿀 수 있어요.",
   "promiseRestore": "휴지통으로 보낸 사진은 30일 동안 갤러리 휴지통에서 되살릴 수 있어요.",
@@ -591,7 +591,9 @@
   "helpTitle": "도움",
   "clearAllSub": "분석 결과와 정리 기록을 지워요 · 사진은 그대로",
   "coinWord": "코인",
-  "bigVideos": "큰 동영상",
+  "filmedVideos": "찍은 동영상",
+  "savedPhotos": "저장한 사진",
+  "savedVideos": "저장·편집한 동영상",
   "videosMeta": "{count}개 · {size}",
   "@videosMeta": {
     "placeholders": {
@@ -609,7 +611,7 @@
   "cortexGetYes": "받으러 가기",
   "videosCount": "{count}개",
   "@videosCount": {
-    "description": "큰 동영상 개수 (정리 화면 제목 뒤)",
+    "description": "동영상 개수 (정리 화면 제목 뒤)",
     "placeholders": {
       "count": {
         "type": "int",
@@ -619,7 +621,7 @@
   },
   "trashCountVideos": "{count}개 휴지통으로",
   "@trashCountVideos": {
-    "description": "큰 동영상 화면의 [휴지통으로] 버튼·확인 창 제목",
+    "description": "동영상 화면의 [휴지통으로] 버튼·확인 창 제목",
     "placeholders": {
       "count": {
         "type": "int",
@@ -629,7 +631,7 @@
   },
   "trashedVideos": "✓ {count}개 · {size} 휴지통으로 보냈어요 · 30일 안에 되살릴 수 있고, 휴지통을 비우면 그만큼 공간이 생겨요",
   "@trashedVideos": {
-    "description": "큰 동영상을 휴지통으로 보낸 뒤 알림",
+    "description": "동영상을 휴지통으로 보낸 뒤 알림",
     "placeholders": {
       "count": {
         "type": "int",
@@ -642,11 +644,11 @@
   },
   "nothingMarkedVideos": "고른 동영상이 없어요",
   "@nothingMarkedVideos": {
-    "description": "큰 동영상 화면에서 아무것도 안 골랐을 때 흐린 버튼"
+    "description": "동영상 화면에서 아무것도 안 골랐을 때 흐린 버튼"
   },
   "focusFinishNoneVideos": "고른 동영상이 없어요. 끝낼까요?",
   "@focusFinishNoneVideos": {
-    "description": "큰 동영상에서 고른 것 없이 길게 눌러 끝낼 때 확인 창"
+    "description": "동영상에서 고른 것 없이 길게 눌러 끝낼 때 확인 창"
   },
   "proTestFree": "비공개 테스트 동안은 모든 묶음 추천이 무료예요",
   "@proTestFree": {
@@ -696,7 +698,7 @@
   "playVideo": "재생",
   "videoOpenFailed": "이 동영상을 열 앱을 찾지 못했어요",
   "@playVideo": {
-    "description": "큰 동영상 크게 보기의 ▶ 버튼 (읽어 주기용 이름)"
+    "description": "동영상 크게 보기의 ▶ 버튼 (읽어 주기용 이름)"
   },
   "@videoOpenFailed": {
     "description": "▶를 눌렀는데 동영상을 열 앱이 없을 때"

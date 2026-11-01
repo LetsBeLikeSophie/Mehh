@@ -550,7 +550,7 @@ abstract class L10n {
   /// No description provided for @onboardingBody.
   ///
   /// In ko, this message translates to:
-  /// **'찍은 날짜와 장소로 사진을 묶고, 똑같은 사진과 큰 동영상을 찾으려면 사진·동영상 전체에 접근해야 해요.'**
+  /// **'찍은 날짜와 장소로 사진을 묶고, 똑같은 사진과 동영상을 찾으려면 사진·동영상 전체에 접근해야 해요.'**
   String get onboardingBody;
 
   /// No description provided for @promiseLocal.
@@ -1387,11 +1387,23 @@ abstract class L10n {
   /// **'코인'**
   String get coinWord;
 
-  /// No description provided for @bigVideos.
+  /// No description provided for @filmedVideos.
   ///
   /// In ko, this message translates to:
-  /// **'큰 동영상'**
-  String get bigVideos;
+  /// **'찍은 동영상'**
+  String get filmedVideos;
+
+  /// No description provided for @savedPhotos.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장한 사진'**
+  String get savedPhotos;
+
+  /// No description provided for @savedVideos.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장·편집한 동영상'**
+  String get savedVideos;
 
   /// No description provided for @videosMeta.
   ///
@@ -1423,31 +1435,31 @@ abstract class L10n {
   /// **'받으러 가기'**
   String get cortexGetYes;
 
-  /// 큰 동영상 개수 (정리 화면 제목 뒤)
+  /// 동영상 개수 (정리 화면 제목 뒤)
   ///
   /// In ko, this message translates to:
   /// **'{count}개'**
   String videosCount(int count);
 
-  /// 큰 동영상 화면의 [휴지통으로] 버튼·확인 창 제목
+  /// 동영상 화면의 [휴지통으로] 버튼·확인 창 제목
   ///
   /// In ko, this message translates to:
   /// **'{count}개 휴지통으로'**
   String trashCountVideos(int count);
 
-  /// 큰 동영상을 휴지통으로 보낸 뒤 알림
+  /// 동영상을 휴지통으로 보낸 뒤 알림
   ///
   /// In ko, this message translates to:
   /// **'✓ {count}개 · {size} 휴지통으로 보냈어요 · 30일 안에 되살릴 수 있고, 휴지통을 비우면 그만큼 공간이 생겨요'**
   String trashedVideos(int count, String size);
 
-  /// 큰 동영상 화면에서 아무것도 안 골랐을 때 흐린 버튼
+  /// 동영상 화면에서 아무것도 안 골랐을 때 흐린 버튼
   ///
   /// In ko, this message translates to:
   /// **'고른 동영상이 없어요'**
   String get nothingMarkedVideos;
 
-  /// 큰 동영상에서 고른 것 없이 길게 눌러 끝낼 때 확인 창
+  /// 동영상에서 고른 것 없이 길게 눌러 끝낼 때 확인 창
   ///
   /// In ko, this message translates to:
   /// **'고른 동영상이 없어요. 끝낼까요?'**
@@ -1483,7 +1495,7 @@ abstract class L10n {
   /// **'캡처 {count}장은 지금 바로 정리할 수 있어요 ›'**
   String shotsReadyNow(int count);
 
-  /// 큰 동영상 크게 보기의 ▶ 버튼 (읽어 주기용 이름)
+  /// 동영상 크게 보기의 ▶ 버튼 (읽어 주기용 이름)
   ///
   /// In ko, this message translates to:
   /// **'재생'**

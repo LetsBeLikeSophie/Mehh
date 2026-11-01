@@ -60,8 +60,8 @@ final groupStatusProvider = Provider.autoDispose.family<GroupStatus, DayGroup>((
   );
   // 캡처 추천(C4)은 무료이고 [추천 보기]로 받는다. 홈의 "정리할 묶음 N개"에 캡처를 셀지는 아직 정하지 않아서
   // 상태는 X가 있을 때만 할 일로 둔다 (줄 아래 글자는 캡처 추천 장수를 보여 준다)
-  // 큰 동영상: 앱 추천이 없다. 선택해 두면 할 일, 아니면 그대로
-  if (g.kind == DayGroupKind.videos) {
+  // 동영상 묶음·저장한 사진: 앱 추천이 없다. 선택해 두면 할 일, 아니면 그대로
+  if (g.kind.noPicks) {
     return pile ? GroupStatus.needsWork : GroupStatus.nothing;
   }
   if (g.kind == DayGroupKind.screenshots) {

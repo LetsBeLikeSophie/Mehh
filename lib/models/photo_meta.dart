@@ -14,9 +14,13 @@ class PhotoMeta {
     this.isVideo = false,
     this.durationSec = 0,
     this.sizeBytes = 0,
+    this.fromOtherApp = false,
   });
 
-  /// 동영상 (큰 동영상 정리에만 쓴다, 2026-10-24 Sophie). 그날의 묶음·분석에는 들어가지 않는다
+  /// 카메라 폴더 밖에 있다: 다른 앱에서 저장·편집·촬영한 것 (안드로이드, 2026-11-01 Sophie)
+  final bool fromOtherApp;
+
+  /// 동영상 (동영상 묶음에만 쓴다, 2026-11-01 Sophie). 그날의 묶음·분석에는 들어가지 않는다
   final bool isVideo;
   final int durationSec;
 
@@ -57,6 +61,7 @@ class PhotoMeta {
     isVideo: isVideo,
     durationSec: durationSec,
     sizeBytes: sizeBytes,
+    fromOtherApp: fromOtherApp,
   );
 
   double get aspect => height == 0 ? 0 : width / height;

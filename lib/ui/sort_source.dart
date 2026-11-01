@@ -10,7 +10,18 @@ import '../models/photo_meta.dart';
 import '../providers.dart';
 
 /// 정리 화면에 들어가는 것: 그날의 묶음, 낱장 사진, 캡처, 똑같은 사진
-enum SortKind { day, singles, screenshots, duplicates, videos }
+enum SortKind {
+  day,
+  singles,
+  screenshots,
+  duplicates,
+  videos,
+  saved,
+  savedVideos;
+
+  /// 사진 대신 동영상을 보여 주는 종류 (세는 단위 "개", Cortex 없음)
+  bool get isVideo => this == videos || this == savedVideos;
+}
 
 /// 사진 위 짧은 표시의 종류 (문구는 [tagText]·[noteText]에서 언어별로)
 enum PhotoTag {
@@ -187,8 +198,12 @@ SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
         ],
       );
     case SortKind.videos:
-      // 큰 동영상: 용량 큰 순으로 보여 주기만 한다. 앱이 골라 주지 않는다 (2026-10-24 Sophie)
+    case SortKind.savedVideos:
+      // 동영상: 용량 큰 순으로 보여 주기만 한다. 앱이 골라 주지 않는다 (2026-10-24 Sophie)
       return SortSource(photos: g!.photos);
+    case SortKind.saved:
+      // 저장한 사진: 최신이 위. 앱이 골라 주지 않는다 (2026-11-01 Sophie)
+      return SortSource(photos: g!.photos.reversed.toList());
     case SortKind.screenshots:
       // 캡처 추천은 무료 (2026-10-22 Sophie C4-A): 오래된 캡처, 연달아 찍은 캡처의 지난 장
       final decisions = ref.watch(decisionsProvider).value ?? const {};

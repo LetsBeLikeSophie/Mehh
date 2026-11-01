@@ -102,6 +102,7 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
               durationSec: v.durationSec,
               sizeBytes: s[v.id] ?? 0,
               isFavorite: v.isFavorite,
+              fromOtherApp: v.fromOtherApp,
             ),
         ];
       }
@@ -111,23 +112,27 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
     }
   }
 
-  /// 큰 동영상 (용량 큰 순). ♥ 즐겨찾기는 뺀다
-  List<PhotoMeta> get _bigVideos {
-    final min = const CleanupConfig().bigVideoBytes;
-    return [
-      for (final v in _videos)
-        if (v.sizeBytes >= min && !v.isFavorite) v,
-    ]..sort((a, b) => b.sizeBytes.compareTo(a.sizeBytes));
-  }
+  /// 동영상 전체를 찍은 것 / 그 밖 두 갈래로, 묶음 안은 용량 큰 순. ♥ 즐겨찾기는 뺀다 (2026-11-01 Sophie)
+  List<PhotoMeta> _videosFrom({required bool otherApp}) => [
+    for (final v in _videos)
+      if (v.fromOtherApp == otherApp && !v.isFavorite) v,
+  ]..sort((a, b) => b.sizeBytes.compareTo(a.sizeBytes));
 
   LibraryState _state() {
-    final big = _bigVideos;
+    final filmed = _videosFrom(otherApp: false);
+    final saved = _videosFrom(otherApp: true);
     return LibraryState(
       photos: _metas,
       groups: [
         ...groupPhotos(_metas),
-        if (big.isNotEmpty)
-          DayGroup(id: 'videos', kind: DayGroupKind.videos, photos: big),
+        if (filmed.isNotEmpty)
+          DayGroup(id: 'videos', kind: DayGroupKind.videos, photos: filmed),
+        if (saved.isNotEmpty)
+          DayGroup(
+            id: 'savedVideos',
+            kind: DayGroupKind.savedVideos,
+            photos: saved,
+          ),
       ],
     );
   }

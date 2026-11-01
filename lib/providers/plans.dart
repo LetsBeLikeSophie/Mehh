@@ -61,6 +61,8 @@ final groupPlanProvider = Provider.autoDispose.family<GroupPlan, DayGroup>((
 ) {
   final features = ref.watch(analysisProvider.select((s) => s.features));
   final decisions = ref.watch(decisionsProvider).value ?? const {};
+  // 앱이 추천하지 않는 묶음: 저장한 사진은 분석값이 있어도 추천을 만들지 않는다
+  if (g.kind.noPicks) return planGroup(const [], features, decisions);
   final muted = ref.watch(mutedReasonsProvider).value ?? const {};
   final eyes = ref.watch(eyesClosedProvider).value ?? const {};
   return planGroup(

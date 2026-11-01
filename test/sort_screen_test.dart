@@ -1139,7 +1139,7 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('큰 동영상: 50MB 넘는 것만 용량 큰 순, 길이·용량 표시, 선택해서 휴지통으로', (tester) async {
+  testWidgets('찍은 동영상: 길이·용량 표시, 선택해서 휴지통으로', (tester) async {
     final t = DateTime(2026, 10, 1);
     PhotoMeta v(String id, int mb, int sec) => PhotoMeta(
       id: id,
@@ -1156,7 +1156,7 @@ void main() {
       photos: [v('v1', 900, 125), v('v2', 300, 40)],
     );
     await pump(tester, SortScreen(kind: SortKind.videos, group: videos));
-    expect(find.textContaining('큰 동영상', findRichText: true), findsWidgets);
+    expect(find.textContaining('찍은 동영상', findRichText: true), findsWidgets);
     expect(find.text('2:05 · 900MB'), findsOneWidget);
     expect(find.text('0:40 · 300MB'), findsOneWidget);
     expect(find.text('추천 보기 · 0장'), findsNothing); // 앱이 골라 주지 않는다
@@ -1176,7 +1176,7 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('큰 동영상: Cortex가 깔려 있어도 [Cortex로]가 없다 (Cortex는 사진·캡처만)', (
+  testWidgets('찍은 동영상: Cortex가 깔려 있어도 [Cortex로]가 없다 (Cortex는 사진·캡처만)', (
     tester,
   ) async {
     PhotoMeta v(String id) => PhotoMeta(
@@ -1205,7 +1205,7 @@ void main() {
     await flush(tester);
   });
 
-  testWidgets('큰 동영상 크게 보기: 길이·용량·날짜가 보인다 (UX-49)', (tester) async {
+  testWidgets('찍은 동영상 크게 보기: 길이·용량·날짜가 보인다 (UX-49)', (tester) async {
     final videos = DayGroup(
       id: 'videos',
       kind: DayGroupKind.videos,
@@ -1315,7 +1315,7 @@ void main() {
     await flush(tester);
   });
 
-  test('용량 막대: 큰 동영상 크기도 전체에 들어가고, 고른 동영상은 선택에 든다 (V2)', () async {
+  test('용량 막대: 동영상 크기도 전체에 들어가고, 고른 동영상은 선택에 든다 (V2)', () async {
     final v = PhotoMeta(
       id: 'v1',
       takenAt: DateTime(2026, 10, 1),
@@ -3330,6 +3330,206 @@ void main() {
     );
   });
 
+  // 카메라 / 그 밖 두 갈래 (2026-11-01 Sophie)
+  {
+    PhotoMeta shot(
+      String id, {
+      bool other = true,
+      int mb = 0,
+      bool video = false,
+    }) => PhotoMeta(
+      id: id,
+      takenAt: DateTime(2026, 9, 1, 10),
+      width: 100,
+      height: 100,
+      fromOtherApp: other,
+      isVideo: video,
+      sizeBytes: mb * 1024 * 1024,
+      durationSec: video ? 30 : 0,
+    );
+
+    test('사진첩: 동영상 전체가 크기와 상관없이 찍은 것 / 그 밖으로 갈리고 묶음마다 큰 순, ♥는 뺀다', () async {
+      final c = ProviderContainer(
+        overrides: [
+          photoLibraryProvider.overrideWithValue(
+            _VideosLibrary([
+              shot('small', other: false, mb: 1, video: true),
+              shot('big', other: false, mb: 900, video: true),
+              shot('edit', mb: 2, video: true),
+              shot('edit2', mb: 40, video: true),
+              PhotoMeta(
+                id: 'love',
+                takenAt: DateTime(2026, 9, 1),
+                width: 1,
+                height: 1,
+                isVideo: true,
+                isFavorite: true,
+                fromOtherApp: true,
+              ),
+            ]),
+          ),
+          storeProvider.overrideWithValue(MemoryStore()),
+        ],
+      );
+      addTearDown(c.dispose);
+      final groups = (await c.read(libraryProvider.future)).groups;
+      List<String> ids(DayGroupKind k) => [
+        for (final g in groups)
+          if (g.kind == k)
+            for (final p in g.photos) p.id,
+      ];
+      expect(ids(DayGroupKind.videos), ['big', 'small']);
+      expect(ids(DayGroupKind.savedVideos), ['edit2', 'edit']);
+    });
+
+    testWidgets('저장한 사진: 추천 없이 직접 고르고, Cortex로 보낼 수 있고, 코인·기록이 안 쓰인다', (
+      tester,
+    ) async {
+      final saved = DayGroup(
+        id: 'saved',
+        kind: DayGroupKind.saved,
+        photos: [shot('a'), shot('b')],
+      );
+      // 분석값이 있어 그날의 묶음이면 추천이 생길 사진들
+      final store = MemoryStore()
+        ..features.addAll({
+          'a': const PhotoFeatures(
+            id: 'a',
+            hashHi: 1,
+            hashLo: 2,
+            sharpness: 900,
+            brightness: 120,
+          ),
+          'b': const PhotoFeatures(
+            id: 'b',
+            hashHi: 1,
+            hashLo: 2,
+            sharpness: 5,
+            brightness: 120,
+          ),
+        });
+      final vault = MemoryProVault();
+      await pump(
+        tester,
+        SortScreen(kind: SortKind.saved, group: saved),
+        store: store,
+        vault: vault,
+        extra: [cortexInstalledProvider.overrideWith((ref) async => true)],
+      );
+      expect(find.textContaining('저장한 사진', findRichText: true), findsWidgets);
+      expect(find.textContaining('추천 보기'), findsNothing);
+      final c = ProviderScope.containerOf(
+        tester.element(find.byType(SortScreen)),
+      );
+      expect(c.read(groupPlanProvider(saved)).trash, isEmpty);
+      expect(c.read(groupStatusProvider(saved)), GroupStatus.nothing);
+      await tester.tap(find.byType(XToggle).at(0));
+      await tester.pumpAndSettle();
+      expect(find.text('Cortex로'), findsOneWidget);
+      expect(c.read(groupStatusProvider(saved)), GroupStatus.needsWork);
+      await tester.tap(find.text('1장 휴지통으로'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('휴지통으로 보냈어요'), findsOneWidget);
+      expect(await store.loadPicks(), isEmpty);
+      expect(vault.value.freeUsed, 0);
+      await flush(tester);
+    });
+
+    testWidgets('저장·편집한 동영상: 작아도 보이고, "개"로 세고, Cortex·추천이 없고 막대에 든다', (
+      tester,
+    ) async {
+      final videos = DayGroup(
+        id: 'savedVideos',
+        kind: DayGroupKind.savedVideos,
+        photos: [shot('v', mb: 2, video: true)],
+      );
+      await pump(
+        tester,
+        SortScreen(kind: SortKind.savedVideos, group: videos),
+        extra: [
+          cortexInstalledProvider.overrideWith((ref) async => true),
+          libraryProvider.overrideWith(
+            () =>
+                _FixedLibrary(LibraryState(photos: const [], groups: [videos])),
+          ),
+        ],
+      );
+      expect(
+        find.textContaining('저장·편집한 동영상', findRichText: true),
+        findsWidgets,
+      );
+      expect(find.text('고른 동영상이 없어요'), findsOneWidget);
+      expect(find.textContaining('추천 보기'), findsNothing);
+      await tester.tap(find.byType(XToggle).at(0));
+      await tester.pumpAndSettle();
+      expect(find.text('1개 휴지통으로'), findsOneWidget);
+      expect(find.text('Cortex로'), findsNothing);
+      final c = ProviderScope.containerOf(
+        tester.element(find.byType(SortScreen)),
+      );
+      expect(c.read(selectedIdsProvider), contains('v'));
+      await flush(tester);
+    });
+
+    testWidgets('코인으로 연 묶음은 사진 일부가 저장한 사진으로 빠져도 열린 채다', (tester) async {
+      final day = DayGroup(
+        id: 'day-new',
+        kind: DayGroupKind.day,
+        photos: [shot('camera', other: false)],
+      );
+      await pump(
+        tester,
+        SortScreen(kind: SortKind.day, group: day),
+        vault: MemoryProVault(
+          const ProState(unlockedPhotos: {'camera', 'pinterest'}),
+        ),
+      );
+      final c = ProviderScope.containerOf(
+        tester.element(find.byType(SortScreen)),
+      );
+      expect(c.read(unlockedProvider(day)), isTrue);
+      await flush(tester);
+    });
+
+    testWidgets('홈: 따로 보기에 저장한 사진·찍은 동영상·저장·편집한 동영상 줄', (tester) async {
+      final groups = [
+        DayGroup(id: 'saved', kind: DayGroupKind.saved, photos: [shot('a')]),
+        DayGroup(
+          id: 'videos',
+          kind: DayGroupKind.videos,
+          photos: [shot('v', other: false, mb: 3, video: true)],
+        ),
+        DayGroup(
+          id: 'savedVideos',
+          kind: DayGroupKind.savedVideos,
+          photos: [shot('w', mb: 2, video: true)],
+        ),
+      ];
+      final lib = DemoPhotoLibrary();
+      await lib.requestPermission();
+      await pump(
+        tester,
+        const Scaffold(body: HomeTab()),
+        library: lib,
+        extra: [
+          libraryProvider.overrideWith(
+            () => _FixedLibrary(
+              LibraryState(photos: [shot('a')], groups: groups),
+            ),
+          ),
+        ],
+      );
+      expect(find.text('저장한 사진'), findsOneWidget);
+      expect(find.text('찍은 동영상'), findsOneWidget);
+      expect(find.text('저장·편집한 동영상'), findsOneWidget);
+      expect(find.text('1개 · 3MB'), findsOneWidget);
+      await tester.tap(find.text('저장한 사진'));
+      await tester.pumpAndSettle();
+      expect(find.byType(SortScreen), findsOneWidget);
+      await flush(tester);
+    });
+  }
+
   // 한 번에 보내는 장수 (2026-10-31 S-3)
   {
     final many = [
@@ -3970,6 +4170,23 @@ class _FullStore extends MemoryStore {
     }
     return super.saveDecisions(list);
   }
+}
+
+/// 사진 없이 정해 둔 동영상만 있는 사진첩
+class _VideosLibrary extends DemoPhotoLibrary {
+  _VideosLibrary(this.videos);
+  final List<PhotoMeta> videos;
+
+  @override
+  Future<List<PhotoMeta>> loadAll() async => const [];
+
+  @override
+  Future<List<PhotoMeta>> loadVideos(Map<String, int> sizes) async => videos;
+
+  @override
+  Future<Map<String, int>> fileSizes(Iterable<String> ids) async => {
+    for (final v in videos) v.id: v.sizeBytes,
+  };
 }
 
 /// 실제 사진첩처럼 16장마다 위치 진행을 알린다 (3,200장)

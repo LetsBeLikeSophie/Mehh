@@ -11,13 +11,13 @@ import 'json_cache.dart';
 
 const _permissionOption = PermissionRequestOption(
   androidPermission: AndroidPermission(
-    // 큰 동영상 정리를 위해 동영상도 (2026-10-24 Sophie)
+    // 동영상 정리를 위해 동영상도 (2026-10-24 Sophie)
     type: RequestType.common,
     mediaLocation: true,
   ),
 );
 
-/// 기기 사진첩 접근. 동영상은 "큰 동영상"에만 쓴다([loadVideos]).
+/// 기기 사진첩 접근. 동영상은 동영상 묶음에만 쓴다([loadVideos]).
 class PhotoLibrary {
   PhotoLibrary({this.bulkSizes});
 
@@ -76,6 +76,7 @@ class PhotoLibrary {
             durationSec: e.duration,
             sizeBytes: sizes[e.id] ?? 0,
             isFavorite: e.isFavorite,
+            fromOtherApp: !isCameraPath(e.relativePath),
           ),
         );
       }
@@ -120,6 +121,7 @@ class PhotoLibrary {
             modifiedAt: e.modifiedDateSecond ?? 0,
             isFavorite: e.isFavorite,
             movedToAlbum: _movedToAlbum(e),
+            fromOtherApp: !isCameraPath(e.relativePath),
           ),
         );
       }

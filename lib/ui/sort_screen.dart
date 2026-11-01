@@ -295,7 +295,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
   /// 마지막 build의 추천·화면 순서 (Cortex 신호가 나중에 와도 보낸 뒤 할 일을 하려고)
   SortSource? _src;
 
-  /// 큰 동영상 칸의 길이·용량 표시용
+  /// 동영상 칸의 길이·용량 표시용
   Map<String, PhotoMeta> _videoMeta = const {};
   List<String> _order = const [];
 
@@ -312,8 +312,8 @@ class _SortScreenState extends ConsumerState<SortScreen>
     }
     _preMarkedSeen.addAll(src.preMarked);
     // Cortex로 보내기는 모든 종류에서 같은 자리 (2026-10-24 Sophie).
-    // 큰 동영상은 빼다: Cortex는 사진·캡처만 받는다 (SPEC 큰 동영상 "Cortex 없음")
-    final cortexKind = widget.kind != SortKind.videos;
+    // 동영상은 빼다: Cortex는 사진·캡처만 받는다 (SPEC 동영상 "Cortex 없음")
+    final cortexKind = !widget.kind.isVideo;
     final cortex = ref.watch(cortexInstalledProvider).value ?? false;
     final decisions = ref.watch(decisionsProvider).value ?? const {};
     final entities = ref.read(photoLibraryProvider).entities;
@@ -386,7 +386,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
                     bottom: 4,
                     child: MehhBadge(tagText(tag, l), inverted: out),
                   ),
-                // 큰 동영상: 길이 · 용량
+                // 동영상: 길이 · 용량
                 if (_videoMeta[id] case final v?)
                   Positioned(
                     left: 4,
@@ -523,7 +523,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
                                             ),
                                             TextSpan(
                                               text:
-                                                  '  ${widget.kind == SortKind.videos ? l.videosCount(order.length) : l.photos(order.length)}',
+                                                  '  ${widget.kind.isVideo ? l.videosCount(order.length) : l.photos(order.length)}',
                                               style: const TextStyle(
                                                 fontSize: MehhText.bodySmall,
                                                 fontWeight: FontWeight.w500,
@@ -641,7 +641,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
                           : () => _send(marked, src, order),
                       child: Text(
                         marked.isEmpty
-                            ? (widget.kind == SortKind.videos
+                            ? (widget.kind.isVideo
                                   ? l.nothingMarkedVideos
                                   : l.nothingMarked)
                             : _trashCount(l, marked.length),

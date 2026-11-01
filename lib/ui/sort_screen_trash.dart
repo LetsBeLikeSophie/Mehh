@@ -16,7 +16,7 @@ extension _Trash on _SortScreenState {
       // 제목 = 아래 버튼과 같은 말 "N장 휴지통으로" (2026-10-24 Sophie: 반복되는 말 없이)
       title: n > 0
           ? _trashCount(l, n)
-          : widget.kind == SortKind.videos
+          : widget.kind.isVideo
           ? l.focusFinishNoneVideos
           : l.focusFinishNone,
       no: l.focusKeepLooking,
@@ -53,9 +53,9 @@ extension _Trash on _SortScreenState {
 
   /// 휴지통으로 보내고 그 뒤 할 일: 정확도 기록, 잠긴 묶음 "다 봤어요"(R3), Pro 안내.
   /// [N장 휴지통으로]와 Cortex 길이 같이 쓴다 (시니어 리뷰 2026-10-24 S-2)
-  /// "N장 휴지통으로" — 큰 동영상은 "N개" (홈 줄과 같은 단위)
+  /// "N장 휴지통으로" — 동영상은 "N개" (홈 줄과 같은 단위)
   String _trashCount(L10n l, int n) =>
-      widget.kind == SortKind.videos ? l.trashCountVideos(n) : l.trashCount(n);
+      widget.kind.isVideo ? l.trashCountVideos(n) : l.trashCount(n);
 
   Future<bool> _trashAndAfter(
     List<String> ids,
@@ -88,7 +88,7 @@ extension _Trash on _SortScreenState {
         ids,
         quiet: nudge,
         doneNote: (n, size) => done = [
-          widget.kind == SortKind.videos
+          widget.kind.isVideo
               ? context.l.trashedVideos(n, size)
               : context.l.trashed(n, size),
           if (left > 0) context.l.sendLimitLeft(maxSendAtOnce, left),

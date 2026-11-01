@@ -306,6 +306,67 @@ void main() {
     await shot(tester, '09_focus');
   });
 
+  testWidgets('11 홈 따로 보기: 저장한 사진·찍은 동영상·저장·편집한 동영상', (tester) async {
+    final c = await start(tester);
+    final lib = c.read(libraryProvider).value!;
+    final some = lib.photos.take(9).toList();
+    PhotoMeta video(PhotoMeta p, int mb, bool other) => PhotoMeta(
+      id: p.id,
+      takenAt: p.takenAt,
+      width: p.width,
+      height: p.height,
+      isVideo: true,
+      durationSec: 95,
+      sizeBytes: mb * 1024 * 1024,
+      fromOtherApp: other,
+    );
+    await open(
+      tester,
+      ProviderScope(
+        overrides: [
+          libraryProvider.overrideWith(
+            () => _FixedLibrary(
+              LibraryState(
+                photos: lib.photos,
+                groups: [
+                  ...lib.groups,
+                  DayGroup(
+                    id: 'saved',
+                    kind: DayGroupKind.saved,
+                    photos: some.take(5).toList(),
+                  ),
+                  DayGroup(
+                    id: 'videos',
+                    kind: DayGroupKind.videos,
+                    photos: [
+                      video(some[5], 1400, false),
+                      video(some[6], 120, false),
+                    ],
+                  ),
+                  DayGroup(
+                    id: 'savedVideos',
+                    kind: DayGroupKind.savedVideos,
+                    photos: [
+                      video(some[7], 310, true),
+                      video(some[8], 42, true),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+        child: const Scaffold(body: HomeTab()),
+      ),
+    );
+    await tester.drag(
+      find.byType(CustomScrollView).first,
+      const Offset(0, -320),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    await shot(tester, '11_home_saved');
+  });
+
   testWidgets('10 사용법 네 장', (tester) async {
     await start(tester);
     navKey.currentState!.push(

@@ -292,7 +292,7 @@ class L10nKo extends L10n {
 
   @override
   String get onboardingBody =>
-      '찍은 날짜와 장소로 사진을 묶고, 똑같은 사진과 큰 동영상을 찾으려면 사진·동영상 전체에 접근해야 해요.';
+      '찍은 날짜와 장소로 사진을 묶고, 똑같은 사진과 동영상을 찾으려면 사진·동영상 전체에 접근해야 해요.';
 
   @override
   String get promiseLocal => '사진과 기록은 폰 밖으로 나가지 않아요.';
@@ -853,7 +853,13 @@ class L10nKo extends L10n {
   String get coinWord => '코인';
 
   @override
-  String get bigVideos => '큰 동영상';
+  String get filmedVideos => '찍은 동영상';
+
+  @override
+  String get savedPhotos => '저장한 사진';
+
+  @override
+  String get savedVideos => '저장·편집한 동영상';
 
   @override
   String videosMeta(int count, String size) {

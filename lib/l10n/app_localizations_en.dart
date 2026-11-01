@@ -335,7 +335,7 @@ class L10nEn extends L10n {
 
   @override
   String get onboardingBody =>
-      'To group photos by date and place and find duplicates and big videos, Mehh needs access to all your photos and videos.';
+      'To group photos by date and place and find duplicates and videos, Mehh needs access to all your photos and videos.';
 
   @override
   String get promiseLocal => 'Your photos and records never leave your phone.';
@@ -1017,7 +1017,13 @@ class L10nEn extends L10n {
   String get coinWord => 'coin';
 
   @override
-  String get bigVideos => 'Big videos';
+  String get filmedVideos => 'Camera videos';
+
+  @override
+  String get savedPhotos => 'Saved photos';
+
+  @override
+  String get savedVideos => 'Saved & edited videos';
 
   @override
   String videosMeta(int count, String size) {
