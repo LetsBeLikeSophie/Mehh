@@ -154,12 +154,18 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
 
   Future<void> _fillLocationsOnce() async {
     final lib = ref.read(photoLibraryProvider);
+    // 화면에는 퍼센트만 보이니 1%가 바뀔 때만 알린다. 16장마다 알리면 홈·막대·정리 화면을
+    // 그때마다 다시 계산한다 (사진 2만 장이면 약 1,250번, 리뷰 2026-11-01 S-3)
+    var shownPercent = -1;
     final found = await lib.fillLocations(
       _metas,
       onProgress: (done, total) {
         if (!ref.mounted) return;
         final cur = state.value;
         if (cur == null) return;
+        final percent = done * 100 ~/ total;
+        if (percent == shownPercent) return;
+        shownPercent = percent;
         state = AsyncData(cur.copyWith(locating: (done, total)));
       },
     );

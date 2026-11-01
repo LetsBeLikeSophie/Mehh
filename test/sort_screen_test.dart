@@ -3185,6 +3185,26 @@ void main() {
     },
   );
 
+  test('위치 읽기: 3,200장을 읽어도 알림은 1%마다, 끝나면 진행 표시가 사라진다 (리뷰 11-01 S-3)', () async {
+    final c = ProviderContainer(
+      overrides: [
+        photoLibraryProvider.overrideWithValue(_LocatingLibrary()),
+        storeProvider.overrideWithValue(MemoryStore()),
+      ],
+    );
+    addTearDown(c.dispose);
+    final seen = <(int, int)?>[];
+    final sub = c.listen(libraryProvider, (_, next) {
+      seen.add(next.value?.locating);
+    });
+    addTearDown(sub.close);
+    await c.read(libraryProvider.future);
+    await pumpEventQueue(times: 2000);
+    expect(seen.where((l) => l != null).length, greaterThan(50));
+    expect(seen.length, lessThanOrEqualTo(105)); // 0~100% + 읽기 끝 + 위치 끝
+    expect(c.read(libraryProvider).value!.locating, isNull);
+  });
+
   testWidgets('정확도 기록이 실패해도(저장 공간 가득) 버튼이 다시 눌리고 남은 사진을 또 보낸다 (리뷰 11-01 S-2)', (
     tester,
   ) async {
@@ -3949,6 +3969,21 @@ class _FullStore extends MemoryStore {
       throw Exception('SQLITE_FULL');
     }
     return super.saveDecisions(list);
+  }
+}
+
+/// 실제 사진첩처럼 16장마다 위치 진행을 알린다 (3,200장)
+class _LocatingLibrary extends DemoPhotoLibrary {
+  @override
+  Future<Map<String, (double, double)>> fillLocations(
+    List<PhotoMeta> metas, {
+    void Function(int done, int total)? onProgress,
+  }) async {
+    for (var done = 16; done <= 3200; done += 16) {
+      await Future<void>.value();
+      onProgress?.call(done, 3200);
+    }
+    return const {};
   }
 }
 
