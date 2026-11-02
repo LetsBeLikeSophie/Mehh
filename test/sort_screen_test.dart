@@ -259,6 +259,47 @@ void main() {
   }
 
   testWidgets(
+    '똑같은 사진: 카메라 폴더 밖 사본은 처음부터 X가 아니고 [추천 보기]로 고른다 (2026-11-02 Sophie)',
+    (tester) async {
+      PhotoMeta copy(String id, {bool other = false}) => PhotoMeta(
+        id: id,
+        takenAt: DateTime(2026, 9, 1, 10),
+        width: 100,
+        height: 100,
+        fromOtherApp: other,
+      );
+      final original = copy('original');
+      final plain = copy('plain');
+      final other = copy('other', other: true);
+      final f = {
+        for (final p in [original, plain, other])
+          p.id: PhotoFeatures(
+            id: p.id,
+            hashHi: 1,
+            hashLo: 2,
+            sharpness: 500,
+            brightness: 120,
+          ),
+      };
+      await pump(
+        tester,
+        const SortScreen(kind: SortKind.duplicates),
+        extra: [
+          analysisProvider.overrideWith(() => _FixedAnalysis(f)),
+          duplicatesProvider.overrideWith(
+            (ref) async => [
+              DuplicateSet(original, [plain, other]),
+            ],
+          ),
+        ],
+      );
+      expect(find.text('1장 휴지통으로'), findsOneWidget);
+      expect(find.text('추천 보기 · 2장'), findsOneWidget);
+      await flush(tester);
+    },
+  );
+
+  testWidgets(
     '똑같은 사진: 표시 없는 사본만 처음부터 X, 앨범으로 옮긴 사본은 X도 추천도 아니다 (리뷰 11-02 S-2)',
     (tester) async {
       PhotoMeta copy(String id, {bool album = false}) => PhotoMeta(

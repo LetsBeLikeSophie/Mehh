@@ -162,7 +162,8 @@ SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
       final all = [
         for (final s in sets) ...[s.keep, ...s.remove],
       ];
-      // 남길 사진과 그림 해시·크기가 완전히 같은 사본은 처음부터 X
+      // 남길 사진과 그림 해시·크기가 완전히 같은 사본은 처음부터 X.
+      // 카메라 폴더 밖 사본은 일부러 복사한 것일 수 있어 [추천 보기]로만 (2026-11-02 Sophie)
       bool identical(PhotoMeta a, PhotoMeta b) {
         final fa = features[a.id], fb = features[b.id];
         return fa != null &&
@@ -189,6 +190,7 @@ SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
                 if (p.id != k &&
                     !p.isFavorite &&
                     !p.movedToAlbum &&
+                    !p.fromOtherApp &&
                     identical(p, byId[k]!))
                   p.id,
         },
