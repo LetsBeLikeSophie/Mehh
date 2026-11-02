@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter_test/flutter_test.dart';
@@ -6,6 +8,17 @@ import 'package:mehh/l10n/app_localizations.dart';
 
 void main() {
   const path = '/storage/emulated/0/DCIM/Camera/내 사진.jpg';
+
+  test('앱을 켤 때 가는 세션 신호는 꺼 둔다 (2026-11-02 Sophie)', () {
+    final manifest = File('android/app/src/main/AndroidManifest.xml')
+        .readAsStringSync();
+    expect(
+      RegExp(
+        r'android:name="firebase_sessions_enabled"\s+android:value="false"',
+      ).hasMatch(manifest),
+      isTrue,
+    );
+  });
 
   test('첫 화면 약속은 오류 기록을 빼고 사진과 정리 기록만 말한다 (리뷰 11-02 S-1)', () {
     expect(lookupL10n(const Locale('ko')).promiseLocal, contains('정리 기록'));
