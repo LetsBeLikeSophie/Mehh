@@ -176,16 +176,21 @@ SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
       final byId = {for (final p in all) p.id: p};
       return SortSource(
         photos: all,
-        // ♥(즐겨찾기) 사본은 추천하지 않는다 (직접 X는 그대로)
+        // ♥(즐겨찾기)·앨범으로 옮긴 사본은 추천하지 않는다 (직접 X는 그대로, 리뷰 11-02 S-2)
         suggested: {
           for (final p in all)
-            if (!keepers.contains(p.id) && !p.isFavorite) p.id,
+            if (!keepers.contains(p.id) && !p.isFavorite && !p.movedToAlbum)
+              p.id,
         },
         preMarked: {
           for (final s in sets)
             if (keeperOf(s, gone) case final k?)
               for (final p in [s.keep, ...s.remove])
-                if (p.id != k && !p.isFavorite && identical(p, byId[k]!)) p.id,
+                if (p.id != k &&
+                    !p.isFavorite &&
+                    !p.movedToAlbum &&
+                    identical(p, byId[k]!))
+                  p.id,
         },
         tags: {
           for (final p in all)

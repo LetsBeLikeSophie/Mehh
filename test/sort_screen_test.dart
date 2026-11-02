@@ -258,6 +258,47 @@ void main() {
     });
   }
 
+  testWidgets(
+    '똑같은 사진: 표시 없는 사본만 처음부터 X, 앨범으로 옮긴 사본은 X도 추천도 아니다 (리뷰 11-02 S-2)',
+    (tester) async {
+      PhotoMeta copy(String id, {bool album = false}) => PhotoMeta(
+        id: id,
+        takenAt: DateTime(2026, 9, 1, 10),
+        width: 100,
+        height: 100,
+        movedToAlbum: album,
+      );
+      final original = copy('original');
+      final plain = copy('plain');
+      final album = copy('album', album: true);
+      final f = {
+        for (final p in [original, plain, album])
+          p.id: PhotoFeatures(
+            id: p.id,
+            hashHi: 1,
+            hashLo: 2,
+            sharpness: 500,
+            brightness: 120,
+          ),
+      };
+      await pump(
+        tester,
+        const SortScreen(kind: SortKind.duplicates),
+        extra: [
+          analysisProvider.overrideWith(() => _FixedAnalysis(f)),
+          duplicatesProvider.overrideWith(
+            (ref) async => [
+              DuplicateSet(original, [plain, album]),
+            ],
+          ),
+        ],
+      );
+      expect(find.text('1장 휴지통으로'), findsOneWidget);
+      expect(find.text('추천 보기 · 1장'), findsOneWidget);
+      await flush(tester);
+    },
+  );
+
   testWidgets('설정: 맨 위 Mehh Pro 줄을 누르면 Pro 안내(구매 복원)가 열린다', (tester) async {
     await pump(tester, const SettingsScreen());
     // 코인은 글자 대신 그림 + 개수
