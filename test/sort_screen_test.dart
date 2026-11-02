@@ -16,6 +16,7 @@ import 'package:mehh/data/notices.dart';
 import 'package:mehh/data/photo_library.dart';
 import 'package:mehh/data/store.dart';
 import 'package:mehh/l10n/l10n.dart';
+import 'package:mehh/logic/duplicates.dart';
 import 'package:mehh/logic/pick_stats.dart';
 import 'package:mehh/logic/recommend.dart';
 import 'package:mehh/models/features.dart';
@@ -194,6 +195,68 @@ void main() {
       DecisionState.undecided,
     );
   });
+
+  {
+    PhotoMeta video(String id) => PhotoMeta(
+      id: id,
+      takenAt: DateTime(2026, 9, 1),
+      width: 100,
+      height: 100,
+      isVideo: true,
+      sizeBytes: 1024,
+    );
+    Decision sent(String id) => Decision(
+      photoId: id,
+      state: DecisionState.trashed,
+      at: DateTime(2026, 10, 1),
+    );
+
+    test('갤러리 휴지통에서 되살린 동영상은 "휴지통으로 보냄" 기억을 지운다 (리뷰 11-02 S-3)', () async {
+      final store = MemoryStore()..decisions['v'] = sent('v');
+      final c = ProviderContainer(
+        overrides: [
+          photoLibraryProvider.overrideWithValue(_VideosLibrary([video('v')])),
+          storeProvider.overrideWithValue(store),
+        ],
+      );
+      addTearDown(c.dispose);
+      await c.read(libraryProvider.future);
+      await c.read(decisionsProvider.future);
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      expect(
+        stateOf(c.read(decisionsProvider).value!, 'v'),
+        DecisionState.undecided,
+      );
+    });
+
+    test('다시 읽는 도중 보낸 동영상은 되살아나지 않는다 (리뷰 11-02 S-3)', () async {
+      final store = MemoryStore();
+      final lib = _VideosLibrary([video('v'), video('w')]);
+      final c = ProviderContainer(
+        overrides: [
+          photoLibraryProvider.overrideWithValue(lib),
+          storeProvider.overrideWithValue(store),
+        ],
+      );
+      addTearDown(c.dispose);
+      await c.read(libraryProvider.future);
+      await c.read(decisionsProvider.future);
+      // 다시 읽기가 동영상 목록을 읽어 둔 채 멈춘 사이에 보낸다
+      final gate = lib.gate = Completer<void>();
+      final reading = c.read(libraryProvider.notifier).syncNow();
+      await Future<void>.delayed(Duration.zero);
+      await c.read(decisionsProvider.notifier).restore({'v': sent('v')});
+      c.read(libraryProvider.notifier).removePhotos({'v'});
+      lib.videos.removeWhere((v) => v.id == 'v');
+      gate.complete();
+      await reading;
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      expect(
+        stateOf(c.read(decisionsProvider).value!, 'v'),
+        DecisionState.trashed,
+      );
+    });
+  }
 
   testWidgets('설정: 맨 위 Mehh Pro 줄을 누르면 Pro 안내(구매 복원)가 열린다', (tester) async {
     await pump(tester, const SettingsScreen());
@@ -4176,12 +4239,18 @@ class _FullStore extends MemoryStore {
 class _VideosLibrary extends DemoPhotoLibrary {
   _VideosLibrary(this.videos);
   final List<PhotoMeta> videos;
+  Completer<void>? gate;
 
   @override
   Future<List<PhotoMeta>> loadAll() async => const [];
 
   @override
-  Future<List<PhotoMeta>> loadVideos(Map<String, int> sizes) async => videos;
+  Future<List<PhotoMeta>> loadVideos(Map<String, int> sizes) async {
+    // 멈추기 전에 읽어 둔 목록을 돌려준다 (읽는 사이 보낸 동영상이 남아 있다)
+    final read = [...videos];
+    await gate?.future;
+    return read;
+  }
 
   @override
   Future<Map<String, int>> fileSizes(Iterable<String> ids) async => {
