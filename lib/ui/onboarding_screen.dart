@@ -29,75 +29,86 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Spacer(),
-              // 받은 그림 그대로 (docs/design/mehh-logo-source.png)
-              Image.asset(
-                'assets/mehh-goat-mehh.png',
-                width: 150,
-                semanticLabel: 'Mehh',
-              ),
-              const SizedBox(height: 28),
-              Text(
-                context.l.onboardingTitle,
-                style: TextStyle(
-                  fontSize: MehhText.display,
-                  fontWeight: FontWeight.w700,
-                  height: 1.3,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                context.l.onboardingBody,
-                style: TextStyle(
-                  fontSize: MehhText.body,
-                  color: MehhColors.textMuted,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: MehhColors.surface,
-                  borderRadius: BorderRadius.circular(MehhRadius.card),
-                ),
+        // 글자를 키운 폰에서 버튼이 밀려나지 않게, 넘칠 때만 스크롤 (UX-93)
+        child: CustomScrollView(
+          slivers: [
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _Promise(Icons.lock_outline, context.l.promiseLocal),
-                    // Cortex가 있으면 "폰 밖으로 안 나간다"의 예외를 바로 알린다 (2026-10-22 Sophie C1-A)
-                    if (ref.watch(cortexInstalledProvider).value ?? false) ...[
-                      const SizedBox(height: 12),
-                      _Promise(Icons.north_east, context.l.privacyCortex),
-                    ],
+                    const Spacer(),
+                    // 받은 그림 그대로 (docs/design/mehh-logo-source.png)
+                    Image.asset(
+                      'assets/mehh-goat-mehh.png',
+                      width: 150,
+                      semanticLabel: 'Mehh',
+                    ),
+                    const SizedBox(height: 28),
+                    Text(
+                      context.l.onboardingTitle,
+                      style: TextStyle(
+                        fontSize: MehhText.display,
+                        fontWeight: FontWeight.w700,
+                        height: 1.3,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
                     const SizedBox(height: 12),
-                    _Promise(Icons.tune, context.l.promiseLearn),
-                    const SizedBox(height: 12),
-                    _Promise(Icons.undo, context.l.promiseRestore),
+                    Text(
+                      context.l.onboardingBody,
+                      style: TextStyle(
+                        fontSize: MehhText.body,
+                        color: MehhColors.textMuted,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: MehhColors.surface,
+                        borderRadius: BorderRadius.circular(MehhRadius.card),
+                      ),
+                      child: Column(
+                        children: [
+                          _Promise(Icons.lock_outline, context.l.promiseLocal),
+                          // Cortex가 있으면 "폰 밖으로 안 나간다"의 예외를 바로 알린다 (2026-10-22 Sophie C1-A)
+                          if (ref.watch(cortexInstalledProvider).value ??
+                              false) ...[
+                            const SizedBox(height: 12),
+                            _Promise(Icons.north_east, context.l.privacyCortex),
+                          ],
+                          const SizedBox(height: 12),
+                          _Promise(Icons.tune, context.l.promiseLearn),
+                          const SizedBox(height: 12),
+                          _Promise(Icons.undo, context.l.promiseRestore),
+                        ],
+                      ),
+                    ),
+                    const Spacer(flex: 2),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        onPressed: _onPressed,
+                        child: Text(
+                          _denied
+                              ? context.l.allowInSettings
+                              : context.l.allowAccess,
+                          style: const TextStyle(
+                            fontSize: MehhText.body,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
-              const Spacer(flex: 2),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: _onPressed,
-                  child: Text(
-                    _denied ? context.l.allowInSettings : context.l.allowAccess,
-                    style: const TextStyle(
-                      fontSize: MehhText.body,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
