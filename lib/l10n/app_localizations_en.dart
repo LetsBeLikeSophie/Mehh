@@ -338,7 +338,8 @@ class L10nEn extends L10n {
       'To group photos by date and place and find duplicates and videos, Mehh needs access to all your photos and videos.';
 
   @override
-  String get promiseLocal => 'Your photos and cleanup records never leave your phone.';
+  String get promiseLocal =>
+      'Your photos and cleanup records never leave your phone.';
 
   @override
   String get promiseLearn =>
@@ -707,6 +708,20 @@ class L10nEn extends L10n {
   @override
   String accRateAll(String rate) {
     return 'All kinds together $rate (for reference)';
+  }
+
+  @override
+  String get accNoteLive => 'These records stay on this phone.';
+
+  @override
+  String get accByKindLive => 'By kind';
+
+  @override
+  String get accRateDayLive => 'Day-set picks you accepted';
+
+  @override
+  String accRateAllLive(String rate) {
+    return 'All kinds together $rate';
   }
 
   @override

@@ -599,6 +599,20 @@ class L10nKo extends L10n {
   }
 
   @override
+  String get accNoteLive => '이 기록은 이 폰에만 있어요.';
+
+  @override
+  String get accByKindLive => '종류별';
+
+  @override
+  String get accRateDayLive => '그날의 묶음 추천을 받아들인 비율';
+
+  @override
+  String accRateAllLive(String rate) {
+    return '모든 종류 합계 $rate';
+  }
+
+  @override
   String get mutedBurst => '비슷한 연속 컷은 자주 남기셔서 당분간 추천하지 않아요 · 30일 뒤에 다시 골라 볼게요';
 
   @override

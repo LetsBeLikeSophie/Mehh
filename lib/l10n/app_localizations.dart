@@ -556,7 +556,7 @@ abstract class L10n {
   /// No description provided for @promiseLocal.
   ///
   /// In ko, this message translates to:
-  /// **'사진과 기록은 폰 밖으로 나가지 않아요.'**
+  /// **'사진과 정리 기록은 폰 밖으로 나가지 않아요.'**
   String get promiseLocal;
 
   /// No description provided for @promiseLearn.
@@ -1020,6 +1020,30 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'모든 종류 합계 {rate} (참고)'**
   String accRateAll(String rate);
+
+  /// No description provided for @accNoteLive.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 기록은 이 폰에만 있어요.'**
+  String get accNoteLive;
+
+  /// No description provided for @accByKindLive.
+  ///
+  /// In ko, this message translates to:
+  /// **'종류별'**
+  String get accByKindLive;
+
+  /// No description provided for @accRateDayLive.
+  ///
+  /// In ko, this message translates to:
+  /// **'그날의 묶음 추천을 받아들인 비율'**
+  String get accRateDayLive;
+
+  /// No description provided for @accRateAllLive.
+  ///
+  /// In ko, this message translates to:
+  /// **'모든 종류 합계 {rate}'**
+  String accRateAllLive(String rate);
 
   /// No description provided for @mutedBurst.
   ///

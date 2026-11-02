@@ -22,6 +22,8 @@ class AccuracyScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l;
+    // 결제를 켤지 재는 말은 테스트 동안만 (정식은 결제 말 없이, UX-95)
+    final testFree = ref.watch(closedTestFreeProvider);
     final locale = Localizations.localeOf(context).toString();
     final records = ref.watch(pickRecordsProvider).value;
     final stats = records == null ? null : PickStats.of(records);
@@ -74,7 +76,10 @@ class AccuracyScreen extends ConsumerWidget {
                     Text(l.accEmpty, style: muted)
                   else ...[
                     // 결제 기준은 그날의 묶음만 (2026-10-23 Sophie P3-A). 전체는 참고 줄
-                    Text(l.accRateDay, style: muted),
+                    Text(
+                      testFree ? l.accRateDay : l.accRateDayLive,
+                      style: muted,
+                    ),
                     Text(
                       pct(dayStats?.acceptRate),
                       style: const TextStyle(
@@ -82,7 +87,12 @@ class AccuracyScreen extends ConsumerWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    Text(l.accRateAll(pct(stats.acceptRate)), style: row),
+                    Text(
+                      testFree
+                          ? l.accRateAll(pct(stats.acceptRate))
+                          : l.accRateAllLive(pct(stats.acceptRate)),
+                      style: row,
+                    ),
                     const SizedBox(height: 12),
                     Text(l.accSends(stats.sends), style: row),
                     Text(
@@ -115,7 +125,10 @@ class AccuracyScreen extends ConsumerWidget {
                         style: row,
                       ),
                     const SizedBox(height: 20),
-                    Text(l.accByKind, style: muted),
+                    Text(
+                      testFree ? l.accByKind : l.accByKindLive,
+                      style: muted,
+                    ),
                     for (final (name, k) in byKind)
                       Text(
                         '$name  ${l.accTagLine(k.accepted, k.suggested)} · '
@@ -133,7 +146,7 @@ class AccuracyScreen extends ConsumerWidget {
                       ),
                   ],
                   const SizedBox(height: 20),
-                  Text(l.accNote, style: muted),
+                  Text(testFree ? l.accNote : l.accNoteLive, style: muted),
                 ],
               ),
             ),

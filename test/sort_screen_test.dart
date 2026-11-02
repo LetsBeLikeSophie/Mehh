@@ -929,6 +929,27 @@ void main() {
     expect(find.textContaining('모든 종류 합계 67%'), findsOneWidget);
     expect(find.textContaining('그날의 묶음  1/2장'), findsOneWidget);
     expect(find.textContaining('캡처  1/1장'), findsOneWidget);
+    // 정식 빌드: 결제 말이 없다 (UX-95)
+    expect(find.textContaining('결제'), findsNothing);
+    expect(find.textContaining('(참고)'), findsNothing);
+    expect(find.text('이 기록은 이 폰에만 있어요.'), findsOneWidget);
+  });
+
+  testWidgets('정확도: 테스트 동안에는 결제 기준 말이 그대로 보인다 (UX-95)', (tester) async {
+    final store = MemoryStore();
+    await store.addPicks([
+      PickRecord(
+        at: DateTime(2026, 10, 1),
+        kind: 'day',
+        tag: 'burst',
+        suggested: true,
+        sent: true,
+      ),
+    ]);
+    await pump(tester, const AccuracyScreen(), store: store, testFree: true);
+    expect(find.textContaining('결제를 켤 만해요'), findsOneWidget);
+    expect(find.textContaining('(결제 기준)'), findsOneWidget);
+    expect(find.textContaining('(참고)'), findsOneWidget);
   });
 
   testWidgets('캡처: X 하나를 켰다 꺼서 킵해도 추천이 남아 있으면 홈은 "다 봤어요"가 아니다', (tester) async {
