@@ -21,6 +21,13 @@ void main() {
   final ko = lookupL10n(const Locale('ko'));
   final en = lookupL10n(const Locale('en'));
 
+  test('영어: 코인 창 제목·사용법 말이 그림·앱과 같다 (UX-96)', () {
+    expect(en.useFreeSetTitle, 'Open with 1 coin?');
+    expect(en.guideSwipeTitle, 'Swipe up to remove, down to keep');
+    expect(en.guideGroupsTitle, 'Your photos are in sets');
+    expect(en.guideRowSub, contains('from sets to trash'));
+  });
+
   setUpAll(() async {
     await initializeDateFormatting('ko');
     await initializeDateFormatting('en');

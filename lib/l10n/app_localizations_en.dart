@@ -157,7 +157,7 @@ class L10nEn extends L10n {
   String get allSeen => 'All done';
 
   @override
-  String get pickScreenshots => 'Pick screenshots to remove';
+  String get pickScreenshots => 'Pick ones to remove';
 
   @override
   String get limitedAccess =>
@@ -737,7 +737,7 @@ class L10nEn extends L10n {
       'You often keep accidental shots, so we\'ll stop suggesting them for now · we\'ll try again in 30 days';
 
   @override
-  String get useFreeSetTitle => 'Open with 1?';
+  String get useFreeSetTitle => 'Open with 1 coin?';
 
   @override
   String useFreeSetBody(int count) {
@@ -870,7 +870,7 @@ class L10nEn extends L10n {
   String get focusFinishYes => 'Finish';
 
   @override
-  String get guideGroupsTitle => 'Your photos are grouped';
+  String get guideGroupsTitle => 'Your photos are in sets';
 
   @override
   String get guideGroupsBody =>
@@ -884,7 +884,7 @@ class L10nEn extends L10n {
       'Tap [Show picks] and the app suggests\nphotos to clean up first.';
 
   @override
-  String get guideSwipeTitle => 'Swipe up to clean up, down to keep';
+  String get guideSwipeTitle => 'Swipe up to remove, down to keep';
 
   @override
   String get guideSwipeBody =>
@@ -910,7 +910,7 @@ class L10nEn extends L10n {
   String get guideRow => 'How it works';
 
   @override
-  String get guideRowSub => 'Four quick pages, from groups to trash';
+  String get guideRowSub => 'Four quick pages, from sets to trash';
 
   @override
   String guidePosition(int current, int total) {
