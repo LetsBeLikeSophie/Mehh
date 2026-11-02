@@ -340,6 +340,73 @@ void main() {
     },
   );
 
+  // 홈 카드 숫자 = 들어가서 보는 [추천 보기] 장수 (UX-94)
+  {
+    PhotoMeta copy(String id, {bool fav = false, bool album = false}) =>
+        PhotoMeta(
+          id: id,
+          takenAt: DateTime(2026, 9, 1, 10),
+          width: 100,
+          height: 100,
+          isFavorite: fav,
+          movedToAlbum: album,
+        );
+    final original = copy('original');
+    final plain = copy('plain');
+    final fav = copy('fav', fav: true);
+    final album = copy('album', album: true);
+    List<Override> setsOf(List<PhotoMeta> remove) => [
+      duplicatesProvider.overrideWith(
+        (ref) async => [DuplicateSet(original, remove)],
+      ),
+    ];
+
+    testWidgets('똑같은 사진: ♥·앨범 사본만 남으면 홈 카드가 없다 (UX-94)', (tester) async {
+      await pump(
+        tester,
+        const Scaffold(body: HomeTab()),
+        extra: setsOf([fav, album]),
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('똑같은 사진'), findsNothing);
+      await flush(tester);
+    });
+
+    testWidgets('똑같은 사진: 섞여 있으면 카드 숫자 = 정리 화면 [추천 보기] 장수 (UX-94)', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        const Scaffold(body: HomeTab()),
+        extra: setsOf([plain, fav, album]),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('똑같은 사진 1장 찾았어요'), findsOneWidget);
+      await tester.tap(find.text('살펴보기'));
+      await tester.pumpAndSettle();
+      expect(find.text('추천 보기 · 1장'), findsOneWidget);
+      await flush(tester);
+    });
+
+    testWidgets('똑같은 사진: 직접 X한 ♥ 사본은 카드에 센다 (UX-94)', (tester) async {
+      final store = MemoryStore()
+        ..decisions['fav'] = Decision(
+          photoId: 'fav',
+          state: DecisionState.toTrash,
+          at: DateTime(2026, 11, 2),
+        );
+      await pump(
+        tester,
+        const Scaffold(body: HomeTab()),
+        store: store,
+        extra: setsOf([fav, album]),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('똑같은 사진 1장 찾았어요'), findsOneWidget);
+      await flush(tester);
+    });
+  }
+
   testWidgets('설정: 맨 위 Mehh Pro 줄을 누르면 Pro 안내(구매 복원)가 열린다', (tester) async {
     await pump(tester, const SettingsScreen());
     // 코인은 글자 대신 그림 + 개수

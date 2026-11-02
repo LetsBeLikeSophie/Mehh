@@ -33,14 +33,20 @@ List<DuplicateSet> _findDups(
   a,
 ) => findDuplicates(a.$1, a.$2, sizes: a.$3, pairs: a.$4);
 
-/// 아직 고르지 않은 똑같은 사진 수 (홈 카드). 킵·휴지통으로 간 것은 빠진다.
+/// 아직 고르지 않은 똑같은 사진. 킵·휴지통으로 간 것은 빠지고,
+/// 표시 없는 사본은 [추천 보기]에 드는 것만, 직접 X는 그대로 (UX-94)
+Iterable<PhotoMeta> duplicatesPending(
+  List<DuplicateSet>? sets,
+  Map<String, Decision> decisions,
+) => (sets ?? const <DuplicateSet>[]).expand((s) => s.remove).where((p) {
+  final st = stateOf(decisions, p.id);
+  return st == DecisionState.toTrash ||
+      (st == DecisionState.undecided && suggestableCopy(p));
+});
+
+/// 홈 카드·Pro 안내의 똑같은 사진 수
 int duplicatesLeft(List<DuplicateSet>? sets, Map<String, Decision> decisions) =>
-    sets == null
-    ? 0
-    : sets.expand((s) => s.remove).where((p) {
-        final st = stateOf(decisions, p.id);
-        return st == DecisionState.undecided || st == DecisionState.toTrash;
-      }).length;
+    duplicatesPending(sets, decisions).length;
 
 /// 묶음 하나의 추천 정리
 /// 자주 되돌린 추천 이유 (취향 학습). 추천 정확도 기록에서 계산하고, 기록이 쌓이면 다시 계산한다.

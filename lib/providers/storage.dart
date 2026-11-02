@@ -57,14 +57,12 @@ final cleanableIdsProvider = Provider.autoDispose<Set<String>>((ref) {
       out.addAll(ref.watch(groupPlanProvider(g)).trash.keys);
     }
   }
-  for (final set in ref.watch(duplicatesProvider).value ?? const []) {
-    for (final p in set.remove) {
-      final st = stateOf(decisions, p.id);
-      if (st == DecisionState.undecided || st == DecisionState.toTrash) {
-        out.add(p.id);
-      }
-    }
-  }
+  out.addAll(
+    duplicatesPending(
+      ref.watch(duplicatesProvider).value,
+      decisions,
+    ).map((p) => p.id),
+  );
   return out;
 });
 

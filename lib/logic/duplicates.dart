@@ -152,6 +152,9 @@ int _piece(PhotoFeatures f, int k, int pieces) {
   return v;
 }
 
+/// 앱이 추천해도 되는 사본. ♥(즐겨찾기)·앨범으로 옮긴 사본은 직접 X만 (리뷰 11-02 S-2, UX-94)
+bool suggestableCopy(PhotoMeta p) => !p.isFavorite && !p.movedToAlbum;
+
 /// 중복 묶음에서 남길 사진: 정리 줄·휴지통에 가지 않은 사진 중 가장 앞(가장 큰) 것.
 /// 사용자가 원본을 정리하면 다음 사진이 남길 사진이 된다. 전부 갔으면 null.
 String? keeperOf(DuplicateSet s, bool Function(String id) gone) {
