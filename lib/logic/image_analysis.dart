@@ -20,8 +20,14 @@ List<PhotoFeatures> analyzeBatch(List<AnalysisInput> inputs) => [
 ];
 
 /// 썸네일 바이트 → dHash, 선명도(라플라시안 분산), 평균 밝기.
+/// 끊긴 파일은 디코더가 던질 수 있다. 한 장 때문에 배치 전체가 실패하지 않게 못 읽은 사진(null)으로 둔다
 PhotoFeatures? analyzeImage(String id, Uint8List bytes, {int modifiedAt = 0}) {
-  final decoded = img.decodeImage(bytes);
+  final img.Image? decoded;
+  try {
+    decoded = img.decodeImage(bytes);
+  } catch (_) {
+    return null;
+  }
   if (decoded == null) return null;
   final gray = _gray(decoded);
   final (hi, lo) = dHash(gray);

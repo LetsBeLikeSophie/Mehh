@@ -427,6 +427,94 @@ void main() {
     await flush(tester);
   });
 
+  {
+    final bad = PhotoMeta(
+      id: 'bad',
+      takenAt: t0.add(const Duration(minutes: 20)),
+      width: 100,
+      height: 100,
+    );
+    final withBad = [...burstPhotos, bad];
+
+    testWidgets(
+      '썸네일을 못 읽는 사진이 있어도 묶음이 "살펴보는 중"에 머물지 않고 [추천 보기]가 된다 (리뷰 11-02 S-4)',
+      (tester) async {
+        final day = DayGroup(
+          id: 'day-p0',
+          kind: DayGroupKind.day,
+          photos: withBad,
+        );
+        await pump(
+          tester,
+          SortScreen(kind: SortKind.day, group: day),
+          library: _UnreadableLibrary(withBad, paid),
+          testFree: true,
+        );
+        await tester.pumpAndSettle();
+        expect(find.textContaining('살펴보는 중'), findsNothing);
+        expect(find.text('추천 보기 · 2장'), findsOneWidget);
+        await flush(tester);
+      },
+    );
+
+    test(
+      '못 읽은 사진은 끝난 것으로 보고, 이번 실행에서 다시 시도하지 않으며 사진이 빠져도 깜빡이지 않는다 (리뷰 11-02 S-4)',
+      () async {
+        final lib = _UnreadableLibrary(withBad, paid);
+        final c = ProviderContainer(
+          overrides: [
+            photoLibraryProvider.overrideWithValue(lib),
+            storeProvider.overrideWithValue(MemoryStore()),
+          ],
+        );
+        addTearDown(c.dispose);
+        final done = <bool>[];
+        c.listen(analysisProvider, (_, n) => done.add(n.done));
+        await c.read(libraryProvider.future);
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        expect(c.read(analysisProvider).done, isTrue);
+        expect(c.read(analysisProvider).features.containsKey('bad'), isFalse);
+        expect(lib.asked, [5]);
+        done.clear();
+        c.read(libraryProvider.notifier).removePhotos({'p3'});
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        expect(done, everyElement(isTrue));
+        expect(lib.asked, hasLength(1));
+      },
+    );
+
+    test('분석값 저장이 실패해도 분석은 끝까지 가고 done이 된다 (리뷰 11-02 S-4)', () async {
+      final c = ProviderContainer(
+        overrides: [
+          photoLibraryProvider.overrideWithValue(
+            _UnreadableLibrary(withBad, paid),
+          ),
+          storeProvider.overrideWithValue(_FeaturesFullStore()),
+        ],
+      );
+      addTearDown(c.dispose);
+      c.listen(analysisProvider, (_, _) {});
+      await c.read(libraryProvider.future);
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      expect(c.read(analysisProvider).done, isTrue);
+      expect(c.read(analysisProvider).features.keys, containsAll(paid.keys));
+    });
+
+    test('분석 자체가 던져도 done이 된다 (리뷰 11-02 S-4)', () async {
+      final c = ProviderContainer(
+        overrides: [
+          photoLibraryProvider.overrideWithValue(_ThrowingLibrary(withBad)),
+          storeProvider.overrideWithValue(MemoryStore()),
+        ],
+      );
+      addTearDown(c.dispose);
+      c.listen(analysisProvider, (_, _) {});
+      await c.read(libraryProvider.future);
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      expect(c.read(analysisProvider).done, isTrue);
+    });
+  }
+
   testWidgets('[선택 해제]는 표시 없음: 연 묶음의 추천이 남아 [추천 보기]로 다시 받는다', (tester) async {
     final day = DayGroup(
       id: 'day-p0',
@@ -4190,6 +4278,48 @@ class _FakeHandoff extends Handoff {
     sent.addAll(photoIds);
     return SendResult.ok;
   }
+}
+
+/// 썸네일을 못 읽는 사진은 분석 결과에서 빠진다 (실제 [PhotoLibrary.analyze]처럼)
+class _UnreadableLibrary extends DemoPhotoLibrary {
+  _UnreadableLibrary(this.photos, this.features);
+  final List<PhotoMeta> photos;
+  final Map<String, PhotoFeatures> features;
+  final asked = <int>[];
+
+  @override
+  Future<List<PhotoMeta>> loadAll() async => photos;
+
+  @override
+  Future<void> analyze(
+    List<PhotoMeta> metas, {
+    required Future<void> Function(List<PhotoFeatures>) onBatch,
+    bool Function()? cancelled,
+  }) async {
+    asked.add(metas.length);
+    await onBatch([for (final m in metas) ?features[m.id]]);
+  }
+}
+
+class _ThrowingLibrary extends DemoPhotoLibrary {
+  _ThrowingLibrary(this.photos);
+  final List<PhotoMeta> photos;
+
+  @override
+  Future<List<PhotoMeta>> loadAll() async => photos;
+
+  @override
+  Future<void> analyze(
+    List<PhotoMeta> metas, {
+    required Future<void> Function(List<PhotoFeatures>) onBatch,
+    bool Function()? cancelled,
+  }) async => throw Exception('decode');
+}
+
+class _FeaturesFullStore extends MemoryStore {
+  @override
+  Future<void> saveFeatures(List<PhotoFeatures> list) async =>
+      throw Exception('SQLITE_FULL');
 }
 
 class _NeverAnalyzedLibrary extends DemoPhotoLibrary {

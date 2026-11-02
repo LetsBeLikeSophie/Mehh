@@ -56,6 +56,7 @@ GroupPlan planGroup(
   CleanupConfig config = const CleanupConfig(),
   Set<TrashReason> muted = const {},
   Set<String> eyesClosed = const {},
+  Set<String> unreadable = const {},
 }) {
   final bursts = findBursts(photos, features, config: config);
   final best = <String>{};
@@ -129,7 +130,9 @@ GroupPlan planGroup(
     best: best,
     kept: kept,
     trash: trash,
-    analyzed: photos.where((p) => features.containsKey(p.id)).length,
+    analyzed: photos
+        .where((p) => features.containsKey(p.id) || unreadable.contains(p.id))
+        .length,
   );
 }
 

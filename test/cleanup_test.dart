@@ -497,6 +497,25 @@ void main() {
       return im;
     }
 
+    test(
+      '끊긴 파일은 던지지 않고 못 읽은 사진이 된다 (한 장 때문에 배치 전체가 실패하지 않게, 리뷰 11-02 S-4)',
+      () {
+        for (final whole in [
+          jpg(checker()),
+          Uint8List.fromList(img.encodePng(checker())),
+        ]) {
+          for (var n = 0; n < whole.length; n += 7) {
+            final part = Uint8List.sublistView(whole, 0, n);
+            expect(
+              () => analyzeImage('x', part),
+              returnsNormally,
+              reason: '$n',
+            );
+          }
+        }
+      },
+    );
+
     test('흐리게 하면 선명도가 크게 떨어지고, 재압축해도 해시는 거의 같다', () {
       final sharp = analyzeImage('s', jpg(checker()))!;
       final blurred = analyzeImage(

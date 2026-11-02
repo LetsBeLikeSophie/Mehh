@@ -60,6 +60,7 @@ final groupPlanProvider = Provider.autoDispose.family<GroupPlan, DayGroup>((
   g,
 ) {
   final features = ref.watch(analysisProvider.select((s) => s.features));
+  final unreadable = ref.watch(analysisProvider.select((s) => s.unreadable));
   final decisions = ref.watch(decisionsProvider).value ?? const {};
   // 앱이 추천하지 않는 묶음: 저장한 사진은 분석값이 있어도 추천을 만들지 않는다
   if (g.kind.noPicks) return planGroup(const [], features, decisions);
@@ -74,6 +75,7 @@ final groupPlanProvider = Provider.autoDispose.family<GroupPlan, DayGroup>((
       for (final e in eyes.entries)
         if (e.value) e.key,
     },
+    unreadable: unreadable,
   );
 });
 
