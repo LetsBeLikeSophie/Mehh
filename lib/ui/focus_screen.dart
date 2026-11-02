@@ -5,6 +5,7 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../config/app_config.dart';
 import '../l10n/l10n.dart';
 import '../logic/format.dart';
 import '../models/day_group.dart';
@@ -70,13 +71,12 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
   /// 없으면 "끝낼까요?". 보내기로 하면 정리 화면으로 돌아가 바로 보낸다
   Future<void> _finish(int total, int marked) async {
     final l = context.l;
+    final n = marked.clamp(0, maxSendAtOnce);
     final ok = await askMehh(
       context,
       // 제목 = 아래 버튼과 같은 말 "N장 휴지통으로" (2026-10-24 Sophie: 반복되는 말 없이)
       title: marked > 0
-          ? (widget.kind.isVideo
-                ? l.trashCountVideos(marked)
-                : l.trashCount(marked))
+          ? (widget.kind.isVideo ? l.trashCountVideos(n) : l.trashCount(n))
           : widget.kind.isVideo
           ? l.focusFinishNoneVideos
           : l.focusFinishNone,

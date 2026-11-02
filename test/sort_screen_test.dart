@@ -3883,7 +3883,9 @@ void main() {
         );
         await tester.tap(find.text('추천 보기 · 2,005장'));
         await tester.pumpAndSettle();
-        await tester.tap(find.text('2,005장 휴지통으로'));
+        // 버튼 숫자 = 실제로 가는 장수 (UX-97)
+        expect(find.text('2,005장 휴지통으로'), findsNothing);
+        await tester.tap(find.text('2,000장 휴지통으로'));
         await tester.pumpAndSettle();
         expect(find.textContaining('나머지 5장은 X 그대로'), findsOneWidget);
         expect(find.text('5장 휴지통으로'), findsOneWidget);
@@ -3992,10 +3994,51 @@ void main() {
       }
       await g.up();
       await tester.pumpAndSettle();
-      expect(find.text('2,000장 휴지통으로'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.text('2,000장 휴지통으로'),
+        ),
+        findsOneWidget,
+      );
       await tester.tap(find.text('휴지통으로'));
       await tester.pumpAndSettle();
       expect(find.byType(SortScreen), findsOneWidget);
+      expect(find.text('5장 휴지통으로'), findsOneWidget);
+      await flush(tester);
+    });
+
+    testWidgets('크게 보기 길게 누르기 창도 실제로 가는 장수, 나머지는 X 그대로 (UX-97)', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        SortScreen(
+          kind: SortKind.singles,
+          group: DayGroup(
+            id: 'singles',
+            kind: DayGroupKind.singles,
+            photos: many,
+          ),
+        ),
+      );
+      await tester.tap(find.text('전체 선택'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(PhotoThumb).first);
+      await tester.pumpAndSettle();
+      await holdToFinish(tester);
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.text('2,000장 휴지통으로'),
+        ),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('휴지통으로'));
+      await tester.pumpAndSettle();
+      expect(find.byType(FocusScreen), findsNothing);
+      expect(find.textContaining('나머지 5장은 X 그대로'), findsOneWidget);
       expect(find.text('5장 휴지통으로'), findsOneWidget);
       await flush(tester);
     });
@@ -4031,7 +4074,8 @@ void main() {
       expect(handoff.sent, hasLength(maxCortexAtOnce));
       final first = {...handoff.sent};
       handoff.sent.clear();
-      expect(find.text('2,005장 휴지통으로'), findsOneWidget); // X는 그대로
+      // X는 2,005장 그대로, 버튼은 실제로 가는 장수 (UX-97)
+      expect(find.text('2,000장 휴지통으로'), findsOneWidget);
 
       await tester.tap(find.text('Cortex로'));
       await tester.pumpAndSettle();

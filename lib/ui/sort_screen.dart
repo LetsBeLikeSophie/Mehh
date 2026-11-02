@@ -644,7 +644,11 @@ class _SortScreenState extends ConsumerState<SortScreen>
                             ? (widget.kind.isVideo
                                   ? l.nothingMarkedVideos
                                   : l.nothingMarked)
-                            : _trashCount(l, marked.length),
+                            // 실제로 가는 장수, 나머지는 보낸 뒤 알림으로 (UX-97)
+                            : _trashCount(
+                                l,
+                                marked.length.clamp(0, maxSendAtOnce),
+                              ),
                         style: const TextStyle(
                           fontSize: MehhText.body,
                           fontWeight: FontWeight.w500,
