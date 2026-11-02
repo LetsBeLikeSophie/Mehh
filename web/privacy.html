@@ -20,7 +20,7 @@
 <body>
 <main>
   <h1>Mehh 개인정보처리방침</h1>
-  <p class="muted">시행일: 2026년 11월 1일 · 문의: mehh@itssophie.dev</p>
+  <p class="muted">시행일: 2026년 11월 2일 · 문의: mehh@itssophie.dev</p>
 
   <p>Mehh(이하 "앱")는 휴대폰 사진첩을 정리하도록 돕는 앱입니다. 앱은 회원 가입이 없고, 운영자가 사용자의 사진이나 기록을 모으는 서버를 두지 않습니다.</p>
 
@@ -30,7 +30,7 @@
     <li>사진 분석(흐림·밝기·그림 해시 등)은 모두 휴대폰 안에서 합니다. 사진이나 분석 값을 운영자나 다른 서버로 보내지 않고, 클라우드 AI를 쓰지 않습니다.</li>
     <li>눈 감은 컷 찾기: 비슷한 연속 컷에서 눈 감은 사진을 고르려고, 휴대폰 안의 얼굴 감지(Google ML Kit, 기기 안에서만 동작)로 얼굴이 있는지와 눈을 떴는지만 봅니다. 사람을 알아보지 않고, 얼굴 모양 같은 정보는 저장하거나 밖으로 보내지 않습니다. 사진마다 "눈 감음" 여부 하나만 휴대폰 안에 남습니다.</li>
     <li>진단 정보: 눈 감은 컷 찾기에 쓰는 Google ML Kit는 기능의 성능과 오류를 살피려고 기기 정보(기종·OS 버전), 앱 정보(패키지 이름·버전), 설치마다 정해지는 식별자, 성능 지표·오류 코드 같은 진단 정보를 Google로 보냅니다. 전송은 HTTPS로 암호화되고 Google은 이를 제3자에게 넘기지 않습니다. 사진, 얼굴 정보, 분석 결과는 보내지 않습니다. 자세한 내용은 <a href="https://developers.google.com/ml-kit/android-data-disclosure">Google ML Kit 데이터 공개</a>를 참고하세요.</li>
-    <li>오류 기록: 앱이 멈추거나 오류가 나면 고치려고 Android 앱은 오류 종류·코드 위치, 기기 정보(기종·OS 버전), 앱 버전, 설치마다 정해지는 식별자를 Google Firebase Crashlytics로 보냅니다. 전송은 암호화되고, 90일 뒤 지워집니다. 사진, 얼굴 정보, 분석 결과, 정리 기록은 보내지 않습니다.</li>
+    <li>오류 기록: 오류를 고치려고 Android 앱은 Google Firebase Crashlytics를 씁니다. 앱을 켤 때마다 세션 신호(세션 ID, 설치마다 정해지는 식별자, 기기 정보, 앱 버전)를 보냅니다. 앱이 멈추거나 오류가 나면 오류 종류·코드 위치, 기기 정보(기종·OS 버전), 앱 버전, 식별자를 보냅니다. 앱 안의 오류는 오류 글을 빼고 보내지만, Android 시스템 쪽에서 앱이 멈추면 오류 글이 함께 가고 드물게 파일 이름이 들어 있을 수 있습니다. 전송은 암호화되고, 오류 기록은 90일 뒤 지워집니다. 그 전에 지우려면 문의 메일로 알려 주세요. 사진, 얼굴 정보, 분석 결과, 정리 기록은 보내지 않습니다.</li>
     <li>동영상: 찍은 동영상과 다른 앱에서 저장·편집한 동영상을 나눠 크기순으로 보여 주려고 동영상의 크기·길이·날짜와 저장된 폴더 이름만 읽습니다. 폴더 이름은 폰 밖으로 보내지 않습니다. 동영상 내용은 분석하지 않습니다.</li>
     <li>얼굴을 알아보거나 사람별로 묶지 않습니다.</li>
   </ul>
@@ -39,7 +39,7 @@
   <ul>
     <li>사진 분석 결과, 사용자가 정한 킵·정리 기록, 휴지통으로 보낸 용량 기록, 추천을 받아들인 기록(추천 정확도·취향 학습용), 코인(무료 묶음) 사용 기록과 이용권 상태.</li>
     <li>이 기록은 앱 전용 저장 공간에만 있고, 휴대폰 클라우드 백업에도 넣지 않습니다.</li>
-    <li>설정 &gt; [모든 기록 지우기]로 언제든 지울 수 있고, 앱을 지우면 함께 지워집니다.</li>
+    <li>설정 &gt; [모든 기록 지우기]로 언제든 지울 수 있고, 앱을 지우면 함께 지워집니다. Google로 보낸 오류 기록은 여기서 지워지지 않습니다(1번 참고).</li>
   </ul>
 
   <h2>3. 휴대폰 밖으로 나가는 경우</h2>
@@ -51,7 +51,7 @@
 
   <h2>4. 하지 않는 것</h2>
   <ul>
-    <li>광고 SDK, 분석(통계) SDK를 넣지 않습니다.</li>
+    <li>광고 SDK와 사용 통계 도구(Google Analytics 등)를 넣지 않습니다. Crashlytics는 오류를 고치는 데만 씁니다.</li>
     <li>사진·기록을 팔거나 다른 회사와 나누지 않습니다.</li>
     <li>Google Play·App Store도 앱이 멈춘 정보를 운영체제 차원에서 모아 개발자에게 익명 통계로 보여 줄 수 있습니다.</li>
   </ul>
@@ -71,7 +71,7 @@
   <hr>
 
   <h1>Mehh Privacy Policy</h1>
-  <p class="muted">Effective November 1, 2026 · Contact: mehh@itssophie.dev</p>
+  <p class="muted">Effective November 2, 2026 · Contact: mehh@itssophie.dev</p>
 
   <p>Mehh ("the app") helps you clean up your phone's photo library. There is no sign-up, and the developer runs no server that collects your photos or records.</p>
 
@@ -81,7 +81,7 @@
     <li>All analysis (blur, brightness, image hashes, etc.) happens on your phone. Photos and analysis values are never sent to the developer or any other server, and no cloud AI is used.</li>
     <li>Closed-eye check: to pick out shots with closed eyes among similar shots, on-device face detection (Google ML Kit, runs only on your phone) checks whether there is a face and whether the eyes are open. It does not recognize people, and no face data is stored or sent anywhere. Only a yes/no "eyes closed" flag per photo stays on your phone.</li>
     <li>Diagnostics: Google ML Kit, used for the closed-eye check, sends diagnostic information to Google to monitor performance and errors — device information (model, OS version), app information (package name, version), a per-installation identifier, and performance metrics and error codes. It is encrypted in transit (HTTPS) and Google does not transfer it to third parties. Photos, face data and analysis results are not sent. See <a href="https://developers.google.com/ml-kit/android-data-disclosure">Google ML Kit data disclosure</a>.</li>
-    <li>Error reports: when the app crashes or hits an error, the Android app sends the error type and code location, device information (model, OS version), app version and a per-installation identifier to Google Firebase Crashlytics so it can be fixed. It is encrypted in transit and deleted after 90 days. Photos, face data, analysis results and cleanup records are not sent.</li>
+    <li>Error reports: the Android app uses Google Firebase Crashlytics so errors can be fixed. Each time the app opens, it sends a session signal (session ID, a per-installation identifier, device information, app version). When the app crashes or hits an error, it sends the error type and code location, device information (model, OS version), app version and the identifier. Errors inside the app are sent without their message, but when the app stops on the Android system side, the message goes too and may rarely contain a file name. It is encrypted in transit, and error reports are deleted after 90 days. To delete them sooner, email us. Photos, face data, analysis results and cleanup records are not sent.</li>
     <li>Videos: to list camera videos and videos saved or edited in other apps by size, the app reads only each video's size, length, date and folder name. Folder names never leave your phone. Video content is not analyzed.</li>
     <li>The app does not recognize faces or group photos by person.</li>
   </ul>
@@ -90,7 +90,7 @@
   <ul>
     <li>Photo analysis results, your keep/remove choices, trashed-size history, which suggestions you accepted (for accuracy and learning your taste), free-set usage and plan status.</li>
     <li>These stay in the app's private storage and are excluded from cloud backups.</li>
-    <li>Clear them anytime in Settings &gt; Clear all records; deleting the app deletes them too.</li>
+    <li>Clear them anytime in Settings &gt; Clear all records; deleting the app deletes them too. Error reports already sent to Google are not removed this way (see section 1).</li>
   </ul>
 
   <h2>3. When something leaves your phone</h2>
@@ -102,7 +102,7 @@
 
   <h2>4. What we don't do</h2>
   <ul>
-    <li>No advertising or analytics SDKs.</li>
+    <li>No advertising SDKs or usage analytics tools (such as Google Analytics). Crashlytics is used only to fix errors.</li>
     <li>We don't sell or share your photos or records.</li>
     <li>Google Play and the App Store may also collect crash information at the operating-system level and show it to the developer as anonymous statistics.</li>
   </ul>

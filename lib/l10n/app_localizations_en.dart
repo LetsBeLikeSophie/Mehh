@@ -338,7 +338,7 @@ class L10nEn extends L10n {
       'To group photos by date and place and find duplicates and videos, Mehh needs access to all your photos and videos.';
 
   @override
-  String get promiseLocal => 'Your photos and records never leave your phone.';
+  String get promiseLocal => 'Your photos and cleanup records never leave your phone.';
 
   @override
   String get promiseLearn =>

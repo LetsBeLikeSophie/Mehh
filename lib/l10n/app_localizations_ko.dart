@@ -295,7 +295,7 @@ class L10nKo extends L10n {
       '찍은 날짜와 장소로 사진을 묶고, 똑같은 사진과 동영상을 찾으려면 사진·동영상 전체에 접근해야 해요.';
 
   @override
-  String get promiseLocal => '사진과 기록은 폰 밖으로 나가지 않아요.';
+  String get promiseLocal => '사진과 정리 기록은 폰 밖으로 나가지 않아요.';
 
   @override
   String get promiseLearn => '추천은 앱이 먼저 골라 둔 것일 뿐이에요. 언제든 바꿀 수 있어요.';
