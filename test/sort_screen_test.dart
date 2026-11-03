@@ -2633,7 +2633,7 @@ void main() {
     expect(find.textContaining('  4장'), findsOneWidget);
     expect(find.textContaining('받았다는 신호가 없어서 휴지통으로 보내지 않았어요'), findsOneWidget);
     expect(find.text('Cortex로 보냄'), findsNWidgets(2));
-    await tester.pump(const Duration(seconds: 6)); // 알림이 사라지게
+    await tester.pump(const Duration(seconds: 9)); // 알림이 사라지게 (8초까지, UX-98)
     await tester.pumpAndSettle();
 
     // 보낸 것보다 적게 받았다고 알려 오면 묻지 않는다
@@ -2642,7 +2642,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('1장만 받았다고'), findsOneWidget);
     expect(find.textContaining('받았어요'), findsNothing);
-    await tester.pump(const Duration(seconds: 6));
+    await tester.pump(const Duration(seconds: 9)); // 알림은 8초까지 (UX-98)
     await tester.pumpAndSettle();
 
     // 받은 사진 목록이 오면 그 사진만 묻는다. [나중에]면 X 그대로, 표시는 "Cortex로 보냄"

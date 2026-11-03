@@ -167,6 +167,10 @@ String formatBytes(int bytes) {
   return '${(bytes / 1024).ceil()}KB';
 }
 
+/// 한 줄 알림이 떠 있는 시간. 돈·삭제 알림도 짧아 읽기 전에 사라지지 않게 3초부터, 긴 안내는 8초까지 (UX-98)
+Duration noteDuration(String text) =>
+    Duration(seconds: (3 + text.length ~/ 12).clamp(3, 8));
+
 /// 한 줄 알림 (화면 아래)
 void showNote(BuildContext context, String text) {
   ScaffoldMessenger.of(context)
@@ -178,8 +182,7 @@ void showNote(BuildContext context, String text) {
             : Text(text),
         behavior: SnackBarBehavior.floating,
         backgroundColor: MehhColors.black,
-        // 긴 안내는 읽을 시간을 더 준다 (2~8초)
-        duration: Duration(seconds: (2 + text.length ~/ 25).clamp(2, 8)),
+        duration: noteDuration(text),
       ),
     );
 }
