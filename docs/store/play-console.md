@@ -169,6 +169,9 @@ These features need to compare every photo with every other photo (for example, 
 3. **수익 창출 설정 > 라이선스**의 Base64 공개키를 복사해 개발 세션에 전달 → `playPublicKey`에 넣어 다시 빌드 (그 전 빌드는 결제 버튼이 안 보이는 게 정상)
 4. 2023년 11월 이후 만든 개인 계정이면 **비공개 테스트에 테스터 12명 이상, 14일 연속** 후 프로덕션 신청 가능
 5. 결제를 켜기 전 SPEC 5단계 "출시 전 결제 체크리스트"를 모두 확인
+6. **정식 출시 날 테스터에게 Pro 선물** (2026-11-03 Sophie Q2-A): 비공개 테스터 모두에게 조건 없이 Play 프로모션 코드 1개씩(`mehh_pro_lifetime`). 리뷰·별점과 바꾸지 않는다(정책). Sophie가 직접: **수익 창출 > 프로모션 코드**에서 테스터 수만큼 일회성 상품 코드 만들기 → 메일로 한 명에 하나씩.
+   - 메일 (한국어): 제목 "Mehh 정식 출시 · 테스트 고마워요" / 본문 "비공개 테스트에 함께해 줘서 고마워요. 고마운 마음으로 Mehh Pro 평생 이용권 코드를 드려요: [코드] · Play 스토어 > 프로필 > 결제 및 정기 결제 > 코드 사용에서 넣어 주세요. 넣은 뒤 Mehh를 껐다 켜거나 설정 > Mehh Pro > [구매 복원]을 누르면 열려요."
+   - Mail (English): subject "Mehh is out · thanks for testing" / body "Thanks for joining the closed test. As a thank-you, here's a Mehh Pro lifetime code: [code] · Redeem it in Play Store > Profile > Payments & subscriptions > Redeem code. Then reopen Mehh, or tap Settings > Mehh Pro > Restore purchases."
 
 ## 8. 앱 안 별점 부탁
 
