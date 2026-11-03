@@ -668,7 +668,7 @@ class L10nEn extends L10n {
 
   @override
   String get proFreeKinds =>
-      'Screenshots, singles and duplicates are always free';
+      'Screenshots, single shots and exact duplicates are always free';
 
   @override
   String freeRefilled(int count) {

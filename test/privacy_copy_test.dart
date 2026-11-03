@@ -22,4 +22,11 @@ void main() {
     expect(webDocUrl(termsUrl, 'en'), '$termsUrl#en');
     expect(webDocUrl(privacyPolicyUrl, 'en'), '$privacyPolicyUrl#en');
   });
+
+  test('영어 Pro 안내의 무료 줄은 홈과 같은 종류 이름 (UX-109)', () {
+    final en = lookupL10n(const Locale('en'));
+    for (final name in [en.singles, en.duplicatesTitle]) {
+      expect(en.proFreeKinds.toLowerCase(), contains(name.toLowerCase()));
+    }
+  });
 }
