@@ -93,26 +93,23 @@ class _HomeTabState extends ConsumerState<HomeTab> {
     final l = context.l;
     // 분석이 끝나면 연속 컷의 눈 감음을 폰 안에서 본다 (홈이 떠 있는 동안)
     ref.watch(faceScanProvider);
-    ref.listen(yearlyEndedProvider, (_, ended) {
-      if (!ended) return;
-      ref.read(yearlyEndedProvider.notifier).clear();
-      showNote(context, l.yearlyEnded(freeGroupsPerMonth));
-    });
-    ref.listen(freeRefilledProvider, (_, refilled) {
-      if (!refilled) return;
-      ref.read(freeRefilledProvider.notifier).clear();
-      showNote(context, l.freeRefilled(freeGroupsPerMonth));
-    });
-    ref.listen(testEndedProvider, (_, ended) {
-      if (!ended) return;
-      ref.read(testEndedProvider.notifier).clear();
-      showNote(context, l.testEnded(freeGroupsPerMonth));
-    });
-    ref.listen(proStartedProvider, (_, started) {
-      if (!started) return;
-      ref.read(proStartedProvider.notifier).clear();
-      showNote(context, l.proThanks);
-    });
+    // 온보딩 동안 올라간 신호도 홈이 처음 그릴 때 한 번 보인다 (UX-107)
+    void oneShot(NotifierProvider<OneShotNotifier, bool> signal, String text) {
+      void show() => WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !ref.read(signal)) return;
+        ref.read(signal.notifier).clear();
+        showNote(context, text);
+      });
+      ref.listen(signal, (_, raised) {
+        if (raised) show();
+      });
+      if (ref.read(signal)) show();
+    }
+
+    oneShot(yearlyEndedProvider, l.yearlyEnded(freeGroupsPerMonth));
+    oneShot(freeRefilledProvider, l.freeRefilled(freeGroupsPerMonth));
+    oneShot(testEndedProvider, l.testEnded(freeGroupsPerMonth));
+    oneShot(proStartedProvider, l.proThanks);
     final library = ref.watch(libraryProvider);
     final limited = ref.watch(permissionProvider) == PermissionState.limited;
 

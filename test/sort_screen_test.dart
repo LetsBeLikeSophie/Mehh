@@ -1726,6 +1726,47 @@ void main() {
     await flush(tester);
   });
 
+  // 온보딩 동안 올라간 신호도 홈이 처음 그릴 때 한 번 보인다 (UX-107)
+  testWidgets('새 폰: 온보딩 동안 조용히 복원된 Pro는 허락 뒤 홈에서 "Pro가 열렸어요" 한 번 (UX-107)', (
+    tester,
+  ) async {
+    final billing = DemoBilling(korean: true)..owned.add(Plan.lifetime);
+    await pump(
+      tester,
+      const RootScreen(),
+      billing: billing,
+      store: MemoryStore()..counters['guideSeen'] = 1,
+    );
+    expect(find.text('사진·동영상 접근 허용'), findsOneWidget); // 아직 온보딩
+    await tester.tap(find.text('사진·동영상 접근 허용'));
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('Pro가 열렸어요'), findsOneWidget);
+    // 나오는 움직임이 끝난 뒤부터 시간이 간다
+    for (var i = 0; i < 4; i++) {
+      await tester.pump(const Duration(seconds: 5));
+    }
+    expect(find.text('Pro가 열렸어요'), findsNothing); // 다시 뜨지 않는다
+    await flush(tester);
+  });
+
+  testWidgets('비공개 테스트가 끝난 뒤 새로 켜 온보딩을 거쳐도 홈에서 "비공개 테스트가 끝났어요" (UX-107)', (
+    tester,
+  ) async {
+    final store = MemoryStore()
+      ..counters['closedTest'] = 1
+      ..counters['guideSeen'] = 1;
+    await pump(tester, const RootScreen(), store: store);
+    await tester.tap(find.text('사진·동영상 접근 허용'));
+    await tester.pump();
+    await tester.pump();
+    expect(
+      find.textContaining('비공개 테스트가 끝났어요', findRichText: true),
+      findsOneWidget,
+    );
+    await flush(tester);
+  });
+
   testWidgets('Cortex가 없으면 [Cortex로]를 눌렀을 때 받으러 가기 안내', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
     await tester.tap(find.byType(XToggle).at(0));
@@ -4399,7 +4440,10 @@ void main() {
     // 자리: Pro 줄 바로 아래, "도움"보다 위 (N2-B)
     final y = tester.getTopLeft(find.text('매달 알림')).dy;
     expect(y, greaterThan(tester.getTopLeft(find.text('Mehh Pro')).dy));
-    expect(y, lessThan(tester.getTopLeft(find.text('사진과 정리 기록은 이 폰에만 있어요')).dy));
+    expect(
+      y,
+      lessThan(tester.getTopLeft(find.text('사진과 정리 기록은 이 폰에만 있어요')).dy),
+    );
     expect(y, lessThan(tester.getTopLeft(find.text('도움')).dy));
     expect(sw().value, isFalse);
     await tester.tap(find.byType(Switch));
