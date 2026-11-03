@@ -1,0 +1,18 @@
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:mehh/l10n/app_localizations.dart';
+
+/// 설정의 개인정보 문구는 첫 화면처럼 "정리 기록"이라고 한다. 처리방침의 오류 "기록"과 섞이지 않게 (S-1 2026-11-03)
+void main() {
+  test('설정 개인정보 제목·첫 줄은 두 언어 모두 정리 기록을 말한다', () {
+    final ko = lookupL10n(const Locale('ko'));
+    final en = lookupL10n(const Locale('en'));
+    for (final s in [ko.privacyTitle, ko.privacyShortLocal]) {
+      expect(s, contains('정리 기록'));
+    }
+    for (final s in [en.privacyTitle, en.privacyShortLocal]) {
+      expect(s, contains('cleanup records'));
+    }
+  });
+}

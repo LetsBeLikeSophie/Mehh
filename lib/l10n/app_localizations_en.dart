@@ -313,11 +313,8 @@ class L10nEn extends L10n {
   String get cleared => 'All records cleared';
 
   @override
-  String get privacyTitle => 'Your photos and records stay on this phone';
-
-  @override
-  String get privacyLocal =>
-      'Photo analysis and keep/remove records are stored only on this phone. Nothing is sent to a server or included in cloud backups.';
+  String get privacyTitle =>
+      'Your photos and cleanup records stay on this phone';
 
   @override
   String get privacyGeocode =>
@@ -1006,7 +1003,8 @@ class L10nEn extends L10n {
   String get save => 'Save';
 
   @override
-  String get privacyShortLocal => 'Photos and records stay on this phone';
+  String get privacyShortLocal =>
+      'Photos and cleanup records stay on this phone';
 
   @override
   String get privacyShortPlace =>

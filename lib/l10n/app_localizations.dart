@@ -514,14 +514,8 @@ abstract class L10n {
   /// No description provided for @privacyTitle.
   ///
   /// In ko, this message translates to:
-  /// **'사진과 기록은 이 폰에만 있어요'**
+  /// **'사진과 정리 기록은 이 폰에만 있어요'**
   String get privacyTitle;
-
-  /// No description provided for @privacyLocal.
-  ///
-  /// In ko, this message translates to:
-  /// **'사진 분석과 정리·킵 기록은 이 폰 안에만 저장돼요. 서버로 보내지 않고, 클라우드 백업에도 넣지 않아요.'**
-  String get privacyLocal;
 
   /// No description provided for @privacyGeocode.
   ///

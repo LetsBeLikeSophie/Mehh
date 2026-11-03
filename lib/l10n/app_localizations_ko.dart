@@ -272,11 +272,7 @@ class L10nKo extends L10n {
   String get cleared => '기록을 모두 지웠어요';
 
   @override
-  String get privacyTitle => '사진과 기록은 이 폰에만 있어요';
-
-  @override
-  String get privacyLocal =>
-      '사진 분석과 정리·킵 기록은 이 폰 안에만 저장돼요. 서버로 보내지 않고, 클라우드 백업에도 넣지 않아요.';
+  String get privacyTitle => '사진과 정리 기록은 이 폰에만 있어요';
 
   @override
   String get privacyGeocode => '장소 이름을 찾을 때는 사진의 위치 좌표만 휴대폰의 위치 서비스로 보내요.';

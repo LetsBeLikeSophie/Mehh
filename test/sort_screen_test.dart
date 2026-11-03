@@ -4399,7 +4399,7 @@ void main() {
     // 자리: Pro 줄 바로 아래, "도움"보다 위 (N2-B)
     final y = tester.getTopLeft(find.text('매달 알림')).dy;
     expect(y, greaterThan(tester.getTopLeft(find.text('Mehh Pro')).dy));
-    expect(y, lessThan(tester.getTopLeft(find.text('사진과 기록은 이 폰에만 있어요')).dy));
+    expect(y, lessThan(tester.getTopLeft(find.text('사진과 정리 기록은 이 폰에만 있어요')).dy));
     expect(y, lessThan(tester.getTopLeft(find.text('도움')).dy));
     expect(sw().value, isFalse);
     await tester.tap(find.byType(Switch));
