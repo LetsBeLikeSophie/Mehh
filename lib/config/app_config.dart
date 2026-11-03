@@ -48,4 +48,8 @@ const privacyPolicyUrl = 'https://itssophie.dev/mehh/privacy.html';
 /// 이용약관·환불 안내 (web/terms.html). 설정과 Pro 안내에서 연결 (2026-10-29 Sophie B3-B)
 const termsUrl = 'https://itssophie.dev/mehh/terms.html';
 
+/// 약관·처리방침은 한 페이지에 한국어 다음 영어. 한국어가 아니면 영어 부분부터 연다 (UX-108)
+String webDocUrl(String url, String languageCode) =>
+    languageCode == 'ko' ? url : '$url#en';
+
 const supportEmail = 'mehh@itssophie.dev';

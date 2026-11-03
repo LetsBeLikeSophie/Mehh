@@ -115,8 +115,20 @@ class SettingsScreen extends ConsumerWidget {
                     onTap: () => _confirmClear(context, ref),
                   ),
                   const SizedBox(height: 28),
-                  MehhLink(context.l.privacyPolicy, privacyPolicyUrl),
-                  MehhLink(context.l.termsRefunds, termsUrl),
+                  MehhLink(
+                    context.l.privacyPolicy,
+                    webDocUrl(
+                      privacyPolicyUrl,
+                      Localizations.localeOf(context).languageCode,
+                    ),
+                  ),
+                  MehhLink(
+                    context.l.termsRefunds,
+                    webDocUrl(
+                      termsUrl,
+                      Localizations.localeOf(context).languageCode,
+                    ),
+                  ),
                   // 버전 글자를 7번 누르면 추천 정확도 (숨은 화면, SPEC 6-8)
                   const _VersionTap(),
                 ],

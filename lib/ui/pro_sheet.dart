@@ -232,7 +232,13 @@ class _ProSheetState extends ConsumerState<_ProSheet> {
             // 사기 전에 환불 안내를 볼 수 있게 (2026-10-29 Sophie B3-B)
             Align(
               alignment: AlignmentDirectional.centerStart,
-              child: MehhLink(l.termsRefunds, termsUrl),
+              child: MehhLink(
+                l.termsRefunds,
+                webDocUrl(
+                  termsUrl,
+                  Localizations.localeOf(context).languageCode,
+                ),
+              ),
             ),
             if (isDemo) Text(l.billingDemo, style: muted),
             Align(
