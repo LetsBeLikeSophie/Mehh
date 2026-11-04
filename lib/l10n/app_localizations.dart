@@ -964,7 +964,7 @@ abstract class L10n {
   /// No description provided for @cortexPartial.
   ///
   /// In ko, this message translates to:
-  /// **'Cortex가 {count}장만 받았다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요.'**
+  /// **'{count, plural, =0{Cortex가 받은 사진이 없다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요.} other{Cortex가 {count}장만 받았다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요.}}'**
   String cortexPartial(int count);
 
   /// No description provided for @accByKind.

@@ -551,7 +551,13 @@ class L10nKo extends L10n {
 
   @override
   String cortexPartial(int count) {
-    return 'Cortex가 $count장만 받았다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요.';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Cortex가 $count장만 받았다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요.',
+      zero: 'Cortex가 받은 사진이 없다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요.',
+    );
+    return '$_temp0';
   }
 
   @override

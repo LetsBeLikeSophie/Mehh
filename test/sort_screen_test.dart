@@ -2812,7 +2812,7 @@ void main() {
     handoff.saved.add(CortexSaved(1, first.toSet()));
     await tester.pumpAndSettle();
     expect(find.textContaining('받았어요'), findsNothing);
-    expect(find.textContaining('0장만'), findsNothing);
+    expect(find.textContaining('알려 왔어요'), findsNothing);
     // 둘째 묶음의 신호도 그대로 받는다
     handoff.saved.add(CortexSaved(2, second.toSet()));
     await tester.pumpAndSettle();
@@ -2875,6 +2875,39 @@ void main() {
       await flush(tester);
     },
   );
+
+  testWidgets('Cortex가 빈 목록을 보내면 "받은 사진이 없다고" 알리고 "0장"은 쓰지 않는다 (UX-113)', (
+    tester,
+  ) async {
+    final shots = DayGroup(
+      id: 'shots',
+      kind: DayGroupKind.screenshots,
+      photos: photos,
+    );
+    final handoff = _FakeHandoff();
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.screenshots, group: shots),
+      extra: [
+        cortexInstalledProvider.overrideWith((ref) async => true),
+        handoffProvider.overrideWithValue(handoff),
+      ],
+    );
+    await tester.tap(find.byType(XToggle).at(0));
+    await tester.pumpAndSettle();
+    await sendCortex(tester);
+    handoff.saved.add(CortexSaved(0, const {}));
+    await tester.pump();
+    await tester.pump();
+    expect(
+      find.text(
+        'Cortex가 받은 사진이 없다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.textContaining('0장'), findsNothing);
+    await flush(tester);
+  });
 
   testWidgets('Cortex: 그날의 묶음에서 Cortex로 보내고 [휴지통으로]여도 정확도 기록이 남는다 (S-2)', (
     tester,

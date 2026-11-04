@@ -375,7 +375,7 @@
   "noticeCoinsBody": "지난달 사진 묶음의 추천을 볼 수 있어요",
   "noticeSetsTitle": "지난달 사진 묶음이 기다려요",
   "noticeProBody": "추천을 보고 한 번에 휴지통으로 보낼 수 있어요",
-  "cortexPartial": "Cortex가 {count}장만 받았다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요.",
+  "cortexPartial": "{count, plural, =0{Cortex가 받은 사진이 없다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요.} other{Cortex가 {count}장만 받았다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요.}}",
   "@cortexPartial": {
     "placeholders": {
       "count": {
