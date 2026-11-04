@@ -187,10 +187,16 @@ class ProNotifier extends AsyncNotifier<ProState> {
 
   Future<void> _save(ProState s) async {
     final was = state.value?.pro ?? false;
-    await _vault.save(s);
     state = AsyncData(s);
     // Pro가 켜지는 순간 한 번 알린다: 시트 밖(결제 대기 뒤 완료, 새 폰 조용한 복원)도 (UX-36)
     if (!was && s.pro) ref.read(proStartedProvider.notifier).raise();
+    // 보관함(Keystore) 쓰기가 실패해도 이번 실행은 그대로 쓴다. 평생권은 다음 실행의
+    // 조용한 복원이 다시 준다. 화면에 알리지 않고 오류 기록에만 남긴다 (S-1 2026-11-04)
+    try {
+      await _vault.save(s);
+    } catch (e, stack) {
+      reportCaught(e, stack);
+    }
   }
 }
 

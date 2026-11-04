@@ -3193,6 +3193,50 @@ void main() {
     return billing;
   }
 
+  // 보관함(Keystore) 쓰기가 실패해도 이번 실행은 열리고 Pro도 켜진다 (S-1 2026-11-04)
+  testWidgets('Pro 보관함 쓰기가 실패해도 [추천 보기]가 열린다 (S-1)', (tester) async {
+    final day = DayGroup(
+      id: 'day-p0',
+      kind: DayGroupKind.day,
+      photos: burstPhotos,
+    );
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.day, group: day),
+      vault: _BrokenVault(),
+      extra: [realPlan(paid)],
+    );
+    await openLocked(tester, '추천 보기 · 2장');
+    expect(find.text('2장 휴지통으로'), findsOneWidget);
+    await flush(tester);
+  });
+
+  testWidgets('Pro 보관함 쓰기가 실패해도 결제하면 Pro가 켜지고 묶음이 열린다 (S-1)', (tester) async {
+    final day = DayGroup(
+      id: 'day-p0',
+      kind: DayGroupKind.day,
+      photos: burstPhotos,
+    );
+    await pump(
+      tester,
+      SortScreen(kind: SortKind.day, group: day),
+      vault: _BrokenVault(
+        ProState(
+          freeMonth: monthKey(DateTime.now()),
+          freeUsed: freeGroupsPerMonth,
+        ),
+      ),
+      extra: [realPlan(paid)],
+    );
+    await tester.tap(find.textContaining('추천 보기'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('₩12,900'));
+    await tester.pumpAndSettle();
+    expect(find.text('Mehh Pro'), findsNothing); // 시트가 닫힌다
+    expect(find.text('2장 휴지통으로'), findsOneWidget);
+    await flush(tester);
+  });
+
   testWidgets('결제가 대기로 가면 이용권 버튼 대신 "결제를 확인하는 중이에요" (UX-64)', (tester) async {
     final billing = await openProFromLocked(tester);
     billing.pendingNext = true;
@@ -4758,4 +4802,16 @@ class _ReloadingLibrary extends DemoPhotoLibrary {
     trashed.addAll(done);
     return done;
   }
+}
+
+/// 쓰기가 늘 실패하는 Pro 보관함 (Keystore 오류 흉내)
+class _BrokenVault implements ProVault {
+  _BrokenVault([this.value = const ProState()]);
+  final ProState value;
+
+  @override
+  Future<ProState> load() async => value;
+
+  @override
+  Future<void> save(ProState s) async => throw Exception('keystore');
 }

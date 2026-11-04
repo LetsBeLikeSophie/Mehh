@@ -6,8 +6,15 @@ import 'package:flutter/foundation.dart';
 /// (2026-11-01 Sophie R1-B)
 typedef SendCrash = void Function(String type, StackTrace? stack);
 
+SendCrash? _send;
+
+/// 잡아서 넘긴 오류도 같은 방식(종류·코드 위치만)으로 남긴다. 오류 기록이 꺼져 있으면 아무것도 안 함
+void reportCaught(Object error, StackTrace stack) =>
+    _send?.call(error.runtimeType.toString(), stack);
+
 /// 앱 안에서 잡히지 않은 오류를 [send]로 넘긴다
 void catchCrashes(SendCrash send) {
+  _send = send;
   final shown = FlutterError.onError;
   FlutterError.onError = (details) {
     shown?.call(details);

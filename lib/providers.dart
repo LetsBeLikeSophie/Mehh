@@ -8,6 +8,7 @@ import 'package:photo_manager/photo_manager.dart';
 
 import 'config/app_config.dart';
 import 'data/billing.dart';
+import 'data/crash_reports.dart';
 import 'data/demo.dart';
 import 'data/device.dart';
 import 'data/face_check.dart';

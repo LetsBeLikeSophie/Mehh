@@ -66,6 +66,19 @@ void main() {
 
     expect(sent, ['FileSystemLikeError']);
   });
+
+  test('잡아서 넘긴 오류(보관함 쓰기 실패)도 종류만 남긴다 (S-1 2026-11-04)', () {
+    final before = FlutterError.onError;
+    final beforeDispatcher = PlatformDispatcher.instance.onError;
+    addTearDown(() {
+      FlutterError.onError = before;
+      PlatformDispatcher.instance.onError = beforeDispatcher;
+    });
+    final sent = <String>[];
+    catchCrashes((type, stack) => sent.add(type));
+    reportCaught(const FileSystemLikeError(path), StackTrace.current);
+    expect(sent, ['FileSystemLikeError']);
+  });
 }
 
 class FileSystemLikeError implements Exception {
