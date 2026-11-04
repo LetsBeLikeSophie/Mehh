@@ -13,4 +13,15 @@ void main() {
       reason: '정식 출시 전에 lib/config/app_config.dart의 closedTestFree를 false로',
     );
   });
+
+  // 반대로 테스트 무료를 끈 빌드는 정식 출시용이다. 공개키가 빠지면 살 버튼이 없어
+  // 코인을 다 쓴 사람이 묶음을 열 길이 없다 (리뷰 2026-11-04 S-4)
+  test('비공개 테스트 무료를 끈 빌드에는 결제 공개키가 들어 있다', () {
+    if (closedTestFree) return; // 아직 비공개 테스트 빌드
+    expect(
+      playPublicKey,
+      isNotEmpty,
+      reason: '정식 출시 전에 lib/data/billing.dart의 playPublicKey에 Play 라이선스 키를',
+    );
+  });
 }
