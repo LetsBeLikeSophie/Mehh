@@ -20,6 +20,7 @@ class RootScreen extends ConsumerStatefulWidget {
 class _RootScreenState extends ConsumerState<RootScreen> {
   late final AppLifecycleListener _lifecycle;
   bool _guideChecked = false;
+  bool _wentAway = false;
 
   /// 사진 접근을 허락해 홈에 처음 왔을 때 사용법을 한 번 (이미 쓰던 사람도 업데이트 뒤 한 번)
   Future<void> _showGuideOnce() async {
@@ -41,11 +42,15 @@ class _RootScreenState extends ConsumerState<RootScreen> {
     super.initState();
     // 설정 앱에서 권한을 바꾸고 돌아오는 경우 + 오래 지났으면 그 사이 찍은 사진도 불러온다
     _lifecycle = AppLifecycleListener(
+      // 휴지통·권한 창은 inactive만 거친다. 가려졌다 돌아온 것만 다른 앱에 다녀온 것 (UX-114)
+      onHide: () => _wentAway = true,
       onResume: () {
+        final wentAway = _wentAway;
+        _wentAway = false;
         ref.read(permissionProvider.notifier).refresh();
         ref.read(libraryProvider.notifier).refreshIfStale(reloadLibraryAfter);
         ref.read(proProvider.notifier).checkMonth();
-        ref.read(proProvider.notifier).checkOwned();
+        ref.read(proProvider.notifier).checkOwned(wentAway: wentAway);
         refreshMonthlyNotice(context, ref);
       },
     );

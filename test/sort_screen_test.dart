@@ -1782,6 +1782,49 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('휴지통 창이 닫힌 직후 Play 스토어에 다녀와도 1분과 상관없이 Pro가 켜진다 (UX-114)', (
+    tester,
+  ) async {
+    final billing = _CountingBilling();
+    await pump(
+      tester,
+      const RootScreen(),
+      billing: billing,
+      store: MemoryStore()..counters['guideSeen'] = 1,
+    );
+    await tester.tap(find.text('사진·동영상 접근 허용'));
+    await tester.pumpAndSettle();
+    Future<void> back(List<AppLifecycleState> states) async {
+      for (final s in states) {
+        tester.binding.handleAppLifecycleStateChanged(s);
+      }
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+    }
+
+    const dialog = [AppLifecycleState.inactive, AppLifecycleState.resumed];
+    // 휴지통 확인 창이 닫힘: 확인 한 번. 같은 1분 안에 창만 또 닫히면 다시 묻지 않는다
+    await back(dialog);
+    final afterDialog = billing.restores;
+    await back(dialog);
+    await back(dialog);
+    expect(billing.restores, afterDialog);
+    await tester.pump(const Duration(seconds: 10));
+    // 10초 뒤 Play 스토어에서 코드를 넣고 돌아옴
+    billing.owned.add(Plan.lifetime);
+    await back(const [
+      AppLifecycleState.inactive,
+      AppLifecycleState.hidden,
+      AppLifecycleState.paused,
+      AppLifecycleState.hidden,
+      AppLifecycleState.inactive,
+      AppLifecycleState.resumed,
+    ]);
+    expect(find.text('Pro가 열렸어요'), findsOneWidget);
+    await flush(tester);
+  });
+
   testWidgets('비공개 테스트가 끝난 뒤 새로 켜 온보딩을 거쳐도 홈에서 "비공개 테스트가 끝났어요" (UX-107)', (
     tester,
   ) async {
@@ -4814,4 +4857,17 @@ class _BrokenVault implements ProVault {
 
   @override
   Future<void> save(ProState s) async => throw Exception('keystore');
+}
+
+/// 스토어 복원이 몇 번 불렸는지 센다 (UX-114)
+class _CountingBilling extends DemoBilling {
+  _CountingBilling() : super(korean: true);
+
+  int restores = 0;
+
+  @override
+  Future<Set<Plan>?> restore() {
+    restores++;
+    return super.restore();
+  }
 }

@@ -98,12 +98,16 @@ class ProNotifier extends AsyncNotifier<ProState> {
   DateTime? _checkedAt;
 
   /// 앱으로 돌아올 때: Play 스토어에서 넣은 코드처럼 앱 밖에서 산 것을 받는다.
-  /// 복원 중이거나 1분 안에 확인했으면 건너뛴다 (S-2 2026-11-04)
-  Future<void> checkOwned() async {
+  /// 복원 중이거나 1분 안에 확인했으면 건너뛴다 (S-2 2026-11-04).
+  /// [wentAway]: 앱이 가려졌다 돌아옴(Play 스토어 등) — 1분과 상관없이 확인한다.
+  /// 휴지통·권한 창이 닫힐 때의 복귀만 1분에 묶는다 (UX-114)
+  Future<void> checkOwned({bool wentAway = false}) async {
     final now = DateTime.now();
     final last = _checkedAt;
     if (_restoring != null ||
-        (last != null && now.difference(last) < const Duration(minutes: 1))) {
+        (!wentAway &&
+            last != null &&
+            now.difference(last) < const Duration(minutes: 1))) {
       return;
     }
     _checkedAt = now;
