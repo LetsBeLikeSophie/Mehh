@@ -1750,6 +1750,38 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('Play 스토어에서 코드를 넣고 돌아오면 Pro가 켜지고 "Pro가 열렸어요" (S-2 2026-11-04)', (
+    tester,
+  ) async {
+    final billing = DemoBilling(korean: true);
+    await pump(
+      tester,
+      const RootScreen(),
+      billing: billing,
+      store: MemoryStore()..counters['guideSeen'] = 1,
+    );
+    await tester.tap(find.text('사진·동영상 접근 허용'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pro가 열렸어요'), findsNothing);
+    // 앱 밖(Play 스토어 코드 사용)에서 평생 이용권이 생김
+    billing.owned.add(Plan.lifetime);
+    for (final s in [
+      AppLifecycleState.inactive,
+      AppLifecycleState.hidden,
+      AppLifecycleState.paused,
+      AppLifecycleState.hidden,
+      AppLifecycleState.inactive,
+      AppLifecycleState.resumed,
+    ]) {
+      tester.binding.handleAppLifecycleStateChanged(s);
+    }
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('Pro가 열렸어요'), findsOneWidget);
+    await flush(tester);
+  });
+
   testWidgets('비공개 테스트가 끝난 뒤 새로 켜 온보딩을 거쳐도 홈에서 "비공개 테스트가 끝났어요" (UX-107)', (
     tester,
   ) async {

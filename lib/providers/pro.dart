@@ -94,9 +94,29 @@ class ProNotifier extends AsyncNotifier<ProState> {
     );
   }
 
+  Future<bool?>? _restoring;
+  DateTime? _checkedAt;
+
+  /// 앱으로 돌아올 때: Play 스토어에서 넣은 코드처럼 앱 밖에서 산 것을 받는다.
+  /// 복원 중이거나 1분 안에 확인했으면 건너뛴다 (S-2 2026-11-04)
+  Future<void> checkOwned() async {
+    final now = DateTime.now();
+    final last = _checkedAt;
+    if (_restoring != null ||
+        (last != null && now.difference(last) < const Duration(minutes: 1))) {
+      return;
+    }
+    _checkedAt = now;
+    await restore(quiet: true);
+  }
+
   /// 스토어에서 가진 것을 다시 받는다. 반환: 복원된 게 있으면 true, 연결 실패면 null.
   /// 평생권은 한 번 받으면 지우지 않는다 (스토어가 잠깐 빈 답을 줘도 사용자가 잃지 않게).
-  Future<bool?> restore({bool quiet = false}) async {
+  /// 겹쳐 부르면 진행 중인 복원 하나를 같이 기다린다 (스토어 복원은 한 번에 하나만 받는다)
+  Future<bool?> restore({bool quiet = false}) =>
+      _restoring ??= _restore().whenComplete(() => _restoring = null);
+
+  Future<bool?> _restore() async {
     final owned = await _billing.restore();
     if (owned == null) return null;
     final s = await future;

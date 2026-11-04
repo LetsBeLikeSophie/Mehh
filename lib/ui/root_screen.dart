@@ -45,6 +45,7 @@ class _RootScreenState extends ConsumerState<RootScreen> {
         ref.read(permissionProvider.notifier).refresh();
         ref.read(libraryProvider.notifier).refreshIfStale(reloadLibraryAfter);
         ref.read(proProvider.notifier).checkMonth();
+        ref.read(proProvider.notifier).checkOwned();
         refreshMonthlyNotice(context, ref);
       },
     );
