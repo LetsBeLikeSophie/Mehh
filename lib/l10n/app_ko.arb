@@ -193,6 +193,7 @@
   "promiseRestore": "휴지통으로 보낸 사진은 30일 동안 갤러리 휴지통에서 되살릴 수 있어요.",
   "allowAccess": "사진·동영상 접근 허용",
   "allowInSettings": "설정에서 허용하기",
+  "allowInSettingsHint": "설정에서 [권한] → [사진 및 동영상] → [모두 허용]을 눌러 주세요",
   "billingPending": "결제를 확인하는 중이에요",
   "billingFailed": "결제를 마치지 못했어요",
   "billingUnavailable": "지금은 스토어에 연결할 수 없어요",

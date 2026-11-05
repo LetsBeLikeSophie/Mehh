@@ -80,6 +80,7 @@
   "promiseRestore": "Photos moved to trash can be restored from your gallery's trash for 30 days.",
   "allowAccess": "Allow photo and video access",
   "allowInSettings": "Allow in Settings",
+  "allowInSettingsHint": "In Settings, tap Permissions → Photos and videos → Allow all",
   "billingPending": "Confirming your purchase…",
   "billingFailed": "The purchase didn't go through",
   "billingUnavailable": "Can't reach the store right now",

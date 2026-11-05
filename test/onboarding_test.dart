@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mehh/l10n/l10n.dart';
 import 'package:mehh/providers.dart';
 import 'package:mehh/data/demo.dart';
+import 'package:mehh/data/photo_library.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:mehh/theme.dart';
 import 'package:mehh/ui/onboarding_screen.dart';
 
@@ -29,6 +31,7 @@ void main() {
     required double scale,
     required String lang,
     bool cortex = true,
+    PhotoLibrary? library,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -38,7 +41,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          photoLibraryProvider.overrideWithValue(DemoPhotoLibrary()),
+          photoLibraryProvider.overrideWithValue(library ?? DemoPhotoLibrary()),
           cortexInstalledProvider.overrideWith((ref) async => cortex),
         ],
         child: MediaQuery(
@@ -99,4 +102,54 @@ void main() {
       );
     }
   });
+  for (final lang in ['ko', 'en']) {
+    testWidgets('$lang · 360×800 · 글자 130%: 거절하면 버튼 위에 설정 안내 한 줄, 버튼까지 스크롤 (UX-100)', (
+      tester,
+    ) async {
+      final lib = _DenyingLibrary();
+      await pump(
+        tester,
+        size: small,
+        scale: 1.3,
+        lang: lang,
+        library: lib,
+      );
+      final hint = lang == 'ko'
+          ? '설정에서 [권한] → [사진 및 동영상] → [모두 허용]을 눌러 주세요'
+          : 'In Settings, tap Permissions → Photos and videos → Allow all';
+      expect(find.text(hint), findsNothing);
+
+      final button = find.byType(FilledButton);
+      await tester.ensureVisible(button);
+      await tester.pumpAndSettle();
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text(hint), findsOneWidget);
+      expect(
+        find.text(lang == 'ko' ? '설정에서 허용하기' : 'Allow in Settings'),
+        findsOneWidget,
+      );
+
+      await tester.ensureVisible(button);
+      await tester.pumpAndSettle();
+      final rect = tester.getRect(button);
+      expect(rect.bottom, lessThanOrEqualTo(small.height - 48));
+      // 안내는 버튼 바로 위
+      expect(tester.getRect(find.text(hint)).bottom, lessThan(rect.top));
+      await tester.tap(button);
+      await tester.pump();
+      expect(lib.settingsOpened, 1);
+    });
+  }
+}
+
+class _DenyingLibrary extends DemoPhotoLibrary {
+  var settingsOpened = 0;
+
+  @override
+  Future<PermissionState> requestPermission() async => PermissionState.denied;
+
+  @override
+  Future<void> openSettings() async => settingsOpened++;
 }

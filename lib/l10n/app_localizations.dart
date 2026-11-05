@@ -577,6 +577,12 @@ abstract class L10n {
   /// **'설정에서 허용하기'**
   String get allowInSettings;
 
+  /// No description provided for @allowInSettingsHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'설정에서 [권한] → [사진 및 동영상] → [모두 허용]을 눌러 주세요'**
+  String get allowInSettingsHint;
+
   /// No description provided for @billingPending.
   ///
   /// In ko, this message translates to:

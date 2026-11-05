@@ -306,6 +306,9 @@ class L10nKo extends L10n {
   String get allowInSettings => '설정에서 허용하기';
 
   @override
+  String get allowInSettingsHint => '설정에서 [권한] → [사진 및 동영상] → [모두 허용]을 눌러 주세요';
+
+  @override
   String get billingPending => '결제를 확인하는 중이에요';
 
   @override

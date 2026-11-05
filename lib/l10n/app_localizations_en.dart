@@ -353,6 +353,10 @@ class L10nEn extends L10n {
   String get allowInSettings => 'Allow in Settings';
 
   @override
+  String get allowInSettingsHint =>
+      'In Settings, tap Permissions → Photos and videos → Allow all';
+
+  @override
   String get billingPending => 'Confirming your purchase…';
 
   @override

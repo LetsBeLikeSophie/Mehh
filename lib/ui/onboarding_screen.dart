@@ -89,6 +89,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       ),
                     ),
                     const Spacer(flex: 2),
+                    // 거절한 뒤엔 설정에서 무엇을 누를지 한 줄 (UX-100)
+                    if (_denied) ...[
+                      Text(
+                        context.l.allowInSettingsHint,
+                        style: const TextStyle(
+                          fontSize: MehhText.bodySmall,
+                          color: MehhColors.textMuted,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                     SizedBox(
                       width: double.infinity,
                       child: FilledButton(
