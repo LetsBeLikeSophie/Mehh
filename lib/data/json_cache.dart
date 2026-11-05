@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 
+import 'crash_reports.dart';
+
 /// 앱 전용 폴더에 저장하는 작은 JSON 캐시. 2단계에서 DB로 옮긴다.
 class JsonCache {
   JsonCache(this.fileName);
@@ -40,10 +42,19 @@ class JsonCache {
     return next;
   }
 
+  /// 저장 공간이 꽉 차 못 써도 던지지 않는다: 부르는 쪽(위치 읽기)이 멈추지 않게.
+  /// 반쯤 쓴 .tmp는 지우고 오류 기록엔 종류만 (리뷰 11-05 S-2)
   Future<void> _write(Map<String, dynamic> data) async {
     final f = await _file();
     final tmp = File('${f.path}.tmp');
-    await tmp.writeAsString(jsonEncode(data), flush: true);
-    await tmp.rename(f.path);
+    try {
+      await tmp.writeAsString(jsonEncode(data), flush: true);
+      await tmp.rename(f.path);
+    } catch (e, stack) {
+      reportCaught(e, stack);
+      try {
+        if (await tmp.exists()) await tmp.delete();
+      } catch (_) {}
+    }
   }
 }

@@ -152,6 +152,9 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
         _locateAgain = false;
         await _fillLocationsOnce();
       } while (_locateAgain && ref.mounted);
+    } catch (e, stack) {
+      // 위치는 덤: 실패해도 묶음은 그대로 쓴다. 오류 기록에만 (리뷰 11-05 S-2)
+      reportCaught(e, stack);
     } finally {
       _locating = false;
     }
@@ -162,26 +165,30 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
     // 화면에는 퍼센트만 보이니 1%가 바뀔 때만 알린다. 16장마다 알리면 홈·막대·정리 화면을
     // 그때마다 다시 계산한다 (사진 2만 장이면 약 1,250번, 리뷰 2026-11-01 S-3)
     var shownPercent = -1;
-    final found = await lib.fillLocations(
-      _metas,
-      onProgress: (done, total) {
-        if (!ref.mounted) return;
-        final cur = state.value;
-        if (cur == null) return;
-        final percent = done * 100 ~/ total;
-        if (percent == shownPercent) return;
-        shownPercent = percent;
-        state = AsyncData(cur.copyWith(locating: (done, total)));
-      },
-    );
-    if (!ref.mounted) return;
-    if (found.isNotEmpty) {
-      _metas = [
-        for (final m in _metas)
-          if (found[m.id] case final ll?) m.withLocation(ll.$1, ll.$2) else m,
-      ];
+    try {
+      final found = await lib.fillLocations(
+        _metas,
+        onProgress: (done, total) {
+          if (!ref.mounted) return;
+          final cur = state.value;
+          if (cur == null) return;
+          final percent = done * 100 ~/ total;
+          if (percent == shownPercent) return;
+          shownPercent = percent;
+          state = AsyncData(cur.copyWith(locating: (done, total)));
+        },
+      );
+      if (!ref.mounted) return;
+      if (found.isNotEmpty) {
+        _metas = [
+          for (final m in _metas)
+            if (found[m.id] case final ll?) m.withLocation(ll.$1, ll.$2) else m,
+        ];
+      }
+    } finally {
+      // 위치 읽기가 중간에 실패해도 "장소 확인 중"이 남지 않게 (리뷰 11-05 S-2)
+      if (ref.mounted) state = AsyncData(_state());
     }
-    state = AsyncData(_state());
   }
 
   /// 다시 읽는 중이면, 그 사이 휴지통으로 보낸 사진 id (다 읽은 뒤에도 빼 두려고)

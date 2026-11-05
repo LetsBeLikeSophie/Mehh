@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show FileSystemException;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -3774,6 +3775,25 @@ void main() {
     expect(c.read(libraryProvider).value!.locating, isNull);
   });
 
+  test('위치 읽기가 중간에 실패해도(저장 공간 가득) "장소 확인 중"이 남지 않는다 (리뷰 11-05 S-2)', () async {
+    final c = ProviderContainer(
+      overrides: [
+        photoLibraryProvider.overrideWithValue(_LocatingFailsLibrary()),
+        storeProvider.overrideWithValue(MemoryStore()),
+      ],
+    );
+    addTearDown(c.dispose);
+    final seen = <(int, int)?>[];
+    final sub = c.listen(libraryProvider, (_, next) {
+      seen.add(next.value?.locating);
+    });
+    addTearDown(sub.close);
+    await c.read(libraryProvider.future);
+    await pumpEventQueue(times: 200);
+    expect(seen.whereType<(int, int)>(), isNotEmpty); // 진행이 실제로 보였다
+    expect(c.read(libraryProvider).value!.locating, isNull);
+  });
+
   testWidgets('정확도 기록이 실패해도(저장 공간 가득) 버튼이 다시 눌리고 남은 사진을 또 보낸다 (리뷰 11-01 S-2)', (
     tester,
   ) async {
@@ -4965,4 +4985,18 @@ class _DecisionsFullStore extends MemoryStore {
   @override
   Future<void> saveDecisions(List<Decision> list) async =>
       throw Exception('SQLITE_FULL');
+}
+
+/// 위치를 반쯤 읽다가 실패한다 (저장 공간 가득, 리뷰 11-05 S-2)
+class _LocatingFailsLibrary extends DemoPhotoLibrary {
+  @override
+  Future<Map<String, (double, double)>> fillLocations(
+    List<PhotoMeta> metas, {
+    void Function(int done, int total)? onProgress,
+  }) async {
+    await Future<void>.value();
+    onProgress?.call(400, 800);
+    await Future<void>.value();
+    throw const FileSystemException('No space left on device');
+  }
 }
