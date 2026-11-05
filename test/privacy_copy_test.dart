@@ -36,4 +36,17 @@ void main() {
       expect(en.proFreeKinds.toLowerCase(), contains(name.toLowerCase()));
     }
   });
+  test('영어 첫 삭제 알림은 30일 동안 "되돌릴 수 있다"로 읽힌다 (UX-116)', () {
+    final en = lookupL10n(const Locale('en'));
+    for (final n in [1, 3]) {
+      for (final s in [
+        en.trashed(n, '2 MB'),
+        en.trashedVideos(n, '2 MB'),
+        en.proNudge(n),
+      ]) {
+        expect(s, contains('You can restore'));
+        expect(s, isNot(contains('within 30 days, or')));
+      }
+    }
+  });
 }

@@ -292,9 +292,9 @@ class L10nEn extends L10n {
       count,
       locale: localeName,
       other:
-          '✓ $countString photos · $size moved to trash · restore them within 30 days, or empty the trash to free up that space',
+          '✓ $countString photos · $size moved to trash · You can restore them for 30 days. Empty the trash to free up that space.',
       one:
-          '✓ 1 photo · $size moved to trash · restore it within 30 days, or empty the trash to free up that space',
+          '✓ 1 photo · $size moved to trash · You can restore it for 30 days. Empty the trash to free up that space.',
     );
     return '$_temp0';
   }
@@ -421,8 +421,8 @@ class L10nEn extends L10n {
       count,
       locale: localeName,
       other:
-          'Moved $countString photos to trash · restore them within 30 days, or empty the trash to free up space.',
-      one: 'Moved 1 photo to trash · restore it within 30 days, or empty the trash to free up space.',
+          'Moved $countString photos to trash · You can restore them for 30 days. Empty the trash to free up space.',
+      one: 'Moved 1 photo to trash · You can restore it for 30 days. Empty the trash to free up space.',
     );
     return '$_temp0 See picks for the other sets right away?';
   }
@@ -1102,9 +1102,9 @@ class L10nEn extends L10n {
       count,
       locale: localeName,
       other:
-          '✓ $countString videos · $size moved to trash · restore them within 30 days, or empty the trash to free up that space',
+          '✓ $countString videos · $size moved to trash · You can restore them for 30 days. Empty the trash to free up that space.',
       one:
-          '✓ 1 video · $size moved to trash · restore it within 30 days, or empty the trash to free up that space',
+          '✓ 1 video · $size moved to trash · You can restore it for 30 days. Empty the trash to free up that space.',
     );
     return '$_temp0';
   }
