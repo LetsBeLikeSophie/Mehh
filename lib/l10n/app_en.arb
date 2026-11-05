@@ -80,6 +80,7 @@
   "promiseRestore": "Photos moved to trash can be restored from your gallery's trash for 30 days.",
   "allowAccess": "Allow photo and video access",
   "allowInSettings": "Allow in Settings",
+  "decisionsUnsaved": "Storage is full, so your picks can't be saved · Tap Move to trash before you close the app",
   "allowInSettingsHint": "In Settings, tap Permissions → Photos and videos → Allow all",
   "billingPending": "Confirming your purchase…",
   "billingFailed": "The purchase didn't go through",

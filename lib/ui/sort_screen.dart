@@ -25,6 +25,7 @@ import 'hold_to_finish.dart';
 import 'monthly_notice.dart';
 import 'sort_source.dart';
 import 'trash_flow.dart';
+import 'one_shot_note.dart';
 import 'widgets.dart';
 
 export 'sort_source.dart' show SortKind;
@@ -302,6 +303,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
   @override
   Widget build(BuildContext context) {
     final l = context.l;
+    noteOnSignal(ref, context, decisionsUnsavedProvider, l.decisionsUnsaved);
     final group = freshGroup(
       ref.watch(libraryProvider).value?.groups ?? const [],
       widget.group,

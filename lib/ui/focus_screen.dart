@@ -16,6 +16,7 @@ import 'freed_bar.dart';
 import 'hold_to_finish.dart';
 import 'large_photo.dart';
 import 'sort_source.dart';
+import 'one_shot_note.dart';
 import 'widgets.dart';
 
 /// 크게 보기: 위로 밀면 정리, 아래로 밀면 킵 (위·아래에 같은 모양의 줄, 눌러도 된다).
@@ -202,6 +203,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
   @override
   Widget build(BuildContext context) {
     final l = context.l;
+    noteOnSignal(ref, context, decisionsUnsavedProvider, l.decisionsUnsaved);
     final src = watchSortSource(
       ref,
       widget.kind,

@@ -306,6 +306,10 @@ class L10nKo extends L10n {
   String get allowInSettings => '설정에서 허용하기';
 
   @override
+  String get decisionsUnsaved =>
+      '저장 공간이 꽉 차서 고른 표시를 기억하지 못해요 · 앱을 닫기 전에 [휴지통으로]를 눌러 주세요';
+
+  @override
   String get allowInSettingsHint => '설정에서 [권한] → [사진 및 동영상] → [모두 허용]을 눌러 주세요';
 
   @override

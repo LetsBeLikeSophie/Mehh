@@ -353,6 +353,10 @@ class L10nEn extends L10n {
   String get allowInSettings => 'Allow in Settings';
 
   @override
+  String get decisionsUnsaved =>
+      'Storage is full, so your picks can\'t be saved · Tap Move to trash before you close the app';
+
+  @override
   String get allowInSettingsHint =>
       'In Settings, tap Permissions → Photos and videos → Allow all';
 

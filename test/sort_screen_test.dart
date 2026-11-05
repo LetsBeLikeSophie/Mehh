@@ -3339,6 +3339,22 @@ void main() {
     // 오류 기록엔 종류만 (글·경로 없음)
     expect(sent, isNotEmpty);
     expect(sent.where((t) => t.contains('SQLITE')), isEmpty);
+    // 처음 실패한 순간 한 번만 한 줄로 알린다 (U1-A)
+    const unsaved = '저장 공간이 꽉 차서 고른 표시를 기억하지 못해요 · 앱을 닫기 전에 [휴지통으로]를 눌러 주세요';
+    expect(find.text(unsaved), findsOneWidget);
+    await tester.pump(const Duration(seconds: 10));
+    await tester.pumpAndSettle();
+    expect(find.text(unsaved), findsNothing);
+    // 다음 사진도 밀어 또 실패해도 다시 알리지 않는다
+    final g2 = await tester.startGesture(tester.getCenter(card()));
+    for (var i = 0; i < 6; i++) {
+      await g2.moveBy(const Offset(0, 20));
+      await tester.pump();
+    }
+    await g2.up();
+    await tester.pumpAndSettle();
+    expect(sent.length, greaterThan(1));
+    expect(find.text(unsaved), findsNothing);
     await flush(tester);
   });
 
@@ -3356,6 +3372,8 @@ void main() {
     await tester.tap(find.textContaining('추천 보기'));
     await tester.pumpAndSettle();
     expect(find.text('2장 휴지통으로'), findsOneWidget);
+    // 그리드에서도 한 줄 알림 (U1-A)
+    expect(find.textContaining('고른 표시를 기억하지 못해요'), findsOneWidget);
     await tester.tap(find.textContaining('추천 보기'));
     await tester.pumpAndSettle();
     expect(find.text('정리할 사진이 없어요'), findsOneWidget);

@@ -12,6 +12,7 @@ import '../providers.dart';
 import '../theme.dart';
 import 'freed_bar.dart';
 import 'sort_screen.dart';
+import 'one_shot_note.dart';
 import 'widgets.dart';
 
 /// 홈: 중복 카드 + 그날의 묶음 목록 (최신순, 연도별 구분선).
@@ -94,22 +95,14 @@ class _HomeTabState extends ConsumerState<HomeTab> {
     // 분석이 끝나면 연속 컷의 눈 감음을 폰 안에서 본다 (홈이 떠 있는 동안)
     ref.watch(faceScanProvider);
     // 온보딩 동안 올라간 신호도 홈이 처음 그릴 때 한 번 보인다 (UX-107)
-    void oneShot(NotifierProvider<OneShotNotifier, bool> signal, String text) {
-      void show() => WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted || !ref.read(signal)) return;
-        ref.read(signal.notifier).clear();
-        showNote(context, text);
-      });
-      ref.listen(signal, (_, raised) {
-        if (raised) show();
-      });
-      if (ref.read(signal)) show();
-    }
+    void oneShot(NotifierProvider<OneShotNotifier, bool> signal, String text) =>
+        noteOnSignal(ref, context, signal, text);
 
     oneShot(yearlyEndedProvider, l.yearlyEnded(freeGroupsPerMonth));
     oneShot(freeRefilledProvider, l.freeRefilled(freeGroupsPerMonth));
     oneShot(testEndedProvider, l.testEnded(freeGroupsPerMonth));
     oneShot(proStartedProvider, l.proThanks);
+    oneShot(decisionsUnsavedProvider, l.decisionsUnsaved);
     final library = ref.watch(libraryProvider);
     final limited = ref.watch(permissionProvider) == PermissionState.limited;
 

@@ -577,6 +577,12 @@ abstract class L10n {
   /// **'설정에서 허용하기'**
   String get allowInSettings;
 
+  /// No description provided for @decisionsUnsaved.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장 공간이 꽉 차서 고른 표시를 기억하지 못해요 · 앱을 닫기 전에 [휴지통으로]를 눌러 주세요'**
+  String get decisionsUnsaved;
+
   /// No description provided for @allowInSettingsHint.
   ///
   /// In ko, this message translates to:
