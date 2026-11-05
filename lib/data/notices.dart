@@ -7,7 +7,7 @@ import 'package:timezone/timezone.dart' as tz;
 /// 알림 글 (제목, 내용, 폰 설정에 보이는 알림 종류 이름)
 typedef NoticeText = ({String title, String body, String channel});
 
-/// 한 달에 한 번 알림 (2026-10-29 Sophie B2-B). 사용자가 허락하면 매달 1일 낮 12시쯤 한 번.
+/// 한 달에 한 번 알림 (2026-10-29 Sophie B2-B). 사용자가 허락하면 매달 1일 낮 12시쯤 한 번 ([monthlyNoticeAt]).
 /// 폰 안에서만 예약하고, 밖으로 보내는 것은 없다.
 abstract class Notices {
   /// 이 폰에서 알림을 보일 수 있나 (안드로이드만). 아니면 묻지도 않는다
@@ -76,13 +76,7 @@ class PhoneNotices implements Notices {
   }
 
   Future<void> _schedule(NoticeText text) async {
-    // 다음 달 1일 낮 12시(이 폰 시각)를 UTC로 적고 "매달 같은 날·시각"으로 되풀이한다.
-    // 시간대 자료 없이도 되고, 낮 12시라 UTC로 옮겨도 날짜가 1일에서 밀리지 않는다
-    final now = DateTime.now();
-    final at = tz.TZDateTime.from(
-      DateTime(now.year, now.month + 1, 1, 12),
-      tz.UTC,
-    );
+    final at = tz.TZDateTime.from(monthlyNoticeAt(DateTime.now()), tz.UTC);
     await _plugin.zonedSchedule(
       id: _id,
       title: text.title,
@@ -95,6 +89,22 @@ class PhoneNotices implements Notices {
       matchDateTimeComponents: DateTimeComponents.dayOfMonthAndTime,
     );
   }
+}
+
+/// 다음 매달 알림의 UTC 시각. 플러그인은 "UTC로 같은 날짜·시각"으로 되풀이하므로,
+/// UTC로도 1일이고 이 폰 시각으로도 1일인 시각을 고른다: 되도록 낮 12시, 시차가 큰 곳
+/// (뉴질랜드 여름 +13 등)은 1일 안의 가장 가까운 시각. 여름시간 1시간 여유를 둔다 (B-33, 2026-11-05 Sophie Q1-A).
+/// [offset]은 테스트용 (없으면 그날 이 폰의 시차)
+DateTime monthlyNoticeAt(DateTime now, {Duration? offset}) {
+  final first = DateTime(now.year, now.month + 1, 1, 12);
+  final off = (offset ?? first.timeZoneOffset).inMinutes;
+  // 이 폰 1일 0시부터 몇 분 뒤에 울릴지. UTC로도 01:00~23:00 안
+  final minute = 720.clamp(off + 60, off + 1380);
+  return DateTime.utc(
+    first.year,
+    first.month,
+    1,
+  ).add(Duration(minutes: minute - off));
 }
 
 /// 테스트·웹: 폰 설정의 허락([allowed])을 바꿔 볼 수 있다
