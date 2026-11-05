@@ -9,6 +9,7 @@ import 'package:in_app_purchase/in_app_purchase.dart' show PurchaseStatus;
 import 'package:photo_manager/photo_manager.dart'
     show AssetEntity, PermissionState;
 import 'package:mehh/data/billing.dart';
+import 'package:mehh/data/crash_reports.dart';
 import 'package:mehh/data/pro.dart';
 import 'package:mehh/data/demo.dart';
 import 'package:mehh/data/handoff.dart';
@@ -3269,6 +3270,60 @@ void main() {
     return billing;
   }
 
+  // 저장 공간이 꽉 찬 폰: 정리 기록을 못 써도 화면은 바로 따라온다 (리뷰 11-05 S-1)
+  testWidgets('정리 기록 저장이 실패해도 크게 보기를 위로 밀면 다음 사진으로 넘어가고 앞 사진은 X (S-1 11-05)', (
+    tester,
+  ) async {
+    final sent = <String>[];
+    final before = FlutterError.onError;
+    catchCrashes((type, stack) => sent.add(type));
+    FlutterError.onError = before;
+    await pump(
+      tester,
+      FocusScreen(kind: SortKind.singles, group: group, initialId: 'p3'),
+      store: _DecisionsFullStore(),
+    );
+    final g = await tester.startGesture(tester.getCenter(card()));
+    for (var i = 0; i < 6; i++) {
+      await g.moveBy(const Offset(0, -20));
+      await tester.pump();
+    }
+    await g.up();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('p3')), findsNothing);
+    final c = ProviderScope.containerOf(
+      tester.element(find.byType(FocusScreen)),
+    );
+    expect(
+      stateOf(c.read(decisionsProvider).value!, 'p3'),
+      DecisionState.toTrash,
+    );
+    // 오류 기록엔 종류만 (글·경로 없음)
+    expect(sent, isNotEmpty);
+    expect(sent.where((t) => t.contains('SQLITE')), isEmpty);
+    await flush(tester);
+  });
+
+  testWidgets('정리 기록 저장이 실패해도 [추천 보기]를 다시 누르면 추천 X가 지워진다 (S-1 11-05)', (
+    tester,
+  ) async {
+    final shots = DayGroup(
+      id: 'shots',
+      kind: DayGroupKind.screenshots,
+      photos: [oldShot(0), oldShot(1)],
+    );
+    await pump(tester, opener(() => shots), store: _DecisionsFullStore());
+    await tester.tap(find.text('열기'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining('추천 보기'));
+    await tester.pumpAndSettle();
+    expect(find.text('2장 휴지통으로'), findsOneWidget);
+    await tester.tap(find.textContaining('추천 보기'));
+    await tester.pumpAndSettle();
+    expect(find.text('정리할 사진이 없어요'), findsOneWidget);
+    await flush(tester);
+  });
+
   // 보관함(Keystore) 쓰기가 실패해도 이번 실행은 열리고 Pro도 켜진다 (S-1 2026-11-04)
   testWidgets('Pro 보관함 쓰기가 실패해도 [추천 보기]가 열린다 (S-1)', (tester) async {
     final day = DayGroup(
@@ -4903,4 +4958,11 @@ class _CountingBilling extends DemoBilling {
     restores++;
     return super.restore();
   }
+}
+
+/// 저장 공간이 꽉 찬 폰처럼 정리 기록 저장이 언제나 실패한다 (리뷰 11-05 S-1)
+class _DecisionsFullStore extends MemoryStore {
+  @override
+  Future<void> saveDecisions(List<Decision> list) async =>
+      throw Exception('SQLITE_FULL');
 }

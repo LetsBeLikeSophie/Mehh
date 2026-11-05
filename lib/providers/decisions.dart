@@ -25,7 +25,7 @@ class DecisionsNotifier extends AsyncNotifier<Map<String, Decision>> {
       ...state.value ?? {},
       for (final d in list) d.photoId: d,
     });
-    await ref.read(storeProvider).saveDecisions(list);
+    await _save(list);
     return before;
   }
 
@@ -37,11 +37,21 @@ class DecisionsNotifier extends AsyncNotifier<Map<String, Decision>> {
         e.value ??
             Decision(photoId: e.key, state: DecisionState.undecided, at: now),
     ];
-    await ref.read(storeProvider).saveDecisions(list);
     state = AsyncData({
       ...state.value ?? {},
       for (final d in list) d.photoId: d,
     });
+    await _save(list);
+  }
+
+  /// 저장 공간이 꽉 차 기록을 못 써도 이번 실행의 화면은 그대로 간다. 다음 실행엔 그 결정이 없을 뿐.
+  /// 화면에 알리지 않고 오류 기록에만 남긴다 (리뷰 11-05 S-1)
+  Future<void> _save(List<Decision> list) async {
+    try {
+      await ref.read(storeProvider).saveDecisions(list);
+    } catch (e, stack) {
+      reportCaught(e, stack);
+    }
   }
 }
 

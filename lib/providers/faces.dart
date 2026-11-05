@@ -34,7 +34,12 @@ class EyesClosedNotifier extends AsyncNotifier<Map<String, bool>> {
         final found = await ref.read(faceCheckerProvider).eyesClosed(part);
         // 못 본 사진도 다시 안 보게 "눈 감음 아님"으로 남긴다
         final result = {for (final id in part) id: found[id] ?? false};
-        await ref.read(storeProvider).saveFaces(result);
+        // 저장이 실패해도(저장 공간 가득) 화면엔 반영하고 다음 12장으로 (같은 12장을 되풀이하지 않게, 리뷰 11-05 S-1)
+        try {
+          await ref.read(storeProvider).saveFaces(result);
+        } catch (e, stack) {
+          reportCaught(e, stack);
+        }
         if (!ref.mounted) return;
         state = AsyncData({...state.value ?? {}, ...result});
       }
