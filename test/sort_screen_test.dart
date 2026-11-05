@@ -3805,6 +3805,8 @@ void main() {
         findsOneWidget,
       );
       expect(find.textContaining('보내지 못했어요'), findsNothing);
+      // 보낸 기록만 실패하면 "기억하지 못해요"는 없다 (U1-A)
+      expect(find.textContaining('기억하지 못해요'), findsNothing);
       expect(find.byType(XToggle), findsNWidgets(photos.length - 2));
       await flush(tester);
     },

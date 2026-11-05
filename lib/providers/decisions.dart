@@ -54,7 +54,10 @@ class DecisionsNotifier extends AsyncNotifier<Map<String, Decision>> {
       await ref.read(storeProvider).saveDecisions(list);
     } catch (e, stack) {
       reportCaught(e, stack);
-      if (!_told) {
+      // 휴지통으로 보낸 기록은 빼고 센다: 그 사진은 폰 휴지통에 있어 다시 켜도 잃는 것이 없고,
+      // "✓ N장 휴지통으로 보냈어요"를 덮지 않게
+      final lost = list.any((d) => d.state != DecisionState.trashed);
+      if (lost && !_told) {
         _told = true;
         ref.read(decisionsUnsavedProvider.notifier).raise();
       }
