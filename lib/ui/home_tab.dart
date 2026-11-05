@@ -116,7 +116,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
     return SafeArea(
       bottom: false,
       child: library.when(
-        loading: () => _Message(l.loadingGroups),
+        loading: () => _Message(l.loadingGroups, loading: true),
         error: (e, _) => _Message(
           l.loadFailed,
           action: (l.retry, () => ref.read(libraryProvider.notifier).reload()),
@@ -813,9 +813,12 @@ class _LimitedBanner extends StatelessWidget {
 }
 
 class _Message extends StatelessWidget {
-  const _Message(this.text, {this.action, this.below});
+  const _Message(this.text, {this.action, this.below, this.loading = false});
 
   final String text;
+
+  /// 첫 읽기 중엔 글자 위에 동그라미: 사진이 많은 폰에서 멈춘 것처럼 보이지 않게 (UX-99)
+  final bool loading;
   final (String, VoidCallback)? action;
 
   /// 문구 아래에 붙일 것 (예: 일부만 허용 안내)
@@ -828,6 +831,10 @@ class _Message extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (loading) ...[
+            const CircularProgressIndicator(color: MehhColors.black),
+            const SizedBox(height: 16),
+          ],
           Text(
             text,
             style: const TextStyle(

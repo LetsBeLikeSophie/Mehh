@@ -159,6 +159,42 @@ void main() {
     await flush(tester);
   });
 
+  testWidgets('홈: 첫 읽기 중엔 "사진을 묶는 중이에요" 위에 동그라미, 다 읽으면 사라짐 (UX-99)', (
+    tester,
+  ) async {
+    final lib = _GatedLibrary(LibraryState(photos: photos, groups: [group]));
+    tester.view.physicalSize = const Size(390 * 3, 844 * 3);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          photoLibraryProvider.overrideWithValue(DemoPhotoLibrary()),
+          storeProvider.overrideWithValue(MemoryStore()),
+          proVaultProvider.overrideWithValue(MemoryProVault()),
+          billingProvider.overrideWithValue(DemoBilling(korean: true)),
+          noticesProvider.overrideWithValue(DemoNotices(supported: false)),
+          libraryProvider.overrideWith(() => lib),
+        ],
+        child: MaterialApp(
+          locale: const Locale('ko'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
+          home: const Scaffold(body: HomeTab()),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('사진을 묶는 중이에요'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+    lib.gate.complete();
+    await tester.pumpAndSettle();
+    expect(find.text('사진을 묶는 중이에요'), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    await flush(tester);
+  });
+
   testWidgets('홈: 용량 막대 — 사진·추천 정리·선택·휴지통 (글자 색 = 칸 색, 한 줄)', (tester) async {
     final store = MemoryStore()
       ..freed[monthKey(DateTime.now())] = 5 * 1024 * 1024;
@@ -4825,6 +4861,19 @@ class _FixedAnalysis extends AnalysisNotifier {
   @override
   AnalysisState build() =>
       AnalysisState(features: features, total: features.length, done: true);
+}
+
+/// 첫 읽기가 [gate]가 열릴 때까지 끝나지 않는 사진첩 (UX-99)
+class _GatedLibrary extends LibraryNotifier {
+  _GatedLibrary(this.value);
+  final LibraryState value;
+  final gate = Completer<void>();
+
+  @override
+  Future<LibraryState> build() async {
+    await gate.future;
+    return value;
+  }
 }
 
 class _FixedLibrary extends LibraryNotifier {
