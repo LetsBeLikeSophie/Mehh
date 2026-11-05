@@ -13,6 +13,7 @@ import 'package:mehh/data/billing.dart';
 import 'package:mehh/data/crash_reports.dart';
 import 'package:mehh/data/pro.dart';
 import 'package:mehh/data/demo.dart';
+import 'package:mehh/data/device.dart';
 import 'package:mehh/data/handoff.dart';
 import 'package:mehh/data/notices.dart';
 import 'package:mehh/data/photo_library.dart';
@@ -3775,6 +3776,38 @@ void main() {
     expect(c.read(libraryProvider).value!.locating, isNull);
   });
 
+  test('위치 진행이 여러 번 바뀌어도 기기 전체 용량은 다시 묻지 않고, 휴지통으로 보내면 한 번 더 (리뷰 11-05 S-3)', () async {
+    final device = _CountingDevice();
+    final c = ProviderContainer(
+      overrides: [
+        photoLibraryProvider.overrideWithValue(_SlowLocatingLibrary()),
+        storeProvider.overrideWithValue(MemoryStore()),
+        deviceProvider.overrideWithValue(device),
+      ],
+    );
+    addTearDown(c.dispose);
+    var progress = 0;
+    final lib = c.listen(libraryProvider, (_, next) {
+      if (next.value?.locating != null) progress++;
+    });
+    addTearDown(lib.close);
+    final bytes = c.listen(photoBytesProvider, (_, _) {});
+    addTearDown(bytes.close);
+    await c.read(libraryProvider.future);
+    for (var i = 0; i < 120; i++) {
+      await Future<void>.delayed(Duration.zero);
+    }
+    await c.read(photoBytesProvider.future);
+    expect(progress, greaterThan(50)); // 진행이 실제로 여러 번 바뀌었다
+    // 처음 1번 + 위치를 다 읽고 다시 묶을 때 1번
+    expect(device.photoBytesCalls, lessThanOrEqualTo(2));
+    final before = device.photoBytesCalls;
+    final id = c.read(libraryProvider).value!.photos.first.id;
+    c.read(libraryProvider.notifier).removePhotos({id});
+    await c.read(photoBytesProvider.future);
+    expect(device.photoBytesCalls, before + 1);
+  });
+
   test('위치 읽기가 중간에 실패해도(저장 공간 가득) "장소 확인 중"이 남지 않는다 (리뷰 11-05 S-2)', () async {
     final c = ProviderContainer(
       overrides: [
@@ -4998,5 +5031,31 @@ class _LocatingFailsLibrary extends DemoPhotoLibrary {
     onProgress?.call(400, 800);
     await Future<void>.value();
     throw const FileSystemException('No space left on device');
+  }
+}
+
+/// 기기 전체 용량을 몇 번 물었는지 센다 (리뷰 11-05 S-3)
+class _CountingDevice extends Device {
+  var photoBytesCalls = 0;
+
+  @override
+  Future<int?> photoBytes() async {
+    photoBytesCalls++;
+    return 1000;
+  }
+}
+
+/// 실제 폰처럼 1%마다 이벤트 한 바퀴씩 쉬며 위치를 읽는다 (리뷰 11-05 S-3)
+class _SlowLocatingLibrary extends DemoPhotoLibrary {
+  @override
+  Future<Map<String, (double, double)>> fillLocations(
+    List<PhotoMeta> metas, {
+    void Function(int done, int total)? onProgress,
+  }) async {
+    for (var done = 32; done <= 3200; done += 32) {
+      await Future<void>.delayed(Duration.zero);
+      onProgress?.call(done, 3200);
+    }
+    return const {};
   }
 }

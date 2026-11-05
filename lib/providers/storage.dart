@@ -15,7 +15,11 @@ final deviceProvider = Provider((ref) => Device());
 final photoBytesProvider = FutureProvider<int>((ref) async {
   final photos = ref.watch(libraryProvider.select((s) => s.value?.photos));
   if (photos == null) return 0;
-  final videos = ref.watch(libraryProvider.select((s) => _videosOf(s.value)));
+  // 묶음 목록으로 본다: _videosOf는 매번 새 목록이라 select가 못 걸러 위치 진행 1%마다
+  // 기기 전체 용량을 다시 물었다 (리뷰 11-05 S-3)
+  final videos = _videosOf(
+    ref.watch(libraryProvider.select((s) => s.value?.groups)),
+  );
   final n = await ref.read(deviceProvider).photoBytes();
   if (n != null) return n;
   final sizes = await ref.read(photoLibraryProvider).fileSizes([
@@ -26,8 +30,8 @@ final photoBytesProvider = FutureProvider<int>((ref) async {
 });
 
 /// 묶음에 든 동영상들 (없으면 빈 목록)
-List<PhotoMeta> _videosOf(LibraryState? s) => [
-  for (final g in s?.groups ?? const <DayGroup>[])
+List<PhotoMeta> _videosOf(List<DayGroup>? groups) => [
+  for (final g in groups ?? const <DayGroup>[])
     if (g.kind.isVideo) ...g.photos,
 ];
 
@@ -69,7 +73,9 @@ final cleanableIdsProvider = Provider.autoDispose<Set<String>>((ref) {
 /// 선택한 사진(X, 아직 안 보냄). 묶음 안 막대의 진한 회색
 final selectedIdsProvider = Provider<Set<String>>((ref) {
   final photos = ref.watch(libraryProvider.select((s) => s.value?.photos));
-  final videos = ref.watch(libraryProvider.select((s) => _videosOf(s.value)));
+  final videos = _videosOf(
+    ref.watch(libraryProvider.select((s) => s.value?.groups)),
+  );
   final decisions = ref.watch(decisionsProvider).value ?? const {};
   // 선택해 둔 동영상도 막대의 추천 정리에 (V2-A)
   return {
