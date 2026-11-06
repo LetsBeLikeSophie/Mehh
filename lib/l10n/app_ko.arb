@@ -34,6 +34,8 @@
   },
   "noGroupsLeft": "지금은\n정리할 묶음이 없어요",
   "sectionOthers": "따로 보기",
+  "sectionPhotos": "사진",
+  "sectionVideos": "동영상",
   "jumpToYear": "연도 이동",
   "freedThisMonth": "이번 달 휴지통으로 {size} 보냈어요",
   "@freedThisMonth": {
@@ -102,8 +104,8 @@
   "pickScreenshots": "지울 캡처를 골라 보세요",
   "limitedAccess": "일부 사진만 허용했어요.\n전체를 허용하면 더 많이 찾을 수 있어요.",
   "choosePhotos": "사진 고르기",
-  "screenshots": "캡처",
-  "singles": "낱장 사진",
+  "screenshots": "캡처한 사진",
+  "singles": "그날 하나뿐인 사진",
   "duplicatesTitle": "똑같은 사진",
   "reasonSharp": "초점 선명",
   "reasonExposure": "밝기 적당",
@@ -387,7 +389,7 @@
   },
   "accByKind": "종류별 (결제 기준은 그날의 묶음)",
   "kindDay": "그날의 묶음",
-  "proFreeKinds": "캡처·낱장·똑같은 사진은 늘 무료",
+  "proFreeKinds": "캡처한 사진·그날 하나뿐인 사진·똑같은 사진은 늘 무료",
   "freeRefilled": "이번 달 ◉ {count}개가 다시 생겼어요",
   "@freeRefilled": {
     "placeholders": {
@@ -603,9 +605,9 @@
   "helpTitle": "도움",
   "clearAllSub": "분석 결과와 정리 기록을 지워요 · 사진은 그대로",
   "coinWord": "코인",
-  "filmedVideos": "찍은 동영상",
-  "savedPhotos": "저장한 사진",
-  "savedVideos": "저장·편집한 동영상",
+  "filmedVideos": "직접 찍은 동영상",
+  "savedPhotos": "받거나 저장한 사진",
+  "savedVideos": "받거나 저장한 동영상",
   "videosMeta": "{count}개 · {size}",
   "@videosMeta": {
     "placeholders": {

@@ -73,6 +73,12 @@ class L10nEn extends L10n {
   String get sectionOthers => 'More';
 
   @override
+  String get sectionPhotos => 'Photos';
+
+  @override
+  String get sectionVideos => 'Videos';
+
+  @override
   String get jumpToYear => 'Jump to year';
 
   @override
@@ -170,7 +176,7 @@ class L10nEn extends L10n {
   String get screenshots => 'Screenshots';
 
   @override
-  String get singles => 'Single shots';
+  String get singles => 'Only photo of the day';
 
   @override
   String get duplicatesTitle => 'Exact duplicates';
@@ -676,7 +682,7 @@ class L10nEn extends L10n {
 
   @override
   String get proFreeKinds =>
-      'Screenshots, single shots and exact duplicates are always free';
+      'Screenshots, only photo of the day and exact duplicates are always free';
 
   @override
   String freeRefilled(int count) {
@@ -1038,13 +1044,13 @@ class L10nEn extends L10n {
   String get coinWord => 'coin';
 
   @override
-  String get filmedVideos => 'Camera videos';
+  String get filmedVideos => 'Videos you shot';
 
   @override
-  String get savedPhotos => 'Saved photos';
+  String get savedPhotos => 'Received or saved photos';
 
   @override
-  String get savedVideos => 'Saved & edited videos';
+  String get savedVideos => 'Received or saved videos';
 
   @override
   String videosMeta(int count, String size) {

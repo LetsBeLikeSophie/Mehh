@@ -67,6 +67,12 @@ class L10nKo extends L10n {
   String get sectionOthers => '따로 보기';
 
   @override
+  String get sectionPhotos => '사진';
+
+  @override
+  String get sectionVideos => '동영상';
+
+  @override
   String get jumpToYear => '연도 이동';
 
   @override
@@ -142,10 +148,10 @@ class L10nKo extends L10n {
   String get choosePhotos => '사진 고르기';
 
   @override
-  String get screenshots => '캡처';
+  String get screenshots => '캡처한 사진';
 
   @override
-  String get singles => '낱장 사진';
+  String get singles => '그날 하나뿐인 사진';
 
   @override
   String get duplicatesTitle => '똑같은 사진';
@@ -574,7 +580,7 @@ class L10nKo extends L10n {
   String get kindDay => '그날의 묶음';
 
   @override
-  String get proFreeKinds => '캡처·낱장·똑같은 사진은 늘 무료';
+  String get proFreeKinds => '캡처한 사진·그날 하나뿐인 사진·똑같은 사진은 늘 무료';
 
   @override
   String freeRefilled(int count) {
@@ -876,13 +882,13 @@ class L10nKo extends L10n {
   String get coinWord => '코인';
 
   @override
-  String get filmedVideos => '찍은 동영상';
+  String get filmedVideos => '직접 찍은 동영상';
 
   @override
-  String get savedPhotos => '저장한 사진';
+  String get savedPhotos => '받거나 저장한 사진';
 
   @override
-  String get savedVideos => '저장·편집한 동영상';
+  String get savedVideos => '받거나 저장한 동영상';
 
   @override
   String videosMeta(int count, String size) {

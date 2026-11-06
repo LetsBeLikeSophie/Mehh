@@ -306,7 +306,7 @@ void main() {
     await shot(tester, '09_focus');
   });
 
-  testWidgets('11 홈 따로 보기: 저장한 사진·찍은 동영상·저장·편집한 동영상', (tester) async {
+  testWidgets('11 홈 따로 보기: 사진·동영상 소제목', (tester) async {
     final c = await start(tester);
     final lib = c.read(libraryProvider).value!;
     final some = lib.photos.take(9).toList();

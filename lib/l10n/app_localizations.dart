@@ -199,6 +199,18 @@ abstract class L10n {
   /// **'따로 보기'**
   String get sectionOthers;
 
+  /// No description provided for @sectionPhotos.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진'**
+  String get sectionPhotos;
+
+  /// No description provided for @sectionVideos.
+  ///
+  /// In ko, this message translates to:
+  /// **'동영상'**
+  String get sectionVideos;
+
   /// No description provided for @jumpToYear.
   ///
   /// In ko, this message translates to:
@@ -292,13 +304,13 @@ abstract class L10n {
   /// No description provided for @screenshots.
   ///
   /// In ko, this message translates to:
-  /// **'캡처'**
+  /// **'캡처한 사진'**
   String get screenshots;
 
   /// No description provided for @singles.
   ///
   /// In ko, this message translates to:
-  /// **'낱장 사진'**
+  /// **'그날 하나뿐인 사진'**
   String get singles;
 
   /// No description provided for @duplicatesTitle.
@@ -994,7 +1006,7 @@ abstract class L10n {
   /// No description provided for @proFreeKinds.
   ///
   /// In ko, this message translates to:
-  /// **'캡처·낱장·똑같은 사진은 늘 무료'**
+  /// **'캡처한 사진·그날 하나뿐인 사진·똑같은 사진은 늘 무료'**
   String get proFreeKinds;
 
   /// No description provided for @freeRefilled.
@@ -1420,19 +1432,19 @@ abstract class L10n {
   /// No description provided for @filmedVideos.
   ///
   /// In ko, this message translates to:
-  /// **'찍은 동영상'**
+  /// **'직접 찍은 동영상'**
   String get filmedVideos;
 
   /// No description provided for @savedPhotos.
   ///
   /// In ko, this message translates to:
-  /// **'저장한 사진'**
+  /// **'받거나 저장한 사진'**
   String get savedPhotos;
 
   /// No description provided for @savedVideos.
   ///
   /// In ko, this message translates to:
-  /// **'저장·편집한 동영상'**
+  /// **'받거나 저장한 동영상'**
   String get savedVideos;
 
   /// No description provided for @videosMeta.

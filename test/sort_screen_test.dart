@@ -967,7 +967,7 @@ void main() {
     expect(find.text('50%'), findsOneWidget); // 큰 숫자는 그날의 묶음만 (1/2)
     expect(find.textContaining('모든 종류 합계 67%'), findsOneWidget);
     expect(find.textContaining('그날의 묶음  1/2장'), findsOneWidget);
-    expect(find.textContaining('캡처  1/1장'), findsOneWidget);
+    expect(find.textContaining('캡처한 사진  1/1장'), findsOneWidget);
     // 정식 빌드: 결제 말이 없다 (UX-95)
     expect(find.textContaining('결제'), findsNothing);
     expect(find.textContaining('(참고)'), findsNothing);
@@ -1516,7 +1516,7 @@ void main() {
       photos: [v('v1', 900, 125), v('v2', 300, 40)],
     );
     await pump(tester, SortScreen(kind: SortKind.videos, group: videos));
-    expect(find.textContaining('찍은 동영상', findRichText: true), findsWidgets);
+    expect(find.textContaining('직접 찍은 동영상', findRichText: true), findsWidgets);
     expect(find.text('2:05 · 900MB'), findsOneWidget);
     expect(find.text('0:40 · 300MB'), findsOneWidget);
     expect(find.text('추천 보기 · 0장'), findsNothing); // 앱이 골라 주지 않는다
@@ -1896,7 +1896,7 @@ void main() {
 
   testWidgets('묶음 이름: 제목을 누르면 바꾸고, [원래 이름으로]로 되돌린다', (tester) async {
     await pump(tester, SortScreen(kind: SortKind.singles, group: group));
-    final title = find.textContaining('낱장 사진');
+    final title = find.textContaining('그날 하나뿐인 사진');
     expect(title, findsWidgets);
     await tester.tap(title.first);
     await tester.pumpAndSettle();
@@ -1913,7 +1913,7 @@ void main() {
     await tester.tap(find.text('저장'));
     await tester.pumpAndSettle();
     expect(find.textContaining('여행 사진'), findsNothing);
-    expect(find.textContaining('낱장 사진'), findsWidgets);
+    expect(find.textContaining('그날 하나뿐인 사진'), findsWidgets);
     await flush(tester);
   });
 
@@ -1985,7 +1985,7 @@ void main() {
       store: store,
     );
     expect(find.textContaining('지우 돌잔치'), findsNothing);
-    expect(find.textContaining('낱장 사진'), findsWidgets);
+    expect(find.textContaining('그날 하나뿐인 사진'), findsWidgets);
     final names = await store.loadNames();
     expect(groupNameOf(names, singles), isNull);
 
@@ -3508,7 +3508,7 @@ void main() {
     Navigator.of(tester.element(find.byType(SettingsScreen))).pop();
     await tester.pumpAndSettle();
     expect(find.textContaining('여행 사진'), findsNothing);
-    expect(find.textContaining('낱장 사진'), findsWidgets);
+    expect(find.textContaining('그날 하나뿐인 사진'), findsWidgets);
     expect(find.text('Cortex로 보냄'), findsNothing);
     expect(store.counters['closedTest'], 2); // 테스트를 거쳤다는 표시는 남는다 (UX-74)
     await flush(tester);
@@ -4094,7 +4094,7 @@ void main() {
         vault: vault,
         extra: [cortexInstalledProvider.overrideWith((ref) async => true)],
       );
-      expect(find.textContaining('저장한 사진', findRichText: true), findsWidgets);
+      expect(find.textContaining('받거나 저장한 사진', findRichText: true), findsWidgets);
       expect(find.textContaining('추천 보기'), findsNothing);
       final c = ProviderScope.containerOf(
         tester.element(find.byType(SortScreen)),
@@ -4133,7 +4133,7 @@ void main() {
         ],
       );
       expect(
-        find.textContaining('저장·편집한 동영상', findRichText: true),
+        find.textContaining('받거나 저장한 동영상', findRichText: true),
         findsWidgets,
       );
       expect(find.text('고른 동영상이 없어요'), findsOneWidget);
@@ -4169,7 +4169,7 @@ void main() {
       await flush(tester);
     });
 
-    testWidgets('홈: 따로 보기에 저장한 사진·찍은 동영상·저장·편집한 동영상 줄', (tester) async {
+    testWidgets('홈: 따로 보기를 사진·동영상 소제목으로 나눈다 — 받거나 저장한 사진 / 직접 찍은 동영상·받거나 저장한 동영상 (2026-11-06)', (tester) async {
       final groups = [
         DayGroup(id: 'saved', kind: DayGroupKind.saved, photos: [shot('a')]),
         DayGroup(
@@ -4197,11 +4197,17 @@ void main() {
           ),
         ],
       );
-      expect(find.text('저장한 사진'), findsOneWidget);
-      expect(find.text('찍은 동영상'), findsOneWidget);
-      expect(find.text('저장·편집한 동영상'), findsOneWidget);
+      expect(find.text('받거나 저장한 사진'), findsOneWidget);
+      expect(find.text('직접 찍은 동영상'), findsOneWidget);
+      expect(find.text('받거나 저장한 동영상'), findsOneWidget);
       expect(find.text('1개 · 3MB'), findsOneWidget);
-      await tester.tap(find.text('저장한 사진'));
+      // 사진 소제목 → 사진 줄 → 동영상 소제목 → 동영상 줄
+      double y(String t) => tester.getTopLeft(find.text(t)).dy;
+      expect(y('사진'), lessThan(y('받거나 저장한 사진')));
+      expect(y('받거나 저장한 사진'), lessThan(y('동영상')));
+      expect(y('동영상'), lessThan(y('직접 찍은 동영상')));
+      expect(y('직접 찍은 동영상'), lessThan(y('받거나 저장한 동영상')));
+      await tester.tap(find.text('받거나 저장한 사진'));
       await tester.pumpAndSettle();
       expect(find.byType(SortScreen), findsOneWidget);
       await flush(tester);

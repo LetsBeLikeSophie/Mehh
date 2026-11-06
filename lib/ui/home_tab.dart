@@ -139,6 +139,11 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             for (final g in state.groups)
               if (g.kind != DayGroupKind.day) g,
           ];
+          bool isVideo(DayGroup g) =>
+              g.kind == DayGroupKind.videos ||
+              g.kind == DayGroupKind.savedVideos;
+          final otherPhotos = [for (final g in others) if (!isVideo(g)) g];
+          final otherVideos = [for (final g in others) if (isVideo(g)) g];
           final left = days
               .where(
                 (g) =>
@@ -226,11 +231,19 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                     if (others.isNotEmpty) ...[
                       const SizedBox(height: 24),
                       _SectionLabel(l.sectionOthers),
-                      for (final g in others)
-                        SizedBox(
-                          height: _tileExtent,
-                          child: _GroupTile(group: g),
-                        ),
+                      // 사진과 동영상을 소제목으로 나눈다 (2026-11-06 Sophie)
+                      for (final (label, part) in [
+                        (l.sectionPhotos, otherPhotos),
+                        (l.sectionVideos, otherVideos),
+                      ])
+                        if (part.isNotEmpty) ...[
+                          _SubLabel(label),
+                          for (final g in part)
+                            SizedBox(
+                              height: _tileExtent,
+                              child: _GroupTile(group: g),
+                            ),
+                        ],
                     ],
                     const SizedBox(height: 8),
                   ],
@@ -841,6 +854,27 @@ class _Message extends StatelessWidget {
           ],
           ?below,
         ],
+      ),
+    );
+  }
+}
+
+/// "따로 보기" 안의 사진·동영상 소제목
+class _SubLabel extends StatelessWidget {
+  const _SubLabel(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(top: 10, bottom: 2),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: MehhText.caption,
+          color: MehhColors.textMuted,
+        ),
       ),
     );
   }
