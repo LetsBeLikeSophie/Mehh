@@ -85,32 +85,57 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
 
   Future<List<PhotoMeta>> _loadVideos() async {
     try {
-      final sizes = await ref.read(deviceProvider).videoSizes() ?? const {};
+      final device = ref.read(deviceProvider);
+      final sizes = await device.videoSizes() ?? const {};
       final lib = ref.read(photoLibraryProvider);
       var videos = await lib.loadVideos(sizes);
       if (sizes.isEmpty && videos.isNotEmpty) {
         // 기기에 한 번에 물을 수 없으면 하나씩 (웹·iOS)
         final s = await lib.fileSizes([for (final v in videos) v.id]);
-        videos = [
-          for (final v in videos)
-            PhotoMeta(
-              id: v.id,
-              takenAt: v.takenAt,
-              width: v.width,
-              height: v.height,
-              isVideo: true,
-              durationSec: v.durationSec,
-              sizeBytes: s[v.id] ?? 0,
-              isFavorite: v.isFavorite,
-              fromOtherApp: v.fromOtherApp,
-            ),
-        ];
+        videos = [for (final v in videos) v.withVideo(sizeBytes: s[v.id] ?? 0)];
       }
-      return videos;
+      return await _withDetails(device, videos);
     } catch (_) {
       return [];
     }
   }
+
+  /// 파일 이름·찍은 시각·편집 앱이 적어 둔 원본 (안드로이드). 찍은 시각이 비어 있으면 카메라 폴더에 있어도
+  /// 편집 앱이 새로 만든 영상이라 "받거나 저장한 동영상"으로 (2026-11-07 폰 시험: 캡컷이 카메라 폴더에 저장)
+  Future<List<PhotoMeta>> _withDetails(
+    Device device,
+    List<PhotoMeta> videos,
+  ) async {
+    final details = await device.videoDetails();
+    if (details == null) return videos;
+    // 원본 id는 찍은 시각이 빈 영상에만 적혀 있다. 한 번 읽은 파일은 다시 읽지 않는다
+    final ask = [
+      for (final v in videos)
+        if (details.containsKey(v.id) &&
+            details[v.id]!.takenAt == null &&
+            !_sourceRead.contains(v.id))
+          v.id,
+    ];
+    if (ask.isNotEmpty) {
+      _sources.addAll(await device.videoSources(ask));
+      _sourceRead.addAll(ask);
+    }
+    return [
+      for (final v in videos)
+        if (details[v.id] case final d?)
+          v.withVideo(
+            fileName: d.name,
+            capturedAt: d.takenAt,
+            editedFrom: _sources[v.id],
+            fromOtherApp: v.fromOtherApp || d.takenAt == null,
+          )
+        else
+          v,
+    ];
+  }
+
+  final _sources = <String, String>{};
+  final _sourceRead = <String>{};
 
   /// 동영상 전체를 찍은 것 / 그 밖 두 갈래로, 묶음 안은 용량 큰 순. ♥ 즐겨찾기는 뺀다 (2026-11-01 Sophie)
   List<PhotoMeta> _videosFrom({required bool otherApp}) => [
@@ -121,6 +146,11 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
   LibraryState _state() {
     final filmed = _videosFrom(otherApp: false);
     final saved = _videosFrom(otherApp: true);
+    // 편집한 동영상과 원본: 위 두 묶음에도 그대로 있고, 짝끼리 한 번 더 모아 보인다 (2026-11-07 Sophie)
+    final edits = findEditSets([
+      for (final v in _videos)
+        if (!v.isFavorite) v,
+    ]).sets;
     return LibraryState(
       photos: _metas,
       groups: [
@@ -132,6 +162,12 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
             id: 'savedVideos',
             kind: DayGroupKind.savedVideos,
             photos: saved,
+          ),
+        if (edits.isNotEmpty)
+          DayGroup(
+            id: 'editedVideos',
+            kind: DayGroupKind.editedVideos,
+            photos: [for (final s in edits) ...s],
           ),
       ],
     );

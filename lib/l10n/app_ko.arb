@@ -142,6 +142,15 @@
     }
   },
   "sceneLossBody": "비슷한 사진을 전부 선택했어요. 그래도 휴지통으로 보낼까요?",
+  "editLossTitle": "{count}쌍은 원본도 편집본도 안 남아요",
+  "@editLossTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "editLossBody": "원본과 편집본을 둘 다 선택했어요. 그래도 휴지통으로 보낼까요?",
   "lookAgain": "다시 볼게요",
   "selectAll": "전체 선택",
   "deselectAll": "선택 해제",
@@ -608,6 +617,9 @@
   "filmedVideos": "직접 찍은 동영상",
   "savedPhotos": "받거나 저장한 사진",
   "savedVideos": "받거나 저장한 동영상",
+  "editedVideos": "편집한 동영상과 원본",
+  "tagSourceVideo": "원본",
+  "tagEditedVideo": "편집본",
   "videosMeta": "{count}개 · {size}",
   "@videosMeta": {
     "placeholders": {

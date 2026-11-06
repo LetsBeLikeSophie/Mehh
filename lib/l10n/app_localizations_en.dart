@@ -256,6 +256,21 @@ class L10nEn extends L10n {
       'You selected every similar photo. Move them to trash anyway?';
 
   @override
+  String editLossTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pairs will have neither the original nor the edit left',
+      one: 'Neither the original nor the edit will be left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get editLossBody =>
+      'You selected both the original and the edit. Move them to trash anyway?';
+
+  @override
   String get lookAgain => 'Look again';
 
   @override
@@ -1051,6 +1066,15 @@ class L10nEn extends L10n {
 
   @override
   String get savedVideos => 'Received or saved videos';
+
+  @override
+  String get editedVideos => 'Edited videos and originals';
+
+  @override
+  String get tagSourceVideo => 'Original';
+
+  @override
+  String get tagEditedVideo => 'Edited';
 
   @override
   String videosMeta(int count, String size) {

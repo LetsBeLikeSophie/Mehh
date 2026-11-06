@@ -4,6 +4,7 @@ import '../l10n/l10n.dart';
 import '../logic/duplicates.dart';
 import '../logic/format.dart';
 import '../logic/recommend.dart';
+import '../logic/video_edits.dart';
 import '../models/day_group.dart';
 import '../models/decision.dart';
 import '../models/photo_meta.dart';
@@ -17,10 +18,15 @@ enum SortKind {
   duplicates,
   videos,
   saved,
-  savedVideos;
+  savedVideos,
+  editedVideos;
 
   /// 사진 대신 동영상을 보여 주는 종류 (세는 단위 "개", Cortex 없음)
-  bool get isVideo => this == videos || this == savedVideos;
+  bool get isVideo =>
+      this == videos || this == savedVideos || this == editedVideos;
+
+  /// 묶음마다 새 줄에서 시작해 어떤 것끼리 짝인지 보이는 종류
+  bool get bySets => this == duplicates || this == editedVideos;
 }
 
 /// 사진 위 짧은 표시의 종류 (문구는 [tagText]·[noteText]에서 언어별로)
@@ -34,6 +40,8 @@ enum PhotoTag {
   duplicate,
   oldShot,
   repeatShot,
+  sourceVideo,
+  editedVideo,
 }
 
 /// 정리 화면(그리드)과 크게 보기가 함께 쓰는 사진 목록과 앱 추천
@@ -48,7 +56,11 @@ class SortSource {
     this.units = const [],
     this.locked = 0,
     this.preMarked = const {},
+    this.alwaysTags = false,
   });
+
+  /// 표시를 X·[추천 보기]와 상관없이 늘 보인다 (편집본·원본처럼 추천이 아닌 사실 표시)
+  final bool alwaysTags;
 
   /// 보여줄 순서 (휴지통으로 간 사진 포함, 화면에서 거른다)
   final List<PhotoMeta> photos;
@@ -96,6 +108,8 @@ String tagText(PhotoTag t, L10n l) => switch (t) {
   PhotoTag.duplicate => l.tagDuplicate,
   PhotoTag.oldShot => l.tagOldShot,
   PhotoTag.repeatShot => l.tagRepeatShot,
+  PhotoTag.sourceVideo => l.tagSourceVideo,
+  PhotoTag.editedVideo => l.tagEditedVideo,
 };
 
 /// 크게 볼 때 한 줄
@@ -121,6 +135,8 @@ String noteText(PhotoTag t, List<BestReason> reasons, L10n l) => switch (t) {
   PhotoTag.duplicate => l.tagDuplicate,
   PhotoTag.oldShot => l.noteOldShot,
   PhotoTag.repeatShot => l.noteRepeatShot,
+  PhotoTag.sourceVideo => l.tagSourceVideo,
+  PhotoTag.editedVideo => l.tagEditedVideo,
 };
 
 /// 사진에 붙이는 이유 표시: X 사진에는 "왜 X인지", 남길 사진·베스트는 [추천 보기]를 받은 뒤에만
@@ -132,6 +148,7 @@ PhotoTag? shownTag(
   required bool picksShown,
 }) {
   final t = src.tags[id];
+  if (src.alwaysTags) return t;
   final keepTag = t == PhotoTag.best || t == PhotoTag.original;
   if (keepTag) return picksShown || src.preMarked.isNotEmpty ? t : null;
   return marked ? t : null;
@@ -205,6 +222,23 @@ SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
     case SortKind.savedVideos:
       // 동영상: 용량 큰 순으로 보여 주기만 한다. 앱이 골라 주지 않는다 (2026-10-24 Sophie)
       return SortSource(photos: g!.photos);
+    case SortKind.editedVideos:
+      // 편집한 동영상과 원본: 짝마다 한 줄, 앱이 골라 주지 않고 직접 하나를 고른다 (2026-11-07 Sophie)
+      final edits = findEditSets(g!.photos);
+      return SortSource(
+        photos: [for (final s in edits.sets) ...s],
+        units: [
+          for (final s in edits.sets) [for (final v in s) v.id],
+        ],
+        tags: {
+          for (final s in edits.sets)
+            for (final v in s)
+              v.id: edits.edited.contains(v.id)
+                  ? PhotoTag.editedVideo
+                  : PhotoTag.sourceVideo,
+        },
+        alwaysTags: true,
+      );
     case SortKind.saved:
       // 저장한 사진: 최신이 위. 앱이 골라 주지 않는다 (2026-11-01 Sophie)
       return SortSource(photos: g!.photos.reversed.toList());

@@ -4060,6 +4060,112 @@ void main() {
       expect(ids(DayGroupKind.savedVideos), ['edit2', 'edit']);
     });
 
+    test('사진첩: 카메라 폴더라도 찍은 시각이 빈 영상(캡컷)은 받거나 저장한 동영상, 원본과 편집본은 짝 묶음에도 (2026-11-07)', () async {
+      final device = _VideoDevice(
+        details: {
+          'orig': (name: '20261023_232859.mp4', takenAt: DateTime(2026, 10, 23)),
+          'capcut': (name: 'lv_0_20261107041537.mp4', takenAt: null),
+          'inshot': (name: 'InShot_20261107_041908908.mp4', takenAt: null),
+          'love': (name: 'love.mp4', takenAt: null),
+        },
+        sources: {'capcut': 'orig', 'love': 'orig'},
+      );
+      final c = ProviderContainer(
+        overrides: [
+          photoLibraryProvider.overrideWithValue(
+            _VideosLibrary([
+              shot('orig', other: false, mb: 6, video: true),
+              shot('capcut', other: false, mb: 3, video: true),
+              shot('inshot', mb: 2, video: true),
+              PhotoMeta(
+                id: 'love',
+                takenAt: DateTime(2026, 9, 1),
+                width: 1,
+                height: 1,
+                isVideo: true,
+                isFavorite: true,
+              ),
+            ]),
+          ),
+          storeProvider.overrideWithValue(MemoryStore()),
+          deviceProvider.overrideWithValue(device),
+        ],
+      );
+      addTearDown(c.dispose);
+      final groups = (await c.read(libraryProvider.future)).groups;
+      List<String> ids(DayGroupKind k) => [
+        for (final g in groups)
+          if (g.kind == k)
+            for (final p in g.photos) p.id,
+      ];
+      expect(ids(DayGroupKind.videos), ['orig']);
+      expect(ids(DayGroupKind.savedVideos), ['capcut', 'inshot']);
+      // ♥ 즐겨찾기는 짝에도 넣지 않는다
+      expect(ids(DayGroupKind.editedVideos), ['orig', 'capcut']);
+      // 원본 id는 찍은 시각이 빈 영상만, 한 번만 읽는다
+      expect(device.asked, {'capcut', 'inshot', 'love'});
+      await c.read(libraryProvider.notifier).reload();
+      expect(device.askCount, 1);
+    });
+
+    testWidgets('편집한 동영상과 원본: 짝마다 한 줄, 원본·편집본 표시가 늘 보이고, 처음엔 X 없음·추천·Cortex 없음, 둘 다 보내면 묻는다', (
+      tester,
+    ) async {
+      PhotoMeta named(String id, String name, {String? from, bool other = true}) =>
+          shot(id, other: other, mb: 4, video: true).withVideo(
+            fileName: name,
+            capturedAt: DateTime(2026, 9, 1, 10),
+            editedFrom: from,
+          );
+      final pairs = DayGroup(
+        id: 'editedVideos',
+        kind: DayGroupKind.editedVideos,
+        photos: [
+          named('o1', 'a.mp4', other: false),
+          named('e1', 'lv_0_1.mp4', from: 'o1'),
+          named('o2', 'Screen_b.mp4'),
+          named('e2', 'Screen_b_1.mp4'),
+        ],
+      );
+      final store = MemoryStore();
+      await pump(
+        tester,
+        SortScreen(kind: SortKind.editedVideos, group: pairs),
+        store: store,
+        extra: [
+          cortexInstalledProvider.overrideWith((ref) async => true),
+          libraryProvider.overrideWith(
+            () =>
+                _FixedLibrary(LibraryState(photos: const [], groups: [pairs])),
+          ),
+        ],
+      );
+      expect(
+        find.textContaining('편집한 동영상과 원본', findRichText: true),
+        findsWidgets,
+      );
+      expect(find.text('원본'), findsNWidgets(2));
+      expect(find.text('편집본'), findsNWidgets(2));
+      expect(find.text('고른 동영상이 없어요'), findsOneWidget);
+      expect(find.textContaining('추천 보기'), findsNothing);
+      // 짝마다 새 줄: 두 번째 짝의 원본은 첫 짝 아래 줄 맨 앞
+      final grids = find.byType(SliverGrid);
+      expect(grids, findsNWidgets(2));
+      await tester.tap(find.byType(XToggle).at(0));
+      await tester.tap(find.byType(XToggle).at(1));
+      await tester.pumpAndSettle();
+      expect(find.text('2개 휴지통으로'), findsOneWidget);
+      expect(find.text('Cortex로'), findsNothing);
+      await tester.tap(find.text('2개 휴지통으로'));
+      await tester.pumpAndSettle();
+      expect(find.text('1쌍은 원본도 편집본도 안 남아요'), findsOneWidget);
+      await tester.tap(find.text('다시 볼게요'));
+      await tester.pumpAndSettle();
+      // 추천이 아니라 직접 고른 것: 추천 정확도 기록에 들어가지 않는다
+      expect(await store.loadPicks(), isEmpty);
+      await flush(tester);
+    });
+
     testWidgets('저장한 사진: 추천 없이 직접 고르고, Cortex로 보낼 수 있고, 코인·기록이 안 쓰인다', (
       tester,
     ) async {
@@ -4182,6 +4288,14 @@ void main() {
           kind: DayGroupKind.savedVideos,
           photos: [shot('w', mb: 2, video: true)],
         ),
+        DayGroup(
+          id: 'editedVideos',
+          kind: DayGroupKind.editedVideos,
+          photos: [
+            shot('v', other: false, mb: 3, video: true),
+            shot('w', mb: 2, video: true),
+          ],
+        ),
       ];
       final lib = DemoPhotoLibrary();
       await lib.requestPermission();
@@ -4212,6 +4326,8 @@ void main() {
       expect(y('받거나 저장한 사진'), lessThan(icon(Icons.videocam_outlined)));
       expect(icon(Icons.videocam_outlined), lessThan(y('직접 찍은 동영상')));
       expect(y('직접 찍은 동영상'), lessThan(y('받거나 저장한 동영상')));
+      // 편집한 동영상과 원본은 동영상 아래 맨 끝 (2026-11-07)
+      expect(y('받거나 저장한 동영상'), lessThan(y('편집한 동영상과 원본')));
       await tester.tap(find.text('받거나 저장한 사진'));
       await tester.pumpAndSettle();
       expect(find.byType(SortScreen), findsOneWidget);
@@ -5111,6 +5227,25 @@ class _LocatingFailsLibrary extends DemoPhotoLibrary {
     onProgress?.call(400, 800);
     await Future<void>.value();
     throw const FileSystemException('No space left on device');
+  }
+}
+
+/// 동영상 이름·찍은 시각·캡컷 원본 id를 정해 둔 기기 (2026-11-07)
+class _VideoDevice extends Device {
+  _VideoDevice({required this.details, required this.sources});
+  final Map<String, VideoDetail> details;
+  final Map<String, String> sources;
+  final asked = <String>{};
+  var askCount = 0;
+
+  @override
+  Future<Map<String, VideoDetail>?> videoDetails() async => details;
+
+  @override
+  Future<Map<String, String>> videoSources(List<String> ids) async {
+    askCount++;
+    asked.addAll(ids);
+    return {for (final id in ids) id: ?sources[id]};
   }
 }
 

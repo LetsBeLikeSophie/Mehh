@@ -445,6 +445,18 @@ abstract class L10n {
   /// **'비슷한 사진을 전부 선택했어요. 그래도 휴지통으로 보낼까요?'**
   String get sceneLossBody;
 
+  /// No description provided for @editLossTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}쌍은 원본도 편집본도 안 남아요'**
+  String editLossTitle(int count);
+
+  /// No description provided for @editLossBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'원본과 편집본을 둘 다 선택했어요. 그래도 휴지통으로 보낼까요?'**
+  String get editLossBody;
+
   /// No description provided for @lookAgain.
   ///
   /// In ko, this message translates to:
@@ -1446,6 +1458,24 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'받거나 저장한 동영상'**
   String get savedVideos;
+
+  /// No description provided for @editedVideos.
+  ///
+  /// In ko, this message translates to:
+  /// **'편집한 동영상과 원본'**
+  String get editedVideos;
+
+  /// No description provided for @tagSourceVideo.
+  ///
+  /// In ko, this message translates to:
+  /// **'원본'**
+  String get tagSourceVideo;
+
+  /// No description provided for @tagEditedVideo.
+  ///
+  /// In ko, this message translates to:
+  /// **'편집본'**
+  String get tagEditedVideo;
 
   /// No description provided for @videosMeta.
   ///

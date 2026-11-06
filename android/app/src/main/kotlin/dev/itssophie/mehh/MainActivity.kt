@@ -43,6 +43,15 @@ class MainActivity : FlutterActivity() {
                     "photoBytes" -> result.success(photoBytes())
                     "videoSizes" -> result.success(videoSizes())
                     "imageSizes" -> result.success(imageSizes())
+                    "videoDetails" -> result.success(videoDetails())
+                    "videoSources" -> {
+                        val ids = call.argument<List<String>>("ids") ?: emptyList()
+                        // 파일을 읽으니 뒤에서 (2026-11-07 Sophie: 편집한 동영상과 원본)
+                        Thread {
+                            val out = videoSources(ids)
+                            runOnUiThread { result.success(out) }
+                        }.start()
+                    }
                     "openGallery" -> result.success(openGallery())
                     "openVideo" -> result.success(openVideo(call.argument<String>("id")))
                     else -> result.notImplemented()
@@ -55,6 +64,78 @@ class MainActivity : FlutterActivity() {
 
     /// 사진 id → 파일 크기 (용량 막대, 한 번의 조회로. 리뷰 2026-10-31 S-4)
     private fun imageSizes(): Map<String, Long> = sizes(MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+
+    /// 동영상 id → [파일 이름, 찍은 시각(ms, 없으면 null)]. 편집 앱이 새로 만든 영상은 찍은 시각이 비어 있다
+    /// (2026-11-07 폰 시험: 캡컷·인샷 모두 비어 있음, 삼성 편집기는 원본 시각을 그대로 둠)
+    private fun videoDetails(): Map<String, List<Any?>> {
+        val out = HashMap<String, List<Any?>>()
+        contentResolver.query(
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+            arrayOf(
+                MediaStore.MediaColumns._ID,
+                MediaStore.MediaColumns.DISPLAY_NAME,
+                MediaStore.MediaColumns.DATE_TAKEN,
+            ),
+            null, null, null,
+        )?.use { c ->
+            val id = c.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
+            val name = c.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
+            val taken = c.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_TAKEN)
+            while (c.moveToNext()) {
+                out[c.getLong(id).toString()] = listOf(
+                    c.getString(name),
+                    if (c.isNull(taken)) null else c.getLong(taken),
+                )
+            }
+        }
+        return out
+    }
+
+    /// 동영상 id → 편집 앱이 적어 둔 원본 동영상 id (캡컷: moov 안 LvMetaInfo의 "videoMaterialId").
+    /// 영상 정보(moov)만 읽고 영상 자체는 읽지 않는다. 폰 밖으로 아무것도 보내지 않는다
+    private fun videoSources(ids: List<String>): Map<String, String> {
+        val out = HashMap<String, String>()
+        for (id in ids) {
+            val n = id.toLongOrNull() ?: continue
+            val uri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, n)
+            try {
+                contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
+                    java.io.FileInputStream(pfd.fileDescriptor).channel.use { ch ->
+                        materialId(ch)?.let { out[id] = it }
+                    }
+                }
+            } catch (e: Exception) {
+            }
+        }
+        return out
+    }
+
+    /// 맨 위 상자들을 건너뛰며 moov를 찾아 그 끝부분(사용자 정보 udta가 있는 곳)에서 원본 id를 찾는다
+    private fun materialId(ch: java.nio.channels.FileChannel): String? {
+        val size = ch.size()
+        var off = 0L
+        val head = java.nio.ByteBuffer.allocate(16)
+        while (off + 8 <= size) {
+            head.clear()
+            ch.read(head, off)
+            head.flip()
+            if (head.remaining() < 8) return null
+            var box = head.getInt().toLong() and 0xffffffffL
+            val type = String(ByteArray(4).also { head.get(it) }, Charsets.ISO_8859_1)
+            if (box == 1L && head.remaining() >= 8) box = head.getLong()
+            if (box == 0L) box = size - off
+            if (box < 8) return null
+            if (type == "moov") {
+                val len = minOf(box, 256L * 1024).toInt()
+                val buf = java.nio.ByteBuffer.allocate(len)
+                ch.read(buf, off + box - len)
+                val text = String(buf.array(), 0, buf.position(), Charsets.ISO_8859_1)
+                return Regex("\"videoMaterialId\"\\s*:\\s*\"(\\d+)\"").find(text)?.groupValues?.get(1)
+            }
+            off += box
+        }
+        return null
+    }
 
     private fun sizes(uri: android.net.Uri): Map<String, Long> {
         val out = HashMap<String, Long>()

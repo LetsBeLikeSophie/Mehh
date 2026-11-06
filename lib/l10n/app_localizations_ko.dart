@@ -224,6 +224,14 @@ class L10nKo extends L10n {
   String get sceneLossBody => '비슷한 사진을 전부 선택했어요. 그래도 휴지통으로 보낼까요?';
 
   @override
+  String editLossTitle(int count) {
+    return '$count쌍은 원본도 편집본도 안 남아요';
+  }
+
+  @override
+  String get editLossBody => '원본과 편집본을 둘 다 선택했어요. 그래도 휴지통으로 보낼까요?';
+
+  @override
   String get lookAgain => '다시 볼게요';
 
   @override
@@ -889,6 +897,15 @@ class L10nKo extends L10n {
 
   @override
   String get savedVideos => '받거나 저장한 동영상';
+
+  @override
+  String get editedVideos => '편집한 동영상과 원본';
+
+  @override
+  String get tagSourceVideo => '원본';
+
+  @override
+  String get tagEditedVideo => '편집본';
 
   @override
   String videosMeta(int count, String size) {

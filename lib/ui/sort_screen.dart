@@ -346,7 +346,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
         ? src.locked + src.suggested.length
         : src.suggested.length;
     final orderSet = order.toSet();
-    final sections = widget.kind == SortKind.duplicates
+    final sections = widget.kind.bySets
         ? [
             for (final u in src.units)
               [
@@ -382,10 +382,12 @@ class _SortScreenState extends ConsumerState<SortScreen>
                   opacity: out ? 0.45 : 1,
                   child: PhotoThumb(entity: entities[id]),
                 ),
+                // 동영상은 아래에 길이·용량이 있어 표시(원본·편집본)를 위에
                 if (tag != null)
-                  Positioned(
-                    left: 4,
-                    bottom: 4,
+                  PositionedDirectional(
+                    start: 4,
+                    bottom: _videoMeta.containsKey(id) ? null : 4,
+                    top: _videoMeta.containsKey(id) ? 4 : null,
                     child: MehhBadge(tagText(tag, l), inverted: out),
                   ),
                 // 동영상: 길이 · 용량

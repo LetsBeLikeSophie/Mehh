@@ -2,20 +2,27 @@ import 'photo_meta.dart';
 
 /// [day]: 그날의 묶음, [singles]: 사진이 적은 날을 모은 "낱장 사진",
 /// [screenshots]: 모든 캡처, [videos]: 카메라로 찍은 동영상(용량 큰 순),
-/// [saved]: 카메라 밖에서 온 사진, [savedVideos]: 카메라 밖에서 온 동영상(용량 큰 순)
+/// [saved]: 카메라 밖에서 온 사진, [savedVideos]: 카메라 밖에서 온 동영상(용량 큰 순),
+/// [editedVideos]: 편집한 동영상과 그 원본 짝 (2026-11-07 Sophie)
 enum DayGroupKind {
   day,
   singles,
   screenshots,
   videos,
   saved,
-  savedVideos;
+  savedVideos,
+  editedVideos;
 
   /// 앱이 추천하지 않고 직접 고르기만 하는 묶음
-  bool get noPicks => this == videos || this == saved || this == savedVideos;
+  bool get noPicks =>
+      this == videos ||
+      this == saved ||
+      this == savedVideos ||
+      this == editedVideos;
 
   /// 사진 대신 동영상을 담는 묶음
-  bool get isVideo => this == videos || this == savedVideos;
+  bool get isVideo =>
+      this == videos || this == savedVideos || this == editedVideos;
 }
 
 /// 그날의 묶음. [photos]는 촬영 시각 오름차순.
