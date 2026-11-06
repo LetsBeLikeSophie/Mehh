@@ -97,4 +97,76 @@ void main() {
     );
     await SqliteStore().clearAll();
   });
+  // 1.17.2(6cdd557, 비공개 테스트 첫 빌드) onCreate 그대로: decision_log·views 있음, names에 photos 없음
+  Future<void> makeV9() async {
+    final db = await openDatabase(
+      path,
+      version: 9,
+      singleInstance: false,
+      onCreate: (db, _) async {
+        await db.execute('''
+          CREATE TABLE features (
+            id TEXT PRIMARY KEY, hi INTEGER, lo INTEGER,
+            sharp REAL, bright REAL, contrast REAL, text REAL, mod INTEGER, v INTEGER)''');
+        await db.execute(
+          'CREATE TABLE decisions (id TEXT PRIMARY KEY, state TEXT, at INTEGER, hold_at INTEGER)',
+        );
+        await db.execute(
+          'CREATE TABLE decision_log (id TEXT, state TEXT, at INTEGER)',
+        );
+        await db.execute(
+          'CREATE TABLE views (id TEXT PRIMARY KEY, count INTEGER, last_at INTEGER)',
+        );
+        await db.execute(
+          'CREATE TABLE freed (month TEXT PRIMARY KEY, bytes INTEGER)',
+        );
+        await db.execute(
+          'CREATE TABLE picks (at INTEGER, kind TEXT, tag TEXT, suggested INTEGER, sent INTEGER)',
+        );
+        await db.execute('CREATE TABLE seen (id TEXT PRIMARY KEY)');
+        await db.execute(
+          'CREATE TABLE cortex_sent (id TEXT PRIMARY KEY, at INTEGER, got INTEGER DEFAULT 0)',
+        );
+        await db.execute(
+          'CREATE TABLE counters (key TEXT PRIMARY KEY, n INTEGER)',
+        );
+        await db.execute(
+          'CREATE TABLE faces (id TEXT PRIMARY KEY, closed INTEGER)',
+        );
+        await db.execute(
+          'CREATE TABLE names (id TEXT PRIMARY KEY, name TEXT)',
+        );
+      },
+    );
+    await db.insert('decisions', {
+      'id': 'a',
+      'state': DecisionState.keep.name,
+      'at': 1000,
+    });
+    await db.insert('names', {'id': 'day-1', 'name': '롯데월드'});
+    await db.insert('cortex_sent', {'id': 'c', 'at': 1000, 'got': 1});
+    await db.insert('counters', {'key': 'closedTest', 'n': 1});
+    await db.close();
+  }
+
+  test('비공개 테스트 첫 빌드(v9)에서 올라와도 결정·이름·Cortex 기록·카운터가 남는다 (리뷰 11-06 S-1)', () async {
+    await makeV9();
+    expect(await tables(), containsAll(['decision_log', 'views']));
+
+    final store = SqliteStore();
+    expect((await store.loadDecisions())['a']?.state, DecisionState.keep);
+    expect(await store.loadCortexSent(), {'c': true});
+    expect(await store.counter('closedTest'), 1);
+    // 옛 이름은 같은 묶음 id로, 사진 목록 없이 읽힌다
+    final names = await store.loadNames();
+    expect(names['day-1']?.name, '롯데월드');
+    expect(names['day-1']?.photoIds, isEmpty);
+    expect(await tables(), isNot(contains('views')));
+    expect(await tables(), isNot(contains('decision_log')));
+
+    // 올라온 뒤 사진 목록을 포함한 새 이름을 저장한다
+    await store.saveName('day-2', '바다', photoIds: ['p1', 'p2']);
+    expect((await store.loadNames())['day-2']?.photoIds, {'p1', 'p2'});
+    await store.clearAll();
+  });
 }
