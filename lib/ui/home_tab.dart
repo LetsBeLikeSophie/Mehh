@@ -231,13 +231,18 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                     if (others.isNotEmpty) ...[
                       const SizedBox(height: 24),
                       _SectionLabel(l.sectionOthers),
-                      // 사진과 동영상을 소제목으로 나눈다 (2026-11-06 Sophie)
-                      for (final (label, part) in [
-                        (l.sectionPhotos, otherPhotos),
-                        (l.sectionVideos, otherVideos),
+                      // 사진과 동영상을 아이콘 소제목으로 나눈다. 이름에 이미 "사진"·"동영상"이
+                      // 있어 글자로 또 쓰면 반복된다 (2026-11-06 Sophie A)
+                      for (final (icon, label, part) in [
+                        (
+                          Icons.photo_library_outlined,
+                          l.sectionPhotos,
+                          otherPhotos,
+                        ),
+                        (Icons.videocam_outlined, l.sectionVideos, otherVideos),
                       ])
                         if (part.isNotEmpty) ...[
-                          _SubLabel(label),
+                          _SubLabel(icon, label),
                           for (final g in part)
                             SizedBox(
                               height: _tileExtent,
@@ -859,22 +864,24 @@ class _Message extends StatelessWidget {
   }
 }
 
-/// "따로 보기" 안의 사진·동영상 소제목
+/// "따로 보기" 안의 사진·동영상 소제목: 아이콘 + 얇은 선 (연도 구분선과 같은 모양).
+/// 글자는 화면 읽기에만
 class _SubLabel extends StatelessWidget {
-  const _SubLabel(this.text);
+  const _SubLabel(this.icon, this.label);
 
-  final String text;
+  final IconData icon;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsetsDirectional.only(top: 10, bottom: 2),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: MehhText.caption,
-          color: MehhColors.textMuted,
-        ),
+      padding: const EdgeInsetsDirectional.only(top: 12, bottom: 2),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: MehhColors.icon, semanticLabel: label),
+          const SizedBox(width: 10),
+          const Expanded(child: Divider()),
+        ],
       ),
     );
   }

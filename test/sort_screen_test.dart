@@ -4169,7 +4169,7 @@ void main() {
       await flush(tester);
     });
 
-    testWidgets('홈: 따로 보기를 사진·동영상 소제목으로 나눈다 — 받거나 저장한 사진 / 직접 찍은 동영상·받거나 저장한 동영상 (2026-11-06)', (tester) async {
+    testWidgets('홈: 따로 보기를 사진·동영상 아이콘 소제목으로 나눈다 — 받거나 저장한 사진 / 직접 찍은 동영상·받거나 저장한 동영상 (2026-11-06)', (tester) async {
       final groups = [
         DayGroup(id: 'saved', kind: DayGroupKind.saved, photos: [shot('a')]),
         DayGroup(
@@ -4201,11 +4201,16 @@ void main() {
       expect(find.text('직접 찍은 동영상'), findsOneWidget);
       expect(find.text('받거나 저장한 동영상'), findsOneWidget);
       expect(find.text('1개 · 3MB'), findsOneWidget);
-      // 사진 소제목 → 사진 줄 → 동영상 소제목 → 동영상 줄
+      // 사진 아이콘 → 사진 줄 → 동영상 아이콘 → 동영상 줄. 소제목은 글자 없이 아이콘만
       double y(String t) => tester.getTopLeft(find.text(t)).dy;
-      expect(y('사진'), lessThan(y('받거나 저장한 사진')));
-      expect(y('받거나 저장한 사진'), lessThan(y('동영상')));
-      expect(y('동영상'), lessThan(y('직접 찍은 동영상')));
+      double icon(IconData i) => tester.getTopLeft(find.byIcon(i)).dy;
+      expect(find.text('사진'), findsNothing);
+      expect(find.text('동영상'), findsNothing);
+      expect(find.bySemanticsLabel('사진'), findsOneWidget);
+      expect(find.bySemanticsLabel('동영상'), findsOneWidget);
+      expect(icon(Icons.photo_library_outlined), lessThan(y('받거나 저장한 사진')));
+      expect(y('받거나 저장한 사진'), lessThan(icon(Icons.videocam_outlined)));
+      expect(icon(Icons.videocam_outlined), lessThan(y('직접 찍은 동영상')));
       expect(y('직접 찍은 동영상'), lessThan(y('받거나 저장한 동영상')));
       await tester.tap(find.text('받거나 저장한 사진'));
       await tester.pumpAndSettle();
