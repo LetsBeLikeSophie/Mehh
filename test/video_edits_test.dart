@@ -40,6 +40,18 @@ void main() {
     expect(e.edited, {'703'});
   });
 
+  test('옮겨 온 캡컷 영상의 원본 id가 더 나중에 찍힌(또는 찍은 시각이 빈) 영상을 가리키면 짝이 없다 (리뷰 11-07 S-1)', () {
+    // 다른 폰에서 옮겨 온 캡컷 영상: 파일 안 번호는 옛 폰 id라 이 폰의 엉뚱한 영상을 가리킬 수 있다
+    final e = findEditSets([
+      v('later', 'a.mp4', at: DateTime(2026, 11, 1), other: false),
+      v('blank', 'b.mp4'),
+      v('lvA', 'lv_0_a.mp4', from: 'later', made: DateTime(2026, 10, 1)),
+      v('lvB', 'lv_0_b.mp4', from: 'blank', made: DateTime(2026, 12, 1)),
+      v('lvC', 'lv_0_c.mp4', from: 'lvB', made: DateTime(2026, 12, 2)),
+    ]);
+    expect(e.sets, isEmpty);
+  });
+
   test('삼성 편집기: 카메라 밖의 "이름_1"이 같은 시각(2분 안)의 "이름"과 짝', () {
     final e = findEditSets([
       v('350', 'Screen_Recording_20210426-182214_CPanho_.mp4', at: t),

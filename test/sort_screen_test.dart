@@ -4063,7 +4063,7 @@ void main() {
     test('사진첩: 카메라 폴더라도 찍은 시각이 빈 영상(캡컷)은 받거나 저장한 동영상, 원본과 편집본은 짝 묶음에도 (2026-11-07)', () async {
       final device = _VideoDevice(
         details: {
-          'orig': (name: '20261023_232859.mp4', takenAt: DateTime(2026, 10, 23)),
+          'orig': (name: '20260901_090000.mp4', takenAt: DateTime(2026, 9, 1, 9)),
           'capcut': (name: 'lv_0_20261107041537.mp4', takenAt: null),
           'inshot': (name: 'InShot_20261107_041908908.mp4', takenAt: null),
           'love': (name: 'love.mp4', takenAt: null),

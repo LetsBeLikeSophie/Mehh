@@ -37,8 +37,15 @@ EditSets findEditSets(List<PhotoMeta> videos) {
   }
 
   for (final v in videos) {
+    // 캡컷이 적은 번호는 그 폰의 id라, 다른 폰에서 옮겨 온 영상이면 엉뚱한 영상을 가리킬 수 있다.
+    // 원본답게 찍은 시각이 있고, 편집본보다 먼저 찍혔고, 자신은 편집본이 아닐 때만 (리뷰 11-07 S-1)
     final src = byId[v.editedFrom];
-    if (src != null && src.id != v.id) {
+    final at0 = src?.capturedAt;
+    if (src != null &&
+        src.id != v.id &&
+        at0 != null &&
+        src.editedFrom == null &&
+        !at0.isAfter(v.takenAt)) {
       link(v, src);
       continue;
     }
