@@ -108,12 +108,15 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
   ) async {
     final details = await device.videoDetails();
     if (details == null) return videos;
-    // 원본 id는 찍은 시각이 빈 영상에만 적혀 있다. 한 번 읽은 파일은 다시 읽지 않는다
+    // 원본 id는 캡컷이 만든 영상(이름이 lv_로 시작, 찍은 시각 없음)에만 적혀 있다. 그것만 연다:
+    // 받은 영상이 수천 개여도 첫 화면이 파일 읽기를 기다리지 않게 (리뷰 11-07 S-2).
+    // 한 번 읽은 파일은 다시 읽지 않는다
     final ask = [
       for (final v in videos)
-        if (details.containsKey(v.id) &&
-            details[v.id]!.takenAt == null &&
-            !_sourceRead.contains(v.id))
+        if (details[v.id] case final d?
+            when d.takenAt == null &&
+                isCapCutName(d.name) &&
+                !_sourceRead.contains(v.id))
           v.id,
     ];
     if (ask.isNotEmpty) {

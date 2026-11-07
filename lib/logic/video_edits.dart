@@ -80,6 +80,10 @@ EditSets findEditSets(List<PhotoMeta> videos) {
   return (sets: sets, edited: edited);
 }
 
+/// 캡컷이 내보낸 영상 이름 ("lv_0_20261107041537.mp4"). 원본 id를 찾으려고 파일을 여는 것은 이것만
+bool isCapCutName(String? name) =>
+    name?.toLowerCase().startsWith('lv_') ?? false;
+
 /// 같은 장면으로 보는 찍은 시각 차이 (삼성 편집본이 원본과 42초 어긋난 예가 있었다)
 const sameShot = Duration(minutes: 2);
 

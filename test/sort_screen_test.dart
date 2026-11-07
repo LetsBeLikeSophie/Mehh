@@ -4066,7 +4066,7 @@ void main() {
           'orig': (name: '20260901_090000.mp4', takenAt: DateTime(2026, 9, 1, 9)),
           'capcut': (name: 'lv_0_20261107041537.mp4', takenAt: null),
           'inshot': (name: 'InShot_20261107_041908908.mp4', takenAt: null),
-          'love': (name: 'love.mp4', takenAt: null),
+          'love': (name: 'lv_0_love.mp4', takenAt: null),
         },
         sources: {'capcut': 'orig', 'love': 'orig'},
       );
@@ -4102,8 +4102,8 @@ void main() {
       expect(ids(DayGroupKind.savedVideos), ['capcut', 'inshot']);
       // ♥ 즐겨찾기는 짝에도 넣지 않는다
       expect(ids(DayGroupKind.editedVideos), ['orig', 'capcut']);
-      // 원본 id는 찍은 시각이 빈 영상만, 한 번만 읽는다
-      expect(device.asked, {'capcut', 'inshot', 'love'});
+      // 파일은 캡컷 이름(lv_)이고 찍은 시각이 빈 영상만, 한 번만 연다 (리뷰 11-07 S-2)
+      expect(device.asked, {'capcut', 'love'});
       await c.read(libraryProvider.notifier).reload();
       expect(device.askCount, 1);
     });
