@@ -45,6 +45,14 @@ class PhotoLibrary {
   /// 위치 캐시 지우기
   Future<void> clearCache() => _locationCache.delete();
 
+  /// 사진첩에 없는 사진의 위치 기록을 지운다 (2026-11-08 Sophie: 폰에 쌓이지 않게)
+  Future<void> forgetLocations(Set<String> present) async {
+    final cached = await _locationCache.read();
+    final before = cached.length;
+    cached.removeWhere((id, _) => !present.contains(id));
+    if (cached.length != before) await _locationCache.write(cached);
+  }
+
   /// 일부만 허용한 상태에서 사진 선택 화면을 다시 띄운다.
   Future<void> presentLimited() =>
       PhotoManager.presentLimited(type: RequestType.common);

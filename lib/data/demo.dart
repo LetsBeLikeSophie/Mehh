@@ -282,6 +282,9 @@ class DemoPhotoLibrary extends PhotoLibrary {
 
   @override
   Future<void> clearCache() async {}
+
+  @override
+  Future<void> forgetLocations(Set<String> present) async {}
 }
 
 class DemoPlaceNamer extends PlaceNamer {

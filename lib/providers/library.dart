@@ -24,6 +24,9 @@ class LibraryState {
   );
 }
 
+/// 갤러리 휴지통이 사진을 남겨 두는 기간(30일)에 하루를 더한 것. 이보다 오래된 결정만 지운다
+const galleryTrashKeep = Duration(days: 31);
+
 /// 사진 불러오기 → 묶음. 위치는 백그라운드에서 채우고 다시 묶는다.
 class LibraryNotifier extends AsyncNotifier<LibraryState> {
   List<PhotoMeta> _metas = [];
@@ -59,12 +62,35 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
       for (final v in videos)
         if (!removed.contains(v.id)) v,
     ];
-    lib.keepOnly({
+    final present = {
       for (final m in [..._metas, ..._videos]) m.id,
-    });
+    };
+    lib.keepOnly(present);
+    Future.microtask(() => _forgetMissing(present));
     Future.microtask(_fillLocations);
     Future.microtask(_reviveRestored);
     return removed.isNotEmpty;
+  }
+
+  /// 사진첩에서 사라진 사진의 기록을 폰에서 지운다 (2026-11-08 Sophie: 기록이 계속 쌓이지 않게).
+  /// 일부 사진만 허용했으면 안 보이는 사진도 사라진 것처럼 보이니 지우지 않는다.
+  /// 비어 있으면 읽기가 잘못됐을 수 있어 지우지 않는다. 지우다 실패해도 화면은 그대로 간다
+  Future<void> _forgetMissing(Set<String> present) async {
+    if (present.isEmpty) return;
+    try {
+      final lib = ref.read(photoLibraryProvider);
+      if (await lib.permissionState() != PermissionState.authorized) return;
+      if (!ref.mounted) return;
+      await ref
+          .read(storeProvider)
+          .forgetMissing(
+            present,
+            decidedBefore: DateTime.now().subtract(galleryTrashKeep),
+          );
+      await lib.forgetLocations(present);
+    } catch (e) {
+      debugPrint('forget missing failed: $e');
+    }
   }
 
   /// 갤러리 휴지통에서 되살린 사진·동영상: 사진첩에 다시 있는데 앱은 "휴지통으로 보냄"으로 기억하고 있으면

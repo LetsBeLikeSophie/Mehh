@@ -208,6 +208,52 @@ void main() {
     await flush(tester);
   });
 
+  {
+    // 사진첩에서 사라진 사진의 기록 (2026-11-08 Sophie: 폰에 계속 쌓이지 않게)
+    Future<MemoryStore> loadWith(PhotoLibrary lib) async {
+      final store = MemoryStore()
+        ..features['gone'] = const PhotoFeatures(
+          id: 'gone',
+          hashHi: 0,
+          hashLo: 0,
+          sharpness: 1,
+          brightness: 1,
+          modifiedAt: 0,
+        )
+        ..seen.add('gone')
+        ..decisions['gone'] = Decision(
+          photoId: 'gone',
+          state: DecisionState.keep,
+          at: DateTime(2020),
+        );
+      final c = ProviderContainer(
+        overrides: [
+          closedTestFreeProvider.overrideWithValue(false),
+          photoLibraryProvider.overrideWithValue(lib),
+          storeProvider.overrideWithValue(store),
+        ],
+      );
+      addTearDown(c.dispose);
+      await c.read(libraryProvider.future);
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      return store;
+    }
+
+    test('사진을 모두 허용했으면 사진첩에 없는 사진의 기록을 불러온 뒤 지운다', () async {
+      final store = await loadWith(_AuthorizedLibrary());
+      expect(store.features, isEmpty);
+      expect(store.seen, isEmpty);
+      expect(store.decisions, isEmpty);
+    });
+
+    test('일부 사진만 허용했으면 안 보이는 사진의 기록을 지우지 않는다', () async {
+      final store = await loadWith(_LimitedLibrary());
+      expect(store.features.keys, ['gone']);
+      expect(store.seen, {'gone'});
+      expect(store.decisions.keys, ['gone']);
+    });
+  }
+
   test('갤러리 휴지통에서 되살린 사진은 "휴지통으로 보냄" 기억을 지운다 (바깥·안 장수가 같게)', () async {
     final lib = DemoPhotoLibrary();
     final first = (await lib.loadAll()).first.id;
@@ -2939,9 +2985,7 @@ void main() {
     await tester.pump();
     await tester.pump();
     expect(
-      find.text(
-        'Cortex가 받은 사진이 없다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요.',
-      ),
+      find.text('Cortex가 받은 사진이 없다고 알려 왔어요 · 휴지통으로 보내지 않았어요 · X는 그대로예요.'),
       findsOneWidget,
     );
     expect(find.textContaining('0장'), findsNothing);
@@ -3832,37 +3876,40 @@ void main() {
     expect(c.read(libraryProvider).value!.locating, isNull);
   });
 
-  test('위치 진행이 여러 번 바뀌어도 기기 전체 용량은 다시 묻지 않고, 휴지통으로 보내면 한 번 더 (리뷰 11-05 S-3)', () async {
-    final device = _CountingDevice();
-    final c = ProviderContainer(
-      overrides: [
-        photoLibraryProvider.overrideWithValue(_SlowLocatingLibrary()),
-        storeProvider.overrideWithValue(MemoryStore()),
-        deviceProvider.overrideWithValue(device),
-      ],
-    );
-    addTearDown(c.dispose);
-    var progress = 0;
-    final lib = c.listen(libraryProvider, (_, next) {
-      if (next.value?.locating != null) progress++;
-    });
-    addTearDown(lib.close);
-    final bytes = c.listen(photoBytesProvider, (_, _) {});
-    addTearDown(bytes.close);
-    await c.read(libraryProvider.future);
-    for (var i = 0; i < 120; i++) {
-      await Future<void>.delayed(Duration.zero);
-    }
-    await c.read(photoBytesProvider.future);
-    expect(progress, greaterThan(50)); // 진행이 실제로 여러 번 바뀌었다
-    // 처음 1번 + 위치를 다 읽고 다시 묶을 때 1번
-    expect(device.photoBytesCalls, lessThanOrEqualTo(2));
-    final before = device.photoBytesCalls;
-    final id = c.read(libraryProvider).value!.photos.first.id;
-    c.read(libraryProvider.notifier).removePhotos({id});
-    await c.read(photoBytesProvider.future);
-    expect(device.photoBytesCalls, before + 1);
-  });
+  test(
+    '위치 진행이 여러 번 바뀌어도 기기 전체 용량은 다시 묻지 않고, 휴지통으로 보내면 한 번 더 (리뷰 11-05 S-3)',
+    () async {
+      final device = _CountingDevice();
+      final c = ProviderContainer(
+        overrides: [
+          photoLibraryProvider.overrideWithValue(_SlowLocatingLibrary()),
+          storeProvider.overrideWithValue(MemoryStore()),
+          deviceProvider.overrideWithValue(device),
+        ],
+      );
+      addTearDown(c.dispose);
+      var progress = 0;
+      final lib = c.listen(libraryProvider, (_, next) {
+        if (next.value?.locating != null) progress++;
+      });
+      addTearDown(lib.close);
+      final bytes = c.listen(photoBytesProvider, (_, _) {});
+      addTearDown(bytes.close);
+      await c.read(libraryProvider.future);
+      for (var i = 0; i < 120; i++) {
+        await Future<void>.delayed(Duration.zero);
+      }
+      await c.read(photoBytesProvider.future);
+      expect(progress, greaterThan(50)); // 진행이 실제로 여러 번 바뀌었다
+      // 처음 1번 + 위치를 다 읽고 다시 묶을 때 1번
+      expect(device.photoBytesCalls, lessThanOrEqualTo(2));
+      final before = device.photoBytesCalls;
+      final id = c.read(libraryProvider).value!.photos.first.id;
+      c.read(libraryProvider.notifier).removePhotos({id});
+      await c.read(photoBytesProvider.future);
+      expect(device.photoBytesCalls, before + 1);
+    },
+  );
 
   test('위치 읽기가 중간에 실패해도(저장 공간 가득) "장소 확인 중"이 남지 않는다 (리뷰 11-05 S-2)', () async {
     final c = ProviderContainer(
@@ -4063,7 +4110,10 @@ void main() {
     test('사진첩: 카메라 폴더라도 찍은 시각이 빈 영상(캡컷)은 받거나 저장한 동영상, 원본과 편집본은 짝 묶음에도 (2026-11-07)', () async {
       final device = _VideoDevice(
         details: {
-          'orig': (name: '20260901_090000.mp4', takenAt: DateTime(2026, 9, 1, 9)),
+          'orig': (
+            name: '20260901_090000.mp4',
+            takenAt: DateTime(2026, 9, 1, 9),
+          ),
           'capcut': (name: 'lv_0_20261107041537.mp4', takenAt: null),
           'inshot': (name: 'InShot_20261107_041908908.mp4', takenAt: null),
           'love': (name: 'lv_0_love.mp4', takenAt: null),
@@ -4108,63 +4158,69 @@ void main() {
       expect(device.askCount, 1);
     });
 
-    testWidgets('편집한 동영상과 원본: 짝마다 한 줄, 원본·편집본 표시가 늘 보이고, 처음엔 X 없음·추천·Cortex 없음, 둘 다 보내면 묻는다', (
-      tester,
-    ) async {
-      PhotoMeta named(String id, String name, {String? from, bool other = true}) =>
-          shot(id, other: other, mb: 4, video: true).withVideo(
-            fileName: name,
-            capturedAt: DateTime(2026, 9, 1, 10),
-            editedFrom: from,
-          );
-      final pairs = DayGroup(
-        id: 'editedVideos',
-        kind: DayGroupKind.editedVideos,
-        photos: [
-          named('o1', 'a.mp4', other: false),
-          named('e1', 'lv_0_1.mp4', from: 'o1'),
-          named('o2', 'Screen_b.mp4'),
-          named('e2', 'Screen_b_1.mp4'),
-        ],
-      );
-      final store = MemoryStore();
-      await pump(
-        tester,
-        SortScreen(kind: SortKind.editedVideos, group: pairs),
-        store: store,
-        extra: [
-          cortexInstalledProvider.overrideWith((ref) async => true),
-          libraryProvider.overrideWith(
-            () =>
-                _FixedLibrary(LibraryState(photos: const [], groups: [pairs])),
-          ),
-        ],
-      );
-      expect(
-        find.textContaining('편집한 동영상과 원본', findRichText: true),
-        findsWidgets,
-      );
-      expect(find.text('원본'), findsNWidgets(2));
-      expect(find.text('편집본'), findsNWidgets(2));
-      expect(find.text('고른 동영상이 없어요'), findsOneWidget);
-      expect(find.textContaining('추천 보기'), findsNothing);
-      // 짝마다 새 줄: 두 번째 짝의 원본은 첫 짝 아래 줄 맨 앞
-      final grids = find.byType(SliverGrid);
-      expect(grids, findsNWidgets(2));
-      await tester.tap(find.byType(XToggle).at(0));
-      await tester.tap(find.byType(XToggle).at(1));
-      await tester.pumpAndSettle();
-      expect(find.text('2개 휴지통으로'), findsOneWidget);
-      expect(find.text('Cortex로'), findsNothing);
-      await tester.tap(find.text('2개 휴지통으로'));
-      await tester.pumpAndSettle();
-      expect(find.text('1쌍은 원본도 편집본도 안 남아요'), findsOneWidget);
-      await tester.tap(find.text('다시 볼게요'));
-      await tester.pumpAndSettle();
-      // 추천이 아니라 직접 고른 것: 추천 정확도 기록에 들어가지 않는다
-      expect(await store.loadPicks(), isEmpty);
-      await flush(tester);
-    });
+    testWidgets(
+      '편집한 동영상과 원본: 짝마다 한 줄, 원본·편집본 표시가 늘 보이고, 처음엔 X 없음·추천·Cortex 없음, 둘 다 보내면 묻는다',
+      (tester) async {
+        PhotoMeta named(
+          String id,
+          String name, {
+          String? from,
+          bool other = true,
+        }) => shot(id, other: other, mb: 4, video: true).withVideo(
+          fileName: name,
+          capturedAt: DateTime(2026, 9, 1, 10),
+          editedFrom: from,
+        );
+        final pairs = DayGroup(
+          id: 'editedVideos',
+          kind: DayGroupKind.editedVideos,
+          photos: [
+            named('o1', 'a.mp4', other: false),
+            named('e1', 'lv_0_1.mp4', from: 'o1'),
+            named('o2', 'Screen_b.mp4'),
+            named('e2', 'Screen_b_1.mp4'),
+          ],
+        );
+        final store = MemoryStore();
+        await pump(
+          tester,
+          SortScreen(kind: SortKind.editedVideos, group: pairs),
+          store: store,
+          extra: [
+            cortexInstalledProvider.overrideWith((ref) async => true),
+            libraryProvider.overrideWith(
+              () => _FixedLibrary(
+                LibraryState(photos: const [], groups: [pairs]),
+              ),
+            ),
+          ],
+        );
+        expect(
+          find.textContaining('편집한 동영상과 원본', findRichText: true),
+          findsWidgets,
+        );
+        expect(find.text('원본'), findsNWidgets(2));
+        expect(find.text('편집본'), findsNWidgets(2));
+        expect(find.text('고른 동영상이 없어요'), findsOneWidget);
+        expect(find.textContaining('추천 보기'), findsNothing);
+        // 짝마다 새 줄: 두 번째 짝의 원본은 첫 짝 아래 줄 맨 앞
+        final grids = find.byType(SliverGrid);
+        expect(grids, findsNWidgets(2));
+        await tester.tap(find.byType(XToggle).at(0));
+        await tester.tap(find.byType(XToggle).at(1));
+        await tester.pumpAndSettle();
+        expect(find.text('2개 휴지통으로'), findsOneWidget);
+        expect(find.text('Cortex로'), findsNothing);
+        await tester.tap(find.text('2개 휴지통으로'));
+        await tester.pumpAndSettle();
+        expect(find.text('1쌍은 원본도 편집본도 안 남아요'), findsOneWidget);
+        await tester.tap(find.text('다시 볼게요'));
+        await tester.pumpAndSettle();
+        // 추천이 아니라 직접 고른 것: 추천 정확도 기록에 들어가지 않는다
+        expect(await store.loadPicks(), isEmpty);
+        await flush(tester);
+      },
+    );
 
     testWidgets('저장한 사진: 추천 없이 직접 고르고, Cortex로 보낼 수 있고, 코인·기록이 안 쓰인다', (
       tester,
@@ -4200,7 +4256,10 @@ void main() {
         vault: vault,
         extra: [cortexInstalledProvider.overrideWith((ref) async => true)],
       );
-      expect(find.textContaining('받거나 저장한 사진', findRichText: true), findsWidgets);
+      expect(
+        find.textContaining('받거나 저장한 사진', findRichText: true),
+        findsWidgets,
+      );
       expect(find.textContaining('추천 보기'), findsNothing);
       final c = ProviderScope.containerOf(
         tester.element(find.byType(SortScreen)),
@@ -4275,64 +4334,67 @@ void main() {
       await flush(tester);
     });
 
-    testWidgets('홈: 따로 보기를 사진·동영상 아이콘 소제목으로 나눈다 — 받거나 저장한 사진 / 직접 찍은 동영상·받거나 저장한 동영상 (2026-11-06)', (tester) async {
-      final groups = [
-        DayGroup(id: 'saved', kind: DayGroupKind.saved, photos: [shot('a')]),
-        DayGroup(
-          id: 'videos',
-          kind: DayGroupKind.videos,
-          photos: [shot('v', other: false, mb: 3, video: true)],
-        ),
-        DayGroup(
-          id: 'savedVideos',
-          kind: DayGroupKind.savedVideos,
-          photos: [shot('w', mb: 2, video: true)],
-        ),
-        DayGroup(
-          id: 'editedVideos',
-          kind: DayGroupKind.editedVideos,
-          photos: [
-            shot('v', other: false, mb: 3, video: true),
-            shot('w', mb: 2, video: true),
-          ],
-        ),
-      ];
-      final lib = DemoPhotoLibrary();
-      await lib.requestPermission();
-      await pump(
-        tester,
-        const Scaffold(body: HomeTab()),
-        library: lib,
-        extra: [
-          libraryProvider.overrideWith(
-            () => _FixedLibrary(
-              LibraryState(photos: [shot('a')], groups: groups),
-            ),
+    testWidgets(
+      '홈: 따로 보기를 사진·동영상 아이콘 소제목으로 나눈다 — 받거나 저장한 사진 / 직접 찍은 동영상·받거나 저장한 동영상 (2026-11-06)',
+      (tester) async {
+        final groups = [
+          DayGroup(id: 'saved', kind: DayGroupKind.saved, photos: [shot('a')]),
+          DayGroup(
+            id: 'videos',
+            kind: DayGroupKind.videos,
+            photos: [shot('v', other: false, mb: 3, video: true)],
           ),
-        ],
-      );
-      expect(find.text('받거나 저장한 사진'), findsOneWidget);
-      expect(find.text('직접 찍은 동영상'), findsOneWidget);
-      expect(find.text('받거나 저장한 동영상'), findsOneWidget);
-      expect(find.text('1개 · 3MB'), findsOneWidget);
-      // 사진 아이콘 → 사진 줄 → 동영상 아이콘 → 동영상 줄. 소제목은 글자 없이 아이콘만
-      double y(String t) => tester.getTopLeft(find.text(t)).dy;
-      double icon(IconData i) => tester.getTopLeft(find.byIcon(i)).dy;
-      expect(find.text('사진'), findsNothing);
-      expect(find.text('동영상'), findsNothing);
-      expect(find.bySemanticsLabel('사진'), findsOneWidget);
-      expect(find.bySemanticsLabel('동영상'), findsOneWidget);
-      expect(icon(Icons.photo_library_outlined), lessThan(y('받거나 저장한 사진')));
-      expect(y('받거나 저장한 사진'), lessThan(icon(Icons.videocam_outlined)));
-      expect(icon(Icons.videocam_outlined), lessThan(y('직접 찍은 동영상')));
-      expect(y('직접 찍은 동영상'), lessThan(y('받거나 저장한 동영상')));
-      // 편집한 동영상과 원본은 동영상 아래 맨 끝 (2026-11-07)
-      expect(y('받거나 저장한 동영상'), lessThan(y('편집한 동영상과 원본')));
-      await tester.tap(find.text('받거나 저장한 사진'));
-      await tester.pumpAndSettle();
-      expect(find.byType(SortScreen), findsOneWidget);
-      await flush(tester);
-    });
+          DayGroup(
+            id: 'savedVideos',
+            kind: DayGroupKind.savedVideos,
+            photos: [shot('w', mb: 2, video: true)],
+          ),
+          DayGroup(
+            id: 'editedVideos',
+            kind: DayGroupKind.editedVideos,
+            photos: [
+              shot('v', other: false, mb: 3, video: true),
+              shot('w', mb: 2, video: true),
+            ],
+          ),
+        ];
+        final lib = DemoPhotoLibrary();
+        await lib.requestPermission();
+        await pump(
+          tester,
+          const Scaffold(body: HomeTab()),
+          library: lib,
+          extra: [
+            libraryProvider.overrideWith(
+              () => _FixedLibrary(
+                LibraryState(photos: [shot('a')], groups: groups),
+              ),
+            ),
+          ],
+        );
+        expect(find.text('받거나 저장한 사진'), findsOneWidget);
+        expect(find.text('직접 찍은 동영상'), findsOneWidget);
+        expect(find.text('받거나 저장한 동영상'), findsOneWidget);
+        expect(find.text('1개 · 3MB'), findsOneWidget);
+        // 사진 아이콘 → 사진 줄 → 동영상 아이콘 → 동영상 줄. 소제목은 글자 없이 아이콘만
+        double y(String t) => tester.getTopLeft(find.text(t)).dy;
+        double icon(IconData i) => tester.getTopLeft(find.byIcon(i)).dy;
+        expect(find.text('사진'), findsNothing);
+        expect(find.text('동영상'), findsNothing);
+        expect(find.bySemanticsLabel('사진'), findsOneWidget);
+        expect(find.bySemanticsLabel('동영상'), findsOneWidget);
+        expect(icon(Icons.photo_library_outlined), lessThan(y('받거나 저장한 사진')));
+        expect(y('받거나 저장한 사진'), lessThan(icon(Icons.videocam_outlined)));
+        expect(icon(Icons.videocam_outlined), lessThan(y('직접 찍은 동영상')));
+        expect(y('직접 찍은 동영상'), lessThan(y('받거나 저장한 동영상')));
+        // 편집한 동영상과 원본은 동영상 아래 맨 끝 (2026-11-07)
+        expect(y('받거나 저장한 동영상'), lessThan(y('편집한 동영상과 원본')));
+        await tester.tap(find.text('받거나 저장한 사진'));
+        await tester.pumpAndSettle();
+        expect(find.byType(SortScreen), findsOneWidget);
+        await flush(tester);
+      },
+    );
   }
 
   // 한 번에 보내는 장수 (2026-10-31 S-3)
@@ -5057,6 +5119,16 @@ class _FixedLibrary extends LibraryNotifier {
       ),
     );
   }
+}
+
+class _AuthorizedLibrary extends DemoPhotoLibrary {
+  @override
+  Future<PermissionState> permissionState() async => PermissionState.authorized;
+}
+
+class _LimitedLibrary extends DemoPhotoLibrary {
+  @override
+  Future<PermissionState> permissionState() async => PermissionState.limited;
 }
 
 class _EmptyLimitedLibrary extends DemoPhotoLibrary {

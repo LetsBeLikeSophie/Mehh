@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mehh/data/sqlite_store.dart';
 import 'package:mehh/models/decision.dart';
+import 'package:mehh/models/features.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
@@ -104,10 +105,12 @@ void main() {
       version: 9,
       singleInstance: false,
       onCreate: (db, _) async {
-        await db.execute('''
+        await db.execute(
+          '''
           CREATE TABLE features (
             id TEXT PRIMARY KEY, hi INTEGER, lo INTEGER,
-            sharp REAL, bright REAL, contrast REAL, text REAL, mod INTEGER, v INTEGER)''');
+            sharp REAL, bright REAL, contrast REAL, text REAL, mod INTEGER, v INTEGER)''',
+        );
         await db.execute(
           'CREATE TABLE decisions (id TEXT PRIMARY KEY, state TEXT, at INTEGER, hold_at INTEGER)',
         );
@@ -133,9 +136,7 @@ void main() {
         await db.execute(
           'CREATE TABLE faces (id TEXT PRIMARY KEY, closed INTEGER)',
         );
-        await db.execute(
-          'CREATE TABLE names (id TEXT PRIMARY KEY, name TEXT)',
-        );
+        await db.execute('CREATE TABLE names (id TEXT PRIMARY KEY, name TEXT)');
       },
     );
     await db.insert('decisions', {
@@ -149,24 +150,80 @@ void main() {
     await db.close();
   }
 
-  test('비공개 테스트 첫 빌드(v9)에서 올라와도 결정·이름·Cortex 기록·카운터가 남는다 (리뷰 11-06 S-1)', () async {
-    await makeV9();
-    expect(await tables(), containsAll(['decision_log', 'views']));
+  test(
+    '비공개 테스트 첫 빌드(v9)에서 올라와도 결정·이름·Cortex 기록·카운터가 남는다 (리뷰 11-06 S-1)',
+    () async {
+      await makeV9();
+      expect(await tables(), containsAll(['decision_log', 'views']));
 
-    final store = SqliteStore();
-    expect((await store.loadDecisions())['a']?.state, DecisionState.keep);
-    expect(await store.loadCortexSent(), {'c': true});
-    expect(await store.counter('closedTest'), 1);
-    // 옛 이름은 같은 묶음 id로, 사진 목록 없이 읽힌다
-    final names = await store.loadNames();
-    expect(names['day-1']?.name, '롯데월드');
-    expect(names['day-1']?.photoIds, isEmpty);
-    expect(await tables(), isNot(contains('views')));
-    expect(await tables(), isNot(contains('decision_log')));
+      final store = SqliteStore();
+      expect((await store.loadDecisions())['a']?.state, DecisionState.keep);
+      expect(await store.loadCortexSent(), {'c': true});
+      expect(await store.counter('closedTest'), 1);
+      // 옛 이름은 같은 묶음 id로, 사진 목록 없이 읽힌다
+      final names = await store.loadNames();
+      expect(names['day-1']?.name, '롯데월드');
+      expect(names['day-1']?.photoIds, isEmpty);
+      expect(await tables(), isNot(contains('views')));
+      expect(await tables(), isNot(contains('decision_log')));
 
-    // 올라온 뒤 사진 목록을 포함한 새 이름을 저장한다
-    await store.saveName('day-2', '바다', photoIds: ['p1', 'p2']);
-    expect((await store.loadNames())['day-2']?.photoIds, {'p1', 'p2'});
-    await store.clearAll();
-  });
+      // 올라온 뒤 사진 목록을 포함한 새 이름을 저장한다
+      await store.saveName('day-2', '바다', photoIds: ['p1', 'p2']);
+      expect((await store.loadNames())['day-2']?.photoIds, {'p1', 'p2'});
+      await store.clearAll();
+    },
+  );
+
+  test(
+    '사진첩에 없는 사진의 기록을 지운다: 결정은 31일 지난 것만, 이름은 사진이 하나도 없을 때 (2026-11-08 Sophie)',
+    () async {
+      final store = SqliteStore();
+      PhotoFeatures f(String id) => PhotoFeatures(
+        id: id,
+        hashHi: 0,
+        hashLo: 0,
+        sharpness: 1,
+        brightness: 1,
+        modifiedAt: 0,
+      );
+      final old = DateTime.now().subtract(const Duration(days: 40));
+      final recent = DateTime.now().subtract(const Duration(days: 3));
+      // 변수 한도(999)를 넘는 장수도 지워지는지: 사라진 사진 1200장
+      await store.saveFeatures([
+        f('a'),
+        for (var i = 0; i < 1200; i++) f('gone$i'),
+      ]);
+      await store.saveFaces({'a': false, 'g': true});
+      await store.addSeen(['a', 'g']);
+      await store.addCortexSent(['a', 'g']);
+      await store.saveDecisions([
+        Decision(photoId: 'a', state: DecisionState.keep, at: old),
+        Decision(photoId: 'oldGone', state: DecisionState.trashed, at: old),
+        Decision(photoId: 'newGone', state: DecisionState.trashed, at: recent),
+      ]);
+      await store.saveName('day-a', '바다', photoIds: ['a', 'g']);
+      await store.saveName('day-g', '산', photoIds: ['g']);
+      await store.saveName('day-old', '옛 이름');
+
+      await store.forgetMissing({
+        'a',
+      }, decidedBefore: DateTime.now().subtract(const Duration(days: 31)));
+
+      expect((await store.loadFeatures()).keys, ['a']);
+      expect(await store.loadFaces(), {'a': false});
+      expect(await store.loadSeen(), {'a'});
+      expect((await store.loadCortexSent()).keys, ['a']);
+      // 갤러리 휴지통에서 되살릴 수 있는 최근 결정은 남긴다
+      expect(
+        (await store.loadDecisions()).keys,
+        unorderedEquals(['a', 'newGone']),
+      );
+      // 사진 목록이 없는 옛 이름은 무엇이 남았는지 몰라 남긴다
+      expect(
+        (await store.loadNames()).keys,
+        unorderedEquals(['day-a', 'day-old']),
+      );
+      await store.clearAll();
+    },
+  );
 }

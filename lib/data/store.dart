@@ -49,6 +49,14 @@ abstract class Store {
 
   /// 이 폰에 남긴 모든 기록을 지운다 (분석 결과, 결정, 열람, 비운 용량).
   Future<void> clearAll();
+
+  /// 사진첩에 없는 사진의 기록을 지운다: 분석 결과·눈 감은 컷·"다 봤어요"·Cortex 표시는 바로,
+  /// 킵·정리 결정은 [decidedBefore]보다 오래된 것만 (갤러리 휴지통에서 30일 안에 되살릴 수 있어서).
+  /// 바꾼 묶음 이름은 그 안의 사진이 하나도 없을 때. 기록이 폰에 계속 쌓이지 않게 (2026-11-08 Sophie)
+  Future<void> forgetMissing(
+    Set<String> present, {
+    required DateTime decidedBefore,
+  });
 }
 
 String monthKey(DateTime d) =>
@@ -169,6 +177,22 @@ class MemoryStore implements Store {
 
   @override
   Future<int> freedBytes(String month) async => freed[month] ?? 0;
+
+  @override
+  Future<void> forgetMissing(
+    Set<String> present, {
+    required DateTime decidedBefore,
+  }) async {
+    bool gone(String id) => !present.contains(id);
+    features.removeWhere((id, _) => gone(id));
+    faces.removeWhere((id, _) => gone(id));
+    seen.removeWhere(gone);
+    cortexSent.removeWhere((id, _) => gone(id));
+    decisions.removeWhere((id, d) => gone(id) && d.at.isBefore(decidedBefore));
+    names.removeWhere(
+      (_, n) => n.photoIds.isNotEmpty && n.photoIds.every(gone),
+    );
+  }
 
   @override
   Future<void> clearAll() async {

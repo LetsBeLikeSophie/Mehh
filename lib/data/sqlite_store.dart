@@ -308,6 +308,55 @@ class SqliteStore implements Store {
   }
 
   @override
+  Future<void> forgetMissing(
+    Set<String> present, {
+    required DateTime decidedBefore,
+  }) async {
+    final db = await _database;
+    // 사진 id 목록을 SQL 하나에 다 넣으면 변수 개수 한도를 넘는다: 표의 id를 읽어 여기서 고른다
+    Future<void> drop(
+      String table, {
+      String? where,
+      List<Object?>? args,
+    }) async {
+      final rows = await db.query(
+        table,
+        columns: ['id'],
+        where: where,
+        whereArgs: args,
+      );
+      final ids = [
+        for (final r in rows)
+          if (!present.contains(r['id'])) r['id'],
+      ];
+      for (var i = 0; i < ids.length; i += 500) {
+        final part = ids.skip(i).take(500).toList();
+        await db.delete(
+          table,
+          where: 'id IN (${List.filled(part.length, '?').join(',')})',
+          whereArgs: part,
+        );
+      }
+    }
+
+    for (final t in ['features', 'faces', 'seen', 'cortex_sent']) {
+      await drop(t);
+    }
+    await drop(
+      'decisions',
+      where: 'at < ?',
+      args: [decidedBefore.millisecondsSinceEpoch],
+    );
+    final names = await loadNames();
+    for (final e in names.entries) {
+      final ids = e.value.photoIds;
+      if (ids.isNotEmpty && !ids.any(present.contains)) {
+        await db.delete('names', where: 'id = ?', whereArgs: [e.key]);
+      }
+    }
+  }
+
+  @override
   Future<void> clearAll() async {
     final db = await _database;
     await db.transaction((tx) async {
