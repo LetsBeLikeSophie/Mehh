@@ -94,14 +94,12 @@ String _stem(String name) {
   return (dot > 0 ? name.substring(0, dot) : name).toLowerCase();
 }
 
-/// 동영상 묶음 안의 세 칸 (2026-11-08 Sophie: 찍은·받은·편집 세 줄을 하나로 합치고 안에서 나눔).
-/// 영상 하나는 한 칸에만: 짝이 있으면 [pairs], 아니면 카메라로 찍은 [filmed], 나머지는 [saved].
-/// [filmed]·[saved]는 용량 큰 순
+/// 동영상 묶음 안의 나눔 (2026-11-08 Sophie). 기준은 "짝이 있냐" 하나뿐:
+/// 짝이 있으면 [pairs](어디서 왔든), 나머지는 [rest] 한 목록(용량 큰 순). 받은 영상인지는 칸에 표시만
 typedef VideoSections = ({
   List<List<PhotoMeta>> pairs,
   Set<String> edited,
-  List<PhotoMeta> filmed,
-  List<PhotoMeta> saved,
+  List<PhotoMeta> rest,
 });
 
 VideoSections videoSections(List<PhotoMeta> videos) {
@@ -110,20 +108,18 @@ VideoSections videoSections(List<PhotoMeta> videos) {
     for (final s in e.sets)
       for (final v in s) v.id,
   };
-  List<PhotoMeta> rest({required bool otherApp}) => [
-    for (final v in videos)
-      if (!inPairs.contains(v.id) && v.fromOtherApp == otherApp) v,
-  ]..sort((a, b) => b.sizeBytes.compareTo(a.sizeBytes));
   return (
     pairs: e.sets,
     edited: e.edited,
-    filmed: rest(otherApp: false),
-    saved: rest(otherApp: true),
+    rest: [
+      for (final v in videos)
+        if (!inPairs.contains(v.id)) v,
+    ]..sort((a, b) => b.sizeBytes.compareTo(a.sizeBytes)),
   );
 }
 
-/// 화면에 보이는 순서 그대로 (짝 → 찍은 → 받은)
+/// 화면에 보이는 순서 그대로 (짝 → 나머지)
 List<PhotoMeta> videoOrder(List<PhotoMeta> videos) {
   final s = videoSections(videos);
-  return [for (final p in s.pairs) ...p, ...s.filmed, ...s.saved];
+  return [for (final p in s.pairs) ...p, ...s.rest];
 }

@@ -909,13 +909,13 @@ class L10nKo extends L10n {
   String get savedPhotos => '받거나 저장한 사진';
 
   @override
-  String get savedVideos => '받거나 저장한 동영상';
-
-  @override
   String get tagSourceVideo => '원본';
 
   @override
   String get tagEditedVideo => '편집본';
+
+  @override
+  String get tagReceivedVideo => '받음';
 
   @override
   String videosMeta(int count, String size) {

@@ -4206,44 +4206,41 @@ void main() {
       durationSec: video ? 30 : 0,
     );
 
-    test(
-      '사진첩: 동영상은 한 묶음, 크기와 상관없이 직접 찍은 것(큰 순) → 그 밖(큰 순), ♥는 뺀다 (2026-11-08)',
-      () async {
-        final c = ProviderContainer(
-          overrides: [
-            photoLibraryProvider.overrideWithValue(
-              _VideosLibrary([
-                shot('small', other: false, mb: 1, video: true),
-                shot('big', other: false, mb: 900, video: true),
-                shot('edit', mb: 2, video: true),
-                shot('edit2', mb: 40, video: true),
-                PhotoMeta(
-                  id: 'love',
-                  takenAt: DateTime(2026, 9, 1),
-                  width: 1,
-                  height: 1,
-                  isVideo: true,
-                  isFavorite: true,
-                  fromOtherApp: true,
-                ),
-              ]),
-            ),
-            storeProvider.overrideWithValue(MemoryStore()),
-          ],
-        );
-        addTearDown(c.dispose);
-        final groups = (await c.read(libraryProvider.future)).groups;
-        List<String> ids(DayGroupKind k) => [
-          for (final g in groups)
-            if (g.kind == k)
-              for (final p in g.photos) p.id,
-        ];
-        expect(ids(DayGroupKind.videos), ['big', 'small', 'edit2', 'edit']);
-        expect(groups.where((g) => g.kind.isVideo), hasLength(1));
-      },
-    );
+    test('사진첩: 동영상은 한 묶음, 찍은 것·받은 것 섞어 용량 큰 순, ♥는 뺀다 (2026-11-08)', () async {
+      final c = ProviderContainer(
+        overrides: [
+          photoLibraryProvider.overrideWithValue(
+            _VideosLibrary([
+              shot('small', other: false, mb: 1, video: true),
+              shot('big', other: false, mb: 900, video: true),
+              shot('edit', mb: 2, video: true),
+              shot('edit2', mb: 40, video: true),
+              PhotoMeta(
+                id: 'love',
+                takenAt: DateTime(2026, 9, 1),
+                width: 1,
+                height: 1,
+                isVideo: true,
+                isFavorite: true,
+                fromOtherApp: true,
+              ),
+            ]),
+          ),
+          storeProvider.overrideWithValue(MemoryStore()),
+        ],
+      );
+      addTearDown(c.dispose);
+      final groups = (await c.read(libraryProvider.future)).groups;
+      List<String> ids(DayGroupKind k) => [
+        for (final g in groups)
+          if (g.kind == k)
+            for (final p in g.photos) p.id,
+      ];
+      expect(ids(DayGroupKind.videos), ['big', 'edit2', 'edit', 'small']);
+      expect(groups.where((g) => g.kind.isVideo), hasLength(1));
+    });
 
-    test('사진첩: 카메라 폴더라도 찍은 시각이 빈 영상(캡컷)은 받거나 저장한 동영상, 원본과 편집본 짝은 맨 앞에 한 번만 (2026-11-07·11-08)', () async {
+    test('사진첩: 카메라 폴더라도 찍은 시각이 빈 영상(캡컷)은 받은 영상, 원본과 편집본 짝은 맨 앞에 한 번만 (2026-11-07·11-08)', () async {
       final device = _VideoDevice(
         details: {
           'orig': (
@@ -4284,7 +4281,7 @@ void main() {
           if (g.kind == k)
             for (final p in g.photos) p.id,
       ];
-      // 짝(원본 먼저) → 찍은 → 받은. ♥ 즐겨찾기는 짝에도 넣지 않는다
+      // 짝(원본 먼저) → 나머지. ♥ 즐겨찾기는 짝에도 넣지 않는다
       expect(ids(DayGroupKind.videos), ['orig', 'capcut', 'inshot']);
       // 파일은 캡컷 이름(lv_)이고 찍은 시각이 빈 영상만, 한 번만 연다 (리뷰 11-07 S-2)
       expect(device.asked, {'capcut', 'love'});
@@ -4353,7 +4350,7 @@ void main() {
     );
 
     testWidgets(
-      '동영상 하나 안에서 짝 → 선 → 직접 찍은 → 선·"받거나 저장한 동영상" → 받은, 같은 영상이 두 번 나오지 않는다 (2026-11-08 Sophie)',
+      '동영상: 짝(받은 원본도) → 선 → 나머지 용량 큰 순, 받은 영상은 "받음" 표시만, 같은 영상이 두 번 나오지 않는다 (2026-11-08 Sophie)',
       (tester) async {
         PhotoMeta v(
           String id, {
@@ -4366,12 +4363,12 @@ void main() {
           capturedAt: from == null ? DateTime(2026, 9, 1, 10) : null,
           editedFrom: from,
         );
-        // 원본(카메라)과 캡컷 편집본(받은 쪽) 짝, 짝 없는 카메라 영상 둘, 받은 영상 하나
         final all = [
+          // 다운로드한 영상(받은 쪽)을 캡컷으로 편집: 원본이 받은 영상이어도 짝에
+          v('down', mb: 6),
+          v('cut', name: 'lv_0_1.mp4', from: 'down', mb: 3),
           v('cam-small', other: false, mb: 1),
-          v('orig', other: false, mb: 6),
           v('got', mb: 2),
-          v('cut', name: 'lv_0_1.mp4', from: 'orig', mb: 3),
           v('cam-big', other: false, mb: 9),
         ];
         final videos = DayGroup(
@@ -4396,19 +4393,22 @@ void main() {
           for (final e in find.byType(MetaData).evaluate())
             if ((e.widget as MetaData).metaData case final String id) id,
         ];
-        expect(shown, ['orig', 'cut', 'cam-big', 'cam-small', 'got']);
+        expect(shown, ['down', 'cut', 'cam-big', 'got', 'cam-small']);
         expect(shown.toSet(), hasLength(all.length)); // 한 번씩만
-        expect(find.byType(Divider), findsNWidgets(2));
-        expect(find.text('받거나 저장한 동영상'), findsOneWidget);
+        expect(find.byType(Divider), findsOneWidget);
         double y(Finder f) => tester.getTopLeft(f).dy;
         Finder tile(String id) =>
             find.byWidgetPredicate((w) => w is MetaData && w.metaData == id);
-        expect(y(find.byType(Divider).at(0)), lessThan(y(tile('cam-big'))));
-        expect(y(tile('cam-small')), lessThan(y(find.text('받거나 저장한 동영상'))));
-        expect(y(find.text('받거나 저장한 동영상')), lessThan(y(tile('got'))));
-        // 표시는 짝에만
+        expect(y(tile('cut')), lessThan(y(find.byType(Divider))));
+        expect(y(find.byType(Divider)), lessThan(y(tile('cam-big'))));
+        // 표시: 짝에는 원본·편집본, 나머지 중 받은 영상에만 "받음"
         expect(find.text('원본'), findsOneWidget);
         expect(find.text('편집본'), findsOneWidget);
+        expect(find.text('받음'), findsOneWidget);
+        expect(
+          find.descendant(of: tile('got'), matching: find.text('받음')),
+          findsOneWidget,
+        );
         await flush(tester);
       },
     );
@@ -4489,9 +4489,9 @@ void main() {
         ],
       );
       expect(find.textContaining('동영상', findRichText: true), findsWidgets);
-      // 칸이 하나뿐이면 나누는 선·이름이 없다
-      expect(find.text('받거나 저장한 동영상'), findsNothing);
+      // 짝이 없으면 나누는 선이 없고, 받은 영상에 "받음"
       expect(find.byType(Divider), findsNothing);
+      expect(find.text('받음'), findsOneWidget);
       expect(find.text('고른 동영상이 없어요'), findsOneWidget);
       expect(find.textContaining('추천 보기'), findsNothing);
       await tester.tap(find.byType(XToggle).at(0));

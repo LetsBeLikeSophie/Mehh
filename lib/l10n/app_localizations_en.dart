@@ -1090,13 +1090,13 @@ class L10nEn extends L10n {
   String get savedPhotos => 'Received or saved photos';
 
   @override
-  String get savedVideos => 'Received or saved videos';
-
-  @override
   String get tagSourceVideo => 'Original';
 
   @override
   String get tagEditedVideo => 'Edited';
+
+  @override
+  String get tagReceivedVideo => 'Received';
 
   @override
   String videosMeta(int count, String size) {

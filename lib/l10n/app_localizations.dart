@@ -1471,12 +1471,6 @@ abstract class L10n {
   /// **'받거나 저장한 사진'**
   String get savedPhotos;
 
-  /// No description provided for @savedVideos.
-  ///
-  /// In ko, this message translates to:
-  /// **'받거나 저장한 동영상'**
-  String get savedVideos;
-
   /// No description provided for @tagSourceVideo.
   ///
   /// In ko, this message translates to:
@@ -1488,6 +1482,12 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'편집본'**
   String get tagEditedVideo;
+
+  /// No description provided for @tagReceivedVideo.
+  ///
+  /// In ko, this message translates to:
+  /// **'받음'**
+  String get tagReceivedVideo;
 
   /// No description provided for @videosMeta.
   ///

@@ -636,9 +636,9 @@
   "coinWord": "코인",
   "videosAll": "동영상",
   "savedPhotos": "받거나 저장한 사진",
-  "savedVideos": "받거나 저장한 동영상",
   "tagSourceVideo": "원본",
   "tagEditedVideo": "편집본",
+  "tagReceivedVideo": "받음",
   "videosMeta": "{count}개 · {size}",
   "@videosMeta": {
     "placeholders": {

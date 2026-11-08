@@ -26,16 +26,13 @@ enum SortKind {
   bool get bySets => this == duplicates;
 }
 
-/// 그리드를 나누는 칸 하나 (동영상: 짝마다 · 찍은 · 받은). 위에 얇은 선이나 작은 이름을 둘 수 있다
+/// 그리드를 나누는 칸 하나 (동영상: 짝마다 · 나머지). 앞 칸과 얇은 선으로 나눌 수 있다
 class SortSection {
-  const SortSection(this.ids, {this.line = false, this.savedLabel = false});
+  const SortSection(this.ids, {this.line = false});
   final List<String> ids;
 
   /// 앞 칸과 얇은 선으로 나눈다
   final bool line;
-
-  /// 선 위 작은 이름 "받거나 저장한 동영상"
-  final bool savedLabel;
 }
 
 /// 사진 위 짧은 표시의 종류 (문구는 [tagText]·[noteText]에서 언어별로)
@@ -51,6 +48,7 @@ enum PhotoTag {
   repeatShot,
   sourceVideo,
   editedVideo,
+  receivedVideo,
 }
 
 /// 정리 화면(그리드)과 크게 보기가 함께 쓰는 사진 목록과 앱 추천
@@ -123,6 +121,7 @@ String tagText(PhotoTag t, L10n l) => switch (t) {
   PhotoTag.repeatShot => l.tagRepeatShot,
   PhotoTag.sourceVideo => l.tagSourceVideo,
   PhotoTag.editedVideo => l.tagEditedVideo,
+  PhotoTag.receivedVideo => l.tagReceivedVideo,
 };
 
 /// 크게 볼 때 한 줄
@@ -150,6 +149,7 @@ String noteText(PhotoTag t, List<BestReason> reasons, L10n l) => switch (t) {
   PhotoTag.repeatShot => l.noteRepeatShot,
   PhotoTag.sourceVideo => l.tagSourceVideo,
   PhotoTag.editedVideo => l.tagEditedVideo,
+  PhotoTag.receivedVideo => l.tagReceivedVideo,
 };
 
 /// 사진에 붙이는 이유 표시: X 사진에는 "왜 X인지", 남길 사진·베스트는 [추천 보기]를 받은 뒤에만
@@ -232,8 +232,8 @@ SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
         ],
       );
     case SortKind.videos:
-      // 동영상 하나 (2026-11-08 Sophie): 편집한 것과 원본 짝마다 한 줄 → 선 → 직접 찍은 → 받거나 저장한.
-      // 영상 하나는 한 칸에만. 앱이 골라 주지 않는다 (2026-10-24 Sophie)
+      // 동영상 하나 (2026-11-08 Sophie): 편집한 것과 원본 짝마다 한 줄 → 선 → 나머지(용량 큰 순).
+      // 나누는 기준은 짝 하나뿐(어디서 왔든), 받은 영상은 "받음" 표시만. 앱이 골라 주지 않는다
       final s = videoSections(g!.photos);
       List<String> ids(List<PhotoMeta> l) => [for (final v in l) v.id];
       return SortSource(
@@ -246,18 +246,14 @@ SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
               v.id: s.edited.contains(v.id)
                   ? PhotoTag.editedVideo
                   : PhotoTag.sourceVideo,
+          for (final v in s.rest)
+            if (v.fromOtherApp) v.id: PhotoTag.receivedVideo,
         },
         alwaysTags: true,
         sections: [
           for (final p in s.pairs) SortSection(ids(p)),
-          if (s.filmed.isNotEmpty)
-            SortSection(ids(s.filmed), line: s.pairs.isNotEmpty),
-          if (s.saved.isNotEmpty)
-            SortSection(
-              ids(s.saved),
-              line: s.pairs.isNotEmpty || s.filmed.isNotEmpty,
-              savedLabel: s.pairs.isNotEmpty || s.filmed.isNotEmpty,
-            ),
+          if (s.rest.isNotEmpty)
+            SortSection(ids(s.rest), line: s.pairs.isNotEmpty),
         ],
       );
     case SortKind.saved:
