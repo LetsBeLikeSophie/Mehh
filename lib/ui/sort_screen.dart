@@ -346,15 +346,27 @@ class _SortScreenState extends ConsumerState<SortScreen>
         ? src.locked + src.suggested.length
         : src.suggested.length;
     final orderSet = order.toSet();
-    final sections = widget.kind.bySets
+    List<String> shown(List<String> ids) => [
+      for (final id in ids)
+        if (orderSet.contains(id)) id,
+    ];
+    final sections = src.sections.isNotEmpty
+        ? [
+            for (final s in src.sections)
+              if (shown(s.ids) case final ids when ids.isNotEmpty)
+                SortSection(ids, line: s.line, savedLabel: s.savedLabel),
+          ]
+        : widget.kind.bySets
         ? [
             for (final u in src.units)
-              [
-                for (final id in u)
-                  if (orderSet.contains(id)) id,
-              ],
-          ].where((u) => u.isNotEmpty).toList()
-        : [order];
+              if (shown(u) case final ids when ids.isNotEmpty) SortSection(ids),
+          ]
+        : [SortSection(order)];
+    // 앞 칸이 다 보내져 사라졌으면 맨 위 칸 위에는 선을 두지 않는다
+    if (sections.isNotEmpty && sections.first.line) {
+      final f = sections.first;
+      sections[0] = SortSection(f.ids, savedLabel: f.savedLabel);
+    }
 
     final cortexSent =
         ref.watch(cortexSentProvider).value ?? const <String, bool>{};
@@ -610,7 +622,36 @@ class _SortScreenState extends ConsumerState<SortScreen>
                         ),
                       ),
                       // 똑같은 사진은 묶음마다 새 줄에서 시작해 어떤 사진끼리 같은지 보이게
-                      for (final (i, section) in sections.indexed)
+                      for (final (i, section) in sections.indexed) ...[
+                        // 동영상: 짝 · 직접 찍은 · 받거나 저장한 사이 얇은 선 (2026-11-08 Sophie)
+                        if (section.line || section.savedLabel)
+                          SliverPadding(
+                            padding: const EdgeInsets.fromLTRB(20, 2, 20, 10),
+                            sliver: SliverToBoxAdapter(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (section.line)
+                                    const Divider(
+                                      height: 1,
+                                      thickness: 1,
+                                      color: MehhColors.border,
+                                    ),
+                                  if (section.savedLabel)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 8),
+                                      child: Text(
+                                        l.savedVideos,
+                                        style: const TextStyle(
+                                          fontSize: MehhText.label,
+                                          color: MehhColors.textMuted,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
                         SliverPadding(
                           padding: EdgeInsets.fromLTRB(
                             20,
@@ -625,10 +666,11 @@ class _SortScreenState extends ConsumerState<SortScreen>
                                   mainAxisSpacing: 4,
                                   crossAxisSpacing: 4,
                                 ),
-                            itemCount: section.length,
-                            itemBuilder: (_, j) => tile(section[j]),
+                            itemCount: section.ids.length,
+                            itemBuilder: (_, j) => tile(section.ids[j]),
                           ),
                         ),
+                      ],
                     ],
                   ),
                 ),

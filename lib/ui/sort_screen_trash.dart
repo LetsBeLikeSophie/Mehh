@@ -198,12 +198,10 @@ extension _Trash on _SortScreenState {
     return askMehh(
       context,
       // 편집한 동영상과 원본: 짝을 통째로 보내면 (2026-11-07 Sophie)
-      title: widget.kind == SortKind.editedVideos
+      title: widget.kind == SortKind.videos
           ? l.editLossTitle(emptied.length)
           : l.sceneLossTitle(emptied.length),
-      body: widget.kind == SortKind.editedVideos
-          ? l.editLossBody
-          : l.sceneLossBody,
+      body: widget.kind == SortKind.videos ? l.editLossBody : l.sceneLossBody,
       no: l.lookAgain,
       yes: l.toTrash,
     );

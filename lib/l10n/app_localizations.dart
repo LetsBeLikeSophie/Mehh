@@ -1459,11 +1459,11 @@ abstract class L10n {
   /// **'코인'**
   String get coinWord;
 
-  /// No description provided for @filmedVideos.
+  /// No description provided for @videosAll.
   ///
   /// In ko, this message translates to:
-  /// **'직접 찍은 동영상'**
-  String get filmedVideos;
+  /// **'동영상'**
+  String get videosAll;
 
   /// No description provided for @savedPhotos.
   ///
@@ -1476,12 +1476,6 @@ abstract class L10n {
   /// In ko, this message translates to:
   /// **'받거나 저장한 동영상'**
   String get savedVideos;
-
-  /// No description provided for @editedVideos.
-  ///
-  /// In ko, this message translates to:
-  /// **'편집한 동영상과 원본'**
-  String get editedVideos;
 
   /// No description provided for @tagSourceVideo.
   ///

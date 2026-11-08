@@ -34,11 +34,9 @@ String groupTitle(
   bool withYear = true,
 }) {
   if (g.kind == DayGroupKind.screenshots) return l.screenshots;
-  if (g.kind == DayGroupKind.videos) return l.filmedVideos;
+  if (g.kind == DayGroupKind.videos) return l.videosAll;
   if (g.kind == DayGroupKind.singles) return l.singles;
   if (g.kind == DayGroupKind.saved) return l.savedPhotos;
-  if (g.kind == DayGroupKind.savedVideos) return l.savedVideos;
-  if (g.kind == DayGroupKind.editedVideos) return l.editedVideos;
   final date = formatDate(g.start, l.localeName, now: now, withYear: withYear);
   return place == null || place.isEmpty ? date : '$date · $place';
 }

@@ -1084,16 +1084,13 @@ class L10nEn extends L10n {
   String get coinWord => 'coin';
 
   @override
-  String get filmedVideos => 'Videos you shot';
+  String get videosAll => 'Videos';
 
   @override
   String get savedPhotos => 'Received or saved photos';
 
   @override
   String get savedVideos => 'Received or saved videos';
-
-  @override
-  String get editedVideos => 'Edited videos and originals';
 
   @override
   String get tagSourceVideo => 'Original';

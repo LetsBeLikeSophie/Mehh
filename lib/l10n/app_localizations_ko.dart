@@ -903,16 +903,13 @@ class L10nKo extends L10n {
   String get coinWord => '코인';
 
   @override
-  String get filmedVideos => '직접 찍은 동영상';
+  String get videosAll => '동영상';
 
   @override
   String get savedPhotos => '받거나 저장한 사진';
 
   @override
   String get savedVideos => '받거나 저장한 동영상';
-
-  @override
-  String get editedVideos => '편집한 동영상과 원본';
 
   @override
   String get tagSourceVideo => '원본';

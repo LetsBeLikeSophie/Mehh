@@ -180,38 +180,19 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
   final _sources = <String, String>{};
   final _sourceRead = <String>{};
 
-  /// 동영상 전체를 찍은 것 / 그 밖 두 갈래로, 묶음 안은 용량 큰 순. ♥ 즐겨찾기는 뺀다 (2026-11-01 Sophie)
-  List<PhotoMeta> _videosFrom({required bool otherApp}) => [
-    for (final v in _videos)
-      if (v.fromOtherApp == otherApp && !v.isFavorite) v,
-  ]..sort((a, b) => b.sizeBytes.compareTo(a.sizeBytes));
-
   LibraryState _state() {
-    final filmed = _videosFrom(otherApp: false);
-    final saved = _videosFrom(otherApp: true);
-    // 편집한 동영상과 원본: 위 두 묶음에도 그대로 있고, 짝끼리 한 번 더 모아 보인다 (2026-11-07 Sophie)
-    final edits = findEditSets([
+    // 동영상은 하나로 (2026-11-08 Sophie). 안의 순서·나눔(짝 → 찍은 → 받은)은 [videoSections].
+    // ♥ 즐겨찾기는 뺀다 (2026-11-01 Sophie)
+    final videos = videoOrder([
       for (final v in _videos)
         if (!v.isFavorite) v,
-    ]).sets;
+    ]);
     return LibraryState(
       photos: _metas,
       groups: [
         ...groupPhotos(_metas),
-        if (filmed.isNotEmpty)
-          DayGroup(id: 'videos', kind: DayGroupKind.videos, photos: filmed),
-        if (saved.isNotEmpty)
-          DayGroup(
-            id: 'savedVideos',
-            kind: DayGroupKind.savedVideos,
-            photos: saved,
-          ),
-        if (edits.isNotEmpty)
-          DayGroup(
-            id: 'editedVideos',
-            kind: DayGroupKind.editedVideos,
-            photos: [for (final s in edits) ...s],
-          ),
+        if (videos.isNotEmpty)
+          DayGroup(id: 'videos', kind: DayGroupKind.videos, photos: videos),
       ],
     );
   }

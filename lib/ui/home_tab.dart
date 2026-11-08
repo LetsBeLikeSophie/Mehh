@@ -140,8 +140,14 @@ class _HomeTabState extends ConsumerState<HomeTab> {
               if (g.kind != DayGroupKind.day) g,
           ];
           bool isVideo(DayGroup g) => g.kind.isVideo;
-          final otherPhotos = [for (final g in others) if (!isVideo(g)) g];
-          final otherVideos = [for (final g in others) if (isVideo(g)) g];
+          final otherPhotos = [
+            for (final g in others)
+              if (!isVideo(g)) g,
+          ];
+          final otherVideos = [
+            for (final g in others)
+              if (isVideo(g)) g,
+          ];
           final left = days
               .where(
                 (g) =>
@@ -710,8 +716,6 @@ class _GroupTile extends ConsumerWidget {
             DayGroupKind.screenshots => SortKind.screenshots,
             DayGroupKind.videos => SortKind.videos,
             DayGroupKind.saved => SortKind.saved,
-            DayGroupKind.savedVideos => SortKind.savedVideos,
-            DayGroupKind.editedVideos => SortKind.editedVideos,
           },
           group: group,
           place: place,

@@ -341,12 +341,6 @@ void main() {
                     photos: [
                       video(some[5], 1400, false),
                       video(some[6], 120, false),
-                    ],
-                  ),
-                  DayGroup(
-                    id: 'savedVideos',
-                    kind: DayGroupKind.savedVideos,
-                    photos: [
                       video(some[7], 310, true),
                       video(some[8], 42, true),
                     ],
