@@ -48,7 +48,12 @@ const playPublicKey = '';
 enum BillingStatus { pending, canceled, failed, unavailable }
 
 /// 산 것(또는 복원된 것)을 받는 쪽. 저장이 끝나야 스토어에 "전달 완료"를 알린다.
-typedef OnOwned = Future<void> Function(Plan plan);
+/// [orderId]·[at]: 스토어 주문번호와 산 때 (설정의 구매 정보, 문의할 때 쓰게. 프로모 코드 등은 없을 수 있다)
+typedef OnOwned = Future<void> Function(
+  Plan plan, {
+  String? orderId,
+  DateTime? at,
+});
 
 abstract class Billing {
   /// 결제 대기·취소·실패 (화면에 한 줄 안내)
@@ -98,7 +103,7 @@ class StoreBilling implements Billing {
             _status.add(BillingStatus.failed);
           case PurchaseOutcome.owned:
             _restoring?.add(plan!);
-            await onOwned(plan!);
+            await onOwned(plan!, orderId: p.purchaseID, at: purchaseTime(p));
         }
         // 확인된 구매만 "전달 완료"로 알린다: 확인 실패는 Play가 3일 뒤 자동 환불하고,
         // 대기는 승인되면 다시 온다
@@ -220,6 +225,9 @@ class DemoBilling implements Billing {
 
   /// 테스트용: 복원 때 승인 대기 중인 구매가 하나 있다 (가족 승인 등)
   bool pendingOnRestore = false;
+
+  /// 테스트용: 결제가 끝날 때 스토어가 주는 주문번호 (미리보기는 없음)
+  String? orderIdNext;
   final _status = StreamController<BillingStatus>.broadcast();
   final owned = <Plan>{};
   OnOwned? _onOwned;
@@ -253,7 +261,7 @@ class DemoBilling implements Billing {
       return;
     }
     owned.add(o.plan);
-    await _onOwned?.call(o.plan);
+    await _onOwned?.call(o.plan, orderId: orderIdNext, at: DateTime.now());
   }
 
   @override
@@ -265,6 +273,12 @@ class DemoBilling implements Billing {
 
   @override
   void dispose() => _status.close();
+}
+
+/// 스토어가 적어 준 산 때 (밀리초 글자). 못 읽으면 null
+DateTime? purchaseTime(PurchaseDetails p) {
+  final ms = int.tryParse(p.transactionDate ?? '');
+  return ms == null ? null : DateTime.fromMillisecondsSinceEpoch(ms);
 }
 
 enum PurchaseOutcome { pending, canceled, failed, owned }

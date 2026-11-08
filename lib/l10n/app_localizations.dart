@@ -757,6 +757,24 @@ abstract class L10n {
   /// **'메일 주소를 복사했어요'**
   String get contactCopied;
 
+  /// No description provided for @orderInfo.
+  ///
+  /// In ko, this message translates to:
+  /// **'주문번호 {order} · {date}'**
+  String orderInfo(String order, String date);
+
+  /// No description provided for @orderInfoNoDate.
+  ///
+  /// In ko, this message translates to:
+  /// **'주문번호 {order}'**
+  String orderInfoNoDate(String order);
+
+  /// No description provided for @orderCopied.
+  ///
+  /// In ko, this message translates to:
+  /// **'주문번호를 복사했어요'**
+  String get orderCopied;
+
   /// No description provided for @accTitle.
   ///
   /// In ko, this message translates to:

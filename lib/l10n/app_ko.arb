@@ -251,6 +251,26 @@
   "contactSubject": "Mehh 문의 ({version})",
   "contactNote": "{email} · 사진이나 기록은 저절로 보내지 않아요. 메일에 적은 것만 받아요.",
   "contactCopied": "메일 주소를 복사했어요",
+  "orderInfo": "주문번호 {order} · {date}",
+  "@orderInfo": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "orderInfoNoDate": "주문번호 {order}",
+  "@orderInfoNoDate": {
+    "placeholders": {
+      "order": {
+        "type": "String"
+      }
+    }
+  },
+  "orderCopied": "주문번호를 복사했어요",
   "@contactSubject": {
     "placeholders": {
       "version": {

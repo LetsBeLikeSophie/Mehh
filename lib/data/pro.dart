@@ -18,6 +18,8 @@ class ProState {
     this.freeMonth = '',
     this.freeUsed = 0,
     this.lastNudge = '',
+    this.orderId = '',
+    this.orderAt = 0,
   });
 
   /// 평생 이용권
@@ -40,6 +42,12 @@ class ProState {
   /// 정리 끝난 뒤 Pro 안내를 마지막으로 띄운 날 ('yyyy-MM-dd', 하루 한 번까지)
   final String lastNudge;
 
+  /// 스토어 주문번호 (Play "GPA.…"). 설정의 구매 정보에 보인다. 모르면 ''
+  final String orderId;
+
+  /// 산 때 (밀리초). 모르면 0
+  final int orderAt;
+
   bool get pro => lifetime || yearly;
 
   int freeLeft(DateTime now) => freeMonth == monthKey(now)
@@ -59,6 +67,8 @@ class ProState {
     String? freeMonth,
     int? freeUsed,
     String? lastNudge,
+    String? orderId,
+    int? orderAt,
   }) => ProState(
     lifetime: lifetime ?? this.lifetime,
     yearly: yearly ?? this.yearly,
@@ -67,6 +77,8 @@ class ProState {
     freeMonth: freeMonth ?? this.freeMonth,
     freeUsed: freeUsed ?? this.freeUsed,
     lastNudge: lastNudge ?? this.lastNudge,
+    orderId: orderId ?? this.orderId,
+    orderAt: orderAt ?? this.orderAt,
   );
 
   Map<String, Object> toJson() => {
@@ -77,6 +89,8 @@ class ProState {
     'freeMonth': freeMonth,
     'freeUsed': freeUsed,
     'lastNudge': lastNudge,
+    'orderId': orderId,
+    'orderAt': orderAt,
   };
 
   factory ProState.fromJson(Map<String, dynamic> j) => ProState(
@@ -89,6 +103,8 @@ class ProState {
     freeMonth: j['freeMonth'] as String? ?? '',
     freeUsed: j['freeUsed'] as int? ?? 0,
     lastNudge: j['lastNudge'] as String? ?? '',
+    orderId: j['orderId'] as String? ?? '',
+    orderAt: j['orderAt'] as int? ?? 0,
   );
 }
 

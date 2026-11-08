@@ -411,6 +411,19 @@ class L10nKo extends L10n {
   String get contactCopied => '메일 주소를 복사했어요';
 
   @override
+  String orderInfo(String order, String date) {
+    return '주문번호 $order · $date';
+  }
+
+  @override
+  String orderInfoNoDate(String order) {
+    return '주문번호 $order';
+  }
+
+  @override
+  String get orderCopied => '주문번호를 복사했어요';
+
+  @override
   String get accTitle => '추천 정확도';
 
   @override

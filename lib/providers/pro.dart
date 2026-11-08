@@ -84,13 +84,20 @@ class ProNotifier extends AsyncNotifier<ProState> {
     ref.read(freeRefilledProvider.notifier).raise();
   }
 
-  Future<void> _owned(Plan plan) async {
+  Future<void> _owned(Plan plan, {String? orderId, DateTime? at}) async {
     ref.read(billingPendingProvider.notifier).set(false);
     final s = await future;
+    final next = plan == Plan.lifetime
+        ? s.copyWith(lifetime: true)
+        : s.copyWith(yearly: true);
+    // 주문번호를 알려 주면 설정의 구매 정보로 남긴다 ([구매 복원]으로도 다시 채워진다)
     await _save(
-      plan == Plan.lifetime
-          ? s.copyWith(lifetime: true)
-          : s.copyWith(yearly: true),
+      orderId == null || orderId.isEmpty
+          ? next
+          : next.copyWith(
+              orderId: orderId,
+              orderAt: at?.millisecondsSinceEpoch ?? 0,
+            ),
     );
   }
 

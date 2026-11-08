@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io' show FileSystemException;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
@@ -20,6 +21,7 @@ import 'package:mehh/data/photo_library.dart';
 import 'package:mehh/data/store.dart';
 import 'package:mehh/l10n/l10n.dart';
 import 'package:mehh/logic/duplicates.dart';
+import 'package:mehh/logic/format.dart';
 import 'package:mehh/logic/pick_stats.dart';
 import 'package:mehh/logic/recommend.dart';
 import 'package:mehh/models/features.dart';
@@ -573,6 +575,69 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('구매 복원'), findsOneWidget);
     await flush(tester);
+  });
+
+  testWidgets('설정: Pro를 사면 Pro 줄 아래 주문번호·날짜, 길게 누르면 복사 (2026-11-08 Sophie)', (
+    tester,
+  ) async {
+    final billing = DemoBilling(korean: true)
+      ..orderIdNext = 'GPA.1234-5678-9012-34567';
+    final vault = MemoryProVault();
+    await pump(tester, const SettingsScreen(), billing: billing, vault: vault);
+    expect(find.textContaining('주문번호'), findsNothing); // 사기 전에는 없다
+    await tester.tap(find.text('Mehh Pro'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('₩12,900'));
+    await tester.pumpAndSettle();
+    if (find.text('구매 복원').evaluate().isNotEmpty) {
+      await tester.tapAt(const Offset(20, 20)); // 시트가 남아 있으면 닫는다
+      await tester.pumpAndSettle();
+    }
+    final today = formatDate(DateTime.now(), 'ko');
+    expect(find.text('주문번호 GPA.1234-5678-9012-34567 · $today'), findsOneWidget);
+    expect(vault.value.orderId, 'GPA.1234-5678-9012-34567'); // 다시 켜도 남는다
+
+    String? copied;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'Clipboard.setData') {
+          copied = (call.arguments as Map)['text'] as String?;
+        }
+        return null;
+      },
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
+    await tester.longPress(find.textContaining('주문번호 GPA'));
+    await tester.pump();
+    expect(copied, 'GPA.1234-5678-9012-34567');
+    expect(find.text('주문번호를 복사했어요'), findsOneWidget);
+    await flush(tester);
+  });
+
+  testWidgets('설정: 주문번호를 모르는 Pro(프로모 코드 등)는 구매 정보 줄이 없다', (tester) async {
+    await pump(
+      tester,
+      const SettingsScreen(),
+      vault: MemoryProVault(const ProState(lifetime: true)),
+    );
+    expect(find.text('Pro를 쓰고 있어요'), findsOneWidget);
+    expect(find.textContaining('주문번호'), findsNothing);
+    await flush(tester);
+  });
+
+  test('주문번호·날짜는 Pro 보관함에 저장했다 다시 읽힌다', () {
+    final s = ProState.fromJson(
+      const ProState(lifetime: true, orderId: 'GPA.1', orderAt: 1000).toJson(),
+    );
+    expect(s.orderId, 'GPA.1');
+    expect(s.orderAt, 1000);
+    expect(ProState.fromJson(const {}).orderId, ''); // 예전 저장분
   });
 
   testWidgets('설정: 비공개 테스트 동안 Pro 시트에 가격·코인 남은 수가 없다 (UX-51)', (tester) async {

@@ -473,6 +473,19 @@ class L10nEn extends L10n {
   String get contactCopied => 'Email address copied';
 
   @override
+  String orderInfo(String order, String date) {
+    return 'Order $order · $date';
+  }
+
+  @override
+  String orderInfoNoDate(String order) {
+    return 'Order $order';
+  }
+
+  @override
+  String get orderCopied => 'Order number copied';
+
+  @override
   String get accTitle => 'Pick accuracy';
 
   @override

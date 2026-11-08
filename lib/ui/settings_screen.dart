@@ -7,6 +7,7 @@ import '../config/app_config.dart';
 import '../data/pro.dart';
 
 import '../l10n/l10n.dart';
+import '../logic/format.dart';
 import '../providers.dart';
 import '../theme.dart';
 import 'accuracy_screen.dart';
@@ -74,6 +75,8 @@ class SettingsScreen extends ConsumerWidget {
                   const SizedBox(height: 20),
                   // 구매 복원은 여기서도 찾을 수 있게 (UX 리뷰 2026-10-22). 새 화면 없이 Pro 안내를 연다
                   const _ProRow(),
+                  // 산 주문번호 (2026-11-08 Sophie: 결제 문의 때 콘솔 주문 관리에서 찾게). 보기만, 길게 누르면 복사
+                  const _OrderLine(),
                   // 알림은 코인이 다시 생긴다는 이야기라 Pro 줄 바로 아래 (2026-10-30 Sophie N2-B)
                   if (ref.watch(noticesProvider).supported) ...[
                     const SizedBox(height: 8),
@@ -310,6 +313,44 @@ class _ProRow extends ConsumerWidget {
                     : CoinCount(s.freeLeft(DateTime.now()), size: 20),
               const Icon(Icons.chevron_right, color: MehhColors.icon),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Pro를 산 주문번호와 날짜 한 줄. 주문번호를 모르면(테스트 무료·프로모 코드 등) 없다
+class _OrderLine extends ConsumerWidget {
+  const _OrderLine();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(proProvider).value;
+    if (s == null || !s.pro || s.orderId.isEmpty) return const SizedBox();
+    final l = context.l;
+    final text = s.orderAt > 0
+        ? l.orderInfo(
+            s.orderId,
+            formatDate(
+              DateTime.fromMillisecondsSinceEpoch(s.orderAt),
+              l.localeName,
+            ),
+          )
+        : l.orderInfoNoDate(s.orderId);
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onLongPress: () async {
+        await Clipboard.setData(ClipboardData(text: s.orderId));
+        if (context.mounted) showNote(context, l.orderCopied);
+      },
+      child: Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 0, 0),
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontSize: MehhText.label,
+            color: MehhColors.textMuted,
           ),
         ),
       ),
