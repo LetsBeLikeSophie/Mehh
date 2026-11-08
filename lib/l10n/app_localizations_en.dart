@@ -716,7 +716,13 @@ class L10nEn extends L10n {
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return 'Free right now: see $countString screenshot picks ›';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Free right now: see $countString screenshot picks ›',
+      one: 'Free right now: see 1 screenshot pick ›',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -725,7 +731,13 @@ class L10nEn extends L10n {
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return 'Free right now: see $countString exact duplicates ›';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Free right now: see $countString exact duplicates ›',
+      one: 'Free right now: see 1 exact duplicate ›',
+    );
+    return '$_temp0';
   }
 
   @override

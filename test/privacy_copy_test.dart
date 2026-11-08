@@ -6,6 +6,16 @@ import 'package:mehh/l10n/app_localizations.dart';
 
 /// 설정의 개인정보 문구는 첫 화면처럼 "정리 기록"이라고 한다. 처리방침의 오류 "기록"과 섞이지 않게 (S-1 2026-11-03)
 void main() {
+  test('Pro 안내의 무료 할 일: 영어 1장은 단수 (리뷰 11-08 S-3)', () {
+    final en = lookupL10n(const Locale('en'));
+    expect(en.freeTodoShots(1), 'Free right now: see 1 screenshot pick ›');
+    expect(en.freeTodoDuplicates(1), 'Free right now: see 1 exact duplicate ›');
+    expect(en.freeTodoShots(3), contains('3 screenshot picks'));
+    expect(en.freeTodoDuplicates(3), contains('3 exact duplicates'));
+    final ko = lookupL10n(const Locale('ko'));
+    expect(ko.freeTodoShots(1), '지금 무료로: 캡처 추천 1장 보기 ›');
+  });
+
   test('Cortex가 빈 목록을 보내면 한국어도 "0장" 대신 "받은 사진이 없다고" (UX-113)', () {
     final ko = lookupL10n(const Locale('ko'));
     expect(ko.cortexPartial(0), contains('받은 사진이 없다고'));
