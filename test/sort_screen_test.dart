@@ -210,22 +210,28 @@ void main() {
 
   {
     // 사진첩에서 사라진 사진의 기록 (2026-11-08 Sophie: 폰에 계속 쌓이지 않게)
-    Future<MemoryStore> loadWith(PhotoLibrary lib) async {
-      final store = MemoryStore()
-        ..features['gone'] = const PhotoFeatures(
-          id: 'gone',
-          hashHi: 0,
-          hashLo: 0,
-          sharpness: 1,
-          brightness: 1,
-          modifiedAt: 0,
-        )
-        ..seen.add('gone')
-        ..decisions['gone'] = Decision(
-          photoId: 'gone',
-          state: DecisionState.keep,
-          at: DateTime(2020),
-        );
+    final old = DateTime(2020);
+    MemoryStore storeFor(String id) => MemoryStore()
+      ..features[id] = PhotoFeatures(
+        id: id,
+        hashHi: 0,
+        hashLo: 0,
+        sharpness: 1,
+        brightness: 1,
+        modifiedAt: 0,
+      )
+      ..seen.add(id)
+      ..decisions[id] = Decision(
+        photoId: id,
+        state: DecisionState.keep,
+        at: old,
+      )
+      ..names['day-$id'] = GroupName('이름', {id});
+
+    Future<ProviderContainer> loadWith(
+      PhotoLibrary lib,
+      MemoryStore store,
+    ) async {
       final c = ProviderContainer(
         overrides: [
           closedTestFreeProvider.overrideWithValue(false),
@@ -236,21 +242,83 @@ void main() {
       addTearDown(c.dispose);
       await c.read(libraryProvider.future);
       await Future<void>.delayed(const Duration(milliseconds: 10));
-      return store;
+      return c;
     }
 
-    test('사진을 모두 허용했으면 사진첩에 없는 사진의 기록을 불러온 뒤 지운다', () async {
-      final store = await loadWith(_AuthorizedLibrary());
-      expect(store.features, isEmpty);
-      expect(store.seen, isEmpty);
-      expect(store.decisions, isEmpty);
-    });
+    Future<void> syncAgain(ProviderContainer c) async {
+      await c.read(libraryProvider.notifier).syncNow();
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+    }
+
+    void expectKept(MemoryStore store, String id) {
+      expect(store.features.keys, [id]);
+      expect(store.seen, {id});
+      expect(store.decisions.keys, [id]);
+      expect(store.names.keys, ['day-$id']);
+    }
+
+    test(
+      '사진을 모두 허용했으면 두 번 연달아 읽어도 없는 사진의 기록을 지운다 (켠 뒤 첫 읽기는 지우지 않는다)',
+      () async {
+        final store = storeFor('gone');
+        final c = await loadWith(_PruneLibrary(), store);
+        expectKept(store, 'gone'); // 첫 읽기
+        await syncAgain(c);
+        expect(store.features, isEmpty);
+        expect(store.seen, isEmpty);
+        expect(store.decisions, isEmpty);
+        expect(store.names, isEmpty);
+      },
+    );
 
     test('일부 사진만 허용했으면 안 보이는 사진의 기록을 지우지 않는다', () async {
-      final store = await loadWith(_LimitedLibrary());
-      expect(store.features.keys, ['gone']);
-      expect(store.seen, {'gone'});
-      expect(store.decisions.keys, ['gone']);
+      final store = storeFor('gone');
+      final c = await loadWith(_PruneLibrary(limited: true), store);
+      await syncAgain(c);
+      expectKept(store, 'gone');
+    });
+
+    test(
+      '다시 읽는 중 휴지통으로 보내 페이지가 밀려도 건너뛴 사진의 오래된 킵은 남는다 (리뷰 11-08 S-1)',
+      () async {
+        final lib = _PruneLibrary();
+        final photos = await DemoPhotoLibrary().loadAll();
+        final skipped = photos[5].id;
+        final store = storeFor(skipped);
+        final c = await loadWith(lib, store);
+        // 다음 읽기: 읽는 사이 첫 사진을 보내고, 밀린 페이지 탓에 [skipped]가 빠진다. 그다음 읽기는 제대로
+        var reads = 0;
+        lib.onLoadAll = () {
+          if (reads++ > 0) return;
+          c.read(libraryProvider.notifier).removePhotos({photos.first.id});
+          lib.hide = {skipped};
+        };
+        lib.afterLoadAll = () => lib.hide = {};
+        await syncAgain(c);
+        expect(reads, 2); // 보낸 사진이 있어 한 번 더 읽었다
+        expectKept(store, skipped);
+      },
+    );
+
+    test('동영상을 못 읽은 읽기에서는 동영상의 오래된 킵·다 봤어요·이름이 남는다 (리뷰 11-08 S-1)', () async {
+      final lib = _PruneLibrary(
+        videos: [
+          PhotoMeta(
+            id: 'v',
+            takenAt: DateTime(2026, 9, 1),
+            width: 100,
+            height: 100,
+            isVideo: true,
+            sizeBytes: 1024,
+          ),
+        ],
+      );
+      final store = storeFor('v');
+      final c = await loadWith(lib, store);
+      lib.videosFail = true;
+      await syncAgain(c);
+      await syncAgain(c);
+      expectKept(store, 'v');
     });
   }
 
@@ -5121,14 +5189,42 @@ class _FixedLibrary extends LibraryNotifier {
   }
 }
 
-class _AuthorizedLibrary extends DemoPhotoLibrary {
-  @override
-  Future<PermissionState> permissionState() async => PermissionState.authorized;
-}
+/// 기록 지우기 시험용 사진첩: 읽는 중 할 일, 잠시 빠지는 사진, 동영상 읽기 실패를 정할 수 있다
+class _PruneLibrary extends DemoPhotoLibrary {
+  _PruneLibrary({this.limited = false, this.videos = const []});
+  final bool limited;
+  final List<PhotoMeta> videos;
+  void Function()? onLoadAll;
+  void Function()? afterLoadAll;
+  Set<String> hide = {};
+  bool videosFail = false;
 
-class _LimitedLibrary extends DemoPhotoLibrary {
   @override
-  Future<PermissionState> permissionState() async => PermissionState.limited;
+  Future<PermissionState> permissionState() async =>
+      limited ? PermissionState.limited : PermissionState.authorized;
+
+  @override
+  Future<List<PhotoMeta>> loadAll() async {
+    onLoadAll?.call();
+    final all = await super.loadAll();
+    final read = [
+      for (final p in all)
+        if (!hide.contains(p.id)) p,
+    ];
+    afterLoadAll?.call();
+    return read;
+  }
+
+  @override
+  Future<List<PhotoMeta>> loadVideos(Map<String, int> sizes) async {
+    if (videosFail) throw StateError('videos');
+    return [...videos];
+  }
+
+  @override
+  Future<Map<String, int>> fileSizes(Iterable<String> ids) async => {
+    for (final v in videos) v.id: v.sizeBytes,
+  };
 }
 
 class _EmptyLimitedLibrary extends DemoPhotoLibrary {

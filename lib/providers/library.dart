@@ -46,10 +46,10 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
     final lib = ref.read(photoLibraryProvider);
     final removed = _removedWhileLoading = <String>{};
     final List<PhotoMeta> metas;
-    final List<PhotoMeta> videos;
+    final List<PhotoMeta>? read;
     try {
       metas = await lib.loadAll();
-      videos = await _loadVideos();
+      read = await _loadVideos();
     } finally {
       _removedWhileLoading = null;
     }
@@ -58,6 +58,7 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
       for (final m in metas)
         if (!removed.contains(m.id)) m,
     ];
+    final videos = read ?? const <PhotoMeta>[];
     _videos = [
       for (final v in videos)
         if (!removed.contains(v.id)) v,
@@ -66,7 +67,16 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
       for (final m in [..._metas, ..._videos]) m.id,
     };
     lib.keepOnly(present);
-    Future.microtask(() => _forgetMissing(present));
+    // 다 읽은 읽기에서만, 직전에 다 읽었을 때도 없던 사진만 지운다 (리뷰 11-08 S-1):
+    // 읽는 사이 휴지통으로 보내 페이지가 밀렸거나 동영상을 못 읽었으면 빠진 사진이 사라진 것처럼 보인다
+    if (removed.isEmpty && read != null) {
+      final last = _lastPresent;
+      _lastPresent = present;
+      if (last != null) {
+        final keep = {...present, ...last};
+        Future.microtask(() => _forgetMissing(keep));
+      }
+    }
     Future.microtask(_fillLocations);
     Future.microtask(_reviveRestored);
     return removed.isNotEmpty;
@@ -75,6 +85,9 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
   /// 사진첩에서 사라진 사진의 기록을 폰에서 지운다 (2026-11-08 Sophie: 기록이 계속 쌓이지 않게).
   /// 일부 사진만 허용했으면 안 보이는 사진도 사라진 것처럼 보이니 지우지 않는다.
   /// 비어 있으면 읽기가 잘못됐을 수 있어 지우지 않는다. 지우다 실패해도 화면은 그대로 간다
+  /// 직전에 다 읽었을 때 사진첩에 있던 id. 켠 뒤 첫 읽기는 이것만 남기고 지우지 않는다
+  Set<String>? _lastPresent;
+
   Future<void> _forgetMissing(Set<String> present) async {
     if (present.isEmpty) return;
     try {
@@ -109,7 +122,8 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
 
   List<PhotoMeta> _videos = [];
 
-  Future<List<PhotoMeta>> _loadVideos() async {
+  /// 못 읽었으면 null (빈 목록으로 보여 주되 기록은 지우지 않게)
+  Future<List<PhotoMeta>?> _loadVideos() async {
     try {
       final device = ref.read(deviceProvider);
       final sizes = await device.videoSizes() ?? const {};
@@ -122,7 +136,7 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
       }
       return await _withDetails(device, videos);
     } catch (_) {
-      return [];
+      return null;
     }
   }
 
