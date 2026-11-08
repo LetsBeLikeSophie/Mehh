@@ -140,36 +140,19 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
     }
   }
 
-  /// 파일 이름·찍은 시각·편집 앱이 적어 둔 원본 (안드로이드). 찍은 시각이 비어 있으면 카메라 폴더에 있어도
-  /// 편집 앱이 새로 만든 영상이라 "받거나 저장한 동영상"으로 (2026-11-07 폰 시험: 캡컷이 카메라 폴더에 저장)
+  /// 찍은 시각 (안드로이드). 찍은 시각이 비어 있으면 카메라 폴더에 있어도
+  /// 편집 앱이 새로 만든 영상이라 받은 쪽으로 (2026-11-07 폰 시험: 캡컷이 카메라 폴더에 저장)
   Future<List<PhotoMeta>> _withDetails(
     Device device,
     List<PhotoMeta> videos,
   ) async {
     final details = await device.videoDetails();
     if (details == null) return videos;
-    // 원본 id는 캡컷이 만든 영상(이름이 lv_로 시작, 찍은 시각 없음)에만 적혀 있다. 그것만 연다:
-    // 받은 영상이 수천 개여도 첫 화면이 파일 읽기를 기다리지 않게 (리뷰 11-07 S-2).
-    // 한 번 읽은 파일은 다시 읽지 않는다
-    final ask = [
-      for (final v in videos)
-        if (details[v.id] case final d?
-            when d.takenAt == null &&
-                isCapCutName(d.name) &&
-                !_sourceRead.contains(v.id))
-          v.id,
-    ];
-    if (ask.isNotEmpty) {
-      _sources.addAll(await device.videoSources(ask));
-      _sourceRead.addAll(ask);
-    }
     return [
       for (final v in videos)
         if (details[v.id] case final d?)
           v.withVideo(
-            fileName: d.name,
             capturedAt: d.takenAt,
-            editedFrom: _sources[v.id],
             fromOtherApp: v.fromOtherApp || d.takenAt == null,
           )
         else
@@ -177,16 +160,13 @@ class LibraryNotifier extends AsyncNotifier<LibraryState> {
     ];
   }
 
-  final _sources = <String, String>{};
-  final _sourceRead = <String>{};
-
   LibraryState _state() {
-    // 동영상은 하나로 (2026-11-08 Sophie). 안의 순서·나눔(짝 → 찍은 → 받은)은 [videoSections].
+    // 동영상은 하나로, 용량 큰 순 (2026-11-08 Sophie). 보기·순서는 정리 화면의 필터([videoViewProvider]).
     // ♥ 즐겨찾기는 뺀다 (2026-11-01 Sophie)
-    final videos = videoOrder([
+    final videos = [
       for (final v in _videos)
         if (!v.isFavorite) v,
-    ]);
+    ]..sort((a, b) => b.sizeBytes.compareTo(a.sizeBytes));
     return LibraryState(
       photos: _metas,
       groups: [

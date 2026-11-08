@@ -18,6 +18,10 @@ String formatDate(
       : DateFormat.yMMMd(locale).format(d);
 }
 
+/// "2026년 10월" / "October 2026"
+String formatMonth(DateTime d, String locale) =>
+    DateFormat.yMMMM(locale).format(d);
+
 String formatTime(DateTime d, String locale) => DateFormat.jm(locale).format(d);
 
 /// 0.823 → "82%" (언어별 형식)

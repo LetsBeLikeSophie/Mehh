@@ -15,19 +15,11 @@ class PhotoMeta {
     this.durationSec = 0,
     this.sizeBytes = 0,
     this.fromOtherApp = false,
-    this.fileName,
     this.capturedAt,
-    this.editedFrom,
   });
-
-  /// 동영상 파일 이름 (안드로이드, 편집본 짝 찾기용)
-  final String? fileName;
 
   /// 기기에 적힌 찍은 시각 (동영상, 안드로이드). 편집 앱이 새로 만든 영상은 비어 있다 (2026-11-07 Sophie)
   final DateTime? capturedAt;
-
-  /// 편집 앱(캡컷)이 파일 안에 적어 둔 원본 동영상 id
-  final String? editedFrom;
 
   /// 카메라 폴더 밖에 있다: 다른 앱에서 저장·편집·촬영한 것 (안드로이드, 2026-11-01 Sophie)
   final bool fromOtherApp;
@@ -74,18 +66,14 @@ class PhotoMeta {
     durationSec: durationSec,
     sizeBytes: sizeBytes,
     fromOtherApp: fromOtherApp,
-    fileName: fileName,
     capturedAt: capturedAt,
-    editedFrom: editedFrom,
   );
 
   /// 동영상 정보만 바꾼 사본 (크기·기기 정보는 나중에 채운다)
   PhotoMeta withVideo({
     int? sizeBytes,
     bool? fromOtherApp,
-    String? fileName,
     DateTime? capturedAt,
-    String? editedFrom,
   }) => PhotoMeta(
     id: id,
     takenAt: takenAt,
@@ -101,9 +89,7 @@ class PhotoMeta {
     durationSec: durationSec,
     sizeBytes: sizeBytes ?? this.sizeBytes,
     fromOtherApp: fromOtherApp ?? this.fromOtherApp,
-    fileName: fileName ?? this.fileName,
     capturedAt: capturedAt ?? this.capturedAt,
-    editedFrom: editedFrom ?? this.editedFrom,
   );
 
   double get aspect => height == 0 ? 0 : width / height;

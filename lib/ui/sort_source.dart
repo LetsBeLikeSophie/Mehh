@@ -4,7 +4,6 @@ import '../l10n/l10n.dart';
 import '../logic/duplicates.dart';
 import '../logic/format.dart';
 import '../logic/recommend.dart';
-import '../logic/video_edits.dart';
 import '../models/day_group.dart';
 import '../models/decision.dart';
 import '../models/photo_meta.dart';
@@ -26,14 +25,50 @@ enum SortKind {
   bool get bySets => this == duplicates;
 }
 
-/// 그리드를 나누는 칸 하나 (동영상: 짝마다 · 나머지). 앞 칸과 얇은 선으로 나눌 수 있다
+/// 그리드를 나누는 칸 하나 (동영상 날짜순: 달마다). 위에 작은 달 이름을 둘 수 있다
 class SortSection {
-  const SortSection(this.ids, {this.line = false});
+  const SortSection(this.ids, {this.month});
   final List<String> ids;
 
-  /// 앞 칸과 얇은 선으로 나눈다
-  final bool line;
+  /// 칸 위 작은 달 이름 ("2026년 10월")
+  final DateTime? month;
 }
+
+/// 동영상 보기 필터 (2026-11-08 Sophie): 어떤 것만 · 어떤 순서로
+enum VideoShow { all, filmed, received }
+
+enum VideoOrder { size, date }
+
+typedef VideoView = ({VideoShow show, VideoOrder order});
+
+/// 동영상 정리 화면의 필터. 앱이 켜져 있는 동안 마지막으로 고른 것을 기억한다 (처음엔 전체·용량순)
+class VideoViewNotifier extends Notifier<VideoView> {
+  @override
+  VideoView build() => (show: VideoShow.all, order: VideoOrder.size);
+
+  void show(VideoShow s) => state = (show: s, order: state.order);
+  void order(VideoOrder o) => state = (show: state.show, order: o);
+}
+
+final videoViewProvider = NotifierProvider<VideoViewNotifier, VideoView>(
+  VideoViewNotifier.new,
+);
+
+/// 필터에 들어오는 동영상, 보일 순서대로 (용량순: 큰 것부터, 날짜순: 최신부터)
+List<PhotoMeta> videosShown(List<PhotoMeta> all, VideoView v) =>
+    [
+      for (final p in all)
+        if (switch (v.show) {
+          VideoShow.all => true,
+          VideoShow.filmed => !p.fromOtherApp,
+          VideoShow.received => p.fromOtherApp,
+        })
+          p,
+    ]..sort(
+      (a, b) => v.order == VideoOrder.size
+          ? b.sizeBytes.compareTo(a.sizeBytes)
+          : b.takenAt.compareTo(a.takenAt),
+    );
 
 /// 사진 위 짧은 표시의 종류 (문구는 [tagText]·[noteText]에서 언어별로)
 enum PhotoTag {
@@ -46,8 +81,6 @@ enum PhotoTag {
   duplicate,
   oldShot,
   repeatShot,
-  sourceVideo,
-  editedVideo,
   receivedVideo,
 }
 
@@ -65,7 +98,11 @@ class SortSource {
     this.preMarked = const {},
     this.alwaysTags = false,
     this.sections = const [],
+    this.hidden = const [],
   });
+
+  /// 필터로 지금 안 보이는 것 (동영상). 고른 표시는 따라가서, 보내기 버튼은 이것까지 센다 (2026-11-08 Sophie)
+  final List<PhotoMeta> hidden;
 
   /// 그리드를 이 칸들로 나눠 보인다. 비면 [SortKind.bySets]면 [units]마다, 아니면 한 칸
   final List<SortSection> sections;
@@ -119,8 +156,6 @@ String tagText(PhotoTag t, L10n l) => switch (t) {
   PhotoTag.duplicate => l.tagDuplicate,
   PhotoTag.oldShot => l.tagOldShot,
   PhotoTag.repeatShot => l.tagRepeatShot,
-  PhotoTag.sourceVideo => l.tagSourceVideo,
-  PhotoTag.editedVideo => l.tagEditedVideo,
   PhotoTag.receivedVideo => l.tagReceivedVideo,
 };
 
@@ -147,8 +182,6 @@ String noteText(PhotoTag t, List<BestReason> reasons, L10n l) => switch (t) {
   PhotoTag.duplicate => l.tagDuplicate,
   PhotoTag.oldShot => l.noteOldShot,
   PhotoTag.repeatShot => l.noteRepeatShot,
-  PhotoTag.sourceVideo => l.tagSourceVideo,
-  PhotoTag.editedVideo => l.tagEditedVideo,
   PhotoTag.receivedVideo => l.tagReceivedVideo,
 };
 
@@ -232,29 +265,35 @@ SortSource watchSortSource(WidgetRef ref, SortKind kind, DayGroup? g) {
         ],
       );
     case SortKind.videos:
-      // 동영상 하나 (2026-11-08 Sophie): 편집한 것과 원본 짝마다 한 줄 → 선 → 나머지(용량 큰 순).
-      // 나누는 기준은 짝 하나뿐(어디서 왔든), 받은 영상은 "받음" 표시만. 앱이 골라 주지 않는다
-      final s = videoSections(g!.photos);
-      List<String> ids(List<PhotoMeta> l) => [for (final v in l) v.id];
+      // 동영상 하나에 다 모으고 필터로 본다 (2026-11-08 Sophie: 짝 묶기는 하지 않는다).
+      // 앱이 골라 주지 않는다 (2026-10-24 Sophie)
+      final view = ref.watch(videoViewProvider);
+      final shown = videosShown(g!.photos, view);
+      final ids = {for (final p in shown) p.id};
+      DateTime month(PhotoMeta p) => DateTime(p.takenAt.year, p.takenAt.month);
       return SortSource(
-        photos: videoOrder(g.photos),
-        // 짝을 통째로 보내면 "원본도 편집본도 안 남아요"를 묻는다
-        units: [for (final p in s.pairs) ids(p)],
+        photos: shown,
+        hidden: [
+          for (final p in g.photos)
+            if (!ids.contains(p.id)) p,
+        ],
+        // 전체 보기에서만 받은 영상에 "받음" (받은 것만 볼 때는 다 받은 것이라 뺀다)
         tags: {
-          for (final p in s.pairs)
-            for (final v in p)
-              v.id: s.edited.contains(v.id)
-                  ? PhotoTag.editedVideo
-                  : PhotoTag.sourceVideo,
-          for (final v in s.rest)
-            if (v.fromOtherApp) v.id: PhotoTag.receivedVideo,
+          if (view.show == VideoShow.all)
+            for (final p in shown)
+              if (p.fromOtherApp) p.id: PhotoTag.receivedVideo,
         },
         alwaysTags: true,
-        sections: [
-          for (final p in s.pairs) SortSection(ids(p)),
-          if (s.rest.isNotEmpty)
-            SortSection(ids(s.rest), line: s.pairs.isNotEmpty),
-        ],
+        // 날짜순은 달마다 작은 이름
+        sections: view.order == VideoOrder.date
+            ? [
+                for (final m in {for (final p in shown) month(p)})
+                  SortSection([
+                    for (final p in shown)
+                      if (month(p) == m) p.id,
+                  ], month: m),
+              ]
+            : const [],
       );
     case SortKind.saved:
       // 저장한 사진: 최신이 위. 앱이 골라 주지 않는다 (2026-11-01 Sophie)

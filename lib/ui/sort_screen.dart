@@ -323,11 +323,20 @@ class _SortScreenState extends ConsumerState<SortScreen>
       for (final p in src.photos)
         if (stateOf(decisions, p.id) != DecisionState.trashed) p.id,
     ];
-    final marked = [
+    final markedShown = [
       for (final id in order)
         if (isMarked(id, decisions, src)) id,
     ];
-    final allSelected = order.isNotEmpty && marked.length == order.length;
+    // 필터로 안 보이는 동영상의 고른 표시도 따라간다: 보내기 버튼은 이것까지 센다 (2026-11-08 Sophie)
+    final marked = [
+      ...markedShown,
+      for (final p in src.hidden)
+        if (stateOf(decisions, p.id) != DecisionState.trashed &&
+            isMarked(p.id, decisions, src))
+          p.id,
+    ];
+    // [전체 선택]은 지금 보이는 것만
+    final allSelected = order.isNotEmpty && markedShown.length == order.length;
     // [추천 보기]는 켜고 끄는 버튼 (2026-10-24 Sophie). 켠 상태 = 이 화면에서 [추천 보기]를 눌렀고
     // 추천이 모두 X. 끈 상태 = 처음 상태(실수 사진처럼 처음부터 X인 것만 X)
     final markedSet = marked.toSet();
@@ -354,7 +363,7 @@ class _SortScreenState extends ConsumerState<SortScreen>
         ? [
             for (final s in src.sections)
               if (shown(s.ids) case final ids when ids.isNotEmpty)
-                SortSection(ids, line: s.line),
+                SortSection(ids, month: s.month),
           ]
         : widget.kind.bySets
         ? [
@@ -362,11 +371,6 @@ class _SortScreenState extends ConsumerState<SortScreen>
               if (shown(u) case final ids when ids.isNotEmpty) SortSection(ids),
           ]
         : [SortSection(order)];
-    // 앞 칸이 다 보내져 사라졌으면 맨 위 칸 위에는 선을 두지 않는다
-    if (sections.isNotEmpty && sections.first.line) {
-      final f = sections.first;
-      sections[0] = SortSection(f.ids);
-    }
 
     final cortexSent =
         ref.watch(cortexSentProvider).value ?? const <String, bool>{};
@@ -571,11 +575,23 @@ class _SortScreenState extends ConsumerState<SortScreen>
                                   // 이 묶음에서 선택한 것만 코랄 (전체 기준 아님)
                                   FreedBar(selected: marked),
                                   const SizedBox(height: 12),
+                                  // 동영상 필터: 무엇만 보기 (2026-11-08 Sophie)
+                                  if (widget.kind.isVideo) ...[
+                                    _VideoShowChips(
+                                      view: ref.watch(videoViewProvider),
+                                    ),
+                                    const SizedBox(height: 4),
+                                  ],
                                   Row(
                                     // 버튼은 글자 길이만큼, 자리가 모자랄 때만 줄인다 (가운데 빈칸 없이 양 끝으로)
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
+                                      // 동영상 순서: 왼쪽 빈자리에 (추천 버튼이 없는 종류)
+                                      if (widget.kind.isVideo)
+                                        _VideoOrderChips(
+                                          view: ref.watch(videoViewProvider),
+                                        ),
                                       if (picks > 0)
                                         Flexible(
                                           // 켠 상태는 ✓와 테두리로 보인다(X처럼 켜고 끄는 표시). 끄면 추천 X만 풀린다
@@ -623,15 +639,18 @@ class _SortScreenState extends ConsumerState<SortScreen>
                       ),
                       // 똑같은 사진은 묶음마다 새 줄에서 시작해 어떤 사진끼리 같은지 보이게
                       for (final (i, section) in sections.indexed) ...[
-                        // 동영상: 짝들과 나머지 사이 얇은 선 (2026-11-08 Sophie)
-                        if (section.line)
-                          const SliverPadding(
-                            padding: EdgeInsets.fromLTRB(20, 2, 20, 10),
+                        // 동영상 날짜순: 달마다 작은 이름 (2026-11-08 Sophie)
+                        if (section.month case final m?)
+                          SliverPadding(
+                            padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
                             sliver: SliverToBoxAdapter(
-                              child: Divider(
-                                height: 1,
-                                thickness: 1,
-                                color: MehhColors.border,
+                              child: Text(
+                                formatMonth(m, l.localeName),
+                                style: const TextStyle(
+                                  fontSize: MehhText.label,
+                                  fontWeight: FontWeight.w600,
+                                  color: MehhColors.textMuted,
+                                ),
                               ),
                             ),
                           ),
@@ -717,6 +736,90 @@ class _SortScreenState extends ConsumerState<SortScreen>
 }
 
 /// 위쪽 한 줄의 작은 버튼 ([추천 보기 · N장], [Cortex로 보내기])
+/// 동영상 필터 칩 하나: 고른 것은 검정 (2026-11-08 Sophie)
+class _Chip extends StatelessWidget {
+  const _Chip(this.label, {required this.on, required this.onTap});
+  final String label;
+  final bool on;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    selected: on,
+    child: Material(
+      color: on ? MehhColors.black : MehhColors.surface,
+      borderRadius: BorderRadius.circular(MehhRadius.chip),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(MehhRadius.chip),
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 36),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Center(
+              widthFactor: 1,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: MehhText.bodySmall,
+                  color: on ? MehhColors.white : MehhColors.text,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+/// [전체] [직접 찍은] [받은·편집]
+class _VideoShowChips extends ConsumerWidget {
+  const _VideoShowChips({required this.view});
+  final VideoView view;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l;
+    final n = ref.read(videoViewProvider.notifier);
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      children: [
+        for (final (s, label) in [
+          (VideoShow.all, l.videoShowAll),
+          (VideoShow.filmed, l.videoShowFilmed),
+          (VideoShow.received, l.videoShowReceived),
+        ])
+          _Chip(label, on: view.show == s, onTap: () => n.show(s)),
+      ],
+    );
+  }
+}
+
+/// [용량순] [날짜순]
+class _VideoOrderChips extends ConsumerWidget {
+  const _VideoOrderChips({required this.view});
+  final VideoView view;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l;
+    final n = ref.read(videoViewProvider.notifier);
+    return Wrap(
+      spacing: 6,
+      children: [
+        for (final (o, label) in [
+          (VideoOrder.size, l.videoOrderSize),
+          (VideoOrder.date, l.videoOrderDate),
+        ])
+          _Chip(label, on: view.order == o, onTap: () => n.order(o)),
+      ],
+    );
+  }
+}
+
 class _PillButton extends StatelessWidget {
   const _PillButton({
     required this.label,
